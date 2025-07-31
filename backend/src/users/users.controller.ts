@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../common/guards/jwt.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { USER_ROLES } from '../common/decorators/roles.decorator';
+import { UpdateProfileDto } from '../common/dto/update-profile.dto';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -123,6 +124,7 @@ export class UsersController {
     return this.usersService.getUserPermissions(id, tenantId);
   }
 
+  // Profile management endpoints
   @Get('profile/me')
   async getMyProfile(@Request() req: any) {
     const tenantId = req.user.tenant_id;
@@ -133,5 +135,23 @@ export class UsersController {
     }
     
     return user;
+  }
+
+  @Put('profile/me')
+  async updateMyProfile(@Body() updateProfileDto: UpdateProfileDto, @Request() req: any) {
+    const tenantId = req.user.tenant_id;
+    return this.usersService.updateProfile(req.user._id, tenantId, updateProfileDto);
+  }
+
+  @Get('profile/me/preferences')
+  async getMyPreferences(@Request() req: any) {
+    const tenantId = req.user.tenant_id;
+    return this.usersService.getPreferences(req.user._id, tenantId);
+  }
+
+  @Put('profile/me/preferences')
+  async updateMyPreferences(@Body() preferences: any, @Request() req: any) {
+    const tenantId = req.user.tenant_id;
+    return this.usersService.updatePreferences(req.user._id, tenantId, preferences);
   }
 } 

@@ -160,6 +160,65 @@ class UserService {
     }
   }
 
+  // Profile management methods
+  async getCurrentUser(): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/profile/me`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch current user');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      throw error;
+    }
+  }
+
+  async updateProfile(profileData: any): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/profile/me`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+  }
+
+  async updatePreferences(preferences: any): Promise<any> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/profile/me/preferences`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(preferences),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update preferences');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating preferences:', error);
+      throw error;
+    }
+  }
+
   async getMyProfile(): Promise<any> {
     try {
       const response = await fetch(`${API_BASE_URL}/users/profile/me`, {

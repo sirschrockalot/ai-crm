@@ -10,12 +10,23 @@ export interface User {
   name: string;
   first_name?: string;
   last_name?: string;
+  phone?: string;
   avatar_url?: string;
   tenant_id: Types.ObjectId;
   role: string;
   permissions: string[];
   is_active: boolean;
   is_verified: boolean;
+  preferences?: {
+    theme?: 'light' | 'dark' | 'auto';
+    notifications?: {
+      email?: boolean;
+      sms?: boolean;
+      push?: boolean;
+    };
+    dashboard_layout?: object;
+    default_view?: 'leads' | 'buyers' | 'dashboard';
+  };
   last_login?: Date;
   login_count: number;
   created_at: Date;
@@ -40,6 +51,9 @@ export class User {
   last_name?: string;
 
   @Prop({ required: false })
+  phone?: string;
+
+  @Prop({ required: false })
   avatar_url?: string;
 
   @Prop({ type: Types.ObjectId, required: true })
@@ -56,6 +70,18 @@ export class User {
 
   @Prop({ default: false })
   is_verified: boolean;
+
+  @Prop({ type: Object, required: false })
+  preferences?: {
+    theme?: 'light' | 'dark' | 'auto';
+    notifications?: {
+      email?: boolean;
+      sms?: boolean;
+      push?: boolean;
+    };
+    dashboard_layout?: object;
+    default_view?: 'leads' | 'buyers' | 'dashboard';
+  };
 
   @Prop({ required: false })
   last_login?: Date;

@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User, UserDocument } from './user.schema';
 import { ROLE_PERMISSIONS } from '../common/constants/permissions';
+import { UpdateProfileDto } from '../common/dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -46,6 +47,52 @@ export class UsersService {
 
   async validateUser(userId: string): Promise<User | null> {
     return this.userModel.findById(userId).exec();
+  }
+
+  // Profile management methods
+  async getCurrentUser(userId: string, tenantId: string): Promise<User | null> {
+    return this.findByIdAndTenant(userId, tenantId);
+  }
+
+  async updateProfile(userId: string, tenantId: string, updateData: UpdateProfileDto): Promise<User | null> {
+    const user = await this.findByIdAndTenant(userId, tenantId);
+    if (!user) {
+      throw new NotFoundException('User not found in tenant');
+    }
+
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { 
+        ...updateData, 
+        updated_at: new Date() 
+      },
+      { new: true }
+    ).exec();
+  }
+
+  async updatePreferences(userId: string, tenantId: string, preferences: any): Promise<User | null> {
+    const user = await this.findByIdAndTenant(userId, tenantId);
+    if (!user) {
+      throw new NotFoundException('User not found in tenant');
+    }
+
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      { 
+        preferences: { ...user.preferences, ...preferences },
+        updated_at: new Date() 
+      },
+      { new: true }
+    ).exec();
+  }
+
+  async getPreferences(userId: string, tenantId: string): Promise<any> {
+    const user = await this.findByIdAndTenant(userId, tenantId);
+    if (!user) {
+      throw new NotFoundException('User not found in tenant');
+    }
+
+    return user.preferences || {};
   }
 
   // Multi-tenant user management methods

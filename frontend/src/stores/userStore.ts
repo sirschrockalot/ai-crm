@@ -5,9 +5,20 @@ interface User {
   _id: string;
   name: string;
   email: string;
+  phone?: string;
   role: string;
   is_active: boolean;
   avatar_url?: string;
+  preferences?: {
+    theme?: 'light' | 'dark' | 'auto';
+    notifications?: {
+      email?: boolean;
+      sms?: boolean;
+      push?: boolean;
+    };
+    dashboard_layout?: object;
+    default_view?: 'leads' | 'buyers' | 'dashboard';
+  };
   last_login?: Date;
   created_at: Date;
   permissions: string[];
@@ -15,11 +26,15 @@ interface User {
 
 interface UserState {
   users: User[];
+  user: User | null; // Current user
   loading: boolean;
   error: string | null;
   fetchUsers: () => Promise<void>;
+  fetchCurrentUser: () => Promise<void>;
   createUser: (userData: any) => Promise<void>;
   updateUser: (userId: string, userData: any) => Promise<void>;
+  updateProfile: (profileData: any) => Promise<void>;
+  updatePreferences: (preferences: any) => Promise<void>;
   activateUser: (userId: string) => Promise<void>;
   deactivateUser: (userId: string) => Promise<void>;
   deleteUser: (userId: string) => Promise<void>;
@@ -28,6 +43,7 @@ interface UserState {
 
 export const useUserStore = create<UserState>((set, get) => ({
   users: [],
+  user: null,
   loading: false,
   error: null,
 
@@ -39,6 +55,19 @@ export const useUserStore = create<UserState>((set, get) => ({
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to fetch users', 
+        loading: false 
+      });
+    }
+  },
+
+  fetchCurrentUser: async () => {
+    set({ loading: true, error: null });
+    try {
+      const user = await userService.getCurrentUser();
+      set({ user, loading: false });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to fetch current user', 
         loading: false 
       });
     }
@@ -68,6 +97,34 @@ export const useUserStore = create<UserState>((set, get) => ({
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Failed to update user', 
+        loading: false 
+      });
+      throw error;
+    }
+  },
+
+  updateProfile: async (profileData) => {
+    set({ loading: true, error: null });
+    try {
+      const updatedUser = await userService.updateProfile(profileData);
+      set({ user: updatedUser, loading: false });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to update profile', 
+        loading: false 
+      });
+      throw error;
+    }
+  },
+
+  updatePreferences: async (preferences) => {
+    set({ loading: true, error: null });
+    try {
+      const updatedUser = await userService.updatePreferences(preferences);
+      set({ user: updatedUser, loading: false });
+    } catch (error) {
+      set({ 
+        error: error instanceof Error ? error.message : 'Failed to update preferences', 
         loading: false 
       });
       throw error;

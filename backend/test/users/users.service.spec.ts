@@ -1,21 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { UsersService } from './users.service';
-import { User, UserDocument } from './user.schema';
+import { UsersService } from '../../src/users/users.service';
+import { User, UserDocument } from '../../src/users/user.schema';
 import { Types } from 'mongoose';
-import { UpdateProfileDto } from '../common/dto/update-profile.dto';
+import { UpdateProfileDto } from '../../src/common/dto/update-profile.dto';
 
 describe('UsersService', () => {
   let service: UsersService;
   let mockUserModel: any;
 
   const mockUser = {
-    _id: new Types.ObjectId('507f1f77bcf86cd799439011'),
+    _id: '507f1f77bcf86cd799439011',
     google_id: 'google123',
     email: 'test@example.com',
     name: 'Test User',
     phone: '+1234567890',
-    tenant_id: new Types.ObjectId('507f1f77bcf86cd799439012'),
+    tenant_id: '507f1f77bcf86cd799439012' as any,
     role: 'acquisition_rep',
     permissions: ['read_leads', 'write_leads'],
     is_active: true,
@@ -36,27 +36,13 @@ describe('UsersService', () => {
   };
 
   beforeEach(async () => {
-    mockUserModel = jest.fn().mockImplementation(() => ({
+    mockUserModel = {
+      findOne: jest.fn(),
+      find: jest.fn(),
+      findByIdAndUpdate: jest.fn(),
+      findByIdAndDelete: jest.fn(),
       save: jest.fn(),
-    }));
-    mockUserModel.findOne = jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    });
-    mockUserModel.find = jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    });
-    mockUserModel.findByIdAndUpdate = jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    });
-    mockUserModel.findByIdAndDelete = jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    });
-    mockUserModel.findOneAndUpdate = jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    });
-    mockUserModel.findById = jest.fn().mockReturnValue({
-      exec: jest.fn(),
-    });
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -79,20 +65,19 @@ describe('UsersService', () => {
     it('should create a new user', async () => {
       const userData = { name: 'New User', email: 'new@example.com' };
       const savedUser = { ...userData, _id: 'newUserId' };
-      // Mock the instance returned by the constructor
-      const userInstance = { save: jest.fn().mockResolvedValue(savedUser) };
-      mockUserModel.mockImplementation(() => userInstance);
+      
+      mockUserModel.save.mockResolvedValue(savedUser);
 
       const result = await service.createUser(userData);
       
       expect(result).toEqual(savedUser);
-      expect(userInstance.save).toHaveBeenCalled();
+      expect(mockUserModel.save).toHaveBeenCalled();
     });
   });
 
   describe('findByGoogleId', () => {
     it('should find user by Google ID', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
 
       const result = await service.findByGoogleId('google123');
       
@@ -103,9 +88,9 @@ describe('UsersService', () => {
 
   describe('findByEmail', () => {
     it('should find user by email and tenant ID', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.findByEmail('test@example.com', '507f1f77bcf86cd799439012');
+      const result = await service.findByEmail('test@example.com', 'tenant123');
       
       expect(result).toEqual(mockUser);
       expect(mockUserModel.findOne).toHaveBeenCalledWith({
@@ -120,7 +105,7 @@ describe('UsersService', () => {
       const updateData = { name: 'Updated Name' };
       const updatedUser = { ...mockUser, ...updateData };
       
-      mockUserModel.findOneAndUpdate().exec.mockResolvedValue(updatedUser);
+      mockUserModel.findOneAndUpdate.mockResolvedValue(updatedUser);
 
       const result = await service.updateUser('google123', updateData);
       
@@ -135,7 +120,7 @@ describe('UsersService', () => {
 
   describe('updateLastLogin', () => {
     it('should update user last login time', async () => {
-      mockUserModel.findByIdAndUpdate().exec.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(mockUser);
 
       await service.updateLastLogin('userId');
 
@@ -148,7 +133,7 @@ describe('UsersService', () => {
 
   describe('validateUser', () => {
     it('should validate user by ID', async () => {
-      mockUserModel.findById().exec.mockResolvedValue(mockUser);
+      mockUserModel.findById.mockResolvedValue(mockUser);
 
       const result = await service.validateUser('userId');
       
@@ -160,9 +145,9 @@ describe('UsersService', () => {
   describe('findAllByTenant', () => {
     it('should find all users in a tenant', async () => {
       const users = [mockUser];
-      mockUserModel.find().exec.mockResolvedValue(users);
+      mockUserModel.find.mockResolvedValue(users);
 
-      const result = await service.findAllByTenant('507f1f77bcf86cd799439012');
+      const result = await service.findAllByTenant('tenant123');
       
       expect(result).toEqual(users);
       expect(mockUserModel.find).toHaveBeenCalledWith({
@@ -173,9 +158,9 @@ describe('UsersService', () => {
 
   describe('findByIdAndTenant', () => {
     it('should find user by ID and tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.findByIdAndTenant('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.findByIdAndTenant('userId', 'tenant123');
       
       expect(result).toEqual(mockUser);
       expect(mockUserModel.findOne).toHaveBeenCalledWith({
@@ -189,14 +174,13 @@ describe('UsersService', () => {
     it('should create user in tenant', async () => {
       const userData = { name: 'New User', email: 'new@example.com' };
       const savedUser = { ...userData, _id: 'newUserId' };
-      // Mock the instance returned by the constructor
-      const userInstance = { save: jest.fn().mockResolvedValue(savedUser) };
-      mockUserModel.mockImplementation(() => userInstance);
+      
+      mockUserModel.save.mockResolvedValue(savedUser);
 
-      const result = await service.createUserInTenant(userData, '507f1f77bcf86cd799439012');
+      const result = await service.createUserInTenant(userData, 'tenant123');
       
       expect(result).toEqual(savedUser);
-      expect(userInstance.save).toHaveBeenCalled();
+      expect(mockUserModel.save).toHaveBeenCalled();
     });
   });
 
@@ -205,24 +189,24 @@ describe('UsersService', () => {
       const updateData = { name: 'Updated Name' };
       const updatedUser = { ...mockUser, ...updateData };
       
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
-      mockUserModel.findByIdAndUpdate().exec.mockResolvedValue(updatedUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUserInTenant('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', updateData);
+      const result = await service.updateUserInTenant('userId', 'tenant123', updateData);
       
       expect(result).toEqual(updatedUser);
       expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '507f1f77bcf86cd799439011',
+        'userId',
         { ...updateData, updated_at: expect.any(Date) },
         { new: true }
       );
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateUserInTenant('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', { name: 'Updated' })
+        service.updateUserInTenant('userId', 'tenant123', { name: 'Updated' })
       ).rejects.toThrow('User not found in tenant');
     });
   });
@@ -231,24 +215,24 @@ describe('UsersService', () => {
     it('should deactivate user in tenant', async () => {
       const deactivatedUser = { ...mockUser, is_active: false };
       
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
-      mockUserModel.findByIdAndUpdate().exec.mockResolvedValue(deactivatedUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(deactivatedUser);
 
-      const result = await service.deactivateUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.deactivateUser('userId', 'tenant123');
       
       expect(result).toEqual(deactivatedUser);
       expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '507f1f77bcf86cd799439011',
+        'userId',
         { is_active: false, updated_at: expect.any(Date) },
         { new: true }
       );
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.deactivateUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012')
+        service.deactivateUser('userId', 'tenant123')
       ).rejects.toThrow('User not found in tenant');
     });
   });
@@ -257,61 +241,61 @@ describe('UsersService', () => {
     it('should activate user in tenant', async () => {
       const activatedUser = { ...mockUser, is_active: true };
       
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
-      mockUserModel.findByIdAndUpdate().exec.mockResolvedValue(activatedUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(activatedUser);
 
-      const result = await service.activateUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.activateUser('userId', 'tenant123');
       
       expect(result).toEqual(activatedUser);
       expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '507f1f77bcf86cd799439011',
+        'userId',
         { is_active: true, updated_at: expect.any(Date) },
         { new: true }
       );
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.activateUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012')
+        service.activateUser('userId', 'tenant123')
       ).rejects.toThrow('User not found in tenant');
     });
   });
 
   describe('deleteUser', () => {
     it('should delete user in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
-      mockUserModel.findByIdAndDelete().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndDelete.mockResolvedValue(mockUser);
 
-      await service.deleteUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      await service.deleteUser('userId', 'tenant123');
       
-      expect(mockUserModel.findByIdAndDelete).toHaveBeenCalledWith('507f1f77bcf86cd799439011');
+      expect(mockUserModel.findByIdAndDelete).toHaveBeenCalledWith('userId');
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.deleteUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012')
+        service.deleteUser('userId', 'tenant123')
       ).rejects.toThrow('User not found in tenant');
     });
   });
 
   describe('getUserPermissions', () => {
     it('should get user permissions', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.getUserPermissions('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.getUserPermissions('userId', 'tenant123');
       
       expect(result).toEqual(mockUser.permissions);
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.getUserPermissions('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012')
+        service.getUserPermissions('userId', 'tenant123')
       ).rejects.toThrow('User not found in tenant');
     });
   });
@@ -319,9 +303,9 @@ describe('UsersService', () => {
   // Profile management tests
   describe('getCurrentUser', () => {
     it('should get current user by ID and tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.getCurrentUser('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.getCurrentUser('userId', 'tenant123');
       
       expect(result).toEqual(mockUser);
       expect(mockUserModel.findOne).toHaveBeenCalledWith({
@@ -339,24 +323,24 @@ describe('UsersService', () => {
       };
       const updatedUser = { ...mockUser, ...profileData };
       
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
-      mockUserModel.findByIdAndUpdate().exec.mockResolvedValue(updatedUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(updatedUser);
 
-      const result = await service.updateProfile('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', profileData);
+      const result = await service.updateProfile('userId', 'tenant123', profileData);
       
       expect(result).toEqual(updatedUser);
       expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '507f1f77bcf86cd799439011',
+        'userId',
         { ...profileData, updated_at: expect.any(Date) },
         { new: true }
       );
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateProfile('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', { name: 'Updated' })
+        service.updateProfile('userId', 'tenant123', { name: 'Updated' })
       ).rejects.toThrow('User not found in tenant');
     });
   });
@@ -376,14 +360,14 @@ describe('UsersService', () => {
         preferences: { ...mockUser.preferences, ...preferences } 
       };
       
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
-      mockUserModel.findByIdAndUpdate().exec.mockResolvedValue(updatedUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
+      mockUserModel.findByIdAndUpdate.mockResolvedValue(updatedUser);
 
-      const result = await service.updatePreferences('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', preferences);
+      const result = await service.updatePreferences('userId', 'tenant123', preferences);
       
       expect(result).toEqual(updatedUser);
       expect(mockUserModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '507f1f77bcf86cd799439011',
+        'userId',
         { 
           preferences: { ...mockUser.preferences, ...preferences },
           updated_at: expect.any(Date) 
@@ -393,38 +377,38 @@ describe('UsersService', () => {
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updatePreferences('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012', { theme: 'dark' })
+        service.updatePreferences('userId', 'tenant123', { theme: 'dark' })
       ).rejects.toThrow('User not found in tenant');
     });
   });
 
   describe('getPreferences', () => {
     it('should get user preferences', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(mockUser);
+      mockUserModel.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.getPreferences('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.getPreferences('userId', 'tenant123');
       
       expect(result).toEqual(mockUser.preferences);
     });
 
     it('should return empty object when user has no preferences', async () => {
       const userWithoutPreferences = { ...mockUser, preferences: undefined };
-      mockUserModel.findOne().exec.mockResolvedValue(userWithoutPreferences);
+      mockUserModel.findOne.mockResolvedValue(userWithoutPreferences);
 
-      const result = await service.getPreferences('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012');
+      const result = await service.getPreferences('userId', 'tenant123');
       
       expect(result).toEqual({});
     });
 
     it('should throw NotFoundException when user not found in tenant', async () => {
-      mockUserModel.findOne().exec.mockResolvedValue(null);
+      mockUserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        service.getPreferences('507f1f77bcf86cd799439011', '507f1f77bcf86cd799439012')
+        service.getPreferences('userId', 'tenant123')
       ).rejects.toThrow('User not found in tenant');
     });
   });
-});
+}); 
