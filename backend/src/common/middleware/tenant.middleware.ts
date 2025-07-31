@@ -1,5 +1,24 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { Types } from 'mongoose';
+
+// Extend Request interface to include tenantId
+declare global {
+  namespace Express {
+    interface Request {
+      tenantId?: string;
+    }
+  }
+}
+
+// Extend User interface to include tenant_id
+declare global {
+  namespace Express {
+    interface User {
+      tenant_id: Types.ObjectId;
+    }
+  }
+}
 
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
@@ -17,7 +36,7 @@ export class TenantMiddleware implements NestMiddleware {
   private extractTenantId(req: Request): string {
     // First try to get from JWT token (user context)
     if (req.user && req.user.tenant_id) {
-      return req.user.tenant_id;
+      return req.user.tenant_id.toString();
     }
     
     // Fallback to header (for admin operations)

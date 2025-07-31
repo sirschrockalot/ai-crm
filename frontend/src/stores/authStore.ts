@@ -18,6 +18,7 @@ interface AuthState {
   setAuth: (isAuthenticated: boolean) => void;
   setUser: (user: User | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
+  login: (accessToken: string, user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
 }
@@ -36,6 +37,19 @@ export const useAuthStore = create<AuthState>()(
       
       setTokens: (accessToken: string, refreshToken: string) => 
         set({ accessToken, refreshToken }),
+      
+      login: (accessToken: string, user: User) => {
+        // Store tokens in localStorage
+        localStorage.setItem('access_token', accessToken);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        set({
+          isAuthenticated: true,
+          user,
+          accessToken,
+          refreshToken: null, // We'll handle refresh tokens later
+        });
+      },
       
       logout: () => {
         // Clear tokens from localStorage

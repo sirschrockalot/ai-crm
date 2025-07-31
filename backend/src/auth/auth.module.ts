@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { GoogleStrategy } from './google.strategy';
+import { DevStrategy } from './dev.strategy';
 import { JwtStrategy } from './jwt.strategy';
 import { UsersService } from '../users/users.service';
 import { User, UserSchema } from '../users/user.schema';
@@ -24,8 +25,12 @@ import { User, UserSchema } from '../users/user.schema';
   providers: [
     AuthService,
     UsersService,
-    GoogleStrategy,
     JwtStrategy,
+    // Conditionally include strategies based on environment
+    ...(process.env.NODE_ENV === 'production' 
+      ? [GoogleStrategy] 
+      : [DevStrategy, GoogleStrategy]
+    ),
   ],
   exports: [AuthService, JwtStrategy],
 })

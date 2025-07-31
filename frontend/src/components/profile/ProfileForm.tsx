@@ -31,7 +31,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ form, onSubmit, isLoading }) 
           placeholder="Enter your full name"
         />
         {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.name.message as string}</p>
         )}
       </div>
 
@@ -55,7 +55,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({ form, onSubmit, isLoading }) 
           placeholder="Enter your phone number (optional)"
         />
         {errors.phone && (
-          <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
+          <p className="mt-1 text-sm text-red-600">{errors.phone.message as string}</p>
         )}
       </div>
 

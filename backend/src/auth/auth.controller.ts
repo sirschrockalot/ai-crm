@@ -37,6 +37,28 @@ export class AuthController {
     }
   }
 
+  @Post('dev/login')
+  @UseGuards(AuthGuard('dev'))
+  async devLogin(@Req() req: Request) {
+    try {
+      const user = req.user as any;
+      const tokens = await this.authService.generateTokens(user);
+      
+      return {
+        success: true,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        user: tokens.user,
+      };
+    } catch (error) {
+      console.error('Dev login error:', error);
+      return {
+        success: false,
+        error: 'Authentication failed',
+      };
+    }
+  }
+
   @Post('refresh')
   async refreshToken(@Body() body: { refresh_token: string }) {
     return this.authService.refreshToken(body.refresh_token);
