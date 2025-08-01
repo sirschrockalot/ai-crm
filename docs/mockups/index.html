@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presidential Digs CRM - Design Mockups</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            color: #F8FAFC;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #94A3B8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .mockup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .mockup-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        .mockup-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .mockup-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #F1F5F9;
+        }
+
+        .mockup-card p {
+            color: #94A3B8;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .mockup-card .features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .mockup-card .features li {
+            color: #CBD5E1;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .mockup-card .features li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10B981;
+            font-weight: 600;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748B, #475569);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 10px 15px rgba(100, 116, 139, 0.3);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-ready {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-draft {
+            background: rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94A3B8;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .mockup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Presidential Digs CRM</h1>
+            <p>Interactive Design Mockups - Review and provide feedback on the user experience</p>
+        </div>
+
+        <div class="mockup-grid">
+            <div class="mockup-card" onclick="window.open('dashboard.html', '_blank')">
+                <h3>📊 Executive Dashboard</h3>
+                <p>High-level business metrics, real-time KPIs, and performance analytics with automation insights.</p>
+                <ul class="features">
+                    <li>Real-time KPI displays</li>
+                    <li>Performance trend charts</li>
+                    <li>Team comparison metrics</li>
+                    <li>Automation efficiency tracking</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="dashboard.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('lead-queue.html', '_blank')">
+                <h3>👥 Lead Queue Management</h3>
+                <p>FIFO lead assignment system with admin controls, automation, and real-time updates.</p>
+                <ul class="features">
+                    <li>FIFO lead assignment</li>
+                    <li>Admin permission controls</li>
+                    <li>Automated lead routing</li>
+                    <li>Real-time queue updates</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="lead-queue.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('lead-detail.html', '_blank')">
+                <h3>📋 Lead Detail View</h3>
+                <p>Comprehensive lead information with communication history, automation status, and quick actions.</p>
+                <ul class="features">
+                    <li>Lead information display</li>
+                    <li>Communication history</li>
+                    <li>Automation status indicators</li>
+                    <li>Quick action buttons</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="lead-detail.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('pipeline.html', '_blank')">
+                <h3>🔄 Lead Pipeline</h3>
+                <p>Kanban-style pipeline with drag-and-drop functionality, automation triggers, and status tracking.</p>
+                <ul class="features">
+                    <li>Kanban board layout</li>
+                    <li>Drag & drop functionality</li>
+                    <li>Automation triggers</li>
+                    <li>Status tracking</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="pipeline.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('communications.html', '_blank')">
+                <h3>💬 Communications Center</h3>
+                <p>Integrated messaging system with SMS, calls, email, and AI-powered automation features.</p>
+                <ul class="features">
+                    <li>SMS & call integration</li>
+                    <li>AI-powered responses</li>
+                    <li>Communication templates</li>
+                    <li>Automation workflows</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="communications.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('buyers.html', '_blank')">
+                <h3>🏠 Buyer Management</h3>
+                <p>Buyer database with AI-powered matching, preference tracking, and deal history.</p>
+                <ul class="features">
+                    <li>Buyer database</li>
+                    <li>AI-powered matching</li>
+                    <li>Preference tracking</li>
+                    <li>Deal history</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="buyers.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('analytics.html', '_blank')">
+                <h3>📈 Analytics & Reports</h3>
+                <p>Comprehensive analytics with automation insights, performance tracking, and predictive analytics.</p>
+                <ul class="features">
+                    <li>Performance analytics</li>
+                    <li>Automation insights</li>
+                    <li>Predictive analytics</li>
+                    <li>Custom reporting</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="analytics.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('automation.html', '_blank')">
+                <h3>🤖 Automation Workflows</h3>
+                <p>Visual workflow builder with drag-and-drop automation rules and AI-powered suggestions.</p>
+                <ul class="features">
+                    <li>Visual workflow builder</li>
+                    <li>Drag & drop rules</li>
+                    <li>AI-powered suggestions</li>
+                    <li>Automation analytics</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="automation.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+
+            <div class="mockup-card" onclick="window.open('settings.html', '_blank')">
+                <h3>⚙️ Settings & Configuration</h3>
+                <p>System configuration, user management, automation settings, and integration preferences.</p>
+                <ul class="features">
+                    <li>User management</li>
+                    <li>Automation settings</li>
+                    <li>Integration preferences</li>
+                    <li>System configuration</li>
+                </ul>
+                <span class="status-badge status-ready">Ready</span>
+                <br><br>
+                <a href="settings.html" class="btn" target="_blank">View Mockup</a>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="mobile-dashboard.html" class="btn btn-secondary" target="_blank">📱 Mobile Companion App</a>
+        </div>
+
+        <div class="footer">
+            <p>Presidential Digs CRM - Design Mockups v1.0</p>
+            <p>Click on any card to view the interactive mockup in a new tab</p>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth animations and interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.mockup-card');
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

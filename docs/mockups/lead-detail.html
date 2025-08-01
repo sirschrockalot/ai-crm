@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Detail View - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #1E293B;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: #0F172A;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            color: #F8FAFC;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #94A3B8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: #64748B;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #3B82F6;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .lead-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .lead-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .lead-info h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-status {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-new {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .status-contacted {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .status-under-contract {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .priority-high {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .lead-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #F1F5F9;
+            color: #475569;
+            border: 1px solid #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background: #E2E8F0;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .communication-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .communication-item:last-child {
+            border-bottom: none;
+        }
+
+        .comm-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3B82F6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .comm-content {
+            flex: 1;
+        }
+
+        .comm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .comm-author {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .comm-time {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .comm-message {
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .comm-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .comm-sms {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .comm-call {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .comm-email {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .automation-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .automation-active {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .automation-paused {
+            background: #FEF3C7;
+            color: #D97706;
+            border: 1px solid #FDE68A;
+        }
+
+        .automation-inactive {
+            background: #F1F5F9;
+            color: #64748B;
+            border: 1px solid #E2E8F0;
+        }
+
+        .property-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .property-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .property-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.25rem;
+        }
+
+        .property-value {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .notes-section {
+            margin-top: 1rem;
+        }
+
+        .note-item {
+            background: #F8FAFC;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3B82F6;
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-author {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .note-time {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .note-content {
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3B82F6;
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-time {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-action {
+            font-weight: 500;
+            color: #1E293B;
+        }
+
+        .timeline-details {
+            color: #64748B;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .ai-suggestions {
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-content {
+            opacity: 0.9;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .lead-meta {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">Presidential Digs CRM</a>
+        <div class="navbar-nav">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="lead-queue.html" class="nav-link">Lead Queue</a>
+            <a href="pipeline.html" class="nav-link">Pipeline</a>
+            <a href="communications.html" class="nav-link">Communications</a>
+            <a href="buyers.html" class="nav-link">Buyers</a>
+            <a href="analytics.html" class="nav-link">Analytics</a>
+            <a href="settings.html" class="nav-link">Settings</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">Mockups</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="lead-queue.html">Lead Queue</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>John Smith - 123 Main St</span>
+        </div>
+
+        <div class="lead-header">
+            <div class="lead-title">
+                <div class="lead-info">
+                    <h1>John Smith</h1>
+                    <p>123 Main Street, Anytown, CA 90210</p>
+                </div>
+                <div class="lead-status">
+                    <span class="status-badge status-contacted">Contacted</span>
+                    <span class="priority-badge priority-high">High Priority</span>
+                </div>
+            </div>
+
+            <div class="lead-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Phone</span>
+                    <span class="meta-value">(555) 123-4567</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Email</span>
+                    <span class="meta-value">john.smith@email.com</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Property Type</span>
+                    <span class="meta-value">Single Family Home</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Estimated Value</span>
+                    <span class="meta-value">$450,000</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Motivation</span>
+                    <span class="meta-value">Divorce</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Timeline</span>
+                    <span class="meta-value">30-60 days</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="btn btn-primary">
+                    <i class="fas fa-phone"></i>
+                    Call Lead
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-sms"></i>
+                    Send SMS
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-envelope"></i>
+                    Send Email
+                </button>
+                <button class="btn btn-success">
+                    <i class="fas fa-file-contract"></i>
+                    Create Offer
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-calendar"></i>
+                    Schedule Follow-up
+                </button>
+                <button class="btn btn-danger">
+                    <i class="fas fa-times"></i>
+                    Mark as Dead
+                </button>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Property Details</h3>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </button>
+                    </div>
+                    <div class="property-details">
+                        <div class="property-item">
+                            <span class="property-label">Square Footage</span>
+                            <span class="property-value">2,400 sq ft</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Bedrooms</span>
+                            <span class="property-value">3</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Bathrooms</span>
+                            <span class="property-value">2.5</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Year Built</span>
+                            <span class="property-value">1985</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Lot Size</span>
+                            <span class="property-value">0.25 acres</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Condition</span>
+                            <span class="property-value">Good</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">Repairs Needed</span>
+                            <span class="property-value">$15,000</span>
+                        </div>
+                        <div class="property-item">
+                            <span class="property-label">ARV</span>
+                            <span class="property-value">$520,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Communication History</h3>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i>
+                            New Message
+                        </button>
+                    </div>
+                    <div class="communication-item">
+                        <div class="comm-avatar">JS</div>
+                        <div class="comm-content">
+                            <div class="comm-header">
+                                <span class="comm-author">John Smith</span>
+                                <span class="comm-time">2 hours ago</span>
+                            </div>
+                            <div class="comm-message">
+                                Hi, I'm interested in selling my house quickly. I'm going through a divorce and need to move out by the end of the month. The house needs some repairs but I'm willing to sell below market value.
+                            </div>
+                            <span class="comm-type comm-sms">
+                                <i class="fas fa-sms"></i>
+                                SMS
+                            </span>
+                        </div>
+                    </div>
+                    <div class="communication-item">
+                        <div class="comm-avatar">AR</div>
+                        <div class="comm-content">
+                            <div class="comm-header">
+                                <span class="comm-author">Alex Rodriguez (You)</span>
+                                <span class="comm-time">1 hour ago</span>
+                            </div>
+                            <div class="comm-message">
+                                Hi John, thanks for reaching out. I'd love to help you sell your house quickly. Can you tell me a bit more about the repairs needed and what you're hoping to get for the property?
+                            </div>
+                            <span class="comm-type comm-sms">
+                                <i class="fas fa-sms"></i>
+                                SMS
+                            </span>
+                        </div>
+                    </div>
+                    <div class="communication-item">
+                        <div class="comm-avatar">JS</div>
+                        <div class="comm-content">
+                            <div class="comm-header">
+                                <span class="comm-author">John Smith</span>
+                                <span class="comm-time">45 minutes ago</span>
+                            </div>
+                            <div class="comm-message">
+                                The kitchen needs new countertops and the master bathroom needs updating. There's also some water damage in the basement. I'm thinking around $400k but I'm flexible if you can close quickly.
+                            </div>
+                            <span class="comm-type comm-sms">
+                                <i class="fas fa-sms"></i>
+                                SMS
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Notes & Comments</h3>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i>
+                            Add Note
+                        </button>
+                    </div>
+                    <div class="notes-section">
+                        <div class="note-item">
+                            <div class="note-header">
+                                <span class="note-author">Alex Rodriguez</span>
+                                <span class="note-time">1 hour ago</span>
+                            </div>
+                            <div class="note-content">
+                                Lead seems motivated due to divorce situation. Property needs $15-20k in repairs. Good potential for wholesale deal. Follow up with property inspection.
+                            </div>
+                        </div>
+                        <div class="note-item">
+                            <div class="note-header">
+                                <span class="note-author">Sarah Johnson</span>
+                                <span class="note-time">30 minutes ago</span>
+                            </div>
+                            <div class="note-content">
+                                Scheduled property inspection for tomorrow at 2 PM. Will assess repair costs and take photos for buyer marketing.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="ai-suggestions">
+                    <div class="ai-header">
+                        <i class="fas fa-robot"></i>
+                        <span class="ai-title">AI Suggestions</span>
+                    </div>
+                    <div class="suggestion-item">
+                        <div class="suggestion-title">Recommended Next Action</div>
+                        <div class="suggestion-content">
+                            Schedule a property inspection within 24 hours. The lead shows high motivation and the timeline is urgent.
+                        </div>
+                        <div class="suggestion-actions">
+                            <button class="btn btn-outline btn-sm">Schedule Inspection</button>
+                            <button class="btn btn-outline btn-sm">Dismiss</button>
+                        </div>
+                    </div>
+                    <div class="suggestion-item">
+                        <div class="suggestion-title">Communication Template</div>
+                        <div class="suggestion-content">
+                            "Hi John, I'd like to schedule a quick property inspection to give you the best offer possible. Would tomorrow work for you?"
+                        </div>
+                        <div class="suggestion-actions">
+                            <button class="btn btn-outline btn-sm">Use Template</button>
+                            <button class="btn btn-outline btn-sm">Edit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Automation Status</h3>
+                    </div>
+                    <div class="automation-status automation-active">
+                        <i class="fas fa-play-circle"></i>
+                        <div>
+                            <div style="font-weight: 600;">Follow-up Sequence Active</div>
+                            <div style="font-size: 0.875rem;">Next message in 2 hours</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" style="width: 100%;">
+                        <i class="fas fa-pause"></i>
+                        Pause Automation
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                    </div>
+                    <div class="activity-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">2 hours ago</div>
+                                <div class="timeline-action">Lead created from website form</div>
+                                <div class="timeline-details">Source: Website Contact Form</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">1 hour ago</div>
+                                <div class="timeline-action">SMS sent to lead</div>
+                                <div class="timeline-details">Template: Initial Contact</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">45 minutes ago</div>
+                                <div class="timeline-action">Lead status updated</div>
+                                <div class="timeline-details">New → Contacted</div>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">30 minutes ago</div>
+                                <div class="timeline-action">Note added by Sarah Johnson</div>
+                                <div class="timeline-details">Property inspection scheduled</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Quick Actions</h3>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-calculator"></i>
+                            Calculate Offer
+                        </button>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-users"></i>
+                            Find Buyers
+                        </button>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-file-alt"></i>
+                            Generate Contract
+                        </button>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-share"></i>
+                            Share with Team
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Quick action buttons
+            const actionButtons = document.querySelectorAll('.btn');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.textContent.includes('Call Lead')) {
+                        alert('Initiating call to (555) 123-4567...');
+                    } else if (this.textContent.includes('Send SMS')) {
+                        alert('Opening SMS composer...');
+                    } else if (this.textContent.includes('Create Offer')) {
+                        alert('Opening offer calculator...');
+                    }
+                });
+            });
+
+            // AI suggestion buttons
+            const suggestionButtons = document.querySelectorAll('.suggestion-actions .btn');
+            suggestionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (this.textContent.includes('Use Template')) {
+                        alert('Template applied to message composer');
+                    } else if (this.textContent.includes('Schedule Inspection')) {
+                        alert('Opening calendar to schedule inspection...');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

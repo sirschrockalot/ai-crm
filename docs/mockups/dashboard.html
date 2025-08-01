@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Dashboard - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .kpi-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .kpi-change.positive {
+            color: #10B981;
+        }
+
+        .kpi-change.negative {
+            color: #EF4444;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .activity-feed {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 500;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .automation-status {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .automation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .automation-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: #F8FAFC;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .automation-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #10B981;
+        }
+
+        .automation-indicator.warning {
+            background: #F59E0B;
+        }
+
+        .automation-indicator.error {
+            background: #EF4444;
+        }
+
+        .automation-info {
+            flex: 1;
+        }
+
+        .automation-name {
+            font-weight: 500;
+            color: #0F172A;
+            font-size: 0.875rem;
+        }
+
+        .automation-stats {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active">Dashboard</a>
+            <a href="#" class="nav-link">Leads</a>
+            <a href="#" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link">Communications</a>
+            <a href="#" class="nav-link">Analytics</a>
+            <a href="#" class="nav-link">Settings</a>
+        </div>
+        <div class="user-menu">
+            <div class="avatar">JS</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Executive Dashboard</h1>
+            <p class="page-subtitle">Real-time business metrics and performance insights</p>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Total Leads</span>
+                    <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.1); color: #3B82F6;">👥</div>
+                </div>
+                <div class="kpi-value">1,247</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+12.5% from last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Active Deals</span>
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">💰</div>
+                </div>
+                <div class="kpi-value">89</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+8.2% from last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Conversion Rate</span>
+                    <div class="kpi-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">📈</div>
+                </div>
+                <div class="kpi-value">23.4%</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+2.1% from last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Revenue (30 days)</span>
+                    <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">💵</div>
+                </div>
+                <div class="kpi-value">$847K</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+15.3% from last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Automation Efficiency</span>
+                    <div class="kpi-icon" style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">🤖</div>
+                </div>
+                <div class="kpi-value">87.2%</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+5.8% from last month</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Team Performance</span>
+                    <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">🏆</div>
+                </div>
+                <div class="kpi-value">94.1%</div>
+                <div class="kpi-change positive">
+                    <span>↗</span>
+                    <span>+3.2% from last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Lead Conversion Pipeline</h3>
+                    <div class="chart-actions">
+                        <button class="btn">7D</button>
+                        <button class="btn btn-primary">30D</button>
+                        <button class="btn">90D</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    📊 Interactive Chart: Lead → Qualified → Deal → Contract
+                </div>
+            </div>
+
+            <div class="activity-feed">
+                <div class="chart-header">
+                    <h3 class="chart-title">Recent Activity</h3>
+                    <button class="btn">View All</button>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">🎯</div>
+                    <div class="activity-content">
+                        <div class="activity-title">New lead qualified: John Smith</div>
+                        <div class="activity-time">2 minutes ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">🤖</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Automation triggered: Follow-up sequence</div>
+                        <div class="activity-time">5 minutes ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">💰</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Deal closed: 123 Main St</div>
+                        <div class="activity-time">15 minutes ago</div>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon">📞</div>
+                    <div class="activity-content">
+                        <div class="activity-title">Call scheduled: Sarah Johnson</div>
+                        <div class="activity-time">1 hour ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="automation-status">
+            <div class="chart-header">
+                <h3 class="chart-title">Automation Status</h3>
+                <button class="btn btn-primary">Configure</button>
+            </div>
+            <div class="automation-grid">
+                <div class="automation-item">
+                    <div class="automation-indicator"></div>
+                    <div class="automation-info">
+                        <div class="automation-name">Lead Qualification</div>
+                        <div class="automation-stats">98.2% accuracy</div>
+                    </div>
+                </div>
+                <div class="automation-item">
+                    <div class="automation-indicator"></div>
+                    <div class="automation-info">
+                        <div class="automation-name">Follow-up Sequences</div>
+                        <div class="automation-stats">156 active</div>
+                    </div>
+                </div>
+                <div class="automation-item">
+                    <div class="automation-indicator warning"></div>
+                    <div class="automation-info">
+                        <div class="automation-name">Buyer Matching</div>
+                        <div class="automation-stats">87.5% accuracy</div>
+                    </div>
+                </div>
+                <div class="automation-item">
+                    <div class="automation-indicator"></div>
+                    <div class="automation-info">
+                        <div class="automation-name">Contract Generation</div>
+                        <div class="automation-stats">23 generated today</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time updates
+        function updateKPIs() {
+            const kpiValues = document.querySelectorAll('.kpi-value');
+            kpiValues.forEach(kpi => {
+                const currentValue = parseInt(kpi.textContent.replace(/[^\d]/g, ''));
+                const change = Math.floor(Math.random() * 10) - 5;
+                const newValue = Math.max(0, currentValue + change);
+                kpi.textContent = kpi.textContent.replace(/\d+/, newValue);
+            });
+        }
+
+        // Update KPIs every 30 seconds
+        setInterval(updateKPIs, 30000);
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.kpi-card, .chart-card, .activity-feed, .automation-status');
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Queue Management - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .queue-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .queue-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-top: 0.25rem;
+        }
+
+        .queue-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .queue-filters {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .filter-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .queue-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+        }
+
+        .queue-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .queue-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .queue-count {
+            background: #3B82F6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .lead-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .lead-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #F1F5F9;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .lead-item:hover {
+            background: #F8FAFC;
+        }
+
+        .lead-item:last-child {
+            border-bottom: none;
+        }
+
+        .lead-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .lead-info {
+            flex: 1;
+        }
+
+        .lead-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .lead-details {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .lead-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .lead-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-new {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+
+        .status-contacted {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+
+        .status-qualified {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .lead-time {
+            font-size: 0.75rem;
+            color: #94A3B8;
+        }
+
+        .lead-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .action-btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .action-btn.primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .automation-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .empty-state {
+            padding: 3rem;
+            text-align: center;
+            color: #64748B;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .empty-state-text {
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .queue-controls {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .queue-stats {
+                justify-content: space-around;
+            }
+            
+            .queue-actions {
+                justify-content: center;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link active">Leads</a>
+            <a href="#" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link">Communications</a>
+            <a href="#" class="nav-link">Analytics</a>
+            <a href="#" class="nav-link">Settings</a>
+        </div>
+        <div class="user-menu">
+            <div class="avatar">JS</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Lead Queue Management</h1>
+            <p class="page-subtitle">FIFO lead assignment system with admin controls and automation</p>
+        </div>
+
+        <div class="queue-controls">
+            <div class="queue-stats">
+                <div class="stat-item">
+                    <div class="stat-value">47</div>
+                    <div class="stat-label">In Queue</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Assigned to You</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Processed Today</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">23.4%</div>
+                    <div class="stat-label">Conversion Rate</div>
+                </div>
+            </div>
+            <div class="queue-actions">
+                <button class="btn btn-primary">
+                    📞 Get Next Lead
+                </button>
+                <button class="btn btn-success">
+                    ➕ Create Lead
+                </button>
+                <button class="btn">
+                    ⚙️ Queue Settings
+                </button>
+            </div>
+        </div>
+
+        <div class="queue-filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">Lead Source</label>
+                    <select class="filter-input">
+                        <option>All Sources</option>
+                        <option>Web Form</option>
+                        <option>Phone Call</option>
+                        <option>Referral</option>
+                        <option>Marketing Campaign</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Lead Age</label>
+                    <select class="filter-input">
+                        <option>All Ages</option>
+                        <option>0-24 hours</option>
+                        <option>1-7 days</option>
+                        <option>1-2 weeks</option>
+                        <option>2+ weeks</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Priority</label>
+                    <select class="filter-input">
+                        <option>All Priorities</option>
+                        <option>High</option>
+                        <option>Medium</option>
+                        <option>Low</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Status</label>
+                    <select class="filter-input">
+                        <option>All Statuses</option>
+                        <option>New</option>
+                        <option>Contacted</option>
+                        <option>Qualified</option>
+                        <option>Unqualified</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" class="filter-input" placeholder="Search leads...">
+                </div>
+            </div>
+        </div>
+
+        <div class="queue-container">
+            <div class="queue-header">
+                <div class="queue-title">Lead Queue (FIFO Order)</div>
+                <div class="queue-count">47 leads</div>
+            </div>
+            <div class="lead-list">
+                <div class="lead-item" style="position: relative;">
+                    <div class="automation-indicator"></div>
+                    <div class="lead-avatar">JS</div>
+                    <div class="lead-info">
+                        <div class="lead-name">John Smith</div>
+                        <div class="lead-details">
+                            <span>📞 (555) 123-4567</span>
+                            <span>📧 john.smith@email.com</span>
+                            <span>📍 123 Main St, City, State</span>
+                        </div>
+                    </div>
+                    <div class="lead-meta">
+                        <div class="lead-status status-new">New</div>
+                        <div class="lead-time">2 hours ago</div>
+                    </div>
+                    <div class="lead-actions">
+                        <button class="action-btn primary" title="Call">📞</button>
+                        <button class="action-btn" title="Message">💬</button>
+                        <button class="action-btn" title="View Details">👁️</button>
+                    </div>
+                </div>
+
+                <div class="lead-item" style="position: relative;">
+                    <div class="automation-indicator"></div>
+                    <div class="lead-avatar">MJ</div>
+                    <div class="lead-info">
+                        <div class="lead-name">Mary Johnson</div>
+                        <div class="lead-details">
+                            <span>📞 (555) 987-6543</span>
+                            <span>📧 mary.j@email.com</span>
+                            <span>📍 456 Oak Ave, City, State</span>
+                        </div>
+                    </div>
+                    <div class="lead-meta">
+                        <div class="lead-status status-contacted">Contacted</div>
+                        <div class="lead-time">4 hours ago</div>
+                    </div>
+                    <div class="lead-actions">
+                        <button class="action-btn primary" title="Call">📞</button>
+                        <button class="action-btn" title="Message">💬</button>
+                        <button class="action-btn" title="View Details">👁️</button>
+                    </div>
+                </div>
+
+                <div class="lead-item" style="position: relative;">
+                    <div class="lead-avatar">RD</div>
+                    <div class="lead-info">
+                        <div class="lead-name">Robert Davis</div>
+                        <div class="lead-details">
+                            <span>📞 (555) 456-7890</span>
+                            <span>📧 robert.d@email.com</span>
+                            <span>📍 789 Pine St, City, State</span>
+                        </div>
+                    </div>
+                    <div class="lead-meta">
+                        <div class="lead-status status-qualified">Qualified</div>
+                        <div class="lead-time">6 hours ago</div>
+                    </div>
+                    <div class="lead-actions">
+                        <button class="action-btn primary" title="Call">📞</button>
+                        <button class="action-btn" title="Message">💬</button>
+                        <button class="action-btn" title="View Details">👁️</button>
+                    </div>
+                </div>
+
+                <div class="lead-item" style="position: relative;">
+                    <div class="automation-indicator"></div>
+                    <div class="lead-avatar">SW</div>
+                    <div class="lead-info">
+                        <div class="lead-name">Sarah Wilson</div>
+                        <div class="lead-details">
+                            <span>📞 (555) 321-0987</span>
+                            <span>📧 sarah.w@email.com</span>
+                            <span>📍 321 Elm St, City, State</span>
+                        </div>
+                    </div>
+                    <div class="lead-meta">
+                        <div class="lead-status status-new">New</div>
+                        <div class="lead-time">8 hours ago</div>
+                    </div>
+                    <div class="lead-actions">
+                        <button class="action-btn primary" title="Call">📞</button>
+                        <button class="action-btn" title="Message">💬</button>
+                        <button class="action-btn" title="View Details">👁️</button>
+                    </div>
+                </div>
+
+                <div class="lead-item" style="position: relative;">
+                    <div class="lead-avatar">MB</div>
+                    <div class="lead-info">
+                        <div class="lead-name">Michael Brown</div>
+                        <div class="lead-details">
+                            <span>📞 (555) 654-3210</span>
+                            <span>📧 michael.b@email.com</span>
+                            <span>📍 654 Maple Dr, City, State</span>
+                        </div>
+                    </div>
+                    <div class="lead-meta">
+                        <div class="lead-status status-contacted">Contacted</div>
+                        <div class="lead-time">1 day ago</div>
+                    </div>
+                    <div class="lead-actions">
+                        <button class="action-btn primary" title="Call">📞</button>
+                        <button class="action-btn" title="Message">💬</button>
+                        <button class="action-btn" title="View Details">👁️</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time queue updates
+        function updateQueue() {
+            const queueCount = document.querySelector('.queue-count');
+            const currentCount = parseInt(queueCount.textContent);
+            const change = Math.floor(Math.random() * 3) - 1;
+            const newCount = Math.max(0, currentCount + change);
+            queueCount.textContent = newCount + ' leads';
+        }
+
+        // Update queue every 30 seconds
+        setInterval(updateQueue, 30000);
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.lead-item');
+            
+            items.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-20px)';
+                
+                setTimeout(() => {
+                    item.style.transition = 'all 0.6s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateX(0)';
+                }, index * 100);
+            });
+        });
+
+        // Add click handlers for actions
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const action = this.title;
+                console.log(`Action: ${action}`);
+                // Here you would implement the actual action
+            });
+        });
+
+        // Add click handlers for lead items
+        document.querySelectorAll('.lead-item').forEach(item => {
+            item.addEventListener('click', function() {
+                console.log('Lead clicked');
+                // Here you would navigate to lead detail view
+            });
+        });
+    </script>
+</body>
+</html> 

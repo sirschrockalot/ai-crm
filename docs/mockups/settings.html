@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings & Configuration - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+
+        .settings-sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .sidebar-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-item {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .sidebar-item:hover {
+            background: #F8FAFC;
+            color: #3B82F6;
+        }
+
+        .sidebar-item.active {
+            background: #EBF4FF;
+            color: #3B82F6;
+            border-right: 3px solid #3B82F6;
+        }
+
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .settings-content {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+        }
+
+        .content-header {
+            background: #F8FAFC;
+            padding: 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .content-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-description {
+            color: #64748B;
+            font-size: 0.875rem;
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        .settings-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .checkbox-input {
+            width: 16px;
+            height: 16px;
+            accent-color: #3B82F6;
+        }
+
+        .checkbox-label {
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+            border-color: #EF4444;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+            border-color: #DC2626;
+        }
+
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-role {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .action-btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .integration-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .integration-card:hover {
+            background: white;
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .integration-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+            border: 1px solid #E2E8F0;
+        }
+
+        .integration-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .integration-status {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 1rem;
+        }
+
+        .status-connected {
+            color: #10B981;
+        }
+
+        .status-disconnected {
+            color: #EF4444;
+        }
+
+        .automation-settings {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .automation-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .automation-item:last-child {
+            border-bottom: none;
+        }
+
+        .automation-info {
+            flex: 1;
+        }
+
+        .automation-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .automation-description {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #CBD5E1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #3B82F6;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .security-settings {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .security-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: #DC2626;
+            font-weight: 600;
+        }
+
+        .security-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #FECACA;
+        }
+
+        .security-item:last-child {
+            border-bottom: none;
+        }
+
+        .security-info {
+            flex: 1;
+        }
+
+        .security-name {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+
+        .security-description {
+            font-size: 0.875rem;
+            color: #6B7280;
+        }
+
+        @media (max-width: 1024px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-sidebar {
+                order: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .user-grid,
+            .integration-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Leads</a>
+            <a href="#" class="nav-link">Pipeline</a>
+            <a href="#" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link">Communications</a>
+            <a href="#" class="nav-link">Analytics</a>
+            <a href="#" class="nav-link">Automation</a>
+            <a href="#" class="nav-link active">Settings</a>
+        </div>
+        <div class="user-menu">
+            <div class="avatar">JS</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Settings & Configuration</h1>
+            <p class="page-subtitle">System configuration, user management, automation settings, and integration preferences</p>
+        </div>
+
+        <div class="settings-layout">
+            <div class="settings-sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-title">Settings</div>
+                </div>
+                <div class="sidebar-nav">
+                    <div class="sidebar-item active" data-section="profile">
+                        <div class="sidebar-icon">👤</div>
+                        <span>Profile Settings</span>
+                    </div>
+                    <div class="sidebar-item" data-section="users">
+                        <div class="sidebar-icon">👥</div>
+                        <span>User Management</span>
+                    </div>
+                    <div class="sidebar-item" data-section="automation">
+                        <div class="sidebar-icon">🤖</div>
+                        <span>Automation Settings</span>
+                    </div>
+                    <div class="sidebar-item" data-section="integrations">
+                        <div class="sidebar-icon">🔗</div>
+                        <span>Integrations</span>
+                    </div>
+                    <div class="sidebar-item" data-section="security">
+                        <div class="sidebar-icon">🔒</div>
+                        <span>Security</span>
+                    </div>
+                    <div class="sidebar-item" data-section="notifications">
+                        <div class="sidebar-icon">🔔</div>
+                        <span>Notifications</span>
+                    </div>
+                    <div class="sidebar-item" data-section="billing">
+                        <div class="sidebar-icon">💳</div>
+                        <span>Billing</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-content">
+                <div class="content-header">
+                    <div class="content-title">Profile Settings</div>
+                    <div class="content-description">Manage your personal information and preferences</div>
+                </div>
+                <div class="content-body">
+                    <div class="settings-section">
+                        <div class="section-title">
+                            <div class="section-icon" style="background: rgba(59, 130, 246, 0.1); color: #3B82F6;">👤</div>
+                            Personal Information
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" value="John Smith">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" value="john.smith@presidentialdigs.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-input" value="(555) 123-4567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Job Title</label>
+                            <input type="text" class="form-input" value="Lead Acquisition Specialist">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Department</label>
+                            <select class="form-select">
+                                <option>Acquisition</option>
+                                <option>Sales</option>
+                                <option>Marketing</option>
+                                <option>Operations</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary">Save Changes</button>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="section-title">
+                            <div class="section-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">⚙️</div>
+                            Preferences
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Time Zone</label>
+                            <select class="form-select">
+                                <option>Eastern Time (ET)</option>
+                                <option>Central Time (CT)</option>
+                                <option>Mountain Time (MT)</option>
+                                <option>Pacific Time (PT)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Language</label>
+                            <select class="form-select">
+                                <option>English</option>
+                                <option>Spanish</option>
+                                <option>French</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date Format</label>
+                            <select class="form-select">
+                                <option>MM/DD/YYYY</option>
+                                <option>DD/MM/YYYY</option>
+                                <option>YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" class="checkbox-input" id="email-notifications" checked>
+                            <label class="checkbox-label" for="email-notifications">Email notifications</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" class="checkbox-input" id="sms-notifications">
+                            <label class="checkbox-label" for="sms-notifications">SMS notifications</label>
+                        </div>
+                        <div class="form-checkbox">
+                            <input type="checkbox" class="checkbox-input" id="push-notifications" checked>
+                            <label class="checkbox-label" for="push-notifications">Push notifications</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                // Add active class to clicked item
+                this.classList.add('active');
+                
+                // Update content based on section
+                const section = this.dataset.section;
+                updateContent(section);
+            });
+        });
+
+        function updateContent(section) {
+            const contentHeader = document.querySelector('.content-header');
+            const contentBody = document.querySelector('.content-body');
+            
+            switch(section) {
+                case 'profile':
+                    contentHeader.innerHTML = `
+                        <div class="content-title">Profile Settings</div>
+                        <div class="content-description">Manage your personal information and preferences</div>
+                    `;
+                    contentBody.innerHTML = `
+                        <div class="settings-section">
+                            <div class="section-title">
+                                <div class="section-icon" style="background: rgba(59, 130, 246, 0.1); color: #3B82F6;">👤</div>
+                                Personal Information
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-input" value="John Smith">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-input" value="john.smith@presidentialdigs.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-input" value="(555) 123-4567">
+                            </div>
+                            <button class="btn btn-primary">Save Changes</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'users':
+                    contentHeader.innerHTML = `
+                        <div class="content-title">User Management</div>
+                        <div class="content-description">Manage team members and their permissions</div>
+                    `;
+                    contentBody.innerHTML = `
+                        <div class="settings-section">
+                            <div class="section-title">
+                                <div class="section-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">👥</div>
+                                Team Members
+                            </div>
+                            <div class="user-grid">
+                                <div class="user-card">
+                                    <div class="user-avatar">JS</div>
+                                    <div class="user-info">
+                                        <div class="user-name">John Smith</div>
+                                        <div class="user-role">Lead Acquisition Specialist</div>
+                                        <div class="user-status status-active">Active</div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Delete">🗑️</button>
+                                    </div>
+                                </div>
+                                <div class="user-card">
+                                    <div class="user-avatar">MJ</div>
+                                    <div class="user-info">
+                                        <div class="user-name">Mary Johnson</div>
+                                        <div class="user-role">Sales Manager</div>
+                                        <div class="user-status status-active">Active</div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Delete">🗑️</button>
+                                    </div>
+                                </div>
+                                <div class="user-card">
+                                    <div class="user-avatar">RD</div>
+                                    <div class="user-info">
+                                        <div class="user-name">Robert Davis</div>
+                                        <div class="user-role">Acquisition Specialist</div>
+                                        <div class="user-status status-inactive">Inactive</div>
+                                    </div>
+                                    <div class="user-actions">
+                                        <button class="action-btn" title="Edit">✏️</button>
+                                        <button class="action-btn" title="Delete">🗑️</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary">➕ Add User</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'automation':
+                    contentHeader.innerHTML = `
+                        <div class="content-title">Automation Settings</div>
+                        <div class="content-description">Configure AI-powered automation workflows</div>
+                    `;
+                    contentBody.innerHTML = `
+                        <div class="settings-section">
+                            <div class="section-title">
+                                <div class="section-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">🤖</div>
+                                Automation Rules
+                            </div>
+                            <div class="automation-settings">
+                                <div class="automation-item">
+                                    <div class="automation-info">
+                                        <div class="automation-name">Lead Qualification</div>
+                                        <div class="automation-description">Automatically qualify leads based on scoring criteria</div>
+                                    </div>
+                                    <div class="toggle-switch active"></div>
+                                </div>
+                                <div class="automation-item">
+                                    <div class="automation-info">
+                                        <div class="automation-name">Follow-up Sequences</div>
+                                        <div class="automation-description">Send automated follow-up messages to leads</div>
+                                    </div>
+                                    <div class="toggle-switch active"></div>
+                                </div>
+                                <div class="automation-item">
+                                    <div class="automation-info">
+                                        <div class="automation-name">Buyer Matching</div>
+                                        <div class="automation-description">Match qualified leads with potential buyers</div>
+                                    </div>
+                                    <div class="toggle-switch"></div>
+                                </div>
+                                <div class="automation-item">
+                                    <div class="automation-info">
+                                        <div class="automation-name">Contract Generation</div>
+                                        <div class="automation-description">Automatically generate contracts for deals</div>
+                                    </div>
+                                    <div class="toggle-switch active"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'integrations':
+                    contentHeader.innerHTML = `
+                        <div class="content-title">Integrations</div>
+                        <div class="content-description">Connect with third-party services and tools</div>
+                    `;
+                    contentBody.innerHTML = `
+                        <div class="settings-section">
+                            <div class="section-title">
+                                <div class="section-icon" style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">🔗</div>
+                                Connected Services
+                            </div>
+                            <div class="integration-grid">
+                                <div class="integration-card">
+                                    <div class="integration-icon">📧</div>
+                                    <div class="integration-name">Gmail</div>
+                                    <div class="integration-status status-connected">Connected</div>
+                                    <button class="btn">Configure</button>
+                                </div>
+                                <div class="integration-card">
+                                    <div class="integration-icon">📞</div>
+                                    <div class="integration-name">Twilio</div>
+                                    <div class="integration-status status-connected">Connected</div>
+                                    <button class="btn">Configure</button>
+                                </div>
+                                <div class="integration-card">
+                                    <div class="integration-icon">📊</div>
+                                    <div class="integration-name">Google Analytics</div>
+                                    <div class="integration-status status-disconnected">Disconnected</div>
+                                    <button class="btn btn-primary">Connect</button>
+                                </div>
+                                <div class="integration-card">
+                                    <div class="integration-icon">📋</div>
+                                    <div class="integration-name">DocuSign</div>
+                                    <div class="integration-status status-connected">Connected</div>
+                                    <button class="btn">Configure</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'security':
+                    contentHeader.innerHTML = `
+                        <div class="content-title">Security Settings</div>
+                        <div class="content-description">Manage account security and privacy settings</div>
+                    `;
+                    contentBody.innerHTML = `
+                        <div class="settings-section">
+                            <div class="section-title">
+                                <div class="section-icon" style="background: rgba(239, 68, 68, 0.1); color: #EF4444;">🔒</div>
+                                Security Features
+                            </div>
+                            <div class="security-settings">
+                                <div class="security-header">
+                                    <span>🔒</span>
+                                    <span>Security Recommendations</span>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <div class="security-name">Two-Factor Authentication</div>
+                                        <div class="security-description">Add an extra layer of security to your account</div>
+                                    </div>
+                                    <button class="btn btn-primary">Enable</button>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <div class="security-name">Password Policy</div>
+                                        <div class="security-description">Require strong passwords for all users</div>
+                                    </div>
+                                    <div class="toggle-switch active"></div>
+                                </div>
+                                <div class="security-item">
+                                    <div class="security-info">
+                                        <div class="security-name">Session Timeout</div>
+                                        <div class="security-description">Automatically log out inactive users</div>
+                                    </div>
+                                    <div class="toggle-switch active"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        // Toggle switch functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('toggle-switch')) {
+                e.target.classList.toggle('active');
+            }
+        });
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.sidebar-item, .user-card, .integration-card');
+            
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.6s ease';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

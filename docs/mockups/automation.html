@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Workflows - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .automation-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .automation-stats {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-top: 0.25rem;
+        }
+
+        .automation-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .workflow-builder {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .builder-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .builder-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .builder-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .builder-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .builder-btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .builder-btn.primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .builder-btn.primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .builder-content {
+            display: grid;
+            grid-template-columns: 250px 1fr 300px;
+            min-height: 600px;
+        }
+
+        .components-panel {
+            background: #F8FAFC;
+            border-right: 1px solid #E2E8F0;
+            padding: 1rem;
+        }
+
+        .panel-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .component-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6B7280;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .component-item {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: grab;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .component-item:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+            transform: translateY(-1px);
+        }
+
+        .component-item:active {
+            cursor: grabbing;
+        }
+
+        .component-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .trigger-icon {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+
+        .condition-icon {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+
+        .action-icon {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .workflow-canvas {
+            background: #F8FAFC;
+            padding: 2rem;
+            position: relative;
+            overflow: auto;
+        }
+
+        .workflow-step {
+            background: white;
+            border: 2px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: move;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 200px;
+        }
+
+        .workflow-step:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .workflow-step.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #0F172A;
+            font-size: 0.875rem;
+        }
+
+        .step-description {
+            font-size: 0.75rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        .step-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .step-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+        }
+
+        .step-btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: #3B82F6;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .properties-panel {
+            background: #F8FAFC;
+            border-left: 1px solid #E2E8F0;
+            padding: 1rem;
+        }
+
+        .property-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .property-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .property-select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .ai-suggestions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .suggestions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .suggestions-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .suggestion-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-card:hover {
+            background: #EBF4FF;
+            border-color: #3B82F6;
+        }
+
+        .suggestion-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            background: rgba(139, 92, 246, 0.1);
+            color: #8B5CF6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            color: #0F172A;
+            font-size: 0.875rem;
+        }
+
+        .suggestion-description {
+            font-size: 0.75rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        .automation-analytics {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .analytics-card {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            text-align: center;
+        }
+
+        .analytics-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .analytics-label {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #E2E8F0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94A3B8;
+            font-size: 0.875rem;
+            margin: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.05);
+            color: #3B82F6;
+        }
+
+        @media (max-width: 1024px) {
+            .builder-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .components-panel,
+            .properties-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .automation-controls {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .automation-stats {
+                justify-content: space-around;
+            }
+            
+            .automation-actions {
+                justify-content: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Leads</a>
+            <a href="#" class="nav-link">Pipeline</a>
+            <a href="#" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link">Communications</a>
+            <a href="#" class="nav-link">Analytics</a>
+            <a href="#" class="nav-link active">Automation</a>
+            <a href="#" class="nav-link">Settings</a>
+        </div>
+        <div class="user-menu">
+            <div class="avatar">JS</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Automation Workflows</h1>
+            <p class="page-subtitle">Visual workflow builder with drag-and-drop automation rules and AI-powered suggestions</p>
+        </div>
+
+        <div class="automation-controls">
+            <div class="automation-stats">
+                <div class="stat-item">
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Active Workflows</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-label">Automations Triggered</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">87.2%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">2.3 days</div>
+                    <div class="stat-label">Avg Time Saved</div>
+                </div>
+            </div>
+            <div class="automation-actions">
+                <button class="btn btn-primary">
+                    ➕ Create Workflow
+                </button>
+                <button class="btn btn-success">
+                    🤖 AI Suggestions
+                </button>
+                <button class="btn">
+                    📊 View Analytics
+                </button>
+            </div>
+        </div>
+
+        <div class="workflow-builder">
+            <div class="builder-header">
+                <div class="builder-title">Lead Qualification Workflow</div>
+                <div class="builder-actions">
+                    <button class="builder-btn">Save Draft</button>
+                    <button class="builder-btn primary">Publish</button>
+                </div>
+            </div>
+            <div class="builder-content">
+                <div class="components-panel">
+                    <div class="panel-title">Components</div>
+                    
+                    <div class="component-category">
+                        <div class="category-title">Triggers</div>
+                        <div class="component-item" draggable="true" data-type="trigger" data-component="new-lead">
+                            <div class="component-icon trigger-icon">🎯</div>
+                            <span>New Lead Created</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="trigger" data-component="lead-status-change">
+                            <div class="component-icon trigger-icon">🔄</div>
+                            <span>Lead Status Changed</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="trigger" data-component="lead-assigned">
+                            <div class="component-icon trigger-icon">👤</div>
+                            <span>Lead Assigned</span>
+                        </div>
+                    </div>
+
+                    <div class="component-category">
+                        <div class="category-title">Conditions</div>
+                        <div class="component-item" draggable="true" data-type="condition" data-component="lead-score">
+                            <div class="component-icon condition-icon">📊</div>
+                            <span>Lead Score > 80</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="condition" data-component="lead-source">
+                            <div class="component-icon condition-icon">📈</div>
+                            <span>Lead Source = Web</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="condition" data-component="response-time">
+                            <div class="component-icon condition-icon">⏰</div>
+                            <span>No Response > 24h</span>
+                        </div>
+                    </div>
+
+                    <div class="component-category">
+                        <div class="category-title">Actions</div>
+                        <div class="component-item" draggable="true" data-type="action" data-component="send-email">
+                            <div class="component-icon action-icon">📧</div>
+                            <span>Send Email</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="action" data-component="send-sms">
+                            <div class="component-icon action-icon">💬</div>
+                            <span>Send SMS</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="action" data-component="assign-lead">
+                            <div class="component-icon action-icon">👤</div>
+                            <span>Assign Lead</span>
+                        </div>
+                        <div class="component-item" draggable="true" data-type="action" data-component="update-status">
+                            <div class="component-icon action-icon">✅</div>
+                            <span>Update Status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workflow-canvas" id="workflow-canvas">
+                    <div class="workflow-step" data-step="1">
+                        <div class="step-actions">
+                            <button class="step-btn" title="Edit">✏️</button>
+                            <button class="step-btn" title="Delete">🗑️</button>
+                        </div>
+                        <div class="step-header">
+                            <div class="step-icon trigger-icon">🎯</div>
+                            <div class="step-title">New Lead Created</div>
+                        </div>
+                        <div class="step-description">Triggered when a new lead is added to the system</div>
+                    </div>
+
+                    <div class="connection-line" style="width: 2px; height: 20px; top: 80px;"></div>
+
+                    <div class="workflow-step" data-step="2">
+                        <div class="step-actions">
+                            <button class="step-btn" title="Edit">✏️</button>
+                            <button class="step-btn" title="Delete">🗑️</button>
+                        </div>
+                        <div class="step-header">
+                            <div class="step-icon condition-icon">📊</div>
+                            <div class="step-title">Lead Score > 80</div>
+                        </div>
+                        <div class="step-description">Check if lead qualification score is above threshold</div>
+                    </div>
+
+                    <div class="connection-line" style="width: 2px; height: 20px; top: 160px;"></div>
+
+                    <div class="workflow-step" data-step="3">
+                        <div class="step-actions">
+                            <button class="step-btn" title="Edit">✏️</button>
+                            <button class="step-btn" title="Delete">🗑️</button>
+                        </div>
+                        <div class="step-header">
+                            <div class="step-icon action-icon">📧</div>
+                            <div class="step-title">Send Welcome Email</div>
+                        </div>
+                        <div class="step-description">Send personalized welcome email to qualified leads</div>
+                    </div>
+
+                    <div class="connection-line" style="width: 2px; height: 20px; top: 240px;"></div>
+
+                    <div class="workflow-step" data-step="4">
+                        <div class="step-actions">
+                            <button class="step-btn" title="Edit">✏️</button>
+                            <button class="step-btn" title="Delete">🗑️</button>
+                        </div>
+                        <div class="step-header">
+                            <div class="step-icon action-icon">👤</div>
+                            <div class="step-title">Assign to Best Agent</div>
+                        </div>
+                        <div class="step-description">Automatically assign lead to available agent with best performance</div>
+                    </div>
+                </div>
+
+                <div class="properties-panel">
+                    <div class="panel-title">Properties</div>
+                    
+                    <div class="property-group">
+                        <div class="property-title">Selected Step</div>
+                        <div style="font-size: 0.875rem; color: #64748B; margin-bottom: 1rem;">
+                            Click on a workflow step to edit its properties
+                        </div>
+                    </div>
+
+                    <div class="property-group">
+                        <div class="property-title">Workflow Settings</div>
+                        <input type="text" class="property-input" placeholder="Workflow Name" value="Lead Qualification Workflow">
+                        <textarea class="property-input" placeholder="Description" rows="3">Automatically qualify and assign new leads based on scoring criteria</textarea>
+                        <select class="property-select">
+                            <option>Active</option>
+                            <option>Inactive</option>
+                            <option>Draft</option>
+                        </select>
+                    </div>
+
+                    <div class="property-group">
+                        <div class="property-title">Execution Settings</div>
+                        <select class="property-select">
+                            <option>Execute Immediately</option>
+                            <option>Execute with Delay</option>
+                            <option>Execute at Specific Time</option>
+                        </select>
+                        <input type="number" class="property-input" placeholder="Delay (minutes)" value="5">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-suggestions">
+            <div class="suggestions-header">
+                <div class="suggestions-title">🤖 AI-Powered Suggestions</div>
+                <button class="btn btn-primary">Generate More</button>
+            </div>
+            <div class="suggestion-card">
+                <div class="suggestion-header">
+                    <div class="suggestion-icon">💡</div>
+                    <div class="suggestion-title">Add Follow-up Sequence</div>
+                </div>
+                <div class="suggestion-description">
+                    Based on your current workflow, we suggest adding a follow-up sequence for leads that don't respond within 24 hours.
+                </div>
+            </div>
+            <div class="suggestion-card">
+                <div class="suggestion-header">
+                    <div class="suggestion-icon">📈</div>
+                    <div class="suggestion-title">Optimize Lead Scoring</div>
+                </div>
+                <div class="suggestion-description">
+                    Your lead scoring threshold could be optimized. Consider lowering it to 75 to capture more qualified leads.
+                </div>
+            </div>
+            <div class="suggestion-card">
+                <div class="suggestion-header">
+                    <div class="suggestion-icon">🤝</div>
+                    <div class="suggestion-title">Add Buyer Matching</div>
+                </div>
+                <div class="suggestion-description">
+                    Automatically match qualified leads with potential buyers in your database for faster deal closure.
+                </div>
+            </div>
+        </div>
+
+        <div class="automation-analytics">
+            <div class="suggestions-header">
+                <div class="suggestions-title">📊 Automation Analytics</div>
+                <button class="btn">View Detailed Report</button>
+            </div>
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <div class="analytics-value">98.2%</div>
+                    <div class="analytics-label">Success Rate</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-value">1,247</div>
+                    <div class="analytics-label">Executions Today</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-value">2.3 days</div>
+                    <div class="analytics-label">Avg Time Saved</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-value">$12.4K</div>
+                    <div class="analytics-label">Cost Savings</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-value">156</div>
+                    <div class="analytics-label">Leads Qualified</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-value">89%</div>
+                    <div class="analytics-label">User Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Drag and Drop functionality for workflow builder
+        let draggedElement = null;
+
+        document.querySelectorAll('.component-item').forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedElement = this;
+                this.style.opacity = '0.5';
+                e.dataTransfer.effectAllowed = 'copy';
+                e.dataTransfer.setData('text/html', this.outerHTML);
+            });
+
+            item.addEventListener('dragend', function() {
+                this.style.opacity = '1';
+                draggedElement = null;
+            });
+        });
+
+        const workflowCanvas = document.getElementById('workflow-canvas');
+
+        workflowCanvas.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            this.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+        });
+
+        workflowCanvas.addEventListener('dragleave', function(e) {
+            this.style.backgroundColor = '';
+        });
+
+        workflowCanvas.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.backgroundColor = '';
+            
+            if (draggedElement) {
+                const componentType = draggedElement.dataset.type;
+                const componentName = draggedElement.dataset.component;
+                const componentText = draggedElement.querySelector('span').textContent;
+                const componentIcon = draggedElement.querySelector('.component-icon').textContent;
+                
+                // Create new workflow step
+                const newStep = createWorkflowStep(componentType, componentName, componentText, componentIcon);
+                this.appendChild(newStep);
+                
+                // Add connection line
+                addConnectionLine();
+            }
+        });
+
+        function createWorkflowStep(type, name, text, icon) {
+            const step = document.createElement('div');
+            step.className = 'workflow-step';
+            step.draggable = true;
+            step.dataset.step = Date.now();
+            
+            const iconClass = type === 'trigger' ? 'trigger-icon' : 
+                             type === 'condition' ? 'condition-icon' : 'action-icon';
+            
+            step.innerHTML = `
+                <div class="step-actions">
+                    <button class="step-btn" title="Edit">✏️</button>
+                    <button class="step-btn" title="Delete">🗑️</button>
+                </div>
+                <div class="step-header">
+                    <div class="step-icon ${iconClass}">${icon}</div>
+                    <div class="step-title">${text}</div>
+                </div>
+                <div class="step-description">Automatically added from component library</div>
+            `;
+            
+            // Add drag functionality to new step
+            step.addEventListener('dragstart', function(e) {
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            
+            step.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+            });
+            
+            return step;
+        }
+
+        function addConnectionLine() {
+            const line = document.createElement('div');
+            line.className = 'connection-line';
+            line.style.cssText = 'width: 2px; height: 20px; background: #3B82F6; position: absolute; left: 50%; transform: translateX(-50%); z-index: 1;';
+            workflowCanvas.appendChild(line);
+        }
+
+        // Step selection for properties panel
+        document.querySelectorAll('.workflow-step').forEach(step => {
+            step.addEventListener('click', function() {
+                document.querySelectorAll('.workflow-step').forEach(s => s.style.borderColor = '#E2E8F0');
+                this.style.borderColor = '#3B82F6';
+                
+                // Update properties panel
+                const propertiesPanel = document.querySelector('.properties-panel');
+                const stepTitle = this.querySelector('.step-title').textContent;
+                propertiesPanel.querySelector('.property-title').textContent = `Selected Step: ${stepTitle}`;
+            });
+        });
+
+        // AI suggestion interactions
+        document.querySelectorAll('.suggestion-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const title = this.querySelector('.suggestion-title').textContent;
+                alert(`Applying suggestion: ${title}`);
+            });
+        });
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.workflow-step, .suggestion-card, .analytics-card');
+            
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.6s ease';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

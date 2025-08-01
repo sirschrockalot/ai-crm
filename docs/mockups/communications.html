@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communications Center - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .communications-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            height: calc(100vh - 200px);
+        }
+
+        .contacts-sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contacts-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .contacts-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #F1F5F9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .contact-item:hover {
+            background: #F8FAFC;
+        }
+
+        .contact-item.active {
+            background: #EBF4FF;
+            border-left: 3px solid #3B82F6;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .contact-status {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .contact-status.online {
+            color: #10B981;
+        }
+
+        .chat-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-contact {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .chat-contact-info h3 {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-contact-info p {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .action-btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .action-btn.primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .action-btn.primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #F8FAFC;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+        }
+
+        .message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .message.sent .message-avatar {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            position: relative;
+        }
+
+        .message.sent .message-bubble {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .message-text {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #94A3B8;
+        }
+
+        .message.sent .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .message-status {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: #94A3B8;
+        }
+
+        .message.sent .message-status {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .ai-suggestion {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-suggestion-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #8B5CF6;
+        }
+
+        .ai-suggestion-text {
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+
+        .ai-suggestion-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #8B5CF6;
+            color: white;
+            border-color: #8B5CF6;
+        }
+
+        .btn-primary:hover {
+            background: #7C3AED;
+            border-color: #7C3AED;
+        }
+
+        .chat-input {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #E2E8F0;
+            background: white;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            font-family: inherit;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            border: none;
+            background: #3B82F6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:hover {
+            background: #2563EB;
+        }
+
+        .send-btn:disabled {
+            background: #CBD5E1;
+            cursor: not-allowed;
+        }
+
+        .communication-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .automation-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 1024px) {
+            .communications-grid {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .contacts-sidebar {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .chat-actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Leads</a>
+            <a href="#" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link active">Communications</a>
+            <a href="#" class="nav-link">Analytics</a>
+            <a href="#" class="nav-link">Settings</a>
+        </div>
+        <div class="user-menu">
+            <div class="avatar">JS</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Communications Center</h1>
+            <p class="page-subtitle">Integrated messaging with AI-powered automation and multi-channel communication</p>
+        </div>
+
+        <div class="communications-grid">
+            <div class="contacts-sidebar">
+                <div class="contacts-header">
+                    <div class="contacts-title">Recent Contacts</div>
+                    <input type="text" class="search-input" placeholder="Search contacts...">
+                </div>
+                <div class="contact-list">
+                    <div class="contact-item active" style="position: relative;">
+                        <div class="automation-indicator"></div>
+                        <div class="contact-avatar">JS</div>
+                        <div class="contact-info">
+                            <div class="contact-name">John Smith</div>
+                            <div class="contact-status online">Online</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-avatar">MJ</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Mary Johnson</div>
+                            <div class="contact-status">Last seen 2h ago</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-avatar">RD</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Robert Davis</div>
+                            <div class="contact-status">Last seen 1d ago</div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-avatar">SW</div>
+                        <div class="contact-info">
+                            <div class="contact-name">Sarah Wilson</div>
+                            <div class="contact-status">Last seen 3h ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="chat-contact">
+                        <div class="chat-contact-avatar">JS</div>
+                        <div class="chat-contact-info">
+                            <h3>John Smith</h3>
+                            <p>Lead #1234 - 123 Main St</p>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="action-btn primary" title="Call">📞</button>
+                        <button class="action-btn" title="Video Call">📹</button>
+                        <button class="action-btn" title="More">⋯</button>
+                    </div>
+                </div>
+
+                <div class="chat-messages">
+                    <div class="communication-tabs">
+                        <button class="tab-btn active">💬 SMS</button>
+                        <button class="tab-btn">📞 Calls</button>
+                        <button class="tab-btn">📧 Email</button>
+                    </div>
+
+                    <div class="message">
+                        <div class="message-avatar">JS</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <div class="message-text">Hi, I'm interested in selling my property at 123 Main St. Can you help me with a quick cash offer?</div>
+                                <div class="message-time">2:30 PM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message sent">
+                        <div class="message-avatar">JS</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <div class="message-text">Absolutely! I'd be happy to help you with a cash offer. Can you tell me a bit more about your property? What's the current condition and approximate square footage?</div>
+                                <div class="message-time">2:32 PM</div>
+                                <div class="message-status">✓✓ Delivered</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ai-suggestion">
+                        <div class="ai-suggestion-header">
+                            🤖 AI Suggestion
+                        </div>
+                        <div class="ai-suggestion-text">
+                            Based on the lead's inquiry, I suggest asking about: property condition, timeline for sale, and whether they've had any recent offers.
+                        </div>
+                        <div class="ai-suggestion-actions">
+                            <button class="btn btn-primary">Use Suggestion</button>
+                            <button class="btn">Dismiss</button>
+                        </div>
+                    </div>
+
+                    <div class="message">
+                        <div class="message-avatar">JS</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <div class="message-text">It's a 3-bedroom, 2-bath house, about 1,800 sq ft. Needs some updates but overall good condition. I need to sell quickly due to a job relocation.</div>
+                                <div class="message-time">2:35 PM</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="message sent">
+                        <div class="message-avatar">JS</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <div class="message-text">Perfect! That sounds like exactly what we're looking for. I can schedule a quick property walkthrough tomorrow. What time works best for you?</div>
+                                <div class="message-time">2:36 PM</div>
+                                <div class="message-status">✓✓ Read</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input">
+                    <div class="input-container">
+                        <textarea class="message-input" placeholder="Type your message... (AI will suggest responses based on context)"></textarea>
+                        <button class="send-btn">📤</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time messaging
+        function addMessage(text, isSent = false) {
+            const messagesContainer = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : ''}`;
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${isSent ? 'JS' : 'JS'}</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div class="message-text">${text}</div>
+                        <div class="message-time">${time}</div>
+                        ${isSent ? '<div class="message-status">✓ Sent</div>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Handle send button
+        const sendBtn = document.querySelector('.send-btn');
+        const messageInput = document.querySelector('.message-input');
+
+        sendBtn.addEventListener('click', function() {
+            const text = messageInput.value.trim();
+            if (text) {
+                addMessage(text, true);
+                messageInput.value = '';
+                
+                // Simulate AI response after 2 seconds
+                setTimeout(() => {
+                    addMessage('Thanks for the information! I\'ll send you a detailed offer within the next hour.');
+                }, 2000);
+            }
+        });
+
+        // Handle enter key
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendBtn.click();
+            }
+        });
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Contact selection
+        document.querySelectorAll('.contact-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update chat header
+                const name = this.querySelector('.contact-name').textContent;
+                document.querySelector('.chat-contact-info h3').textContent = name;
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.contact-item, .message, .ai-suggestion');
+            
+            elements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    element.style.transition = 'all 0.6s ease';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 

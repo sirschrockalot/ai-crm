@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics & Reports - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .analytics-controls {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-range {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .date-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .analytics-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chart-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chart-btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .chart-btn.active {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.1) 50%, transparent 70%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: #F8FAFC;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .metric-change {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .metric-change.positive {
+            color: #10B981;
+        }
+
+        .metric-change.negative {
+            color: #EF4444;
+        }
+
+        .automation-insights {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .insight-card {
+            background: #F8FAFC;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            position: relative;
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            color: #0F172A;
+            font-size: 0.875rem;
+        }
+
+        .insight-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .insight-description {
+            font-size: 0.75rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        .prediction-alert {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .prediction-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #8B5CF6;
+        }
+
+        .prediction-text {
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .report-builder {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .builder-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .builder-select {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+            min-width: 150px;
+        }
+
+        .builder-select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .report-preview {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .team-performance {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .performance-table th,
+        .performance-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .performance-table th {
+            background: #F8FAFC;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .performance-table td {
+            font-size: 0.875rem;
+        }
+
+        .performance-score {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .score-excellent {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+
+        .score-good {
+            background: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+
+        .score-average {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+
+        .score-poor {
+            background: rgba(239, 68, 68, 0.1);
+            color: #EF4444;
+        }
+
+        @media (max-width: 1024px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .analytics-controls {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+            
+            .date-range {
+                justify-content: center;
+            }
+            
+            .analytics-actions {
+                justify-content: center;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Leads</a>
+            <a href="#" class="nav-link">Pipeline</a>
+            <a href="#" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link">Communications</a>
+            <a href="#" class="nav-link active">Analytics</a>
+            <a href="#" class="nav-link">Settings</a>
+        </div>
+        <div class="user-menu">
+            <div class="avatar">JS</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Analytics & Reports</h1>
+            <p class="page-subtitle">Comprehensive analytics with automation insights and predictive analytics</p>
+        </div>
+
+        <div class="analytics-controls">
+            <div class="date-range">
+                <label>Date Range:</label>
+                <input type="date" class="date-input" value="2024-01-01">
+                <span>to</span>
+                <input type="date" class="date-input" value="2024-12-19">
+            </div>
+            <div class="analytics-actions">
+                <button class="btn btn-primary">
+                    📊 Generate Report
+                </button>
+                <button class="btn btn-success">
+                    📥 Export Data
+                </button>
+                <button class="btn">
+                    ⚙️ Report Settings
+                </button>
+            </div>
+        </div>
+
+        <div class="analytics-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Lead Conversion Funnel</h3>
+                    <div class="chart-actions">
+                        <button class="chart-btn active">30D</button>
+                        <button class="chart-btn">90D</button>
+                        <button class="chart-btn">1Y</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    📈 Interactive Funnel Chart: New → Contacted → Qualified → Deal → Closed
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">1,247</div>
+                        <div class="metric-label">New Leads</div>
+                        <div class="metric-change positive">+12.5%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">892</div>
+                        <div class="metric-label">Contacted</div>
+                        <div class="metric-change positive">+8.2%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">234</div>
+                        <div class="metric-label">Qualified</div>
+                        <div class="metric-change positive">+15.3%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">89</div>
+                        <div class="metric-label">Deals</div>
+                        <div class="metric-change positive">+23.1%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Revenue Trends</h3>
+                    <div class="chart-actions">
+                        <button class="chart-btn active">Monthly</button>
+                        <button class="chart-btn">Quarterly</button>
+                        <button class="chart-btn">Yearly</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    💰 Revenue Chart: Monthly progression with projections
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">$847K</div>
+                        <div class="metric-label">This Month</div>
+                        <div class="metric-change positive">+15.3%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">$2.1M</div>
+                        <div class="metric-label">This Quarter</div>
+                        <div class="metric-change positive">+12.8%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">$8.4M</div>
+                        <div class="metric-label">This Year</div>
+                        <div class="metric-change positive">+18.7%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Team Performance</h3>
+                    <div class="chart-actions">
+                        <button class="chart-btn active">Leads</button>
+                        <button class="chart-btn">Deals</button>
+                        <button class="chart-btn">Revenue</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    🏆 Team Performance Chart: Individual and team metrics
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">94.1%</div>
+                        <div class="metric-label">Team Efficiency</div>
+                        <div class="metric-change positive">+3.2%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">23.4%</div>
+                        <div class="metric-label">Avg Conversion</div>
+                        <div class="metric-change positive">+2.1%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">2.3 days</div>
+                        <div class="metric-label">Avg Response Time</div>
+                        <div class="metric-change positive">-0.5 days</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Lead Source Analysis</h3>
+                    <div class="chart-actions">
+                        <button class="chart-btn active">Volume</button>
+                        <button class="chart-btn">Quality</button>
+                        <button class="chart-btn">Cost</button>
+                    </div>
+                </div>
+                <div class="chart-placeholder">
+                    📊 Lead Source Chart: Web, Phone, Referral, Marketing Campaign
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">45%</div>
+                        <div class="metric-label">Web Forms</div>
+                        <div class="metric-change positive">+8.2%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">28%</div>
+                        <div class="metric-label">Phone Calls</div>
+                        <div class="metric-change positive">+5.1%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">18%</div>
+                        <div class="metric-label">Referrals</div>
+                        <div class="metric-change positive">+12.3%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">9%</div>
+                        <div class="metric-label">Marketing</div>
+                        <div class="metric-change negative">-2.1%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="automation-insights">
+            <div class="chart-header">
+                <h3 class="chart-title">🤖 Automation Insights</h3>
+                <button class="btn btn-primary">Configure Automation</button>
+            </div>
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">🎯</div>
+                        <div class="insight-title">Lead Qualification</div>
+                    </div>
+                    <div class="insight-value">98.2%</div>
+                    <div class="insight-description">AI accuracy in lead qualification and scoring</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon" style="background: rgba(59, 130, 246, 0.1); color: #3B82F6;">💬</div>
+                        <div class="insight-title">Response Generation</div>
+                    </div>
+                    <div class="insight-value">87.5%</div>
+                    <div class="insight-description">User acceptance rate for AI-generated responses</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon" style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6;">🤝</div>
+                        <div class="insight-title">Buyer Matching</div>
+                    </div>
+                    <div class="insight-value">92.1%</div>
+                    <div class="insight-description">Accuracy in matching buyers to properties</div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-header">
+                        <div class="insight-icon" style="background: rgba(245, 158, 11, 0.1); color: #F59E0B;">📈</div>
+                        <div class="insight-title">Conversion Prediction</div>
+                    </div>
+                    <div class="insight-value">89.7%</div>
+                    <div class="insight-description">Accuracy in predicting lead conversion likelihood</div>
+                </div>
+            </div>
+            <div class="prediction-alert">
+                <div class="prediction-header">
+                    🔮 AI Prediction
+                </div>
+                <div class="prediction-text">
+                    Based on current trends, we predict a 15% increase in lead conversion rate over the next 30 days. 
+                    Consider increasing follow-up automation for high-priority leads.
+                </div>
+            </div>
+        </div>
+
+        <div class="team-performance">
+            <div class="chart-header">
+                <h3 class="chart-title">Team Performance Metrics</h3>
+                <button class="btn">View Detailed Report</button>
+            </div>
+            <table class="performance-table">
+                <thead>
+                    <tr>
+                        <th>Team Member</th>
+                        <th>Leads Processed</th>
+                        <th>Conversion Rate</th>
+                        <th>Avg Response Time</th>
+                        <th>Revenue Generated</th>
+                        <th>Performance Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>John Smith</td>
+                        <td>156</td>
+                        <td>24.8%</td>
+                        <td>1.2 days</td>
+                        <td>$234K</td>
+                        <td><span class="performance-score score-excellent">Excellent</span></td>
+                    </tr>
+                    <tr>
+                        <td>Mary Johnson</td>
+                        <td>142</td>
+                        <td>22.1%</td>
+                        <td>1.8 days</td>
+                        <td>$198K</td>
+                        <td><span class="performance-score score-good">Good</span></td>
+                    </tr>
+                    <tr>
+                        <td>Robert Davis</td>
+                        <td>128</td>
+                        <td>19.7%</td>
+                        <td>2.3 days</td>
+                        <td>$167K</td>
+                        <td><span class="performance-score score-average">Average</span></td>
+                    </tr>
+                    <tr>
+                        <td>Sarah Wilson</td>
+                        <td>98</td>
+                        <td>16.2%</td>
+                        <td>3.1 days</td>
+                        <td>$124K</td>
+                        <td><span class="performance-score score-poor">Needs Improvement</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="report-builder">
+            <div class="chart-header">
+                <h3 class="chart-title">📋 Custom Report Builder</h3>
+                <button class="btn btn-primary">Generate Report</button>
+            </div>
+            <div class="builder-controls">
+                <select class="builder-select">
+                    <option>Select Report Type</option>
+                    <option>Lead Performance Report</option>
+                    <option>Revenue Analysis Report</option>
+                    <option>Team Performance Report</option>
+                    <option>Automation Efficiency Report</option>
+                </select>
+                <select class="builder-select">
+                    <option>Select Time Period</option>
+                    <option>Last 7 Days</option>
+                    <option>Last 30 Days</option>
+                    <option>Last Quarter</option>
+                    <option>Last Year</option>
+                </select>
+                <select class="builder-select">
+                    <option>Select Team Member</option>
+                    <option>All Team Members</option>
+                    <option>John Smith</option>
+                    <option>Mary Johnson</option>
+                    <option>Robert Davis</option>
+                </select>
+                <select class="builder-select">
+                    <option>Select Format</option>
+                    <option>PDF Report</option>
+                    <option>Excel Spreadsheet</option>
+                    <option>CSV Data Export</option>
+                    <option>Interactive Dashboard</option>
+                </select>
+            </div>
+            <div class="report-preview">
+                📊 Report preview will appear here. Select options above to customize your report.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time analytics updates
+        function updateMetrics() {
+            const metricValues = document.querySelectorAll('.metric-value');
+            metricValues.forEach(metric => {
+                const currentValue = metric.textContent;
+                if (currentValue.includes('%')) {
+                    const currentNum = parseFloat(currentValue);
+                    const change = (Math.random() - 0.5) * 2;
+                    const newValue = Math.max(0, Math.min(100, currentNum + change));
+                    metric.textContent = newValue.toFixed(1) + '%';
+                } else if (currentValue.includes('$')) {
+                    const currentNum = parseInt(currentValue.replace(/[^\d]/g, ''));
+                    const change = Math.floor(Math.random() * 10000) - 5000;
+                    const newValue = Math.max(0, currentNum + change);
+                    metric.textContent = '$' + newValue.toLocaleString() + 'K';
+                } else if (currentValue.includes('days')) {
+                    const currentNum = parseFloat(currentValue);
+                    const change = (Math.random() - 0.5) * 0.5;
+                    const newValue = Math.max(0.1, currentNum + change);
+                    metric.textContent = newValue.toFixed(1) + ' days';
+                }
+            });
+        }
+
+        // Update metrics every 60 seconds
+        setInterval(updateMetrics, 60000);
+
+        // Chart button interactions
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const parent = this.closest('.chart-actions');
+                parent.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Simulate chart update
+                const chartPlaceholder = this.closest('.chart-card').querySelector('.chart-placeholder');
+                chartPlaceholder.style.background = 'linear-gradient(135deg, #EBF4FF, #DBEAFE)';
+                setTimeout(() => {
+                    chartPlaceholder.style.background = 'linear-gradient(135deg, #F1F5F9, #E2E8F0)';
+                }, 500);
+            });
+        });
+
+        // Add smooth animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.chart-card, .insight-card');
+            
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html> 
