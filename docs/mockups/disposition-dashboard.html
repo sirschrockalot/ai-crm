@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disposition Dashboard - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .role-badge {
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8B5CF6, #A855F7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .disposition-focus {
+            background: linear-gradient(135deg, #F3E8FF, #FAF5FF);
+            border: 1px solid #DDD6FE;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .focus-title {
+            font-weight: 600;
+            color: #7C3AED;
+            margin-bottom: 0.5rem;
+        }
+
+        .focus-description {
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-title {
+            font-size: 0.875rem;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-change.positive {
+            color: #059669;
+        }
+
+        .kpi-change.negative {
+            color: #DC2626;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .workflow-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+        }
+
+        .workflow-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .workflow-title {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .workflow-count {
+            background: #8B5CF6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .workflow-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .workflow-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #F1F5F9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .workflow-item:hover {
+            background: #F8FAFC;
+        }
+
+        .workflow-item:last-child {
+            border-bottom: none;
+        }
+
+        .deal-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .deal-name {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .deal-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .status-under-contract {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .status-marketing {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-showing {
+            background: #FCE7F3;
+            color: #BE185D;
+        }
+
+        .status-closing {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .deal-details {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.5rem;
+        }
+
+        .deal-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+        }
+
+        .action-btn:hover {
+            background: #8B5CF6;
+            color: white;
+            border-color: #8B5CF6;
+        }
+
+        .buyer-matching {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .matching-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .matching-title {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .matching-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .matching-card {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #FAF5FF;
+        }
+
+        .matching-property {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .matching-buyers {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.5rem;
+        }
+
+        .matching-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .score-badge {
+            background: #8B5CF6;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 1rem;
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .action-card:hover {
+            border-color: #8B5CF6;
+            background: #FAF5FF;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .action-title {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-description {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 0.875rem;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #8B5CF6;
+            color: white;
+            border-color: #8B5CF6;
+        }
+
+        .btn-primary:hover {
+            background: #7C3AED;
+            border-color: #7C3AED;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .matching-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="role-badge">Disposition Team</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active">Dashboard</a>
+            <a href="#" class="nav-link">Contracts</a>
+            <a href="#" class="nav-link">Buyers</a>
+            <a href="#" class="nav-link">Marketing</a>
+        </div>
+        <div class="user-menu">
+            <span>Mike Rodriguez</span>
+            <div class="avatar">MR</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-handshake"></i>
+                Disposition Dashboard
+            </h1>
+            <p class="page-subtitle">Focus on marketing and selling properties under contract</p>
+        </div>
+
+        <div class="disposition-focus">
+            <div class="focus-title">🎯 Your Focus Area</div>
+            <div class="focus-description">
+                You work with <strong>leads under contract only</strong>. 
+                Your goal is to market properties effectively and match them with qualified buyers to close deals.
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Properties Under Contract</span>
+                    <div class="kpi-icon" style="background: #8B5CF6;">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">15</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +3 this week
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Active Marketing Campaigns</span>
+                    <div class="kpi-icon" style="background: #10B981;">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">8</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +2 new campaigns
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Buyer Matches</span>
+                    <div class="kpi-icon" style="background: #F59E0B;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">42</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +12 this month
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Avg Days to Close</span>
+                    <div class="kpi-icon" style="background: #EF4444;">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">18</div>
+                <div class="kpi-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    -3 days improvement
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-grid">
+            <div class="workflow-section">
+                <div class="workflow-header">
+                    <span class="workflow-title">Properties Under Contract</span>
+                    <span class="workflow-count">15</span>
+                </div>
+                <div class="workflow-list">
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">123 Oak St, Austin</span>
+                            <span class="deal-status status-under-contract">Under Contract</span>
+                        </div>
+                        <div class="deal-details">$450k ARV • 3 bed, 2 bath • 1,800 sq ft</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Market</button>
+                            <button class="action-btn">Match Buyers</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">456 Pine Ave, Dallas</span>
+                            <span class="deal-status status-marketing">Marketing</span>
+                        </div>
+                        <div class="deal-details">$380k ARV • 2 bed, 1 bath • 1,200 sq ft</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Campaign</button>
+                            <button class="action-btn">Showings</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">789 Elm Dr, Houston</span>
+                            <span class="deal-status status-showing">Showing</span>
+                        </div>
+                        <div class="deal-details">$520k ARV • 4 bed, 2.5 bath • 2,100 sq ft</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Schedule</button>
+                            <button class="action-btn">Offers</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-section">
+                <div class="workflow-header">
+                    <span class="workflow-title">Closing Soon</span>
+                    <span class="workflow-count">5</span>
+                </div>
+                <div class="workflow-list">
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">321 Maple Rd, San Antonio</span>
+                            <span class="deal-status status-closing">Closing</span>
+                        </div>
+                        <div class="deal-details">$410k ARV • Closing in 3 days</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Documents</button>
+                            <button class="action-btn">Timeline</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">654 Cedar Ln, Fort Worth</span>
+                            <span class="deal-status status-closing">Closing</span>
+                        </div>
+                        <div class="deal-details">$360k ARV • Closing in 1 week</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Documents</button>
+                            <button class="action-btn">Timeline</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">987 Birch St, Arlington</span>
+                            <span class="deal-status status-showing">Showing</span>
+                        </div>
+                        <div class="deal-details">$480k ARV • 3 showings scheduled</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Schedule</button>
+                            <button class="action-btn">Offers</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="buyer-matching">
+            <div class="matching-header">
+                <h3 class="matching-title">AI Buyer Matching</h3>
+                <a href="#" class="btn btn-primary">View All Matches</a>
+            </div>
+            <div class="matching-grid">
+                <div class="matching-card">
+                    <div class="matching-property">123 Oak St, Austin</div>
+                    <div class="matching-buyers">8 qualified buyers matched</div>
+                    <div class="matching-score">
+                        <span class="score-badge">95%</span>
+                        <span>Match Score</span>
+                    </div>
+                </div>
+                <div class="matching-card">
+                    <div class="matching-property">456 Pine Ave, Dallas</div>
+                    <div class="matching-buyers">12 qualified buyers matched</div>
+                    <div class="matching-score">
+                        <span class="score-badge">88%</span>
+                        <span>Match Score</span>
+                    </div>
+                </div>
+                <div class="matching-card">
+                    <div class="matching-property">789 Elm Dr, Houston</div>
+                    <div class="matching-buyers">6 qualified buyers matched</div>
+                    <div class="matching-score">
+                        <span class="score-badge">92%</span>
+                        <span>Match Score</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="action-grid">
+                <div class="action-card">
+                    <div class="action-icon" style="background: #8B5CF6;">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <div class="action-title">Create Campaign</div>
+                    <div class="action-description">Launch marketing campaign</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon" style="background: #10B981;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="action-title">Match Buyers</div>
+                    <div class="action-description">Find qualified buyers</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon" style="background: #F59E0B;">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="action-title">Schedule Showings</div>
+                    <div class="action-description">Book property viewings</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon" style="background: #EF4444;">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div class="action-title">Closing Documents</div>
+                    <div class="action-description">Manage closing process</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <div class="activity-header">
+                <h3 class="activity-title">Recent Activity</h3>
+                <a href="#" class="btn">View All</a>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #10B981;">
+                    <i class="fas fa-bullhorn"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Marketing campaign launched for 123 Oak St</div>
+                    <div class="activity-time">30 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #8B5CF6;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">8 buyers matched for 456 Pine Ave property</div>
+                    <div class="activity-time">2 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #F59E0B;">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Showing scheduled for 789 Elm Dr</div>
+                    <div class="activity-time">4 hours ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #EF4444;">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Closing documents prepared for 321 Maple Rd</div>
+                    <div class="activity-time">1 day ago</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Interactive functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make workflow items clickable
+            const workflowItems = document.querySelectorAll('.workflow-item');
+            workflowItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Navigate to deal detail view
+                    console.log('Navigate to deal detail');
+                });
+            });
+
+            // Make action cards clickable
+            const actionCards = document.querySelectorAll('.action-card');
+            actionCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const title = this.querySelector('.action-title').textContent;
+                    console.log('Action clicked:', title);
+                });
+            });
+
+            // Make action buttons functional
+            const actionBtns = document.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const action = this.textContent;
+                    console.log('Action button clicked:', action);
+                });
+            });
+
+            // Make matching cards clickable
+            const matchingCards = document.querySelectorAll('.matching-card');
+            matchingCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const property = this.querySelector('.matching-property').textContent;
+                    console.log('Matching card clicked:', property);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

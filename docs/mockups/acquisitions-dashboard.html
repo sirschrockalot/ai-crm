@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acquisitions Dashboard - Presidential Digs CRM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #0F172A;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #E2E8F0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .role-badge {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #64748B;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .acquisition-focus {
+            background: linear-gradient(135deg, #DBEAFE, #EFF6FF);
+            border: 1px solid #BFDBFE;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .focus-title {
+            font-weight: 600;
+            color: #1E40AF;
+            margin-bottom: 0.5rem;
+        }
+
+        .focus-description {
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-title {
+            font-size: 0.875rem;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-change.positive {
+            color: #059669;
+        }
+
+        .kpi-change.negative {
+            color: #DC2626;
+        }
+
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .workflow-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            overflow: hidden;
+        }
+
+        .workflow-header {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .workflow-title {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .workflow-count {
+            background: #3B82F6;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .workflow-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .workflow-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #F1F5F9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .workflow-item:hover {
+            background: #F8FAFC;
+        }
+
+        .workflow-item:last-child {
+            border-bottom: none;
+        }
+
+        .lead-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-name {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .lead-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .status-new {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .status-contacting {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .status-negotiating {
+            background: #FCE7F3;
+            color: #BE185D;
+        }
+
+        .lead-details {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+        }
+
+        .action-btn:hover {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .quick-actions h3 {
+            margin-bottom: 1rem;
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .action-card:hover {
+            border-color: #3B82F6;
+            background: #F8FAFC;
+        }
+
+        .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .action-title {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-description {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .recent-activity {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.875rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 0.875rem;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #F8FAFC;
+            border-color: #CBD5E1;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            border-color: #2563EB;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        @media (max-width: 768px) {
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Presidential Digs CRM</div>
+        <div class="role-badge">Acquisitions Team</div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active">Dashboard</a>
+            <a href="#" class="nav-link">Lead Queue</a>
+            <a href="#" class="nav-link">Communications</a>
+            <a href="#" class="nav-link">Reports</a>
+        </div>
+        <div class="user-menu">
+            <span>Sarah Johnson</span>
+            <div class="avatar">SJ</div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-bullseye"></i>
+                Acquisitions Dashboard
+            </h1>
+            <p class="page-subtitle">Focus on acquiring new leads and converting them to contracts</p>
+        </div>
+
+        <div class="acquisition-focus">
+            <div class="focus-title">🎯 Your Focus Area</div>
+            <div class="focus-description">
+                You work with <strong>new leads</strong> and <strong>leads not yet under contract</strong>. 
+                Your goal is to nurture relationships and convert leads to signed purchase contracts.
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">New Leads Today</span>
+                    <div class="kpi-icon" style="background: #3B82F6;">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">24</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +12% from yesterday
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Active Negotiations</span>
+                    <div class="kpi-icon" style="background: #8B5CF6;">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">18</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +3 this week
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Conversion Rate</span>
+                    <div class="kpi-icon" style="background: #10B981;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">34%</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +5% this month
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Avg Response Time</span>
+                    <div class="kpi-icon" style="background: #F59E0B;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">2.3h</div>
+                <div class="kpi-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    -0.5h improvement
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-grid">
+            <div class="workflow-section">
+                <div class="workflow-header">
+                    <span class="workflow-title">New Lead Queue</span>
+                    <span class="workflow-count">12</span>
+                </div>
+                <div class="workflow-list">
+                    <div class="workflow-item">
+                        <div class="lead-info">
+                            <span class="lead-name">John Smith</span>
+                            <span class="lead-status status-new">New</span>
+                        </div>
+                        <div class="lead-details">123 Oak St, Austin, TX • $450k ARV</div>
+                        <div class="lead-actions">
+                            <button class="action-btn">Call</button>
+                            <button class="action-btn">Text</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="lead-info">
+                            <span class="lead-name">Maria Garcia</span>
+                            <span class="lead-status status-new">New</span>
+                        </div>
+                        <div class="lead-details">456 Pine Ave, Dallas, TX • $380k ARV</div>
+                        <div class="lead-actions">
+                            <button class="action-btn">Call</button>
+                            <button class="action-btn">Text</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="lead-info">
+                            <span class="lead-name">Robert Wilson</span>
+                            <span class="lead-status status-new">New</span>
+                        </div>
+                        <div class="lead-details">789 Elm Dr, Houston, TX • $520k ARV</div>
+                        <div class="lead-actions">
+                            <button class="action-btn">Call</button>
+                            <button class="action-btn">Text</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-section">
+                <div class="workflow-header">
+                    <span class="workflow-title">Active Negotiations</span>
+                    <span class="workflow-count">8</span>
+                </div>
+                <div class="workflow-list">
+                    <div class="workflow-item">
+                        <div class="lead-info">
+                            <span class="lead-name">Lisa Chen</span>
+                            <span class="lead-status status-negotiating">Negotiating</span>
+                        </div>
+                        <div class="lead-details">321 Maple Rd, San Antonio, TX • $410k ARV</div>
+                        <div class="lead-actions">
+                            <button class="action-btn">Call</button>
+                            <button class="action-btn">Contract</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="lead-info">
+                            <span class="lead-name">David Brown</span>
+                            <span class="lead-status status-contacting">Contacting</span>
+                        </div>
+                        <div class="lead-details">654 Cedar Ln, Fort Worth, TX • $360k ARV</div>
+                        <div class="lead-actions">
+                            <button class="action-btn">Call</button>
+                            <button class="action-btn">Text</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="lead-info">
+                            <span class="lead-name">Jennifer Lee</span>
+                            <span class="lead-status status-negotiating">Negotiating</span>
+                        </div>
+                        <div class="lead-details">987 Birch St, Arlington, TX • $480k ARV</div>
+                        <div class="lead-actions">
+                            <button class="action-btn">Call</button>
+                            <button class="action-btn">Contract</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h3>Quick Actions</h3>
+            <div class="action-grid">
+                <div class="action-card">
+                    <div class="action-icon" style="background: #3B82F6;">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="action-title">Add New Lead</div>
+                    <div class="action-description">Manually enter lead information</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon" style="background: #10B981;">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="action-title">Call Campaign</div>
+                    <div class="action-description">Batch call multiple leads</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon" style="background: #8B5CF6;">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="action-title">Create Contract</div>
+                    <div class="action-description">Generate purchase agreement</div>
+                </div>
+                <div class="action-card">
+                    <div class="action-icon" style="background: #F59E0B;">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="action-title">Performance Report</div>
+                    <div class="action-description">View your conversion metrics</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recent-activity">
+            <div class="activity-header">
+                <h3 class="activity-title">Recent Activity</h3>
+                <a href="#" class="btn">View All</a>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #10B981;">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Called John Smith about 123 Oak St property</div>
+                    <div class="activity-time">2 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #8B5CF6;">
+                    <i class="fas fa-file-contract"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Contract sent to Lisa Chen for 321 Maple Rd</div>
+                    <div class="activity-time">15 minutes ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #3B82F6;">
+                    <i class="fas fa-comment"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">Text message sent to Maria Garcia</div>
+                    <div class="activity-time">1 hour ago</div>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon" style="background: #F59E0B;">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">New lead added: Robert Wilson</div>
+                    <div class="activity-time">2 hours ago</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Interactive functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make workflow items clickable
+            const workflowItems = document.querySelectorAll('.workflow-item');
+            workflowItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Navigate to lead detail view
+                    console.log('Navigate to lead detail');
+                });
+            });
+
+            // Make action cards clickable
+            const actionCards = document.querySelectorAll('.action-card');
+            actionCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const title = this.querySelector('.action-title').textContent;
+                    console.log('Action clicked:', title);
+                });
+            });
+
+            // Make action buttons functional
+            const actionBtns = document.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const action = this.textContent;
+                    console.log('Action button clicked:', action);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
