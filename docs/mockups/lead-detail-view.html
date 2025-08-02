@@ -15,8 +15,202 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: #F8FAFC;
-            color: #0F172A;
+            color: #1E293B;
             line-height: 1.6;
+        }
+
+        .navbar {
+            background: #0F172A;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            color: #F8FAFC;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #94A3B8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #3B82F6;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            color: #64748B;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #3B82F6;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .lead-header {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .lead-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .lead-info h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-info p {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .lead-status {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-end;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .status-under-contract {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .priority-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .priority-high {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .lead-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #F8FAFC;
+            border-radius: 8px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+        }
+
+        .btn-secondary {
+            background: #F1F5F9;
+            color: #475569;
+            border: 1px solid #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            background: #E2E8F0;
+        }
+
+        .btn-success {
+            background: #10B981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
         }
 
         .header {
@@ -645,6 +839,158 @@
             margin-top: 0.5rem;
         }
 
+        .ai-suggestions {
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+            color: white;
+        }
+
+        .suggestion-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-content {
+            opacity: 0.9;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .automation-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .automation-active {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .automation-paused {
+            background: #FEF3C7;
+            color: #D97706;
+            border: 1px solid #FDE68A;
+        }
+
+        .automation-inactive {
+            background: #F1F5F9;
+            color: #64748B;
+            border: 1px solid #E2E8F0;
+        }
+
+        .communication-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .communication-item:last-child {
+            border-bottom: none;
+        }
+
+        .comm-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3B82F6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .comm-content {
+            flex: 1;
+        }
+
+        .comm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .comm-author {
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .comm-time {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .comm-message {
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .comm-type {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .comm-sms {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .comm-call {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .comm-email {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
         @media (max-width: 1024px) {
             .main-grid {
                 grid-template-columns: 1fr;
@@ -681,25 +1027,94 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-left">
-            <button class="back-btn" onclick="history.back()">
-                <i class="fas fa-arrow-left"></i>
-                Back
-            </button>
-            <div class="lead-title">123 Oak Street, Austin, TX 78701</div>
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">Presidential Digs CRM</a>
+        <div class="navbar-nav">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+            <a href="lead-queue.html" class="nav-link">Lead Queue</a>
+            <a href="pipeline.html" class="nav-link">Pipeline</a>
+            <a href="communications.html" class="nav-link">Communications</a>
+            <a href="buyers.html" class="nav-link">Buyers</a>
+            <a href="analytics.html" class="nav-link">Analytics</a>
+            <a href="settings.html" class="nav-link">Settings</a>
         </div>
-        <div class="header-actions">
-            <button class="action-btn">
-                <i class="fas fa-edit"></i>
-                Edit Lead
-            </button>
-            <button class="action-btn primary">
-                <i class="fas fa-plus"></i>
-                Add Note
-            </button>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">Mockups</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="lead-queue.html">Lead Queue</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>John Smith - 123 Oak Street</span>
         </div>
-    </div>
+
+        <div class="lead-header">
+            <div class="lead-title">
+                <div class="lead-info">
+                    <h1>John Smith</h1>
+                    <p>123 Oak Street, Austin, TX 78701</p>
+                </div>
+                <div class="lead-status">
+                    <span class="status-badge status-under-contract">Under Contract</span>
+                    <span class="priority-badge priority-high">High Priority</span>
+                </div>
+            </div>
+
+            <div class="lead-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Phone</span>
+                    <span class="meta-value">(555) 123-4567</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Email</span>
+                    <span class="meta-value">john.smith@email.com</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Property Type</span>
+                    <span class="meta-value">Single Family Home</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Estimated Value</span>
+                    <span class="meta-value">$410,000</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Motivation</span>
+                    <span class="meta-value">Relocation</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Timeline</span>
+                    <span class="meta-value">30-60 days</span>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="btn btn-primary">
+                    <i class="fas fa-phone"></i>
+                    Call Lead
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-sms"></i>
+                    Send SMS
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-envelope"></i>
+                    Send Email
+                </button>
+                <button class="btn btn-success">
+                    <i class="fas fa-file-contract"></i>
+                    Create Offer
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-calendar"></i>
+                    Schedule Follow-up
+                </button>
+                <button class="btn btn-danger">
+                    <i class="fas fa-times"></i>
+                    Mark as Dead
+                </button>
+            </div>
+        </div>
 
     <div class="container">
         <!-- Status Banner -->
@@ -945,6 +1360,70 @@
                     </div>
                 </div>
 
+                <!-- Communication History -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            Communication History
+                        </div>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i>
+                            New Message
+                        </button>
+                    </div>
+                    <div class="communication-item">
+                        <div class="comm-avatar">JS</div>
+                        <div class="comm-content">
+                            <div class="comm-header">
+                                <span class="comm-author">John Smith</span>
+                                <span class="comm-time">2 hours ago</span>
+                            </div>
+                            <div class="comm-message">
+                                Hi, I'm interested in selling my house quickly. I'm relocating for work and need to move out by the end of the month. The house needs some repairs but I'm willing to sell below market value.
+                            </div>
+                            <span class="comm-type comm-sms">
+                                <i class="fas fa-sms"></i>
+                                SMS
+                            </span>
+                        </div>
+                    </div>
+                    <div class="communication-item">
+                        <div class="comm-avatar">SJ</div>
+                        <div class="comm-content">
+                            <div class="comm-header">
+                                <span class="comm-author">Sarah Johnson (You)</span>
+                                <span class="comm-time">1 hour ago</span>
+                            </div>
+                            <div class="comm-message">
+                                Hi John, thanks for reaching out. I'd love to help you sell your house quickly. Can you tell me a bit more about the repairs needed and what you're hoping to get for the property?
+                            </div>
+                            <span class="comm-type comm-sms">
+                                <i class="fas fa-sms"></i>
+                                SMS
+                            </span>
+                        </div>
+                    </div>
+                    <div class="communication-item">
+                        <div class="comm-avatar">JS</div>
+                        <div class="comm-content">
+                            <div class="comm-header">
+                                <span class="comm-author">John Smith</span>
+                                <span class="comm-time">45 minutes ago</span>
+                            </div>
+                            <div class="comm-message">
+                                The kitchen needs new countertops and the master bathroom needs updating. There's also some water damage in the basement. I'm thinking around $400k but I'm flexible if you can close quickly.
+                            </div>
+                            <span class="comm-type comm-sms">
+                                <i class="fas fa-sms"></i>
+                                SMS
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Activity Timeline -->
                 <div class="section">
                     <div class="section-header">
@@ -1095,6 +1574,65 @@
                     </div>
                 </div>
 
+                <!-- AI Suggestions -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            AI Suggestions
+                        </div>
+                    </div>
+
+                    <div class="ai-suggestions">
+                        <div class="suggestion-item">
+                            <div class="suggestion-title">Recommended Next Action</div>
+                            <div class="suggestion-content">
+                                Schedule a property inspection within 24 hours. The lead shows high motivation and the timeline is urgent.
+                            </div>
+                            <div class="suggestion-actions">
+                                <button class="btn btn-outline btn-sm">Schedule Inspection</button>
+                                <button class="btn btn-outline btn-sm">Dismiss</button>
+                            </div>
+                        </div>
+                        <div class="suggestion-item">
+                            <div class="suggestion-title">Communication Template</div>
+                            <div class="suggestion-content">
+                                "Hi John, I'd like to schedule a quick property inspection to give you the best offer possible. Would tomorrow work for you?"
+                            </div>
+                            <div class="suggestion-actions">
+                                <button class="btn btn-outline btn-sm">Use Template</button>
+                                <button class="btn btn-outline btn-sm">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automation Status -->
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <div class="section-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            Automation Status
+                        </div>
+                    </div>
+
+                    <div class="automation-status automation-active">
+                        <i class="fas fa-play-circle"></i>
+                        <div>
+                            <div style="font-weight: 600;">Follow-up Sequence Active</div>
+                            <div style="font-size: 0.875rem;">Next message in 2 hours</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-pause"></i>
+                        Pause Automation
+                    </button>
+                </div>
+
                 <!-- Notes -->
                 <div class="section">
                     <div class="section-header">
@@ -1145,55 +1683,7 @@
                     </div>
                 </div>
 
-                <!-- Communication -->
-                <div class="section">
-                    <div class="section-header">
-                        <div class="section-title">
-                            <div class="section-icon">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            Communication
-                        </div>
-                    </div>
 
-                    <div class="communication-panel">
-                        <textarea class="message-input" placeholder="Type your message..."></textarea>
-                        <button class="send-message-btn">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Message
-                        </button>
-
-                        <div class="messages-list">
-                            <div class="message-item">
-                                <div class="message-header">
-                                    <div class="message-sender">John Smith (Owner)</div>
-                                    <div class="message-time">1 hour ago</div>
-                                </div>
-                                <div class="message-content inbound">
-                                    Hi Sarah, just wanted to confirm the showing time for tomorrow at 2 PM. Looking forward to meeting potential buyers.
-                                </div>
-                            </div>
-                            <div class="message-item">
-                                <div class="message-header">
-                                    <div class="message-sender">Sarah Johnson (You)</div>
-                                    <div class="message-time">2 hours ago</div>
-                                </div>
-                                <div class="message-content outbound">
-                                    Perfect! I've scheduled two qualified buyers for tomorrow at 2 PM and 3 PM. They both match your property criteria very well.
-                                </div>
-                            </div>
-                            <div class="message-item">
-                                <div class="message-header">
-                                    <div class="message-sender">John Smith (Owner)</div>
-                                    <div class="message-time">1 day ago</div>
-                                </div>
-                                <div class="message-content inbound">
-                                    Thanks for the quick response on the contract. Everything looks good to me. When can we schedule the inspection?
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -1223,28 +1713,6 @@
                 }
             });
 
-            // Send message functionality
-            const sendMessageBtn = document.querySelector('.send-message-btn');
-            const messageInput = document.querySelector('.message-input');
-            const messagesList = document.querySelector('.messages-list');
-
-            sendMessageBtn.addEventListener('click', function() {
-                const messageText = messageInput.value.trim();
-                if (messageText) {
-                    const messageItem = document.createElement('div');
-                    messageItem.className = 'message-item';
-                    messageItem.innerHTML = `
-                        <div class="message-header">
-                            <div class="message-sender">Sarah Johnson (You)</div>
-                            <div class="message-time">Just now</div>
-                        </div>
-                        <div class="message-content outbound">${messageText}</div>
-                    `;
-                    messagesList.insertBefore(messageItem, messagesList.firstChild);
-                    messageInput.value = '';
-                }
-            });
-
             // Document card click functionality
             const documentCards = document.querySelectorAll('.document-card');
             documentCards.forEach(card => {
@@ -1254,23 +1722,69 @@
                 });
             });
 
-            // Contact button functionality
-            const contactBtns = document.querySelectorAll('.contact-btn');
-            contactBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const action = this.textContent.trim();
-                    alert(`Initiating ${action} with lead contact`);
+            // Quick action buttons
+            const actionButtons = document.querySelectorAll('.btn');
+            actionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.textContent.includes('Call Lead')) {
+                        alert('Initiating call to (555) 123-4567...');
+                    } else if (this.textContent.includes('Send SMS')) {
+                        alert('Opening SMS composer...');
+                    } else if (this.textContent.includes('Create Offer')) {
+                        alert('Opening offer calculator...');
+                    } else if (this.textContent.includes('Schedule Follow-up')) {
+                        alert('Opening calendar to schedule follow-up...');
+                    } else if (this.textContent.includes('Mark as Dead')) {
+                        alert('Marking lead as dead...');
+                    }
                 });
             });
 
-            // Status action buttons
-            const statusActions = document.querySelectorAll('.status-actions .action-btn');
-            statusActions.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const action = this.textContent.trim();
-                    alert(`Executing action: ${action}`);
+            // AI suggestion buttons
+            const suggestionButtons = document.querySelectorAll('.suggestion-actions .btn');
+            suggestionButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (this.textContent.includes('Use Template')) {
+                        alert('Template applied to message composer');
+                    } else if (this.textContent.includes('Schedule Inspection')) {
+                        alert('Opening calendar to schedule inspection...');
+                    } else if (this.textContent.includes('Dismiss')) {
+                        this.closest('.suggestion-item').style.display = 'none';
+                    } else if (this.textContent.includes('Edit')) {
+                        alert('Opening template editor...');
+                    }
                 });
             });
+
+            // Automation control
+            const pauseAutomationBtn = document.querySelector('.btn-secondary');
+            if (pauseAutomationBtn && pauseAutomationBtn.textContent.includes('Pause Automation')) {
+                pauseAutomationBtn.addEventListener('click', function() {
+                    const automationStatus = document.querySelector('.automation-status');
+                    if (automationStatus.classList.contains('automation-active')) {
+                        automationStatus.className = 'automation-status automation-paused';
+                        automationStatus.innerHTML = `
+                            <i class="fas fa-pause-circle"></i>
+                            <div>
+                                <div style="font-weight: 600;">Follow-up Sequence Paused</div>
+                                <div style="font-size: 0.875rem;">Resume to continue automation</div>
+                            </div>
+                        `;
+                        this.innerHTML = '<i class="fas fa-play"></i> Resume Automation';
+                    } else {
+                        automationStatus.className = 'automation-status automation-active';
+                        automationStatus.innerHTML = `
+                            <i class="fas fa-play-circle"></i>
+                            <div>
+                                <div style="font-weight: 600;">Follow-up Sequence Active</div>
+                                <div style="font-size: 0.875rem;">Next message in 2 hours</div>
+                            </div>
+                        `;
+                        this.innerHTML = '<i class="fas fa-pause"></i> Pause Automation';
+                    }
+                });
+            }
 
             // Edit buttons
             const editBtns = document.querySelectorAll('.edit-btn');
