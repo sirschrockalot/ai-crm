@@ -267,30 +267,87 @@
             font-weight: 500;
         }
 
-        .status-under-contract {
+        .status-new-contract {
             background: #DBEAFE;
             color: #1E40AF;
         }
 
-        .status-marketing {
+        .status-active-dispo {
             background: #FEF3C7;
             color: #92400E;
         }
 
-        .status-showing {
+        .status-assigned {
             background: #FCE7F3;
             color: #BE185D;
         }
 
-        .status-closing {
+        .status-closed {
             background: #D1FAE5;
             color: #065F46;
+        }
+
+        .status-cancelled {
+            background: #FEE2E2;
+            color: #DC2626;
         }
 
         .deal-details {
             font-size: 0.875rem;
             color: #64748B;
             margin-bottom: 0.5rem;
+        }
+
+        .deal-insights {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .insight-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            background: #F8FAFC;
+            border-radius: 4px;
+            border-left: 3px solid #8B5CF6;
+        }
+
+        .insight-label {
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .insight-value {
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .insight-value.profit-positive {
+            color: #059669;
+        }
+
+        .insight-value.profit-negative {
+            color: #DC2626;
+        }
+
+        .insight-value.urgent {
+            color: #DC2626;
+            font-weight: 700;
+        }
+
+        .insight-value.warning {
+            color: #F59E0B;
+            font-weight: 600;
+        }
+
+        .deal-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .deal-actions {
@@ -580,65 +637,65 @@
         <div class="disposition-focus">
             <div class="focus-title">🎯 Your Focus Area</div>
             <div class="focus-description">
-                You work with <strong>leads under contract only</strong>. 
-                Your goal is to market properties effectively and match them with qualified buyers to close deals.
+                You manage the complete disposition workflow from <strong>new contracts</strong> to <strong>closed deals</strong>. 
+                Track deals through: New Contract → Active Disposition → Assigned → Closed/Cancelled.
             </div>
         </div>
 
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Properties Under Contract</span>
+                    <span class="kpi-title">Total Deals in Pipeline</span>
                     <div class="kpi-icon" style="background: #8B5CF6;">
                         <i class="fas fa-file-contract"></i>
                     </div>
                 </div>
-                <div class="kpi-value">15</div>
+                <div class="kpi-value">16</div>
                 <div class="kpi-change positive">
                     <i class="fas fa-arrow-up"></i>
-                    +3 this week
+                    +4 this week
                 </div>
             </div>
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Active Marketing Campaigns</span>
-                    <div class="kpi-icon" style="background: #10B981;">
+                    <span class="kpi-title">Active Disposition</span>
+                    <div class="kpi-icon" style="background: #F59E0B;">
                         <i class="fas fa-bullhorn"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">6</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +2 new this week
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Assigned Deals</span>
+                    <div class="kpi-icon" style="background: #10B981;">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                </div>
+                <div class="kpi-value">3</div>
+                <div class="kpi-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    +1 this week
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Closed This Month</span>
+                    <div class="kpi-icon" style="background: #059669;">
+                        <i class="fas fa-check-circle"></i>
                     </div>
                 </div>
                 <div class="kpi-value">8</div>
                 <div class="kpi-change positive">
                     <i class="fas fa-arrow-up"></i>
-                    +2 new campaigns
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Buyer Matches</span>
-                    <div class="kpi-icon" style="background: #F59E0B;">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">42</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +12 this month
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Avg Days to Close</span>
-                    <div class="kpi-icon" style="background: #EF4444;">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">18</div>
-                <div class="kpi-change negative">
-                    <i class="fas fa-arrow-down"></i>
-                    -3 days improvement
+                    +3 vs last month
                 </div>
             </div>
         </div>
@@ -646,28 +703,229 @@
         <div class="workflow-grid">
             <div class="workflow-section">
                 <div class="workflow-header">
-                    <span class="workflow-title">Properties Under Contract</span>
-                    <span class="workflow-count">15</span>
+                    <span class="workflow-title">New Contracts</span>
+                    <span class="workflow-count">4</span>
                 </div>
                 <div class="workflow-list">
                     <div class="workflow-item">
                         <div class="deal-info">
                             <span class="deal-name">123 Oak St, Austin</span>
-                            <span class="deal-status status-under-contract">Under Contract</span>
+                            <span class="deal-status status-new-contract">New Contract</span>
                         </div>
                         <div class="deal-details">$450k ARV • 3 bed, 2 bath • 1,800 sq ft</div>
+                        <div class="deal-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">Contract Date:</span>
+                                <span class="insight-value">12/15/2024</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Days Under Contract:</span>
+                                <span class="insight-value">2 days</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Lead Source:</span>
+                                <span class="insight-value">Direct Mail</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Occupied:</span>
+                                <span class="insight-value">Yes</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Listing Price:</span>
+                                <span class="insight-value">$450k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Acquisition Price:</span>
+                                <span class="insight-value">$320k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Commission:</span>
+                                <span class="insight-value">$8k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Profit:</span>
+                                <span class="insight-value profit-positive">$122k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Agent:</span>
+                                <span class="insight-value">Sarah Johnson</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Contact:</span>
+                                <span class="insight-value">John Smith (555) 123-4567</span>
+                            </div>
+                        </div>
                         <div class="deal-actions">
+                            <button class="action-btn">Setup</button>
                             <button class="action-btn">Market</button>
-                            <button class="action-btn">Match Buyers</button>
                             <button class="action-btn">View</button>
                         </div>
                     </div>
                     <div class="workflow-item">
                         <div class="deal-info">
                             <span class="deal-name">456 Pine Ave, Dallas</span>
-                            <span class="deal-status status-marketing">Marketing</span>
+                            <span class="deal-status status-new-contract">New Contract</span>
                         </div>
                         <div class="deal-details">$380k ARV • 2 bed, 1 bath • 1,200 sq ft</div>
+                        <div class="deal-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">Contract Date:</span>
+                                <span class="insight-value">12/14/2024</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Days Under Contract:</span>
+                                <span class="insight-value">3 days</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Lead Source:</span>
+                                <span class="insight-value">Facebook Ads</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Occupied:</span>
+                                <span class="insight-value">No</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Listing Price:</span>
+                                <span class="insight-value">$380k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Acquisition Price:</span>
+                                <span class="insight-value">$280k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Commission:</span>
+                                <span class="insight-value">$6k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Profit:</span>
+                                <span class="insight-value profit-positive">$94k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Agent:</span>
+                                <span class="insight-value">Mike Rodriguez</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Contact:</span>
+                                <span class="insight-value">Maria Garcia (555) 987-6543</span>
+                            </div>
+                        </div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Setup</button>
+                            <button class="action-btn">Market</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">789 Elm Dr, Houston</span>
+                            <span class="deal-status status-new-contract">New Contract</span>
+                        </div>
+                        <div class="deal-details">$520k ARV • 4 bed, 2.5 bath • 2,100 sq ft</div>
+                        <div class="deal-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">Contract Date:</span>
+                                <span class="insight-value">12/13/2024</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Days Under Contract:</span>
+                                <span class="insight-value">4 days</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Lead Source:</span>
+                                <span class="insight-value">Cold Calling</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Occupied:</span>
+                                <span class="insight-value">Yes</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Listing Price:</span>
+                                <span class="insight-value">$520k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Acquisition Price:</span>
+                                <span class="insight-value">$380k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Commission:</span>
+                                <span class="insight-value">$10k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Profit:</span>
+                                <span class="insight-value profit-positive">$130k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Agent:</span>
+                                <span class="insight-value">Sarah Johnson</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Contact:</span>
+                                <span class="insight-value">Robert Wilson (555) 456-7890</span>
+                            </div>
+                        </div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Setup</button>
+                            <button class="action-btn">Market</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="workflow-section">
+                <div class="workflow-header">
+                    <span class="workflow-title">Active Disposition</span>
+                    <span class="workflow-count">6</span>
+                </div>
+                <div class="workflow-list">
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">321 Maple Rd, San Antonio</span>
+                            <span class="deal-status status-active-dispo">Active Dispo</span>
+                        </div>
+                        <div class="deal-details">$410k ARV • Marketing campaign active</div>
+                        <div class="deal-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">Contract Date:</span>
+                                <span class="insight-value">12/10/2024</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Days Under Contract:</span>
+                                <span class="insight-value warning">7 days</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Lead Source:</span>
+                                <span class="insight-value">Direct Mail</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Occupied:</span>
+                                <span class="insight-value">No</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Listing Price:</span>
+                                <span class="insight-value">$410k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Acquisition Price:</span>
+                                <span class="insight-value">$295k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Commission:</span>
+                                <span class="insight-value">$7k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Profit:</span>
+                                <span class="insight-value profit-positive">$108k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Agent:</span>
+                                <span class="insight-value">Mike Rodriguez</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Contact:</span>
+                                <span class="insight-value">Lisa Chen (555) 234-5678</span>
+                            </div>
+                        </div>
                         <div class="deal-actions">
                             <button class="action-btn">Campaign</button>
                             <button class="action-btn">Showings</button>
@@ -676,13 +934,114 @@
                     </div>
                     <div class="workflow-item">
                         <div class="deal-info">
-                            <span class="deal-name">789 Elm Dr, Houston</span>
-                            <span class="deal-status status-showing">Showing</span>
+                            <span class="deal-name">654 Cedar Ln, Fort Worth</span>
+                            <span class="deal-status status-active-dispo">Active Dispo</span>
                         </div>
-                        <div class="deal-details">$520k ARV • 4 bed, 2.5 bath • 2,100 sq ft</div>
+                        <div class="deal-details">$360k ARV • 5 buyer inquiries</div>
                         <div class="deal-actions">
-                            <button class="action-btn">Schedule</button>
-                            <button class="action-btn">Offers</button>
+                            <button class="action-btn">Campaign</button>
+                            <button class="action-btn">Showings</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">987 Birch St, Arlington</span>
+                            <span class="deal-status status-active-dispo">Active Dispo</span>
+                        </div>
+                        <div class="deal-details">$480k ARV • 3 showings scheduled</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Campaign</button>
+                            <button class="action-btn">Showings</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-grid">
+            <div class="workflow-section">
+                <div class="workflow-header">
+                    <span class="workflow-title">Assigned Deals</span>
+                    <span class="workflow-count">3</span>
+                </div>
+                <div class="workflow-list">
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">555 Oak Ave, Plano</span>
+                            <span class="deal-status status-assigned">Assigned</span>
+                        </div>
+                        <div class="deal-details">$390k ARV • Assigned to Buyer #1247</div>
+                        <div class="deal-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">Contract Date:</span>
+                                <span class="insight-value">12/05/2024</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Days Under Contract:</span>
+                                <span class="insight-value">12 days</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Lead Source:</span>
+                                <span class="insight-value">Facebook Ads</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Occupied:</span>
+                                <span class="insight-value">Yes</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Listing Price:</span>
+                                <span class="insight-value">$390k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Acquisition Price:</span>
+                                <span class="insight-value">$285k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Commission:</span>
+                                <span class="insight-value">$6k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Profit:</span>
+                                <span class="insight-value profit-positive">$99k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Buyer:</span>
+                                <span class="insight-value">David Thompson</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Closing Date:</span>
+                                <span class="insight-value urgent">12/20/2024</span>
+                            </div>
+                        </div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Documents</button>
+                            <button class="action-btn">Timeline</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">777 Pine St, McKinney</span>
+                            <span class="deal-status status-assigned">Assigned</span>
+                        </div>
+                        <div class="deal-details">$420k ARV • Assigned to Buyer #0892</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Documents</button>
+                            <button class="action-btn">Timeline</button>
+                            <button class="action-btn">View</button>
+                        </div>
+                    </div>
+                    <div class="workflow-item">
+                        <div class="deal-info">
+                            <span class="deal-name">999 Elm Way, Frisco</span>
+                            <span class="deal-status status-assigned">Assigned</span>
+                        </div>
+                        <div class="deal-details">$510k ARV • Assigned to Buyer #1563</div>
+                        <div class="deal-actions">
+                            <button class="action-btn">Documents</button>
+                            <button class="action-btn">Timeline</button>
                             <button class="action-btn">View</button>
                         </div>
                     </div>
@@ -691,45 +1050,138 @@
 
             <div class="workflow-section">
                 <div class="workflow-header">
-                    <span class="workflow-title">Closing Soon</span>
-                    <span class="workflow-count">5</span>
+                    <span class="workflow-title">Closed Deals</span>
+                    <span class="workflow-count">2</span>
                 </div>
                 <div class="workflow-list">
                     <div class="workflow-item">
                         <div class="deal-info">
-                            <span class="deal-name">321 Maple Rd, San Antonio</span>
-                            <span class="deal-status status-closing">Closing</span>
+                            <span class="deal-name">111 Maple Dr, Richardson</span>
+                            <span class="deal-status status-closed">Closed</span>
                         </div>
-                        <div class="deal-details">$410k ARV • Closing in 3 days</div>
+                        <div class="deal-details">$375k ARV • Closed 2 days ago</div>
+                        <div class="deal-insights">
+                            <div class="insight-item">
+                                <span class="insight-label">Contract Date:</span>
+                                <span class="insight-value">11/20/2024</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Days Under Contract:</span>
+                                <span class="insight-value">27 days</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Lead Source:</span>
+                                <span class="insight-value">Direct Mail</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Occupied:</span>
+                                <span class="insight-value">No</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Listing Price:</span>
+                                <span class="insight-value">$375k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Acquisition Price:</span>
+                                <span class="insight-value">$270k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Commission:</span>
+                                <span class="insight-value">$5k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Profit:</span>
+                                <span class="insight-value profit-positive">$100k</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Buyer:</span>
+                                <span class="insight-value">Jennifer Lee</span>
+                            </div>
+                            <div class="insight-item">
+                                <span class="insight-label">Closing Date:</span>
+                                <span class="insight-value">12/17/2024</span>
+                            </div>
+                        </div>
                         <div class="deal-actions">
                             <button class="action-btn">Documents</button>
-                            <button class="action-btn">Timeline</button>
+                            <button class="action-btn">Analytics</button>
                             <button class="action-btn">View</button>
                         </div>
                     </div>
                     <div class="workflow-item">
                         <div class="deal-info">
-                            <span class="deal-name">654 Cedar Ln, Fort Worth</span>
-                            <span class="deal-status status-closing">Closing</span>
+                            <span class="deal-name">333 Cedar Ave, Allen</span>
+                            <span class="deal-status status-closed">Closed</span>
                         </div>
-                        <div class="deal-details">$360k ARV • Closing in 1 week</div>
+                        <div class="deal-details">$445k ARV • Closed 1 week ago</div>
                         <div class="deal-actions">
                             <button class="action-btn">Documents</button>
-                            <button class="action-btn">Timeline</button>
+                            <button class="action-btn">Analytics</button>
                             <button class="action-btn">View</button>
                         </div>
                     </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">987 Birch St, Arlington</span>
-                            <span class="deal-status status-showing">Showing</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="workflow-section" style="margin-bottom: 2rem;">
+            <div class="workflow-header">
+                <span class="workflow-title">Cancelled Deals</span>
+                <span class="workflow-count">1</span>
+            </div>
+            <div class="workflow-list">
+                <div class="workflow-item">
+                    <div class="deal-info">
+                        <span class="deal-name">888 Birch Ln, Garland</span>
+                        <span class="deal-status status-cancelled">Cancelled</span>
+                    </div>
+                    <div class="deal-details">$320k ARV • Cancelled due to inspection issues</div>
+                    <div class="deal-insights">
+                        <div class="insight-item">
+                            <span class="insight-label">Contract Date:</span>
+                            <span class="insight-value">12/01/2024</span>
                         </div>
-                        <div class="deal-details">$480k ARV • 3 showings scheduled</div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Schedule</button>
-                            <button class="action-btn">Offers</button>
-                            <button class="action-btn">View</button>
+                        <div class="insight-item">
+                            <span class="insight-label">Days Under Contract:</span>
+                            <span class="insight-value">16 days</span>
                         </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Lead Source:</span>
+                            <span class="insight-value">Cold Calling</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Occupied:</span>
+                            <span class="insight-value">Yes</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Listing Price:</span>
+                            <span class="insight-value">$320k</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Acquisition Price:</span>
+                            <span class="insight-value">$240k</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Commission:</span>
+                            <span class="insight-value">$4k</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Profit:</span>
+                            <span class="insight-value profit-negative">-$24k</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Buyer:</span>
+                            <span class="insight-value">Michael Brown</span>
+                        </div>
+                        <div class="insight-item">
+                            <span class="insight-label">Cancellation Date:</span>
+                            <span class="insight-value urgent">12/17/2024</span>
+                        </div>
+                    </div>
+                    <div class="deal-actions">
+                        <button class="action-btn">Reason</button>
+                        <button class="action-btn">Analytics</button>
+                        <button class="action-btn">View</button>
                     </div>
                 </div>
             </div>
@@ -808,38 +1260,38 @@
                 <a href="#" class="btn">View All</a>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #10B981;">
-                    <i class="fas fa-bullhorn"></i>
+                <div class="activity-icon" style="background: #3B82F6;">
+                    <i class="fas fa-file-contract"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Marketing campaign launched for 123 Oak St</div>
+                    <div class="activity-text">New contract added: 123 Oak St, Austin</div>
                     <div class="activity-time">30 minutes ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #8B5CF6;">
-                    <i class="fas fa-users"></i>
+                <div class="activity-icon" style="background: #F59E0B;">
+                    <i class="fas fa-bullhorn"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">8 buyers matched for 456 Pine Ave property</div>
+                    <div class="activity-text">Marketing campaign launched for 456 Pine Ave</div>
                     <div class="activity-time">2 hours ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #F59E0B;">
-                    <i class="fas fa-calendar-alt"></i>
+                <div class="activity-icon" style="background: #10B981;">
+                    <i class="fas fa-handshake"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Showing scheduled for 789 Elm Dr</div>
+                    <div class="activity-text">Deal assigned to Buyer #1247 for 555 Oak Ave</div>
                     <div class="activity-time">4 hours ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #EF4444;">
-                    <i class="fas fa-file-signature"></i>
+                <div class="activity-icon" style="background: #059669;">
+                    <i class="fas fa-check-circle"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Closing documents prepared for 321 Maple Rd</div>
+                    <div class="activity-text">Deal closed: 111 Maple Dr, Richardson</div>
                     <div class="activity-time">1 day ago</div>
                 </div>
             </div>
