@@ -337,6 +337,144 @@
             flex: 1;
         }
 
+        /* Team Performance Styles */
+        .team-performance {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .team-section {
+            margin-bottom: 2rem;
+        }
+
+        .team-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .team-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #F1F5F9;
+        }
+
+        .user-performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .user-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: #CBD5E1;
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #0F172A;
+            font-size: 1rem;
+        }
+
+        .user-role {
+            color: #64748B;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .user-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .user-status.active {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .user-status.inactive {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .user-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .metric-label {
+            color: #64748B;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .metric-value {
+            color: #0F172A;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .metric-value.highlight {
+            color: #10B981;
+        }
+
+        .metric-value.warning {
+            color: #F59E0B;
+        }
+
+        .metric-value.danger {
+            color: #EF4444;
+        }
+
         .automation-name {
             font-weight: 500;
             color: #0F172A;
@@ -365,6 +503,20 @@
             
             .nav-links {
                 display: none;
+            }
+
+            .user-performance-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .user-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
             }
         }
     </style>
@@ -517,6 +669,204 @@
             </div>
         </div>
 
+        <!-- Team Performance Section -->
+        <div class="team-performance">
+            <div class="chart-header">
+                <h3 class="chart-title">Team Performance</h3>
+                <div class="chart-actions">
+                    <button class="btn">Today</button>
+                    <button class="btn btn-primary">This Week</button>
+                    <button class="btn">This Month</button>
+                </div>
+            </div>
+            
+            <!-- Acquisition Team -->
+            <div class="team-section">
+                <h4 class="team-title">🎯 Acquisition Team</h4>
+                <div class="user-performance-grid">
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">SJ</div>
+                            <div class="user-info">
+                                <div class="user-name">Sarah Johnson</div>
+                                <div class="user-role">Senior Acquisitions</div>
+                            </div>
+                            <div class="user-status active">Active</div>
+                        </div>
+                        <div class="user-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Calls Made</span>
+                                <span class="metric-value">47</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Offers Made</span>
+                                <span class="metric-value">12</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Contracts/Leads</span>
+                                <span class="metric-value">8/15</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Conversion Rate</span>
+                                <span class="metric-value highlight">53.3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">MR</div>
+                            <div class="user-info">
+                                <div class="user-name">Mike Rodriguez</div>
+                                <div class="user-role">Acquisitions Agent</div>
+                            </div>
+                            <div class="user-status active">Active</div>
+                        </div>
+                        <div class="user-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Calls Made</span>
+                                <span class="metric-value">38</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Offers Made</span>
+                                <span class="metric-value">9</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Contracts/Leads</span>
+                                <span class="metric-value">5/12</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Conversion Rate</span>
+                                <span class="metric-value highlight">41.7%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">AL</div>
+                            <div class="user-info">
+                                <div class="user-name">Alex Lee</div>
+                                <div class="user-role">Acquisitions Agent</div>
+                            </div>
+                            <div class="user-status active">Active</div>
+                        </div>
+                        <div class="user-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Calls Made</span>
+                                <span class="metric-value">42</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Offers Made</span>
+                                <span class="metric-value">11</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Contracts/Leads</span>
+                                <span class="metric-value">6/14</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Conversion Rate</span>
+                                <span class="metric-value highlight">42.9%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disposition Team -->
+            <div class="team-section">
+                <h4 class="team-title">🤝 Disposition Team</h4>
+                <div class="user-performance-grid">
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">DT</div>
+                            <div class="user-info">
+                                <div class="user-name">David Thompson</div>
+                                <div class="user-role">Senior Disposition</div>
+                            </div>
+                            <div class="user-status active">Active</div>
+                        </div>
+                        <div class="user-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Dials Made</span>
+                                <span class="metric-value">156</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">New Buyers Added</span>
+                                <span class="metric-value">23</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Deals Assigned</span>
+                                <span class="metric-value">8</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Avg Buyers/Deal</span>
+                                <span class="metric-value highlight">2.9</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">JL</div>
+                            <div class="user-info">
+                                <div class="user-name">Jennifer Lee</div>
+                                <div class="user-role">Disposition Agent</div>
+                            </div>
+                            <div class="user-status active">Active</div>
+                        </div>
+                        <div class="user-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Dials Made</span>
+                                <span class="metric-value">134</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">New Buyers Added</span>
+                                <span class="metric-value">18</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Deals Assigned</span>
+                                <span class="metric-value">6</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Avg Buyers/Deal</span>
+                                <span class="metric-value highlight">3.0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">CW</div>
+                            <div class="user-info">
+                                <div class="user-name">Chris Wilson</div>
+                                <div class="user-role">Disposition Agent</div>
+                            </div>
+                            <div class="user-status active">Active</div>
+                        </div>
+                        <div class="user-metrics">
+                            <div class="metric-item">
+                                <span class="metric-label">Dials Made</span>
+                                <span class="metric-value">142</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">New Buyers Added</span>
+                                <span class="metric-value">20</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Deals Assigned</span>
+                                <span class="metric-value">7</span>
+                            </div>
+                            <div class="metric-item">
+                                <span class="metric-label">Avg Buyers/Deal</span>
+                                <span class="metric-value highlight">2.9</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="automation-status">
             <div class="chart-header">
                 <h3 class="chart-title">Automation Status</h3>
@@ -572,7 +922,7 @@
 
         // Add smooth animations
         document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.kpi-card, .chart-card, .activity-feed, .automation-status');
+            const cards = document.querySelectorAll('.kpi-card, .chart-card, .activity-feed, .automation-status, .team-performance');
             
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
@@ -584,7 +934,59 @@
                     card.style.transform = 'translateY(0)';
                 }, index * 100);
             });
+
+            // Team performance time period buttons
+            const timeButtons = document.querySelectorAll('.team-performance .btn');
+            timeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove primary class from all buttons
+                    timeButtons.forEach(btn => btn.classList.remove('btn-primary'));
+                    // Add primary class to clicked button
+                    this.classList.add('btn-primary');
+                    
+                    // Simulate data update based on time period
+                    const period = this.textContent.trim();
+                    updateTeamMetrics(period);
+                });
+            });
+
+            // User card click functionality
+            const userCards = document.querySelectorAll('.user-card');
+            userCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const userName = this.querySelector('.user-name').textContent;
+                    alert(`Viewing detailed performance for ${userName}`);
+                });
+            });
         });
+
+        // Function to simulate updating team metrics based on time period
+        function updateTeamMetrics(period) {
+            const metricValues = document.querySelectorAll('.metric-value');
+            
+            // Simulate different values based on time period
+            let multiplier = 1;
+            if (period === 'Today') {
+                multiplier = 0.2;
+            } else if (period === 'This Week') {
+                multiplier = 1;
+            } else if (period === 'This Month') {
+                multiplier = 4;
+            }
+
+            metricValues.forEach(metric => {
+                const currentValue = metric.textContent;
+                if (currentValue.includes('%') || currentValue.includes('/')) {
+                    return; // Skip percentages and ratios
+                }
+                
+                const numericValue = parseInt(currentValue.replace(/[^\d]/g, ''));
+                if (!isNaN(numericValue)) {
+                    const newValue = Math.round(numericValue * multiplier);
+                    metric.textContent = currentValue.replace(/\d+/, newValue);
+                }
+            });
+        }
     </script>
 </body>
 </html> 
