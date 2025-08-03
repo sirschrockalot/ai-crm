@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acquisitions Dashboard - Presidential Digs CRM</title>
+    <title>Acquisitions Dashboard - DealCycle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,9 +32,112 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: #F9FAFB;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+            font-size: 0.875rem;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #F1F5F9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: #F8FAFC;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-lead-id {
+            font-weight: 600;
+            color: #3B82F6;
+            font-size: 0.75rem;
+        }
+
+        .result-lead-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-lead-details {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .no-results {
+            padding: 1rem;
+            text-align: center;
+            color: #64748B;
+            font-size: 0.875rem;
+        }
+
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 1.5rem;
             font-weight: 700;
+        }
+
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
             background: linear-gradient(135deg, #3B82F6, #1D4ED8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -71,7 +174,7 @@
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
         }
 
         .avatar {
@@ -468,25 +571,745 @@
             border-color: #059669;
         }
 
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Today's Priorities */
+        .today-priorities {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .priorities-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .priorities-header h3 {
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .date {
+            color: #64748B;
+            font-size: 0.875rem;
+        }
+
+        .priorities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .priority-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .priority-card.urgent {
+            background: #FEF3C7;
+            border-color: #F59E0B;
+        }
+
+        .priority-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .priority-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #3B82F6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .priority-card.urgent .priority-icon {
+            background: #F59E0B;
+        }
+
+        .priority-content {
+            flex: 1;
+        }
+
+        .priority-title {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .priority-count {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #3B82F6;
+            margin-bottom: 0.25rem;
+        }
+
+        .priority-card.urgent .priority-count {
+            color: #F59E0B;
+        }
+
+        .priority-time {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        /* Performance Section */
+        .performance-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .performance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .performance-header h3 {
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .performance-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+        }
+
+        .performance-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .performance-content {
+            flex: 1;
+        }
+
+        .performance-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .performance-label {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        /* Main Call Workflow - CENTRAL FOCUS */
+        .main-call-workflow {
+            background: linear-gradient(135deg, #EBF4FF, #DBEAFE);
+            border: 2px solid #3B82F6;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #0F172A;
+            box-shadow: 0 20px 25px rgba(59, 130, 246, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-call-workflow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .main-call-workflow .workflow-header {
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-call-workflow h2 {
+            color: #0F172A;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .main-call-workflow p {
+            color: #374151;
+            font-size: 1.2rem;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        .workflow-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-call {
+            background: #0F172A !important;
+            color: white !important;
+            border-color: #0F172A !important;
+            font-size: 1.3rem !important;
+            padding: 1.5rem 3rem !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-call:hover {
+            background: #1E293B !important;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .workflow-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #0F172A;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+        }
+
+        .stat-item i {
+            color: #3B82F6;
+        }
+
+        .stat-item strong {
+            color: #0F172A;
+        }
+
+        /* Status Updates */
+        .status-updates {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .status-header {
+            padding: 1.5rem 1.5rem 1rem 1.5rem;
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .status-updates h3 {
+            color: #0F172A;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-subtitle {
+            color: #64748B;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-total {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background: #F8FAFC;
+            border-radius: 8px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .total-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .total-count {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #3B82F6;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+
+        .status-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #3B82F6;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-label {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-count {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0F172A;
+        }
+
+        /* Callback Calendar Styles */
+        .callback-calendar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            background: #F8FAFC;
+            padding: 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+            color: #0F172A;
+            font-size: 1.25rem;
+        }
+
+        .calendar-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .calendar-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #D1D5DB;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            background: #F3F4F6;
+        }
+
+        .filter-btn.active {
+            background: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+
+        .calendar-alerts {
+            padding: 1rem 1.5rem;
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-warning {
+            background: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #F59E0B;
+        }
+
+        .alert-warning i {
+            color: #F59E0B;
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0;
+            min-height: 400px;
+        }
+
+        .calendar-view {
+            padding: 1.5rem;
+            border-right: 1px solid #E2E8F0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #E2E8F0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .calendar-day-header {
+            background: #F8FAFC;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day {
+            background: white;
+            padding: 0.75rem;
+            min-height: 80px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .calendar-day:hover {
+            background: #F8FAFC;
+        }
+
+        .calendar-day.today {
+            background: #DBEAFE;
+            border: 2px solid #3B82F6;
+        }
+
+        .calendar-day.has-callbacks {
+            background: #FEF3C7;
+        }
+
+        .calendar-day.missed-callbacks {
+            background: #FEE2E2;
+        }
+
+        .day-number {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-callbacks {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .callback-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3B82F6;
+            margin-top: 0.25rem;
+        }
+
+        .callback-indicator.missed {
+            background: #EF4444;
+        }
+
+        .callback-list {
+            padding: 1.5rem;
+            background: #F8FAFC;
+        }
+
+        .callback-list h4 {
+            margin: 0 0 1rem 0;
+            color: #0F172A;
+            font-size: 1.1rem;
+        }
+
+        .callback-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .callback-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #3B82F6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .callback-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .callback-item.missed {
+            border-left-color: #EF4444;
+            background: #FEF2F2;
+        }
+
+        .callback-item.urgent {
+            border-left-color: #F59E0B;
+            background: #FFFBEB;
+        }
+
+        .callback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .callback-name {
+            font-weight: 600;
+            color: #0F172A;
+        }
+
+        .callback-time {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .callback-details {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-bottom: 0.5rem;
+        }
+
+        .callback-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .callback-btn {
+            padding: 0.25rem 0.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .callback-btn.call {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .callback-btn.call:hover {
+            background: #2563EB;
+        }
+
+        .callback-btn.reschedule {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .callback-btn.reschedule:hover {
+            background: #E5E7EB;
+        }
+
         @media (max-width: 768px) {
-            .workflow-grid {
+            .priorities-grid {
                 grid-template-columns: 1fr;
             }
             
-            .kpi-grid {
-                grid-template-columns: 1fr;
+            .performance-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            .action-grid {
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .workflow-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .main-call-workflow h2 {
+                font-size: 2rem;
+                color: #0F172A;
+            }
+
+            .main-call-workflow p {
+                font-size: 1rem;
+                color: #374151;
+            }
+
+            .btn-call {
+                font-size: 1.1rem !important;
+                padding: 1.25rem 2rem !important;
+                background: #0F172A !important;
+                color: white !important;
+            }
+
+            .stat-item {
+                background: rgba(255, 255, 255, 0.95) !important;
+                color: #0F172A !important;
+            }
+
+            .calendar-container {
                 grid-template-columns: 1fr;
+            }
+
+            .calendar-view {
+                border-right: none;
+                border-bottom: 1px solid #E2E8F0;
+            }
+
+            .calendar-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .calendar-controls {
+                justify-content: space-between;
+            }
+
+            .calendar-filters {
+                flex-wrap: wrap;
+            }
+
+            .navbar {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .search-container {
+                order: 3;
+                max-width: 100%;
+                margin: 0;
+                width: 100%;
+            }
+
+            .nav-links {
+                order: 2;
+            }
+
+            .user-menu {
+                order: 1;
+            }
+
+            .status-header {
+                padding: 1rem;
+            }
+
+            .status-total {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+
+            .status-grid {
+                padding: 1rem;
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">Presidential Digs CRM</div>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <!-- Blue arrow (top) -->
+                    <path d="M8 12 Q16 8 24 12 L20 16 Q16 12 12 16 L8 12" stroke="#3B82F6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Green arrow (bottom) -->
+                    <path d="M24 20 Q16 24 8 20 L12 16 Q16 20 20 16 L24 20" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="logo-text">DealCycle</span>
+        </div>
         <div class="role-badge">Acquisitions Team</div>
+        
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="leadSearch" placeholder="Search leads by ID, name, phone, or address..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        
         <div class="nav-links">
             <a href="#" class="nav-link active">Dashboard</a>
             <a href="#" class="nav-link">Lead Queue</a>
@@ -494,7 +1317,6 @@
             <a href="#" class="nav-link">Reports</a>
         </div>
         <div class="user-menu">
-            <span>Sarah Johnson</span>
             <div class="avatar">SJ</div>
         </div>
     </nav>
@@ -505,197 +1327,199 @@
                 <i class="fas fa-bullseye"></i>
                 Acquisitions Dashboard
             </h1>
-            <p class="page-subtitle">Focus on acquiring new leads and converting them to contracts</p>
+            <p class="page-subtitle">Ready to make calls and close deals today?</p>
         </div>
 
-        <div class="acquisition-focus">
-            <div class="focus-title">🎯 Your Focus Area</div>
-            <div class="focus-description">
-                You work with <strong>new leads</strong> and <strong>leads not yet under contract</strong>. 
-                Your goal is to nurture relationships and convert leads to signed purchase contracts.
+        <!-- Today's Priorities -->
+        <div class="today-priorities">
+            <div class="priorities-header">
+                <h3>📅 Today's Priorities</h3>
+                <span class="date">December 18, 2024</span>
             </div>
-        </div>
-
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">New Leads Today</span>
-                    <div class="kpi-icon" style="background: #3B82F6;">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">24</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +12% from yesterday
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Active Negotiations</span>
-                    <div class="kpi-icon" style="background: #8B5CF6;">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">18</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +3 this week
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Conversion Rate</span>
-                    <div class="kpi-icon" style="background: #10B981;">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">34%</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +5% this month
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Avg Response Time</span>
-                    <div class="kpi-icon" style="background: #F59E0B;">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">2.3h</div>
-                <div class="kpi-change negative">
-                    <i class="fas fa-arrow-down"></i>
-                    -0.5h improvement
-                </div>
-            </div>
-        </div>
-
-        <div class="workflow-grid">
-            <div class="workflow-section">
-                <div class="workflow-header">
-                    <span class="workflow-title">New Lead Queue</span>
-                    <span class="workflow-count">12</span>
-                </div>
-                <div class="workflow-list">
-                    <div class="workflow-item">
-                        <div class="lead-info">
-                            <span class="lead-name">John Smith</span>
-                            <span class="lead-status status-new">New</span>
-                        </div>
-                        <div class="lead-details">123 Oak St, Austin, TX • $450k ARV</div>
-                        <div class="lead-actions">
-                            <button class="action-btn">Call</button>
-                            <button class="action-btn">Text</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="lead-info">
-                            <span class="lead-name">Maria Garcia</span>
-                            <span class="lead-status status-new">New</span>
-                        </div>
-                        <div class="lead-details">456 Pine Ave, Dallas, TX • $380k ARV</div>
-                        <div class="lead-actions">
-                            <button class="action-btn">Call</button>
-                            <button class="action-btn">Text</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="lead-info">
-                            <span class="lead-name">Robert Wilson</span>
-                            <span class="lead-status status-new">New</span>
-                        </div>
-                        <div class="lead-details">789 Elm Dr, Houston, TX • $520k ARV</div>
-                        <div class="lead-actions">
-                            <button class="action-btn">Call</button>
-                            <button class="action-btn">Text</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="workflow-section">
-                <div class="workflow-header">
-                    <span class="workflow-title">Active Negotiations</span>
-                    <span class="workflow-count">8</span>
-                </div>
-                <div class="workflow-list">
-                    <div class="workflow-item">
-                        <div class="lead-info">
-                            <span class="lead-name">Lisa Chen</span>
-                            <span class="lead-status status-negotiating">Negotiating</span>
-                        </div>
-                        <div class="lead-details">321 Maple Rd, San Antonio, TX • $410k ARV</div>
-                        <div class="lead-actions">
-                            <button class="action-btn">Call</button>
-                            <button class="action-btn">Contract</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="lead-info">
-                            <span class="lead-name">David Brown</span>
-                            <span class="lead-status status-contacting">Contacting</span>
-                        </div>
-                        <div class="lead-details">654 Cedar Ln, Fort Worth, TX • $360k ARV</div>
-                        <div class="lead-actions">
-                            <button class="action-btn">Call</button>
-                            <button class="action-btn">Text</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="lead-info">
-                            <span class="lead-name">Jennifer Lee</span>
-                            <span class="lead-status status-negotiating">Negotiating</span>
-                        </div>
-                        <div class="lead-details">987 Birch St, Arlington, TX • $480k ARV</div>
-                        <div class="lead-actions">
-                            <button class="action-btn">Call</button>
-                            <button class="action-btn">Contract</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="quick-actions">
-            <h3>Quick Actions</h3>
-            <div class="action-grid">
-                <div class="action-card">
-                    <div class="action-icon" style="background: #3B82F6;">
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="action-title">Add New Lead</div>
-                    <div class="action-description">Manually enter lead information</div>
-                </div>
-                <div class="action-card">
-                    <div class="action-icon" style="background: #10B981;">
+            <div class="priorities-grid">
+                <div class="priority-card urgent">
+                    <div class="priority-icon">
                         <i class="fas fa-phone"></i>
                     </div>
-                    <div class="action-title">Call Campaign</div>
-                    <div class="action-description">Batch call multiple leads</div>
+                    <div class="priority-content">
+                        <div class="priority-title">Scheduled Callbacks</div>
+                        <div class="priority-count">5 calls</div>
+                        <div class="priority-time">Next: John Smith at 10:30 AM</div>
+                    </div>
                 </div>
-                <div class="action-card">
-                    <div class="action-icon" style="background: #8B5CF6;">
+                <div class="priority-card">
+                    <div class="priority-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="priority-content">
+                        <div class="priority-title">Follow-up Leads</div>
+                        <div class="priority-count">12 leads</div>
+                        <div class="priority-time">Last contacted 2+ days ago</div>
+                    </div>
+                </div>
+                <div class="priority-card">
+                    <div class="priority-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="priority-content">
+                        <div class="priority-title">New Leads</div>
+                        <div class="priority-count">8 leads</div>
+                        <div class="priority-time">Added in last 24 hours</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Call Workflow - CENTRAL FOCUS -->
+        <div class="main-call-workflow">
+            <div class="workflow-header">
+                <h2>🎯 Start Making Calls</h2>
+                <p>Click the button below to get your next lead and begin calling</p>
+            </div>
+            <div class="workflow-actions">
+                <button class="btn btn-primary btn-large btn-call" id="getNextLead">
+                    <i class="fas fa-phone"></i>
+                    Get Next Lead
+                </button>
+                <div class="workflow-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <span><strong>12</strong> leads in your queue</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Avg call time: <strong>4.2 minutes</strong></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-bullseye"></i>
+                        <span>Today's goal: <strong>25 calls</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Callback Calendar View -->
+        <div class="callback-calendar">
+            <div class="calendar-header">
+                <h3>📅 Callback Calendar</h3>
+                <div class="calendar-controls">
+                    <div class="calendar-filters">
+                        <button class="filter-btn active" data-filter="day">Today</button>
+                        <button class="filter-btn" data-filter="week">This Week</button>
+                        <button class="filter-btn" data-filter="month">This Month</button>
+                    </div>
+                    <button class="btn btn-secondary" id="addCallback">
+                        <i class="fas fa-plus"></i>
+                        Add Callback
+                    </button>
+                </div>
+            </div>
+            
+            <div class="calendar-alerts">
+                <div class="alert alert-warning" id="missedCallbacks" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="missedCount">0</span> missed callbacks need attention
+                </div>
+            </div>
+
+            <div class="calendar-container">
+                <div class="calendar-view" id="calendarView">
+                    <!-- Calendar will be populated by JavaScript -->
+                </div>
+                
+                <div class="callback-list">
+                    <h4>Upcoming Callbacks</h4>
+                    <div class="callback-items" id="callbackItems">
+                        <!-- Callback items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Status Updates - Simplified -->
+        <div class="status-updates">
+            <div class="status-header">
+                <h3>📝 Quick Status Updates</h3>
+                <p class="status-subtitle">After each call, quickly update the lead status</p>
+                <div class="status-total">
+                    <span class="total-label">Total Active Leads:</span>
+                    <span class="total-count" id="totalLeads">28</span>
+                </div>
+            </div>
+            <div class="status-grid">
+                <div class="status-card" data-status="callback">
+                    <div class="status-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="status-label">Call Back</div>
+                    <div class="status-count">12</div>
+                </div>
+                <div class="status-card" data-status="offer">
+                    <div class="status-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="status-label">Offer Made</div>
+                    <div class="status-count">8</div>
+                </div>
+                <div class="status-card" data-status="negotiating">
+                    <div class="status-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="status-label">Negotiating Offer</div>
+                    <div class="status-count">5</div>
+                </div>
+                <div class="status-card" data-status="contract">
+                    <div class="status-icon">
                         <i class="fas fa-file-contract"></i>
                     </div>
-                    <div class="action-title">Create Contract</div>
-                    <div class="action-description">Generate purchase agreement</div>
+                    <div class="status-label">Contract Out</div>
+                    <div class="status-count">3</div>
                 </div>
-                <div class="action-card">
-                    <div class="action-icon" style="background: #F59E0B;">
-                        <i class="fas fa-chart-bar"></i>
+            </div>
+        </div>
+
+        <!-- Your Performance - Simplified -->
+        <div class="performance-section">
+            <div class="performance-header">
+                <h3>📊 Today's Progress</h3>
+                <button class="btn btn-primary">View Full Report</button>
+            </div>
+            <div class="performance-grid">
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #3B82F6;">
+                        <i class="fas fa-phone"></i>
                     </div>
-                    <div class="action-title">Performance Report</div>
-                    <div class="action-description">View your conversion metrics</div>
+                    <div class="performance-content">
+                        <div class="performance-value">23</div>
+                        <div class="performance-label">Calls Made</div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #10B981;">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">7</div>
+                        <div class="performance-label">Offers Made</div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #8B5CF6;">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">3</div>
+                        <div class="performance-label">Contracts</div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #F59E0B;">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">42.9%</div>
+                        <div class="performance-label">Conversion Rate</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -719,25 +1543,25 @@
                     <i class="fas fa-file-contract"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Contract sent to Lisa Chen for 321 Maple Rd</div>
+                    <div class="activity-text">Contract sent to Mary Johnson for 456 Pine Ave</div>
                     <div class="activity-time">15 minutes ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #3B82F6;">
-                    <i class="fas fa-comment"></i>
+                <div class="activity-icon" style="background: #F59E0B;">
+                    <i class="fas fa-handshake"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Text message sent to Maria Garcia</div>
+                    <div class="activity-text">Made offer to Robert Davis for 789 Elm St</div>
                     <div class="activity-time">1 hour ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #F59E0B;">
-                    <i class="fas fa-user-plus"></i>
+                <div class="activity-icon" style="background: #3B82F6;">
+                    <i class="fas fa-phone"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">New lead added: Robert Wilson</div>
+                    <div class="activity-text">Scheduled callback with Lisa Wilson for tomorrow</div>
                     <div class="activity-time">2 hours ago</div>
                 </div>
             </div>
@@ -745,35 +1569,848 @@
     </div>
 
     <script>
-        // Interactive functionality
+        // Enhanced Acquisition Workflow
         document.addEventListener('DOMContentLoaded', function() {
-            // Make workflow items clickable
-            const workflowItems = document.querySelectorAll('.workflow-item');
-            workflowItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Navigate to lead detail view
-                    console.log('Navigate to lead detail');
-                });
+            let currentLead = null;
+            let callCount = 23; // Starting call count
+
+            // Get Next Lead Button - Main Workflow
+            const getNextLeadBtn = document.getElementById('getNextLead');
+            getNextLeadBtn.addEventListener('click', function() {
+                // Simulate getting next lead
+                currentLead = getNextLead();
+                if (currentLead) {
+                    openLeadDetailView(currentLead);
+                    updateCallCount();
+                } else {
+                    showNotification('No more leads in queue!', 'info');
+                }
             });
 
-            // Make action cards clickable
-            const actionCards = document.querySelectorAll('.action-card');
-            actionCards.forEach(card => {
+            // Status Update Cards - Quick Status Changes
+            const statusCards = document.querySelectorAll('.status-card');
+            statusCards.forEach(card => {
                 card.addEventListener('click', function() {
-                    const title = this.querySelector('.action-title').textContent;
-                    console.log('Action clicked:', title);
+                    if (currentLead) {
+                        const status = this.dataset.status;
+                        updateLeadStatus(currentLead, status);
+                        this.classList.add('status-updated');
+                        setTimeout(() => {
+                            this.classList.remove('status-updated');
+                        }, 1000);
+                    } else {
+                        showNotification('Get a lead first by clicking "Get Next Lead"', 'warning');
+                    }
                 });
             });
 
-            // Make action buttons functional
-            const actionBtns = document.querySelectorAll('.action-btn');
-            actionBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const action = this.textContent;
-                    console.log('Action button clicked:', action);
+            // Priority Cards - Quick Access
+            const priorityCards = document.querySelectorAll('.priority-card');
+            priorityCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const title = this.querySelector('.priority-title').textContent;
+                    if (title.includes('Scheduled Callbacks')) {
+                        showScheduledCallbacks();
+                    } else if (title.includes('Follow-up')) {
+                        showFollowUpLeads();
+                    } else if (title.includes('New Leads')) {
+                        showNewLeads();
+                    }
                 });
             });
+
+            // Performance Cards - Click to View Details
+            const performanceCards = document.querySelectorAll('.performance-card');
+            performanceCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const label = this.querySelector('.performance-label').textContent;
+                    showPerformanceDetails(label);
+                });
+            });
+
+            // Functions
+            function getNextLead() {
+                const leads = [
+                    {
+                        id: 1,
+                        name: 'John Smith',
+                        address: '123 Oak Street, City, State',
+                        phone: '(555) 123-4567',
+                        email: 'john@email.com',
+                        source: 'Web Form',
+                        priority: 'High',
+                        status: 'New',
+                        notes: 'Interested in selling due to relocation'
+                    },
+                    {
+                        id: 2,
+                        name: 'Sarah Wilson',
+                        address: '456 Pine Avenue, City, State',
+                        phone: '(555) 987-6543',
+                        email: 'sarah@email.com',
+                        source: 'Phone Call',
+                        priority: 'Medium',
+                        status: 'New',
+                        notes: 'Property needs repairs, motivated seller'
+                    },
+                    {
+                        id: 3,
+                        name: 'Robert Davis',
+                        address: '789 Elm Street, City, State',
+                        phone: '(555) 456-7890',
+                        email: 'robert@email.com',
+                        source: 'Referral',
+                        priority: 'High',
+                        status: 'New',
+                        notes: 'Inherited property, wants quick sale'
+                    }
+                ];
+
+                // Return next available lead
+                return leads[Math.floor(Math.random() * leads.length)];
+            }
+
+            function openLeadDetailView(lead) {
+                // In a real app, this would open the lead detail view
+                // For now, show a modal with lead information
+                showLeadModal(lead);
+            }
+
+            function updateLeadStatus(lead, status) {
+                // Update the lead status
+                lead.status = status;
+                
+                // Update the status count in the UI
+                const statusCard = document.querySelector(`[data-status="${status}"]`);
+                if (statusCard) {
+                    const countElement = statusCard.querySelector('.status-count');
+                    const currentCount = parseInt(countElement.textContent);
+                    countElement.textContent = currentCount + 1;
+                }
+
+                // Update total count
+                updateTotalLeads();
+                
+                // Add to recent activity
+                addToRecentActivity(lead, status);
+                
+                showNotification(`Updated ${lead.name} status to ${status}`, 'success');
+            }
+
+            function updateTotalLeads() {
+                const statusCards = document.querySelectorAll('.status-card');
+                let total = 0;
+                
+                statusCards.forEach(card => {
+                    const countElement = card.querySelector('.status-count');
+                    if (countElement) {
+                        total += parseInt(countElement.textContent);
+                    }
+                });
+                
+                const totalElement = document.getElementById('totalLeads');
+                if (totalElement) {
+                    totalElement.textContent = total;
+                }
+            }
+
+            function updateCallCount() {
+                callCount++;
+                const callCountElement = document.querySelector('.performance-card .performance-value');
+                if (callCountElement) {
+                    callCountElement.textContent = callCount;
+                }
+            }
+
+            function showLeadModal(lead) {
+                const modal = document.createElement('div');
+                modal.className = 'lead-modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>📞 Call Lead: ${lead.name}</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="lead-info">
+                                <p><strong>Address:</strong> ${lead.address}</p>
+                                <p><strong>Phone:</strong> ${lead.phone}</p>
+                                <p><strong>Email:</strong> ${lead.email}</p>
+                                <p><strong>Source:</strong> ${lead.source}</p>
+                                <p><strong>Priority:</strong> ${lead.priority}</p>
+                                <p><strong>Notes:</strong> ${lead.notes}</p>
+                            </div>
+                            <div class="call-actions">
+                                <button class="btn btn-primary" onclick="makeCall('${lead.phone}')">
+                                    <i class="fas fa-phone"></i> Call Now
+                                </button>
+                                <button class="btn" onclick="scheduleCallback('${lead.id}')">
+                                    <i class="fas fa-clock"></i> Schedule Callback
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Add modal styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    .lead-modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 1000;
+                    }
+                    .modal-content {
+                        background: white;
+                        border-radius: 12px;
+                        padding: 2rem;
+                        max-width: 500px;
+                        width: 90%;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                    }
+                    .modal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 1.5rem;
+                    }
+                    .modal-close {
+                        background: none;
+                        border: none;
+                        font-size: 1.5rem;
+                        cursor: pointer;
+                        color: #64748B;
+                    }
+                    .lead-info p {
+                        margin-bottom: 0.75rem;
+                        color: #374151;
+                    }
+                    .call-actions {
+                        display: flex;
+                        gap: 1rem;
+                        margin-top: 1.5rem;
+                    }
+                `;
+                document.head.appendChild(style);
+
+                document.body.appendChild(modal);
+
+                // Close modal functionality
+                modal.querySelector('.modal-close').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+            }
+
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                
+                // Add notification styles
+                const style = document.createElement('style');
+                style.textContent = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        padding: 1rem 1.5rem;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: 500;
+                        z-index: 1001;
+                        animation: slideIn 0.3s ease;
+                    }
+                    .notification-success { background: #10B981; }
+                    .notification-warning { background: #F59E0B; }
+                    .notification-info { background: #3B82F6; }
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            function addToRecentActivity(lead, status) {
+                const activityContainer = document.querySelector('.recent-activity');
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                
+                const statusIcons = {
+                    'callback': 'fas fa-phone',
+                    'offer': 'fas fa-dollar-sign',
+                    'negotiating': 'fas fa-handshake',
+                    'contract': 'fas fa-file-contract'
+                };
+
+                const statusColors = {
+                    'callback': '#3B82F6',
+                    'offer': '#10B981',
+                    'negotiating': '#F59E0B',
+                    'contract': '#8B5CF6'
+                };
+
+                const statusLabels = {
+                    'callback': 'Call Back',
+                    'offer': 'Offer Made',
+                    'negotiating': 'Negotiating Offer',
+                    'contract': 'Contract Out'
+                };
+
+                activityItem.innerHTML = `
+                    <div class="activity-icon" style="background: ${statusColors[status] || '#3B82F6'};">
+                        <i class="${statusIcons[status] || 'fas fa-phone'}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">Updated ${lead.name} status to ${statusLabels[status] || status}</div>
+                        <div class="activity-time">Just now</div>
+                    </div>
+                `;
+
+                // Insert at the top
+                const firstItem = activityContainer.querySelector('.activity-item');
+                activityContainer.insertBefore(activityItem, firstItem);
+
+                // Remove oldest item if more than 4
+                const items = activityContainer.querySelectorAll('.activity-item');
+                if (items.length > 4) {
+                    activityContainer.removeChild(items[items.length - 1]);
+                }
+            }
+
+            // Placeholder functions for other features
+            function showScheduledCallbacks() {
+                showNotification('Opening scheduled callbacks...', 'info');
+            }
+
+            function showFollowUpLeads() {
+                showNotification('Opening follow-up leads...', 'info');
+            }
+
+            function showNewLeads() {
+                showNotification('Opening new leads...', 'info');
+            }
+
+            function showPerformanceDetails(metric) {
+                showNotification(`Opening detailed ${metric} report...`, 'info');
+            }
+
+            // Global functions for modal actions
+            window.makeCall = function(phone) {
+                showNotification(`Calling ${phone}...`, 'success');
+                // In a real app, this would integrate with phone system
+            };
+
+            window.scheduleCallback = function(leadId) {
+                showNotification('Scheduling callback...', 'info');
+                // In a real app, this would open calendar/scheduling
+            };
+
+            // Add status update animation
+            const style = document.createElement('style');
+            style.textContent = `
+                .status-updated {
+                    animation: statusPulse 0.5s ease;
+                }
+                @keyframes statusPulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // Calendar Functionality
+            let currentFilter = 'day';
+            let callbacks = [
+                {
+                    id: 1,
+                    leadName: 'John Smith',
+                    phone: '(555) 123-4567',
+                    scheduledTime: '2024-12-18T10:30:00',
+                    status: 'scheduled',
+                    notes: 'Interested in selling due to relocation'
+                },
+                {
+                    id: 2,
+                    leadName: 'Sarah Wilson',
+                    phone: '(555) 987-6543',
+                    scheduledTime: '2024-12-18T14:00:00',
+                    status: 'scheduled',
+                    notes: 'Property needs repairs, motivated seller'
+                },
+                {
+                    id: 3,
+                    leadName: 'Robert Davis',
+                    phone: '(555) 456-7890',
+                    scheduledTime: '2024-12-17T09:00:00',
+                    status: 'missed',
+                    notes: 'Inherited property, wants quick sale'
+                },
+                {
+                    id: 4,
+                    leadName: 'Maria Garcia',
+                    phone: '(555) 321-6540',
+                    scheduledTime: '2024-12-19T11:00:00',
+                    status: 'scheduled',
+                    notes: 'Divorce sale, needs quick closing'
+                },
+                {
+                    id: 5,
+                    leadName: 'David Chen',
+                    phone: '(555) 789-0123',
+                    scheduledTime: '2024-12-16T15:30:00',
+                    status: 'missed',
+                    notes: 'Job transfer, selling family home'
+                }
+            ];
+
+            // Initialize calendar
+            function initCalendar() {
+                renderCalendar();
+                renderCallbackList();
+                checkMissedCallbacks();
+            }
+
+            function renderCalendar() {
+                const calendarView = document.getElementById('calendarView');
+                const today = new Date();
+                const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                
+                let calendarHTML = '<div class="calendar-grid">';
+                
+                // Add day headers
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                days.forEach(day => {
+                    calendarHTML += `<div class="calendar-day-header">${day}</div>`;
+                });
+
+                // Add empty cells for days before month starts
+                const firstDayOfWeek = currentMonth.getDay();
+                for (let i = 0; i < firstDayOfWeek; i++) {
+                    calendarHTML += '<div class="calendar-day empty"></div>';
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= lastDay.getDate(); day++) {
+                    const date = new Date(today.getFullYear(), today.getMonth(), day);
+                    const dayCallbacks = getCallbacksForDate(date);
+                    const isToday = day === today.getDate();
+                    const hasCallbacks = dayCallbacks.length > 0;
+                    const hasMissedCallbacks = dayCallbacks.some(cb => cb.status === 'missed');
+                    
+                    let dayClass = 'calendar-day';
+                    if (isToday) dayClass += ' today';
+                    if (hasCallbacks) dayClass += ' has-callbacks';
+                    if (hasMissedCallbacks) dayClass += ' missed-callbacks';
+
+                    calendarHTML += `
+                        <div class="${dayClass}" data-date="${date.toISOString().split('T')[0]}">
+                            <div class="day-number">${day}</div>
+                            ${hasCallbacks ? `<div class="day-callbacks">${dayCallbacks.length} callback${dayCallbacks.length > 1 ? 's' : ''}</div>` : ''}
+                            ${hasCallbacks ? `<div class="callback-indicator ${hasMissedCallbacks ? 'missed' : ''}"></div>` : ''}
+                        </div>
+                    `;
+                }
+
+                calendarHTML += '</div>';
+                calendarView.innerHTML = calendarHTML;
+
+                // Add click handlers for calendar days
+                const calendarDays = document.querySelectorAll('.calendar-day:not(.empty)');
+                calendarDays.forEach(day => {
+                    day.addEventListener('click', function() {
+                        const date = this.getAttribute('data-date');
+                        showDayCallbacks(date);
+                    });
+                });
+            }
+
+            function getCallbacksForDate(date) {
+                const dateStr = date.toISOString().split('T')[0];
+                return callbacks.filter(callback => {
+                    const callbackDate = callback.scheduledTime.split('T')[0];
+                    return callbackDate === dateStr;
+                });
+            }
+
+            function renderCallbackList() {
+                const callbackItems = document.getElementById('callbackItems');
+                const filteredCallbacks = getFilteredCallbacks();
+                
+                if (filteredCallbacks.length === 0) {
+                    callbackItems.innerHTML = '<p style="color: #64748B; text-align: center; padding: 2rem;">No callbacks for this period</p>';
+                    return;
+                }
+
+                const callbackHTML = filteredCallbacks.map(callback => {
+                    const scheduledDate = new Date(callback.scheduledTime);
+                    const isMissed = callback.status === 'missed';
+                    const isUrgent = isMissed || (scheduledDate < new Date() && callback.status === 'scheduled');
+                    
+                    let itemClass = 'callback-item';
+                    if (isMissed) itemClass += ' missed';
+                    if (isUrgent) itemClass += ' urgent';
+
+                    return `
+                        <div class="${itemClass}" data-callback-id="${callback.id}">
+                            <div class="callback-header">
+                                <div class="callback-name">${callback.leadName}</div>
+                                <div class="callback-time">${formatTime(scheduledDate)}</div>
+                            </div>
+                            <div class="callback-details">${callback.notes}</div>
+                            <div class="callback-actions">
+                                <button class="callback-btn call" onclick="makeCallbackCall('${callback.phone}')">
+                                    <i class="fas fa-phone"></i> Call
+                                </button>
+                                <button class="callback-btn reschedule" onclick="rescheduleCallback(${callback.id})">
+                                    <i class="fas fa-clock"></i> Reschedule
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                callbackItems.innerHTML = callbackHTML;
+            }
+
+            function getFilteredCallbacks() {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                
+                switch (currentFilter) {
+                    case 'day':
+                        return callbacks.filter(callback => {
+                            const callbackDate = new Date(callback.scheduledTime);
+                            return callbackDate.toDateString() === today.toDateString();
+                        });
+                    case 'week':
+                        const weekStart = new Date(today);
+                        weekStart.setDate(today.getDate() - today.getDay());
+                        const weekEnd = new Date(weekStart);
+                        weekEnd.setDate(weekStart.getDate() + 6);
+                        
+                        return callbacks.filter(callback => {
+                            const callbackDate = new Date(callback.scheduledTime);
+                            return callbackDate >= weekStart && callbackDate <= weekEnd;
+                        });
+                    case 'month':
+                        return callbacks.filter(callback => {
+                            const callbackDate = new Date(callback.scheduledTime);
+                            return callbackDate.getMonth() === today.getMonth() && 
+                                   callbackDate.getFullYear() === today.getFullYear();
+                        });
+                    default:
+                        return callbacks;
+                }
+            }
+
+            function checkMissedCallbacks() {
+                const now = new Date();
+                const missedCallbacks = callbacks.filter(callback => {
+                    const callbackDate = new Date(callback.scheduledTime);
+                    return callbackDate < now && callback.status === 'scheduled';
+                });
+
+                if (missedCallbacks.length > 0) {
+                    // Update missed callbacks to missed status
+                    missedCallbacks.forEach(callback => {
+                        callback.status = 'missed';
+                    });
+                    
+                    const missedAlert = document.getElementById('missedCallbacks');
+                    const missedCount = document.getElementById('missedCount');
+                    missedCount.textContent = missedCallbacks.length;
+                    missedAlert.style.display = 'flex';
+                    
+                    showNotification(`${missedCallbacks.length} callback(s) were missed and need attention`, 'warning');
+                }
+            }
+
+            function formatTime(date) {
+                return date.toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit',
+                    hour12: true 
+                });
+            }
+
+            function showDayCallbacks(date) {
+                const dayCallbacks = getCallbacksForDate(new Date(date));
+                if (dayCallbacks.length > 0) {
+                    showNotification(`${dayCallbacks.length} callback(s) scheduled for ${new Date(date).toLocaleDateString()}`, 'info');
+                } else {
+                    showNotification('No callbacks scheduled for this date', 'info');
+                }
+            }
+
+            // Calendar filter buttons
+            document.addEventListener('DOMContentLoaded', function() {
+                const filterButtons = document.querySelectorAll('.filter-btn');
+                filterButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        // Remove active class from all buttons
+                        filterButtons.forEach(btn => btn.classList.remove('active'));
+                        // Add active class to clicked button
+                        this.classList.add('active');
+                        
+                        currentFilter = this.getAttribute('data-filter');
+                        renderCallbackList();
+                    });
+                });
+
+                // Add callback button
+                const addCallbackBtn = document.getElementById('addCallback');
+                if (addCallbackBtn) {
+                    addCallbackBtn.addEventListener('click', function() {
+                        showNotification('Opening callback scheduler...', 'info');
+                    });
+                }
+
+                // Initialize calendar
+                initCalendar();
+            });
+
+            // Global functions for callback actions
+            window.makeCallbackCall = function(phone) {
+                showNotification(`Calling ${phone}...`, 'success');
+                // In a real app, this would integrate with phone system
+            };
+
+            window.rescheduleCallback = function(callbackId) {
+                showNotification('Opening reschedule dialog...', 'info');
+                // In a real app, this would open calendar/scheduling
+            };
+
+            // Lead Search Functionality
+            let allLeads = [
+                {
+                    id: 'LD-001',
+                    name: 'John Smith',
+                    phone: '(555) 123-4567',
+                    address: '123 Oak Street, City, State 12345',
+                    status: 'New',
+                    source: 'Web Form',
+                    priority: 'High'
+                },
+                {
+                    id: 'LD-002',
+                    name: 'Sarah Wilson',
+                    phone: '(555) 987-6543',
+                    address: '456 Pine Avenue, City, State 12345',
+                    status: 'Contacting',
+                    source: 'Phone Call',
+                    priority: 'Medium'
+                },
+                {
+                    id: 'LD-003',
+                    name: 'Robert Davis',
+                    phone: '(555) 456-7890',
+                    address: '789 Elm Street, City, State 12345',
+                    status: 'Negotiating',
+                    source: 'Referral',
+                    priority: 'High'
+                },
+                {
+                    id: 'LD-004',
+                    name: 'Maria Garcia',
+                    phone: '(555) 321-6540',
+                    address: '321 Maple Drive, City, State 12345',
+                    status: 'Contract',
+                    source: 'Direct Mail',
+                    priority: 'Medium'
+                },
+                {
+                    id: 'LD-005',
+                    name: 'David Chen',
+                    phone: '(555) 789-0123',
+                    address: '654 Birch Lane, City, State 12345',
+                    status: 'New',
+                    source: 'Social Media',
+                    priority: 'Low'
+                },
+                {
+                    id: 'LD-006',
+                    name: 'Lisa Johnson',
+                    phone: '(555) 234-5678',
+                    address: '987 Cedar Road, City, State 12345',
+                    status: 'Contacting',
+                    source: 'Referral',
+                    priority: 'High'
+                },
+                {
+                    id: 'LD-007',
+                    name: 'Michael Brown',
+                    phone: '(555) 876-5432',
+                    address: '147 Spruce Court, City, State 12345',
+                    status: 'New',
+                    source: 'Web Form',
+                    priority: 'Medium'
+                },
+                {
+                    id: 'LD-008',
+                    name: 'Jennifer Lee',
+                    phone: '(555) 345-6789',
+                    address: '258 Willow Way, City, State 12345',
+                    status: 'Negotiating',
+                    source: 'Phone Call',
+                    priority: 'High'
+                }
+            ];
+
+            function searchLeads(query) {
+                if (!query || query.trim().length < 2) {
+                    return [];
+                }
+
+                const searchTerm = query.toLowerCase().trim();
+                return allLeads.filter(lead => {
+                    return lead.id.toLowerCase().includes(searchTerm) ||
+                           lead.name.toLowerCase().includes(searchTerm) ||
+                           lead.phone.includes(searchTerm) ||
+                           lead.address.toLowerCase().includes(searchTerm);
+                });
+            }
+
+            function renderSearchResults(results) {
+                const searchResults = document.getElementById('searchResults');
+                
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div class="no-results">No leads found</div>';
+                    searchResults.classList.add('active');
+                    return;
+                }
+
+                const resultsHTML = results.map(lead => `
+                    <div class="search-result-item" onclick="openLeadDetail('${lead.id}')">
+                        <div class="result-lead-id">${lead.id}</div>
+                        <div class="result-lead-name">${lead.name}</div>
+                        <div class="result-lead-details">
+                            ${lead.phone} • ${lead.address}
+                        </div>
+                        <div class="result-lead-details">
+                            Status: ${lead.status} • Priority: ${lead.priority}
+                        </div>
+                    </div>
+                `).join('');
+
+                searchResults.innerHTML = resultsHTML;
+                searchResults.classList.add('active');
+            }
+
+            function openLeadDetail(leadId) {
+                const lead = allLeads.find(l => l.id === leadId);
+                if (lead) {
+                    showNotification(`Opening lead detail for ${lead.name} (${leadId})`, 'success');
+                    // In a real app, this would navigate to the lead detail page
+                    // For now, show a modal with lead information
+                    showLeadDetailModal(lead);
+                }
+                hideSearchResults();
+            }
+
+            function showLeadDetailModal(lead) {
+                const modal = document.createElement('div');
+                modal.className = 'lead-modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>📋 Lead Details: ${lead.name}</h3>
+                            <button class="modal-close" onclick="this.closest('.lead-modal').remove()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="lead-info">
+                                <p><strong>Lead ID:</strong> ${lead.id}</p>
+                                <p><strong>Name:</strong> ${lead.name}</p>
+                                <p><strong>Phone:</strong> ${lead.phone}</p>
+                                <p><strong>Address:</strong> ${lead.address}</p>
+                                <p><strong>Status:</strong> ${lead.status}</p>
+                                <p><strong>Source:</strong> ${lead.source}</p>
+                                <p><strong>Priority:</strong> ${lead.priority}</p>
+                            </div>
+                            <div class="call-actions">
+                                <button class="btn btn-primary" onclick="makeCall('${lead.phone}')">
+                                    <i class="fas fa-phone"></i> Call Lead
+                                </button>
+                                <button class="btn" onclick="editLead('${lead.id}')">
+                                    <i class="fas fa-edit"></i> Edit Lead
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+            }
+
+            function hideSearchResults() {
+                const searchResults = document.getElementById('searchResults');
+                searchResults.classList.remove('active');
+                document.getElementById('leadSearch').value = '';
+            }
+
+            // Search event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('leadSearch');
+                const searchResults = document.getElementById('searchResults');
+
+                // Search input event
+                searchInput.addEventListener('input', function() {
+                    const query = this.value;
+                    const results = searchLeads(query);
+                    renderSearchResults(results);
+                });
+
+                // Hide results when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        hideSearchResults();
+                    }
+                });
+
+                // Keyboard navigation
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        hideSearchResults();
+                    }
+                });
+            });
+
+            // Global functions for lead actions
+            window.editLead = function(leadId) {
+                showNotification(`Opening edit form for lead ${leadId}`, 'info');
+                // In a real app, this would open the lead edit form
+            };
         });
     </script>
 </body>

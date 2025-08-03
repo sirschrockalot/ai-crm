@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobile Companion App - Presidential Digs CRM</title>
+    <title>Mobile Companion App - DealCycle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -574,8 +575,7 @@
                 <div class="card">
                     <div class="chart-container">
                         <div class="chart-placeholder">
-                            <i class="fas fa-chart-area"></i>
-                            <div>Performance Chart</div>
+                            <canvas id="mobileChart" width="300" height="150"></canvas>
                         </div>
                     </div>
                     <div class="metric-row">
@@ -737,6 +737,50 @@
                     }
                 });
             }, 10000);
+
+            // Initialize Mobile Chart
+            const mobileCtx = document.getElementById('mobileChart');
+            if (mobileCtx) {
+                new Chart(mobileCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['9AM', '12PM', '3PM', '6PM', '9PM'],
+                        datasets: [{
+                            label: 'Performance',
+                            data: [65, 78, 82, 75, 68],
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#3B82F6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: {
+                                    color: '#E2E8F0'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>

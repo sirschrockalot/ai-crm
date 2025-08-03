@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disposition Dashboard - Presidential Digs CRM</title>
+    <title>Disposition Dashboard - DealCycle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,9 +32,112 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+            margin: 0 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: #F9FAFB;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6B7280;
+            font-size: 0.875rem;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #F1F5F9;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background: #F8FAFC;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-lead-id {
+            font-weight: 600;
+            color: #3B82F6;
+            font-size: 0.75rem;
+        }
+
+        .result-lead-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-lead-details {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .no-results {
+            padding: 1rem;
+            text-align: center;
+            color: #64748B;
+            font-size: 0.875rem;
+        }
+
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 1.5rem;
             font-weight: 700;
+        }
+
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
             background: linear-gradient(135deg, #3B82F6, #1D4ED8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -71,7 +174,7 @@
         .user-menu {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            justify-content: center;
         }
 
         .avatar {
@@ -111,23 +214,424 @@
             font-size: 1.1rem;
         }
 
-        .disposition-focus {
-            background: linear-gradient(135deg, #F3E8FF, #FAF5FF);
-            border: 1px solid #DDD6FE;
+        /* Priority Alerts Section */
+        .priority-alerts {
+            background: white;
             border-radius: 12px;
-            padding: 1rem;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
             margin-bottom: 2rem;
         }
 
-        .focus-title {
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .alerts-header h3 {
+            color: #0F172A;
             font-weight: 600;
-            color: #7C3AED;
+        }
+
+        .date {
+            color: #64748B;
+            font-size: 0.875rem;
+        }
+
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .alert-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .alert-card:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+        }
+
+        .alert-card.urgent {
+            background: #FEF2F2;
+            border-color: #FECACA;
+        }
+
+        .alert-card.urgent:hover {
+            background: #FEE2E2;
+        }
+
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .alert-card.urgent .alert-icon {
+            background: #EF4444;
+        }
+
+        .alert-card:not(.urgent) .alert-icon {
+            background: #3B82F6;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-count {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-details {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        /* Quick Actions Section */
+        .quick-actions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .actions-header h3 {
+            color: #0F172A;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: left;
+            border: none;
+            width: 100%;
+        }
+
+        .action-card:hover {
+            background: #F1F5F9;
+            border-color: #3B82F6;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+
+        .action-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .action-content {
+            flex: 1;
+        }
+
+        .action-title {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .action-subtitle {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        /* Deal Pipeline Section */
+        .deal-pipeline {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .pipeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .pipeline-header h3 {
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .pipeline-filters {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-select, .filter-search {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        .filter-select:focus, .filter-search:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .pipeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Buyer Management Section */
+        .buyer-management {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+            margin-bottom: 2rem;
+        }
+
+        .buyer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .buyer-header h3 {
+            color: #0F172A;
+            font-weight: 600;
+        }
+
+        .buyer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .buyer-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .buyer-card:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+        }
+
+        .buyer-card.high-interest {
+            background: #F0F9FF;
+            border-color: #3B82F6;
+        }
+
+        .buyer-card .buyer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .buyer-name {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .buyer-type {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .buyer-status {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            background: #10B981;
+            color: white;
+        }
+
+        .buyer-details {
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 0.5rem;
         }
 
-        .focus-description {
-            color: #374151;
-            font-size: 0.9rem;
+        .detail-item .label {
+            font-size: 0.875rem;
+            color: #64748B;
+        }
+
+        .detail-item .value {
+            font-size: 0.875rem;
+            color: #0F172A;
+            font-weight: 500;
+        }
+
+        .buyer-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Deal Card Styles */
+        .deal-card {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .deal-card:hover {
+            border-color: #3B82F6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+        }
+
+        .deal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .deal-header.urgent {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .deal-header.warning {
+            background: #FFFBEB;
+            border: 1px solid #FED7AA;
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .deal-address {
+            font-weight: 600;
+            color: #0F172A;
+            margin-bottom: 0.25rem;
+        }
+
+        .deal-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .status-new { background: #3B82F6; }
+        .status-active { background: #F59E0B; }
+        .status-assigned { background: #10B981; }
+        .status-closing { background: #8B5CF6; }
+
+        .deal-priority {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .priority-high { background: #EF4444; color: white; }
+        .priority-medium { background: #F59E0B; color: white; }
+        .priority-low { background: #6B7280; color: white; }
+
+        .deal-specs {
+            font-weight: 500;
+            color: #0F172A;
+            margin-bottom: 0.75rem;
+        }
+
+        .deal-timeline, .deal-financials {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .timeline-item, .financial-item {
+            font-size: 0.875rem;
+            color: #64748B;
+            background: #F8FAFC;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .financial-item.profit {
+            color: #10B981;
+            font-weight: 600;
+            background: #F0FDF4;
+        }
+
+        .deal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
         }
 
         .kpi-grid {
@@ -606,13 +1110,50 @@
             .matching-grid {
                 grid-template-columns: 1fr;
             }
+
+            .navbar {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .search-container {
+                order: 3;
+                max-width: 100%;
+                margin: 0;
+                width: 100%;
+            }
+
+            .nav-links {
+                order: 2;
+            }
+
+            .user-menu {
+                order: 1;
+            }
         }
     </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="logo">Presidential Digs CRM</div>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <!-- Blue arrow (top) -->
+                    <path d="M8 12 Q16 8 24 12 L20 16 Q16 12 12 16 L8 12" stroke="#3B82F6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Green arrow (bottom) -->
+                    <path d="M24 20 Q16 24 8 20 L12 16 Q16 20 20 16 L24 20" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <span class="logo-text">DealCycle</span>
+        </div>
         <div class="role-badge">Disposition Team</div>
+        
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="leadSearch" placeholder="Search leads by ID, name, phone, or address..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        
         <div class="nav-links">
             <a href="#" class="nav-link active">Dashboard</a>
             <a href="#" class="nav-link">Contracts</a>
@@ -620,7 +1161,6 @@
             <a href="#" class="nav-link">Marketing</a>
         </div>
         <div class="user-menu">
-            <span>Mike Rodriguez</span>
             <div class="avatar">MR</div>
         </div>
     </nav>
@@ -631,625 +1171,241 @@
                 <i class="fas fa-handshake"></i>
                 Disposition Dashboard
             </h1>
-            <p class="page-subtitle">Focus on marketing and selling properties under contract</p>
+            <p class="page-subtitle">Manage deals, connect with buyers, and close transactions</p>
         </div>
 
-        <div class="disposition-focus">
-            <div class="focus-title">🎯 Your Focus Area</div>
-            <div class="focus-description">
-                You manage the complete disposition workflow from <strong>new contracts</strong> to <strong>closed deals</strong>. 
-                Track deals through: New Contract → Active Disposition → Assigned → Closed/Cancelled.
+        <!-- Priority Alerts Section -->
+        <div class="priority-alerts">
+            <div class="alerts-header">
+                <h3>🚨 Priority Alerts</h3>
+                <span class="date">December 18, 2024</span>
             </div>
-        </div>
-
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Total Deals in Pipeline</span>
-                    <div class="kpi-icon" style="background: #8B5CF6;">
-                        <i class="fas fa-file-contract"></i>
+            <div class="alerts-grid">
+                <div class="alert-card urgent">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Inspection Period Ending</div>
+                        <div class="alert-count">3 deals</div>
+                        <div class="alert-details">123 Oak St - expires today</div>
                     </div>
                 </div>
-                <div class="kpi-value">16</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +4 this week
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Active Disposition</span>
-                    <div class="kpi-icon" style="background: #F59E0B;">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">6</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +2 new this week
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Assigned Deals</span>
-                    <div class="kpi-icon" style="background: #10B981;">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">3</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +1 this week
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-header">
-                    <span class="kpi-title">Closed This Month</span>
-                    <div class="kpi-icon" style="background: #059669;">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
-                <div class="kpi-value">8</div>
-                <div class="kpi-change positive">
-                    <i class="fas fa-arrow-up"></i>
-                    +3 vs last month
-                </div>
-            </div>
-        </div>
-
-        <div class="workflow-grid">
-            <div class="workflow-section">
-                <div class="workflow-header">
-                    <span class="workflow-title">New Contracts</span>
-                    <span class="workflow-count">4</span>
-                </div>
-                <div class="workflow-list">
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">123 Oak St, Austin</span>
-                            <span class="deal-status status-new-contract">New Contract</span>
-                        </div>
-                        <div class="deal-details">$450k ARV • 3 bed, 2 bath • 1,800 sq ft</div>
-                        <div class="deal-insights">
-                            <div class="insight-item">
-                                <span class="insight-label">Contract Date:</span>
-                                <span class="insight-value">12/15/2024</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Days Under Contract:</span>
-                                <span class="insight-value">2 days</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Lead Source:</span>
-                                <span class="insight-value">Direct Mail</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Occupied:</span>
-                                <span class="insight-value">Yes</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Listing Price:</span>
-                                <span class="insight-value">$450k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Acquisition Price:</span>
-                                <span class="insight-value">$320k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Commission:</span>
-                                <span class="insight-value">$8k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Profit:</span>
-                                <span class="insight-value profit-positive">$122k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Agent:</span>
-                                <span class="insight-value">Sarah Johnson</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Contact:</span>
-                                <span class="insight-value">John Smith (555) 123-4567</span>
-                            </div>
-                        </div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Setup</button>
-                            <button class="action-btn">Market</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">456 Pine Ave, Dallas</span>
-                            <span class="deal-status status-new-contract">New Contract</span>
-                        </div>
-                        <div class="deal-details">$380k ARV • 2 bed, 1 bath • 1,200 sq ft</div>
-                        <div class="deal-insights">
-                            <div class="insight-item">
-                                <span class="insight-label">Contract Date:</span>
-                                <span class="insight-value">12/14/2024</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Days Under Contract:</span>
-                                <span class="insight-value">3 days</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Lead Source:</span>
-                                <span class="insight-value">Facebook Ads</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Occupied:</span>
-                                <span class="insight-value">No</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Listing Price:</span>
-                                <span class="insight-value">$380k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Acquisition Price:</span>
-                                <span class="insight-value">$280k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Commission:</span>
-                                <span class="insight-value">$6k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Profit:</span>
-                                <span class="insight-value profit-positive">$94k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Agent:</span>
-                                <span class="insight-value">Mike Rodriguez</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Contact:</span>
-                                <span class="insight-value">Maria Garcia (555) 987-6543</span>
-                            </div>
-                        </div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Setup</button>
-                            <button class="action-btn">Market</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">789 Elm Dr, Houston</span>
-                            <span class="deal-status status-new-contract">New Contract</span>
-                        </div>
-                        <div class="deal-details">$520k ARV • 4 bed, 2.5 bath • 2,100 sq ft</div>
-                        <div class="deal-insights">
-                            <div class="insight-item">
-                                <span class="insight-label">Contract Date:</span>
-                                <span class="insight-value">12/13/2024</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Days Under Contract:</span>
-                                <span class="insight-value">4 days</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Lead Source:</span>
-                                <span class="insight-value">Cold Calling</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Occupied:</span>
-                                <span class="insight-value">Yes</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Listing Price:</span>
-                                <span class="insight-value">$520k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Acquisition Price:</span>
-                                <span class="insight-value">$380k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Commission:</span>
-                                <span class="insight-value">$10k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Profit:</span>
-                                <span class="insight-value profit-positive">$130k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Agent:</span>
-                                <span class="insight-value">Sarah Johnson</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Contact:</span>
-                                <span class="insight-value">Robert Wilson (555) 456-7890</span>
-                            </div>
-                        </div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Setup</button>
-                            <button class="action-btn">Market</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="workflow-section">
-                <div class="workflow-header">
-                    <span class="workflow-title">Active Disposition</span>
-                    <span class="workflow-count">6</span>
-                </div>
-                <div class="workflow-list">
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">321 Maple Rd, San Antonio</span>
-                            <span class="deal-status status-active-dispo">Active Dispo</span>
-                        </div>
-                        <div class="deal-details">$410k ARV • Marketing campaign active</div>
-                        <div class="deal-insights">
-                            <div class="insight-item">
-                                <span class="insight-label">Contract Date:</span>
-                                <span class="insight-value">12/10/2024</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Days Under Contract:</span>
-                                <span class="insight-value warning">7 days</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Lead Source:</span>
-                                <span class="insight-value">Direct Mail</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Occupied:</span>
-                                <span class="insight-value">No</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Listing Price:</span>
-                                <span class="insight-value">$410k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Acquisition Price:</span>
-                                <span class="insight-value">$295k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Commission:</span>
-                                <span class="insight-value">$7k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Profit:</span>
-                                <span class="insight-value profit-positive">$108k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Agent:</span>
-                                <span class="insight-value">Mike Rodriguez</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Contact:</span>
-                                <span class="insight-value">Lisa Chen (555) 234-5678</span>
-                            </div>
-                        </div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Campaign</button>
-                            <button class="action-btn">Showings</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">654 Cedar Ln, Fort Worth</span>
-                            <span class="deal-status status-active-dispo">Active Dispo</span>
-                        </div>
-                        <div class="deal-details">$360k ARV • 5 buyer inquiries</div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Campaign</button>
-                            <button class="action-btn">Showings</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">987 Birch St, Arlington</span>
-                            <span class="deal-status status-active-dispo">Active Dispo</span>
-                        </div>
-                        <div class="deal-details">$480k ARV • 3 showings scheduled</div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Campaign</button>
-                            <button class="action-btn">Showings</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="workflow-grid">
-            <div class="workflow-section">
-                <div class="workflow-header">
-                    <span class="workflow-title">Assigned Deals</span>
-                    <span class="workflow-count">3</span>
-                </div>
-                <div class="workflow-list">
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">555 Oak Ave, Plano</span>
-                            <span class="deal-status status-assigned">Assigned</span>
-                        </div>
-                        <div class="deal-details">$390k ARV • Assigned to Buyer #1247</div>
-                        <div class="deal-insights">
-                            <div class="insight-item">
-                                <span class="insight-label">Contract Date:</span>
-                                <span class="insight-value">12/05/2024</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Days Under Contract:</span>
-                                <span class="insight-value">12 days</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Lead Source:</span>
-                                <span class="insight-value">Facebook Ads</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Occupied:</span>
-                                <span class="insight-value">Yes</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Listing Price:</span>
-                                <span class="insight-value">$390k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Acquisition Price:</span>
-                                <span class="insight-value">$285k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Commission:</span>
-                                <span class="insight-value">$6k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Profit:</span>
-                                <span class="insight-value profit-positive">$99k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Buyer:</span>
-                                <span class="insight-value">David Thompson</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Closing Date:</span>
-                                <span class="insight-value urgent">12/20/2024</span>
-                            </div>
-                        </div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Documents</button>
-                            <button class="action-btn">Timeline</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">777 Pine St, McKinney</span>
-                            <span class="deal-status status-assigned">Assigned</span>
-                        </div>
-                        <div class="deal-details">$420k ARV • Assigned to Buyer #0892</div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Documents</button>
-                            <button class="action-btn">Timeline</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">999 Elm Way, Frisco</span>
-                            <span class="deal-status status-assigned">Assigned</span>
-                        </div>
-                        <div class="deal-details">$510k ARV • Assigned to Buyer #1563</div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Documents</button>
-                            <button class="action-btn">Timeline</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="workflow-section">
-                <div class="workflow-header">
-                    <span class="workflow-title">Closed Deals</span>
-                    <span class="workflow-count">2</span>
-                </div>
-                <div class="workflow-list">
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">111 Maple Dr, Richardson</span>
-                            <span class="deal-status status-closed">Closed</span>
-                        </div>
-                        <div class="deal-details">$375k ARV • Closed 2 days ago</div>
-                        <div class="deal-insights">
-                            <div class="insight-item">
-                                <span class="insight-label">Contract Date:</span>
-                                <span class="insight-value">11/20/2024</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Days Under Contract:</span>
-                                <span class="insight-value">27 days</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Lead Source:</span>
-                                <span class="insight-value">Direct Mail</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Occupied:</span>
-                                <span class="insight-value">No</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Listing Price:</span>
-                                <span class="insight-value">$375k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Acquisition Price:</span>
-                                <span class="insight-value">$270k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Commission:</span>
-                                <span class="insight-value">$5k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Profit:</span>
-                                <span class="insight-value profit-positive">$100k</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Buyer:</span>
-                                <span class="insight-value">Jennifer Lee</span>
-                            </div>
-                            <div class="insight-item">
-                                <span class="insight-label">Closing Date:</span>
-                                <span class="insight-value">12/17/2024</span>
-                            </div>
-                        </div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Documents</button>
-                            <button class="action-btn">Analytics</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                    <div class="workflow-item">
-                        <div class="deal-info">
-                            <span class="deal-name">333 Cedar Ave, Allen</span>
-                            <span class="deal-status status-closed">Closed</span>
-                        </div>
-                        <div class="deal-details">$445k ARV • Closed 1 week ago</div>
-                        <div class="deal-actions">
-                            <button class="action-btn">Documents</button>
-                            <button class="action-btn">Analytics</button>
-                            <button class="action-btn">View</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="workflow-section" style="margin-bottom: 2rem;">
-            <div class="workflow-header">
-                <span class="workflow-title">Cancelled Deals</span>
-                <span class="workflow-count">1</span>
-            </div>
-            <div class="workflow-list">
-                <div class="workflow-item">
-                    <div class="deal-info">
-                        <span class="deal-name">888 Birch Ln, Garland</span>
-                        <span class="deal-status status-cancelled">Cancelled</span>
-                    </div>
-                    <div class="deal-details">$320k ARV • Cancelled due to inspection issues</div>
-                    <div class="deal-insights">
-                        <div class="insight-item">
-                            <span class="insight-label">Contract Date:</span>
-                            <span class="insight-value">12/01/2024</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Days Under Contract:</span>
-                            <span class="insight-value">16 days</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Lead Source:</span>
-                            <span class="insight-value">Cold Calling</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Occupied:</span>
-                            <span class="insight-value">Yes</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Listing Price:</span>
-                            <span class="insight-value">$320k</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Acquisition Price:</span>
-                            <span class="insight-value">$240k</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Commission:</span>
-                            <span class="insight-value">$4k</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Profit:</span>
-                            <span class="insight-value profit-negative">-$24k</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Buyer:</span>
-                            <span class="insight-value">Michael Brown</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Cancellation Date:</span>
-                            <span class="insight-value urgent">12/17/2024</span>
-                        </div>
-                    </div>
-                    <div class="deal-actions">
-                        <button class="action-btn">Reason</button>
-                        <button class="action-btn">Analytics</button>
-                        <button class="action-btn">View</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="buyer-matching">
-            <div class="matching-header">
-                <h3 class="matching-title">AI Buyer Matching</h3>
-                <a href="#" class="btn btn-primary">View All Matches</a>
-            </div>
-            <div class="matching-grid">
-                <div class="matching-card">
-                    <div class="matching-property">123 Oak St, Austin</div>
-                    <div class="matching-buyers">8 qualified buyers matched</div>
-                    <div class="matching-score">
-                        <span class="score-badge">95%</span>
-                        <span>Match Score</span>
-                    </div>
-                </div>
-                <div class="matching-card">
-                    <div class="matching-property">456 Pine Ave, Dallas</div>
-                    <div class="matching-buyers">12 qualified buyers matched</div>
-                    <div class="matching-score">
-                        <span class="score-badge">88%</span>
-                        <span>Match Score</span>
-                    </div>
-                </div>
-                <div class="matching-card">
-                    <div class="matching-property">789 Elm Dr, Houston</div>
-                    <div class="matching-buyers">6 qualified buyers matched</div>
-                    <div class="matching-score">
-                        <span class="score-badge">92%</span>
-                        <span>Match Score</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="quick-actions">
-            <h3>Quick Actions</h3>
-            <div class="action-grid">
-                <div class="action-card">
-                    <div class="action-icon" style="background: #8B5CF6;">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <div class="action-title">Create Campaign</div>
-                    <div class="action-description">Launch marketing campaign</div>
-                </div>
-                <div class="action-card">
-                    <div class="action-icon" style="background: #10B981;">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="action-title">Match Buyers</div>
-                    <div class="action-description">Find qualified buyers</div>
-                </div>
-                <div class="action-card">
-                    <div class="action-icon" style="background: #F59E0B;">
+                <div class="alert-card">
+                    <div class="alert-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="action-title">Schedule Showings</div>
-                    <div class="action-description">Book property viewings</div>
-                </div>
-                <div class="action-card">
-                    <div class="action-icon" style="background: #EF4444;">
-                        <i class="fas fa-file-signature"></i>
+                    <div class="alert-content">
+                        <div class="alert-title">Closing This Week</div>
+                        <div class="alert-count">2 deals</div>
+                        <div class="alert-details">456 Pine Ave - Friday</div>
                     </div>
-                    <div class="action-title">Closing Documents</div>
-                    <div class="action-description">Manage closing process</div>
+                </div>
+                <div class="alert-card">
+                    <div class="alert-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Buyer Follow-ups</div>
+                        <div class="alert-count">8 calls</div>
+                        <div class="alert-details">High interest buyers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Section -->
+        <div class="quick-actions">
+            <div class="actions-header">
+                <h3>⚡ Quick Actions</h3>
+            </div>
+            <div class="actions-grid">
+                <button class="action-card" id="getNextDeal">
+                    <div class="action-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Get Next Deal</div>
+                        <div class="action-subtitle">Start working on next priority deal</div>
+                    </div>
+                </button>
+                <button class="action-card" id="callBuyers">
+                    <div class="action-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Call Buyers</div>
+                        <div class="action-subtitle">Contact interested buyers</div>
+                    </div>
+                </button>
+                <button class="action-card" id="assignDeal">
+                    <div class="action-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Assign Deal</div>
+                        <div class="action-subtitle">Match buyer to property</div>
+                    </div>
+                </button>
+                <button class="action-card" id="scheduleClosing">
+                    <div class="action-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="action-content">
+                        <div class="action-title">Schedule Closing</div>
+                        <div class="action-subtitle">Set up deal closing</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Deal Pipeline with Filters -->
+        <div class="deal-pipeline">
+            <div class="pipeline-header">
+                <h3>📋 Deal Pipeline</h3>
+                <div class="pipeline-filters">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="all">All Statuses</option>
+                        <option value="new-contract">New Contract</option>
+                        <option value="active-disposition">Active Disposition</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="closing">Closing</option>
+                    </select>
+                    <select class="filter-select" id="priorityFilter">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="low">Low Priority</option>
+                    </select>
+                    <select class="filter-select" id="timeFilter">
+                        <option value="all">All Timeframes</option>
+                        <option value="inspection">Inspection Period</option>
+                        <option value="closing">Closing Soon</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <input type="text" class="filter-search" placeholder="Search deals..." id="dealSearch">
+                </div>
+            </div>
+            <div class="pipeline-grid" id="dealGrid">
+                <!-- Deals will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Buyer Management Section -->
+        <div class="buyer-management">
+            <div class="buyer-header">
+                <h3>👥 Buyer Management</h3>
+                <button class="btn btn-primary" id="addBuyer">Add Buyer</button>
+            </div>
+            <div class="buyer-grid">
+                <div class="buyer-card high-interest">
+                    <div class="buyer-header">
+                        <div class="buyer-info">
+                            <div class="buyer-name">David Chen</div>
+                            <div class="buyer-type">Cash Buyer</div>
+                        </div>
+                        <div class="buyer-status">High Interest</div>
+                    </div>
+                    <div class="buyer-details">
+                        <div class="detail-item">
+                            <span class="label">Budget:</span>
+                            <span class="value">$400k - $600k</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Areas:</span>
+                            <span class="value">Austin, Dallas</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Last Contact:</span>
+                            <span class="value">2 days ago</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Interested In:</span>
+                            <span class="value">3 bed, 2 bath</span>
+                        </div>
+                    </div>
+                    <div class="buyer-actions">
+                        <button class="btn btn-sm btn-primary">Call</button>
+                        <button class="btn btn-sm">View Details</button>
+                    </div>
+                </div>
+
+                <div class="buyer-card">
+                    <div class="buyer-header">
+                        <div class="buyer-info">
+                            <div class="buyer-name">Lisa Thompson</div>
+                            <div class="buyer-type">Investor</div>
+                        </div>
+                        <div class="buyer-status">Medium Interest</div>
+                    </div>
+                    <div class="buyer-details">
+                        <div class="detail-item">
+                            <span class="label">Budget:</span>
+                            <span class="value">$300k - $500k</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Areas:</span>
+                            <span class="value">Houston</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Last Contact:</span>
+                            <span class="value">1 week ago</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Interested In:</span>
+                            <span class="value">Fixer uppers</span>
+                        </div>
+                    </div>
+                    <div class="buyer-actions">
+                        <button class="btn btn-sm btn-primary">Call</button>
+                        <button class="btn btn-sm">View Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="performance-section">
+            <div class="performance-header">
+                <h3>📊 Today's Performance</h3>
+                <button class="btn btn-primary">View Full Report</button>
+            </div>
+            <div class="performance-grid">
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #8B5CF6;">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">16</div>
+                        <div class="performance-label">Active Deals</div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #10B981;">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">12</div>
+                        <div class="performance-label">Buyer Calls</div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #F59E0B;">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">3</div>
+                        <div class="performance-label">Deals Assigned</div>
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <div class="performance-icon" style="background: #059669;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="performance-content">
+                        <div class="performance-value">2</div>
+                        <div class="performance-label">Closings This Week</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1260,38 +1416,38 @@
                 <a href="#" class="btn">View All</a>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #3B82F6;">
-                    <i class="fas fa-file-contract"></i>
+                <div class="activity-icon" style="background: #10B981;">
+                    <i class="fas fa-phone"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">New contract added: 123 Oak St, Austin</div>
+                    <div class="activity-text">Called David Chen about 123 Oak St property</div>
                     <div class="activity-time">30 minutes ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #F59E0B;">
-                    <i class="fas fa-bullhorn"></i>
+                <div class="activity-icon" style="background: #8B5CF6;">
+                    <i class="fas fa-handshake"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Marketing campaign launched for 456 Pine Ave</div>
+                    <div class="activity-text">Assigned 456 Pine Ave to Lisa Thompson</div>
                     <div class="activity-time">2 hours ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #10B981;">
-                    <i class="fas fa-handshake"></i>
+                <div class="activity-icon" style="background: #F59E0B;">
+                    <i class="fas fa-calendar-check"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Deal assigned to Buyer #1247 for 555 Oak Ave</div>
+                    <div class="activity-text">Scheduled closing for 789 Elm St</div>
                     <div class="activity-time">4 hours ago</div>
                 </div>
             </div>
             <div class="activity-item">
-                <div class="activity-icon" style="background: #059669;">
-                    <i class="fas fa-check-circle"></i>
+                <div class="activity-icon" style="background: #3B82F6;">
+                    <i class="fas fa-file-contract"></i>
                 </div>
                 <div class="activity-content">
-                    <div class="activity-text">Deal closed: 111 Maple Dr, Richardson</div>
+                    <div class="activity-text">New contract received for 321 Maple Rd</div>
                     <div class="activity-time">1 day ago</div>
                 </div>
             </div>
@@ -1299,44 +1455,826 @@
     </div>
 
     <script>
-        // Interactive functionality
+        // Enhanced Disposition Workflow
         document.addEventListener('DOMContentLoaded', function() {
-            // Make workflow items clickable
-            const workflowItems = document.querySelectorAll('.workflow-item');
-            workflowItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    // Navigate to deal detail view
-                    console.log('Navigate to deal detail');
-                });
-            });
+            let currentDeal = null;
+            let currentBuyer = null;
 
-            // Make action cards clickable
-            const actionCards = document.querySelectorAll('.action-card');
-            actionCards.forEach(card => {
+            // Sample deals data
+            const deals = [
+                {
+                    id: 1,
+                    address: '123 Oak St, Austin',
+                    status: 'new-contract',
+                    priority: 'high',
+                    arv: '$450k',
+                    beds: 3,
+                    baths: 2,
+                    sqft: '1,800',
+                    contractDate: '12/15/2024',
+                    daysUnderContract: 2,
+                    inspectionEnds: '12/20/2024',
+                    closingDate: '01/15/2025',
+                    acquisitionPrice: '$320k',
+                    listingPrice: '$450k',
+                    profit: '$122k',
+                    agent: 'Sarah Johnson',
+                    contact: 'John Smith (555) 123-4567',
+                    occupied: 'Yes',
+                    leadSource: 'Direct Mail'
+                },
+                {
+                    id: 2,
+                    address: '456 Pine Ave, Dallas',
+                    status: 'active-disposition',
+                    priority: 'medium',
+                    arv: '$380k',
+                    beds: 2,
+                    baths: 1,
+                    sqft: '1,200',
+                    contractDate: '12/14/2024',
+                    daysUnderContract: 3,
+                    inspectionEnds: '12/19/2024',
+                    closingDate: '01/10/2025',
+                    acquisitionPrice: '$280k',
+                    listingPrice: '$380k',
+                    profit: '$94k',
+                    agent: 'Mike Rodriguez',
+                    contact: 'Maria Garcia (555) 987-6543',
+                    occupied: 'No',
+                    leadSource: 'Facebook Ads'
+                },
+                {
+                    id: 3,
+                    address: '789 Elm Dr, Houston',
+                    status: 'assigned',
+                    priority: 'high',
+                    arv: '$520k',
+                    beds: 4,
+                    baths: 2.5,
+                    sqft: '2,100',
+                    contractDate: '12/13/2024',
+                    daysUnderContract: 4,
+                    inspectionEnds: '12/18/2024',
+                    closingDate: '01/05/2025',
+                    acquisitionPrice: '$380k',
+                    listingPrice: '$520k',
+                    profit: '$130k',
+                    agent: 'Sarah Johnson',
+                    contact: 'Robert Wilson (555) 456-7890',
+                    occupied: 'Yes',
+                    leadSource: 'Cold Calling',
+                    assignedBuyer: 'David Chen'
+                }
+            ];
+
+            // Sample buyers data
+            const buyers = [
+                {
+                    id: 1,
+                    name: 'David Chen',
+                    type: 'Cash Buyer',
+                    status: 'High Interest',
+                    budget: '$400k - $600k',
+                    areas: 'Austin, Dallas',
+                    lastContact: '2 days ago',
+                    interestedIn: '3 bed, 2 bath',
+                    phone: '(555) 111-2222',
+                    email: 'david@email.com'
+                },
+                {
+                    id: 2,
+                    name: 'Lisa Thompson',
+                    type: 'Investor',
+                    status: 'Medium Interest',
+                    budget: '$300k - $500k',
+                    areas: 'Houston',
+                    lastContact: '1 week ago',
+                    interestedIn: 'Fixer uppers',
+                    phone: '(555) 333-4444',
+                    email: 'lisa@email.com'
+                }
+            ];
+
+            // Initialize the page
+            initializePage();
+
+            // Quick Actions
+            document.getElementById('getNextDeal').addEventListener('click', getNextDeal);
+            document.getElementById('callBuyers').addEventListener('click', callBuyers);
+            document.getElementById('assignDeal').addEventListener('click', assignDeal);
+            document.getElementById('scheduleClosing').addEventListener('click', scheduleClosing);
+
+            // Priority Alerts
+            document.querySelectorAll('.alert-card').forEach(card => {
                 card.addEventListener('click', function() {
-                    const title = this.querySelector('.action-title').textContent;
-                    console.log('Action clicked:', title);
+                    const title = this.querySelector('.alert-title').textContent;
+                    handleAlertClick(title);
                 });
             });
 
-            // Make action buttons functional
-            const actionBtns = document.querySelectorAll('.action-btn');
-            actionBtns.forEach(btn => {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const action = this.textContent;
-                    console.log('Action button clicked:', action);
-                });
-            });
-
-            // Make matching cards clickable
-            const matchingCards = document.querySelectorAll('.matching-card');
-            matchingCards.forEach(card => {
+            // Buyer Cards
+            document.querySelectorAll('.buyer-card').forEach(card => {
                 card.addEventListener('click', function() {
-                    const property = this.querySelector('.matching-property').textContent;
-                    console.log('Matching card clicked:', property);
+                    const buyerName = this.querySelector('.buyer-name').textContent;
+                    const buyer = buyers.find(b => b.name === buyerName);
+                    if (buyer) {
+                        showBuyerModal(buyer);
+                    }
                 });
             });
+
+            // Pipeline Filters
+            document.getElementById('statusFilter').addEventListener('change', filterDeals);
+            document.getElementById('priorityFilter').addEventListener('change', filterDeals);
+            document.getElementById('timeFilter').addEventListener('change', filterDeals);
+            document.getElementById('dealSearch').addEventListener('input', filterDeals);
+
+            function initializePage() {
+                populateDealGrid();
+                updatePerformanceMetrics();
+            }
+
+            function populateDealGrid() {
+                const dealGrid = document.getElementById('dealGrid');
+                dealGrid.innerHTML = '';
+
+                deals.forEach(deal => {
+                    const dealCard = createDealCard(deal);
+                    dealGrid.appendChild(dealCard);
+                });
+            }
+
+            function createDealCard(deal) {
+                const card = document.createElement('div');
+                card.className = 'deal-card';
+                card.dataset.status = deal.status;
+                card.dataset.priority = deal.priority;
+
+                const urgencyClass = getUrgencyClass(deal);
+                const statusClass = getStatusClass(deal.status);
+
+                card.innerHTML = `
+                    <div class="deal-header ${urgencyClass}">
+                        <div class="deal-info">
+                            <div class="deal-address">${deal.address}</div>
+                            <div class="deal-status ${statusClass}">${formatStatus(deal.status)}</div>
+                        </div>
+                        <div class="deal-priority priority-${deal.priority}">${deal.priority.toUpperCase()}</div>
+                    </div>
+                    <div class="deal-details">
+                        <div class="deal-specs">${deal.arv} ARV • ${deal.beds} bed, ${deal.baths} bath • ${deal.sqft} sq ft</div>
+                        <div class="deal-timeline">
+                            <span class="timeline-item">Contract: ${deal.contractDate}</span>
+                            <span class="timeline-item">Inspection: ${deal.inspectionEnds}</span>
+                            <span class="timeline-item">Closing: ${deal.closingDate}</span>
+                        </div>
+                        <div class="deal-financials">
+                            <span class="financial-item">Acquisition: ${deal.acquisitionPrice}</span>
+                            <span class="financial-item">Listing: ${deal.listingPrice}</span>
+                            <span class="financial-item profit">Profit: ${deal.profit}</span>
+                        </div>
+                    </div>
+                    <div class="deal-actions">
+                        <button class="btn btn-sm btn-primary" onclick="viewDeal(${deal.id})">View</button>
+                        <button class="btn btn-sm" onclick="callContact(${deal.id})">Call</button>
+                        <button class="btn btn-sm" onclick="assignBuyer(${deal.id})">Assign</button>
+                    </div>
+                `;
+
+                return card;
+            }
+
+            function getUrgencyClass(deal) {
+                const today = new Date();
+                const inspectionDate = new Date(deal.inspectionEnds);
+                const daysUntilInspection = Math.ceil((inspectionDate - today) / (1000 * 60 * 60 * 24));
+
+                if (daysUntilInspection <= 0) return 'urgent';
+                if (daysUntilInspection <= 2) return 'warning';
+                return '';
+            }
+
+            function getStatusClass(status) {
+                const statusMap = {
+                    'new-contract': 'status-new',
+                    'active-disposition': 'status-active',
+                    'assigned': 'status-assigned',
+                    'closing': 'status-closing'
+                };
+                return statusMap[status] || 'status-default';
+            }
+
+            function formatStatus(status) {
+                const statusMap = {
+                    'new-contract': 'New Contract',
+                    'active-disposition': 'Active Disposition',
+                    'assigned': 'Assigned',
+                    'closing': 'Closing'
+                };
+                return statusMap[status] || status;
+            }
+
+            function filterDeals() {
+                const statusFilter = document.getElementById('statusFilter').value;
+                const priorityFilter = document.getElementById('priorityFilter').value;
+                const timeFilter = document.getElementById('timeFilter').value;
+                const searchTerm = document.getElementById('dealSearch').value.toLowerCase();
+
+                const dealCards = document.querySelectorAll('.deal-card');
+                dealCards.forEach(card => {
+                    let show = true;
+
+                    // Status filter
+                    if (statusFilter !== 'all' && card.dataset.status !== statusFilter) {
+                        show = false;
+                    }
+
+                    // Priority filter
+                    if (priorityFilter !== 'all' && card.dataset.priority !== priorityFilter) {
+                        show = false;
+                    }
+
+                    // Search filter
+                    if (searchTerm && !card.textContent.toLowerCase().includes(searchTerm)) {
+                        show = false;
+                    }
+
+                    card.style.display = show ? 'block' : 'none';
+                });
+            }
+
+            function getNextDeal() {
+                // Find the highest priority deal
+                const priorityOrder = ['high', 'medium', 'low'];
+                let nextDeal = null;
+
+                for (const priority of priorityOrder) {
+                    nextDeal = deals.find(deal => deal.priority === priority && deal.status === 'new-contract');
+                    if (nextDeal) break;
+                }
+
+                if (nextDeal) {
+                    currentDeal = nextDeal;
+                    showDealModal(nextDeal);
+                } else {
+                    showNotification('No deals available to work on', 'info');
+                }
+            }
+
+            function callBuyers() {
+                // Show list of buyers to call
+                showBuyerCallList();
+            }
+
+            function assignDeal() {
+                if (currentDeal) {
+                    showBuyerAssignmentModal(currentDeal);
+                } else {
+                    showNotification('Select a deal first', 'warning');
+                }
+            }
+
+            function scheduleClosing() {
+                showNotification('Opening closing scheduler...', 'info');
+            }
+
+            function handleAlertClick(alertTitle) {
+                if (alertTitle.includes('Inspection Period')) {
+                    showInspectionAlerts();
+                } else if (alertTitle.includes('Closing This Week')) {
+                    showClosingAlerts();
+                } else if (alertTitle.includes('Buyer Follow-ups')) {
+                    showBuyerFollowUps();
+                }
+            }
+
+            function showDealModal(deal) {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>📋 Deal Details: ${deal.address}</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="deal-info-grid">
+                                <div class="info-section">
+                                    <h4>Property Details</h4>
+                                    <p><strong>ARV:</strong> ${deal.arv}</p>
+                                    <p><strong>Beds/Baths:</strong> ${deal.beds}/${deal.baths}</p>
+                                    <p><strong>Square Feet:</strong> ${deal.sqft}</p>
+                                    <p><strong>Occupied:</strong> ${deal.occupied}</p>
+                                </div>
+                                <div class="info-section">
+                                    <h4>Timeline</h4>
+                                    <p><strong>Contract Date:</strong> ${deal.contractDate}</p>
+                                    <p><strong>Inspection Ends:</strong> ${deal.inspectionEnds}</p>
+                                    <p><strong>Closing Date:</strong> ${deal.closingDate}</p>
+                                </div>
+                                <div class="info-section">
+                                    <h4>Financials</h4>
+                                    <p><strong>Acquisition:</strong> ${deal.acquisitionPrice}</p>
+                                    <p><strong>Listing:</strong> ${deal.listingPrice}</p>
+                                    <p><strong>Profit:</strong> ${deal.profit}</p>
+                                </div>
+                            </div>
+                            <div class="deal-actions">
+                                <button class="btn btn-primary" onclick="callContact(${deal.id})">Call Contact</button>
+                                <button class="btn" onclick="assignBuyer(${deal.id})">Assign Buyer</button>
+                                <button class="btn" onclick="scheduleInspection(${deal.id})">Schedule Inspection</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                addModalStyles();
+                document.body.appendChild(modal);
+                setupModalClose(modal);
+            }
+
+            function showBuyerModal(buyer) {
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>👤 Buyer: ${buyer.name}</h3>
+                            <button class="modal-close">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="buyer-info">
+                                <p><strong>Type:</strong> ${buyer.type}</p>
+                                <p><strong>Status:</strong> ${buyer.status}</p>
+                                <p><strong>Budget:</strong> ${buyer.budget}</p>
+                                <p><strong>Areas:</strong> ${buyer.areas}</p>
+                                <p><strong>Interested In:</strong> ${buyer.interestedIn}</p>
+                                <p><strong>Phone:</strong> ${buyer.phone}</p>
+                                <p><strong>Email:</strong> ${buyer.email}</p>
+                                <p><strong>Last Contact:</strong> ${buyer.lastContact}</p>
+                            </div>
+                            <div class="buyer-actions">
+                                <button class="btn btn-primary" onclick="callBuyer('${buyer.phone}')">Call Buyer</button>
+                                <button class="btn" onclick="emailBuyer('${buyer.email}')">Email Buyer</button>
+                                <button class="btn" onclick="viewBuyerHistory(${buyer.id})">View History</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                addModalStyles();
+                document.body.appendChild(modal);
+                setupModalClose(modal);
+            }
+
+            function addModalStyles() {
+                if (!document.getElementById('modal-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'modal-styles';
+                    style.textContent = `
+                        .modal {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background: rgba(0, 0, 0, 0.5);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 1000;
+                        }
+                        .modal-content {
+                            background: white;
+                            border-radius: 12px;
+                            padding: 2rem;
+                            max-width: 600px;
+                            width: 90%;
+                            max-height: 80vh;
+                            overflow-y: auto;
+                        }
+                        .modal-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 1.5rem;
+                        }
+                        .modal-close {
+                            background: none;
+                            border: none;
+                            font-size: 1.5rem;
+                            cursor: pointer;
+                            color: #64748B;
+                        }
+                        .deal-info-grid {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                            gap: 1.5rem;
+                            margin-bottom: 1.5rem;
+                        }
+                        .info-section h4 {
+                            margin-bottom: 0.75rem;
+                            color: #0F172A;
+                        }
+                        .info-section p {
+                            margin-bottom: 0.5rem;
+                            color: #374151;
+                        }
+                        .deal-actions, .buyer-actions {
+                            display: flex;
+                            gap: 1rem;
+                            margin-top: 1.5rem;
+                        }
+                        .deal-card {
+                            background: white;
+                            border: 1px solid #E2E8F0;
+                            border-radius: 12px;
+                            padding: 1.5rem;
+                            margin-bottom: 1rem;
+                        }
+                        .deal-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 1rem;
+                        }
+                        .deal-header.urgent {
+                            background: #FEF2F2;
+                            border: 1px solid #FECACA;
+                            border-radius: 8px;
+                            padding: 0.5rem;
+                        }
+                        .deal-header.warning {
+                            background: #FFFBEB;
+                            border: 1px solid #FED7AA;
+                            border-radius: 8px;
+                            padding: 0.5rem;
+                        }
+                        .deal-address {
+                            font-weight: 600;
+                            color: #0F172A;
+                        }
+                        .deal-status {
+                            font-size: 0.75rem;
+                            padding: 0.25rem 0.5rem;
+                            border-radius: 12px;
+                            color: white;
+                            font-weight: 600;
+                        }
+                        .status-new { background: #3B82F6; }
+                        .status-active { background: #F59E0B; }
+                        .status-assigned { background: #10B981; }
+                        .status-closing { background: #8B5CF6; }
+                        .priority-high { background: #EF4444; color: white; }
+                        .priority-medium { background: #F59E0B; color: white; }
+                        .priority-low { background: #6B7280; color: white; }
+                        .deal-timeline, .deal-financials {
+                            display: flex;
+                            gap: 1rem;
+                            margin: 0.5rem 0;
+                            flex-wrap: wrap;
+                        }
+                        .timeline-item, .financial-item {
+                            font-size: 0.875rem;
+                            color: #64748B;
+                        }
+                        .financial-item.profit {
+                            color: #10B981;
+                            font-weight: 600;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+
+            function setupModalClose(modal) {
+                modal.querySelector('.modal-close').addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        document.body.removeChild(modal);
+                    }
+                });
+            }
+
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification notification-${type}`;
+                notification.textContent = message;
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        padding: 1rem 1.5rem;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: 500;
+                        z-index: 1001;
+                        animation: slideIn 0.3s ease;
+                    }
+                    .notification-success { background: #10B981; }
+                    .notification-warning { background: #F59E0B; }
+                    .notification-info { background: #3B82F6; }
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                `;
+                document.head.appendChild(style);
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            // Placeholder functions
+            function showInspectionAlerts() {
+                showNotification('Showing inspection period alerts...', 'info');
+            }
+
+            function showClosingAlerts() {
+                showNotification('Showing closing alerts...', 'info');
+            }
+
+            function showBuyerFollowUps() {
+                showNotification('Showing buyer follow-up list...', 'info');
+            }
+
+            function showBuyerCallList() {
+                showNotification('Opening buyer call list...', 'info');
+            }
+
+            function showBuyerAssignmentModal(deal) {
+                showNotification('Opening buyer assignment...', 'info');
+            }
+
+            function updatePerformanceMetrics() {
+                // Update performance metrics based on current data
+                const activeDeals = deals.filter(d => d.status !== 'closed').length;
+                const assignedDeals = deals.filter(d => d.status === 'assigned').length;
+                
+                // Update the performance cards
+                const performanceCards = document.querySelectorAll('.performance-card .performance-value');
+                if (performanceCards[0]) performanceCards[0].textContent = activeDeals;
+                if (performanceCards[2]) performanceCards[2].textContent = assignedDeals;
+            }
+
+            // Global functions for modal actions
+            window.viewDeal = function(dealId) {
+                const deal = deals.find(d => d.id === dealId);
+                if (deal) {
+                    currentDeal = deal;
+                    showDealModal(deal);
+                }
+            };
+
+            window.callContact = function(dealId) {
+                const deal = deals.find(d => d.id === dealId);
+                if (deal) {
+                    showNotification(`Calling ${deal.contact}...`, 'success');
+                }
+            };
+
+            window.assignBuyer = function(dealId) {
+                const deal = deals.find(d => d.id === dealId);
+                if (deal) {
+                    showNotification(`Opening buyer assignment for ${deal.address}...`, 'info');
+                }
+            };
+
+            window.callBuyer = function(phone) {
+                showNotification(`Calling ${phone}...`, 'success');
+            };
+
+            window.emailBuyer = function(email) {
+                showNotification(`Opening email to ${email}...`, 'info');
+            };
+
+            window.viewBuyerHistory = function(buyerId) {
+                showNotification('Opening buyer history...', 'info');
+            };
+
+            window.scheduleInspection = function(dealId) {
+                showNotification('Opening inspection scheduler...', 'info');
+            };
+
+            // Lead Search Functionality
+            let allLeads = [
+                {
+                    id: 'LD-001',
+                    name: 'John Smith',
+                    phone: '(555) 123-4567',
+                    address: '123 Oak Street, City, State 12345',
+                    status: 'New',
+                    source: 'Web Form',
+                    priority: 'High'
+                },
+                {
+                    id: 'LD-002',
+                    name: 'Sarah Wilson',
+                    phone: '(555) 987-6543',
+                    address: '456 Pine Avenue, City, State 12345',
+                    status: 'Contacting',
+                    source: 'Phone Call',
+                    priority: 'Medium'
+                },
+                {
+                    id: 'LD-003',
+                    name: 'Robert Davis',
+                    phone: '(555) 456-7890',
+                    address: '789 Elm Street, City, State 12345',
+                    status: 'Negotiating',
+                    source: 'Referral',
+                    priority: 'High'
+                },
+                {
+                    id: 'LD-004',
+                    name: 'Maria Garcia',
+                    phone: '(555) 321-6540',
+                    address: '321 Maple Drive, City, State 12345',
+                    status: 'Contract',
+                    source: 'Direct Mail',
+                    priority: 'Medium'
+                },
+                {
+                    id: 'LD-005',
+                    name: 'David Chen',
+                    phone: '(555) 789-0123',
+                    address: '654 Birch Lane, City, State 12345',
+                    status: 'New',
+                    source: 'Social Media',
+                    priority: 'Low'
+                },
+                {
+                    id: 'LD-006',
+                    name: 'Lisa Johnson',
+                    phone: '(555) 234-5678',
+                    address: '987 Cedar Road, City, State 12345',
+                    status: 'Contacting',
+                    source: 'Referral',
+                    priority: 'High'
+                },
+                {
+                    id: 'LD-007',
+                    name: 'Michael Brown',
+                    phone: '(555) 876-5432',
+                    address: '147 Spruce Court, City, State 12345',
+                    status: 'New',
+                    source: 'Web Form',
+                    priority: 'Medium'
+                },
+                {
+                    id: 'LD-008',
+                    name: 'Jennifer Lee',
+                    phone: '(555) 345-6789',
+                    address: '258 Willow Way, City, State 12345',
+                    status: 'Negotiating',
+                    source: 'Phone Call',
+                    priority: 'High'
+                }
+            ];
+
+            function searchLeads(query) {
+                if (!query || query.trim().length < 2) {
+                    return [];
+                }
+
+                const searchTerm = query.toLowerCase().trim();
+                return allLeads.filter(lead => {
+                    return lead.id.toLowerCase().includes(searchTerm) ||
+                           lead.name.toLowerCase().includes(searchTerm) ||
+                           lead.phone.includes(searchTerm) ||
+                           lead.address.toLowerCase().includes(searchTerm);
+                });
+            }
+
+            function renderSearchResults(results) {
+                const searchResults = document.getElementById('searchResults');
+                
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div class="no-results">No leads found</div>';
+                    searchResults.classList.add('active');
+                    return;
+                }
+
+                const resultsHTML = results.map(lead => `
+                    <div class="search-result-item" onclick="openLeadDetail('${lead.id}')">
+                        <div class="result-lead-id">${lead.id}</div>
+                        <div class="result-lead-name">${lead.name}</div>
+                        <div class="result-lead-details">
+                            ${lead.phone} • ${lead.address}
+                        </div>
+                        <div class="result-lead-details">
+                            Status: ${lead.status} • Priority: ${lead.priority}
+                        </div>
+                    </div>
+                `).join('');
+
+                searchResults.innerHTML = resultsHTML;
+                searchResults.classList.add('active');
+            }
+
+            function openLeadDetail(leadId) {
+                const lead = allLeads.find(l => l.id === leadId);
+                if (lead) {
+                    showNotification(`Opening lead detail for ${lead.name} (${leadId})`, 'success');
+                    // In a real app, this would navigate to the lead detail page
+                    // For now, show a modal with lead information
+                    showLeadDetailModal(lead);
+                }
+                hideSearchResults();
+            }
+
+            function showLeadDetailModal(lead) {
+                const modal = document.createElement('div');
+                modal.className = 'lead-modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>📋 Lead Details: ${lead.name}</h3>
+                            <button class="modal-close" onclick="this.closest('.lead-modal').remove()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="lead-info">
+                                <p><strong>Lead ID:</strong> ${lead.id}</p>
+                                <p><strong>Name:</strong> ${lead.name}</p>
+                                <p><strong>Phone:</strong> ${lead.phone}</p>
+                                <p><strong>Address:</strong> ${lead.address}</p>
+                                <p><strong>Status:</strong> ${lead.status}</p>
+                                <p><strong>Source:</strong> ${lead.source}</p>
+                                <p><strong>Priority:</strong> ${lead.priority}</p>
+                            </div>
+                            <div class="call-actions">
+                                <button class="btn btn-primary" onclick="makeCall('${lead.phone}')">
+                                    <i class="fas fa-phone"></i> Call Lead
+                                </button>
+                                <button class="btn" onclick="editLead('${lead.id}')">
+                                    <i class="fas fa-edit"></i> Edit Lead
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+            }
+
+            function hideSearchResults() {
+                const searchResults = document.getElementById('searchResults');
+                searchResults.classList.remove('active');
+                document.getElementById('leadSearch').value = '';
+            }
+
+            // Search event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                const searchInput = document.getElementById('leadSearch');
+                const searchResults = document.getElementById('searchResults');
+
+                // Search input event
+                searchInput.addEventListener('input', function() {
+                    const query = this.value;
+                    const results = searchLeads(query);
+                    renderSearchResults(results);
+                });
+
+                // Hide results when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        hideSearchResults();
+                    }
+                });
+
+                // Keyboard navigation
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        hideSearchResults();
+                    }
+                });
+            });
+
+            // Global functions for lead actions
+            window.editLead = function(leadId) {
+                showNotification(`Opening edit form for lead ${leadId}`, 'info');
+                // In a real app, this would open the lead edit form
+            };
+
+            window.makeCall = function(phone) {
+                showNotification(`Calling ${phone}...`, 'success');
+                // In a real app, this would integrate with phone system
+            };
         });
     </script>
 </body>
