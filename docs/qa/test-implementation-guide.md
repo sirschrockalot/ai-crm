@@ -161,6 +161,18 @@ npm install --save-dev detox @maestrohq/cli
 # Create test configuration
 ```
 
+### **4. Micro-App Testing Setup**
+
+```bash
+# Install micro-app testing dependencies
+npm install --save-dev @module-federation/utilities
+npm install --save-dev webpack-module-federation-plugin
+npm install --save-dev single-spa-testing
+npm install --save-dev @testing-library/jest-dom
+
+# Create test configuration
+```
+
 ```typescript
 // jest.config.js (Mobile)
 module.exports = {
@@ -173,6 +185,33 @@ module.exports = {
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!src/test/**/*'
+  ]
+};
+```
+
+```typescript
+// jest.config.js (Micro-App)
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^lead-management/(.*)$': '<rootDir>/../lead-management/src/$1',
+    '^analytics/(.*)$': '<rootDir>/../analytics/src/$1',
+    '^dashboard/(.*)$': '<rootDir>/../dashboard/src/$1'
+  },
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/test/**/*',
+    '!src/bootstrap.ts',
+    '!src/main.ts'
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/coverage/'
   ]
 };
 ```
@@ -581,6 +620,247 @@ describe('LeadController (e2e)', () => {
 import { Test, TestingModule } from '@nestjs/testing';
 import { FeatureFlagsService } from '../../modules/common/services/feature-flags.service';
 import { RedisService } from '../../modules/common/caching/redis.service';
+```
+
+### **5. Micro-App Testing**
+
+```typescript
+// src/test/micro-apps/lead-management-app.test.ts
+import { render, screen, fireEvent } from '@testing-library/react';
+import { LeadManagementApp } from '../../micro-apps/lead-management/LeadManagementApp';
+import { EventBus } from '../../shared/event-bus';
+import { SharedStateManager } from '../../shared/state-manager';
+
+describe('LeadManagementApp', () => {
+  let eventBus: EventBus;
+  let stateManager: SharedStateManager;
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    eventBus = new EventBus();
+    stateManager = new SharedStateManager();
+    container = document.createElement('div');
+  });
+
+  it('should initialize micro-app correctly', () => {
+    const app = new LeadManagementApp(container, eventBus, stateManager);
+    
+    expect(app.isInitialized()).toBe(true);
+    expect(container.querySelector('[data-testid="lead-app"]')).toBeInTheDocument();
+  });
+
+  it('should handle app lifecycle events', () => {
+    const app = new LeadManagementApp(container, eventBus, stateManager);
+    const lifecycleSpy = jest.fn();
+    
+    app.onLifecycleEvent(lifecycleSpy);
+    app.mount();
+    
+    expect(lifecycleSpy).toHaveBeenCalledWith('mounted');
+    
+    app.unmount();
+    expect(lifecycleSpy).toHaveBeenCalledWith('unmounted');
+  });
+
+  it('should communicate with host application', () => {
+    const app = new LeadManagementApp(container, eventBus, stateManager);
+    const messageSpy = jest.fn();
+    
+    eventBus.subscribe('lead-created', messageSpy);
+    app.createLead({ property_address: '123 Main St' });
+    
+    expect(messageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lead-created',
+        payload: { property_address: '123 Main St' }
+      })
+    );
+  });
+
+  it('should update shared state', () => {
+    const app = new LeadManagementApp(container, eventBus, stateManager);
+    
+    app.updateSharedState({ selectedLead: 'lead-123' });
+    
+    expect(stateManager.getState()).toMatchObject({
+      selectedLead: 'lead-123'
+    });
+  });
+});
+```
+
+```typescript
+// src/test/micro-apps/module-federation.test.ts
+import { loadRemoteModule } from '@module-federation/utilities';
+
+describe('Module Federation', () => {
+  it('should load remote modules correctly', async () => {
+    // Mock webpack module federation
+    window.__webpack_require__ = {
+      e: jest.fn().mockResolvedValue([]),
+      l: jest.fn().mockResolvedValue({ default: jest.fn() })
+    };
+
+    const module = await loadRemoteModule({
+      remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      remoteName: 'lead-management',
+      exposedModule: './LeadForm'
+    });
+
+    expect(module).toBeDefined();
+    expect(module.default).toBeInstanceOf(Function);
+  });
+
+  it('should handle federation configuration', () => {
+    const config = require('../../webpack.config.js');
+    const federationPlugin = config.plugins.find(
+      p => p.constructor.name === 'ModuleFederationPlugin'
+    );
+
+    expect(federationPlugin.options).toMatchObject({
+      name: 'lead-management',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './LeadForm': './src/components/LeadForm',
+        './LeadList': './src/components/LeadList'
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true }
+      }
+    });
+  });
+
+  it('should handle federation errors gracefully', async () => {
+    // Mock failed module loading
+    window.__webpack_require__ = {
+      e: jest.fn().mockRejectedValue(new Error('Module not found')),
+      l: jest.fn().mockRejectedValue(new Error('Load failed'))
+    };
+
+    await expect(loadRemoteModule({
+      remoteEntry: 'http://localhost:3001/remoteEntry.js',
+      remoteName: 'non-existent',
+      exposedModule: './Module'
+    })).rejects.toThrow('Module not found');
+  });
+});
+```
+
+```typescript
+// src/test/micro-apps/cross-app-communication.test.ts
+import { EventBus } from '../../shared/event-bus';
+import { LeadManagementApp } from '../../micro-apps/lead-management/LeadManagementApp';
+import { AnalyticsApp } from '../../micro-apps/analytics/AnalyticsApp';
+import { DashboardApp } from '../../micro-apps/dashboard/DashboardApp';
+
+describe('Cross-App Communication', () => {
+  let eventBus: EventBus;
+  let leadApp: LeadManagementApp;
+  let analyticsApp: AnalyticsApp;
+  let dashboardApp: DashboardApp;
+
+  beforeEach(() => {
+    eventBus = new EventBus();
+    leadApp = new LeadManagementApp(eventBus);
+    analyticsApp = new AnalyticsApp(eventBus);
+    dashboardApp = new DashboardApp(eventBus);
+  });
+
+  it('should broadcast events across apps', () => {
+    const analyticsSpy = jest.fn();
+    const dashboardSpy = jest.fn();
+
+    analyticsApp.onLeadCreated(analyticsSpy);
+    dashboardApp.onLeadCreated(dashboardSpy);
+
+    leadApp.createLead({ property_address: '123 Main St' });
+
+    expect(analyticsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lead-created',
+        payload: { property_address: '123 Main St' }
+      })
+    );
+
+    expect(dashboardSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lead-created',
+        payload: { property_address: '123 Main St' }
+      })
+    );
+  });
+
+  it('should handle app state synchronization', () => {
+    const stateSpy = jest.fn();
+    analyticsApp.onStateChange(stateSpy);
+
+    leadApp.updateState({ selectedLead: 'lead-123' });
+
+    expect(stateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'lead-management',
+        state: { selectedLead: 'lead-123' }
+      })
+    );
+  });
+
+  it('should isolate app boundaries', () => {
+    const isolatedEvent = { type: 'internal-event', data: 'private' };
+
+    leadApp.emitInternalEvent(isolatedEvent);
+
+    // Event should not propagate to other apps
+    expect(analyticsApp.getInternalEvents()).not.toContain(isolatedEvent);
+    expect(dashboardApp.getInternalEvents()).not.toContain(isolatedEvent);
+  });
+});
+```
+
+```typescript
+// src/test/micro-apps/app-boundaries.test.ts
+import { LeadManagementApp } from '../../micro-apps/lead-management/LeadManagementApp';
+import { DashboardApp } from '../../micro-apps/dashboard/DashboardApp';
+
+describe('App Boundaries', () => {
+  it('should prevent cross-app DOM manipulation', () => {
+    const leadAppContainer = document.createElement('div');
+    const dashboardAppContainer = document.createElement('div');
+
+    const leadApp = new LeadManagementApp(leadAppContainer);
+    const dashboardApp = new DashboardApp(dashboardAppContainer);
+
+    // Lead app should not be able to modify dashboard app DOM
+    expect(() => {
+      leadApp.manipulateDOM(dashboardAppContainer);
+    }).toThrow('Cross-app DOM manipulation not allowed');
+  });
+
+  it('should isolate CSS styles between apps', () => {
+    const leadApp = new LeadManagementApp();
+    const dashboardApp = new DashboardApp();
+
+    leadApp.addStyles('.lead-button { color: red; }');
+    dashboardApp.addStyles('.dashboard-button { color: blue; }');
+
+    // Styles should be scoped to respective apps
+    expect(document.querySelector('.lead-button')).toHaveStyle({ color: 'red' });
+    expect(document.querySelector('.dashboard-button')).toHaveStyle({ color: 'blue' });
+    expect(document.querySelector('.lead-button')).not.toHaveStyle({ color: 'blue' });
+  });
+
+  it('should handle app loading and unloading', async () => {
+    const container = document.createElement('div');
+    const app = new LeadManagementApp(container);
+
+    await app.load();
+    expect(container.querySelector('[data-testid="lead-app"]')).toBeInTheDocument();
+
+    await app.unload();
+    expect(container.querySelector('[data-testid="lead-app"]')).not.toBeInTheDocument();
+  });
+});
+```
 
 describe('Feature Flags', () => {
   let featureFlagsService: FeatureFlagsService;
@@ -916,6 +1196,32 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run test:e2e
+
+  micro-app-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [lead-management, analytics, dashboard]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:micro-app:${{ matrix.app }}
+      - run: npm run test:federation:${{ matrix.app }}
+
+  cross-app-integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:cross-app-integration
 
   performance-tests:
     runs-on: ubuntu-latest

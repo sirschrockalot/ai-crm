@@ -41,6 +41,9 @@ graph TD
     G[Feature Flag Tests] --> H[AI Model Tests]
     H --> I[Multi-Tenant Tests]
     
+    J[Micro-App Tests] --> K[Module Federation Tests]
+    K --> L[Cross-App Communication Tests]
+    
     style A fill:#ff9999
     style B fill:#ffcc99
     style C fill:#99ccff
@@ -50,6 +53,9 @@ graph TD
     style G fill:#99ffcc
     style H fill:#ffcc99
     style I fill:#ccff99
+    style J fill:#ff99ff
+    style K fill:#99ffff
+    style L fill:#ffff99
 ```
 
 ### **Test Layers**
@@ -58,6 +64,7 @@ graph TD
 - **Backend:** NestJS services, controllers, utilities
 - **Frontend:** React components, hooks, utilities
 - **Mobile:** React Native components, services
+- **Micro-Apps:** Individual app components and services
 - **Coverage:** > 90% for critical paths
 
 #### **2. Integration Tests (20%)**
@@ -65,12 +72,14 @@ graph TD
 - **Database Integration:** Data persistence and queries
 - **External Services:** Twilio, Google OAuth, AI services
 - **Feature Flag Integration:** Flag behavior and fallbacks
+- **Micro-App Integration:** Cross-app communication and data sharing
 
 #### **3. End-to-End Tests (10%)**
 - **User Workflows:** Complete user journeys
 - **Cross-Platform:** Desktop and mobile scenarios
 - **Multi-Tenant:** Tenant isolation and data segregation
 - **Real-World Scenarios:** Production-like environments
+- **Micro-App Workflows:** End-to-end micro-app interactions
 
 ---
 
@@ -118,6 +127,21 @@ graph TD
 - React Native Flipper: Debugging
 - Metro: Bundler testing
 - AsyncStorage Mock: Storage testing
+```
+
+### **Micro-App Testing Stack**
+```typescript
+// Testing Framework
+- Jest: Unit testing for individual micro-apps
+- Module Federation Testing: Cross-app module loading
+- Webpack Module Federation: Federation configuration testing
+- Single-SPA Testing: Micro-frontend framework testing
+
+// Test Utilities
+- Module Federation Plugin: Federation setup testing
+- Shared Dependency Testing: Common library testing
+- Cross-App Communication Testing: Event bus and messaging
+- Micro-App Isolation Testing: App boundary testing
 ```
 
 ### **Performance Testing Stack**
@@ -452,6 +476,275 @@ describe('AI Model Tests', () => {
 });
 ```
 
+### **6. Micro-App Testing**
+
+#### **Individual App Testing**
+```typescript
+// Micro-App Unit Test Example
+describe('LeadManagementApp', () => {
+  let app: MicroApp;
+  let container: HTMLElement;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    app = new LeadManagementApp(container);
+  });
+
+  it('should initialize micro-app correctly', () => {
+    expect(app.isInitialized()).toBe(true);
+    expect(container.querySelector('[data-testid="lead-app"]')).toBeInTheDocument();
+  });
+
+  it('should handle app lifecycle events', () => {
+    const lifecycleSpy = jest.fn();
+    app.onLifecycleEvent(lifecycleSpy);
+
+    app.mount();
+    expect(lifecycleSpy).toHaveBeenCalledWith('mounted');
+
+    app.unmount();
+    expect(lifecycleSpy).toHaveBeenCalledWith('unmounted');
+  });
+
+  it('should communicate with host application', () => {
+    const messageSpy = jest.fn();
+    window.addEventListener('micro-app-message', messageSpy);
+
+    app.sendMessage('lead-created', { leadId: 'test-123' });
+    
+    expect(messageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        detail: { type: 'lead-created', payload: { leadId: 'test-123' } }
+      })
+    );
+  });
+});
+```
+
+#### **Module Federation Testing**
+```typescript
+// Module Federation Test Suite
+describe('Module Federation', () => {
+  it('should load remote modules correctly', async () => {
+    const remoteModule = await import('lead-management/LeadForm');
+    
+    expect(remoteModule).toBeDefined();
+    expect(remoteModule.default).toBeInstanceOf(Function);
+  });
+
+  it('should handle federation configuration', () => {
+    const federationConfig = require('./webpack.config.js');
+    
+    expect(federationConfig.plugins).toContainEqual(
+      expect.objectContaining({
+        constructor: { name: 'ModuleFederationPlugin' }
+      })
+    );
+  });
+
+  it('should resolve shared dependencies', () => {
+    const sharedDeps = federationConfig.plugins.find(
+      p => p.constructor.name === 'ModuleFederationPlugin'
+    ).options.shared;
+
+    expect(sharedDeps).toHaveProperty('react');
+    expect(sharedDeps).toHaveProperty('react-dom');
+  });
+});
+```
+
+#### **Cross-App Communication Testing**
+```typescript
+// Cross-App Communication Test Suite
+describe('Cross-App Communication', () => {
+  let eventBus: EventBus;
+  let leadApp: LeadManagementApp;
+  let analyticsApp: AnalyticsApp;
+
+  beforeEach(() => {
+    eventBus = new EventBus();
+    leadApp = new LeadManagementApp(eventBus);
+    analyticsApp = new AnalyticsApp(eventBus);
+  });
+
+  it('should broadcast events across apps', () => {
+    const analyticsSpy = jest.fn();
+    analyticsApp.onLeadCreated(analyticsSpy);
+
+    leadApp.createLead({ property_address: '123 Main St' });
+    
+    expect(analyticsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'lead-created',
+        payload: expect.objectContaining({
+          property_address: '123 Main St'
+        })
+      })
+    );
+  });
+
+  it('should handle app state synchronization', () => {
+    const stateSpy = jest.fn();
+    analyticsApp.onStateChange(stateSpy);
+
+    leadApp.updateState({ selectedLead: 'lead-123' });
+    
+    expect(stateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: 'lead-management',
+        state: { selectedLead: 'lead-123' }
+      })
+    );
+  });
+
+  it('should isolate app boundaries', () => {
+    const isolatedEvent = { type: 'internal-event', data: 'private' };
+    
+    leadApp.emitInternalEvent(isolatedEvent);
+    
+    // Event should not propagate to other apps
+    expect(analyticsApp.getInternalEvents()).not.toContain(isolatedEvent);
+  });
+});
+```
+
+#### **Shared State Management Testing**
+```typescript
+// Shared State Management Test Suite
+describe('Shared State Management', () => {
+  let stateManager: SharedStateManager;
+  let leadApp: LeadManagementApp;
+  let dashboardApp: DashboardApp;
+
+  beforeEach(() => {
+    stateManager = new SharedStateManager();
+    leadApp = new LeadManagementApp(stateManager);
+    dashboardApp = new DashboardApp(stateManager);
+  });
+
+  it('should synchronize shared state across apps', () => {
+    leadApp.updateSharedState({ currentUser: { id: 'user-123' } });
+    
+    expect(dashboardApp.getSharedState()).toMatchObject({
+      currentUser: { id: 'user-123' }
+    });
+  });
+
+  it('should handle state conflicts gracefully', () => {
+    // Simulate concurrent state updates
+    leadApp.updateSharedState({ selectedLead: 'lead-1' });
+    dashboardApp.updateSharedState({ selectedLead: 'lead-2' });
+    
+    const finalState = stateManager.getState();
+    expect(finalState.selectedLead).toBeDefined();
+    expect(finalState.conflictResolved).toBe(true);
+  });
+
+  it('should maintain app-specific state isolation', () => {
+    leadApp.updateAppState({ internalData: 'private' });
+    dashboardApp.updateAppState({ dashboardConfig: 'private' });
+    
+    expect(leadApp.getAppState()).toHaveProperty('internalData');
+    expect(dashboardApp.getAppState()).toHaveProperty('dashboardConfig');
+    expect(leadApp.getAppState()).not.toHaveProperty('dashboardConfig');
+  });
+});
+```
+
+#### **App Boundary Testing**
+```typescript
+// App Boundary Test Suite
+describe('App Boundaries', () => {
+  it('should prevent cross-app DOM manipulation', () => {
+    const leadAppContainer = document.createElement('div');
+    const dashboardAppContainer = document.createElement('div');
+    
+    const leadApp = new LeadManagementApp(leadAppContainer);
+    const dashboardApp = new DashboardApp(dashboardAppContainer);
+    
+    // Lead app should not be able to modify dashboard app DOM
+    expect(() => {
+      leadApp.manipulateDOM(dashboardAppContainer);
+    }).toThrow('Cross-app DOM manipulation not allowed');
+  });
+
+  it('should isolate CSS styles between apps', () => {
+    const leadApp = new LeadManagementApp();
+    const dashboardApp = new DashboardApp();
+    
+    leadApp.addStyles('.lead-button { color: red; }');
+    dashboardApp.addStyles('.dashboard-button { color: blue; }');
+    
+    // Styles should be scoped to respective apps
+    expect(document.querySelector('.lead-button')).toHaveStyle({ color: 'red' });
+    expect(document.querySelector('.dashboard-button')).toHaveStyle({ color: 'blue' });
+    expect(document.querySelector('.lead-button')).not.toHaveStyle({ color: 'blue' });
+  });
+
+  it('should handle app loading and unloading', async () => {
+    const container = document.createElement('div');
+    const app = new LeadManagementApp(container);
+    
+    await app.load();
+    expect(container.querySelector('[data-testid="lead-app"]')).toBeInTheDocument();
+    
+    await app.unload();
+    expect(container.querySelector('[data-testid="lead-app"]')).not.toBeInTheDocument();
+  });
+});
+```
+
+#### **Federation Configuration Testing**
+```typescript
+// Federation Configuration Test Suite
+describe('Federation Configuration', () => {
+  it('should validate webpack federation config', () => {
+    const config = require('./webpack.config.js');
+    const federationPlugin = config.plugins.find(
+      p => p.constructor.name === 'ModuleFederationPlugin'
+    );
+    
+    expect(federationPlugin.options).toMatchObject({
+      name: 'lead-management',
+      filename: 'remoteEntry.js',
+      exposes: {
+        './LeadForm': './src/components/LeadForm',
+        './LeadList': './src/components/LeadList'
+      },
+      shared: {
+        react: { singleton: true },
+        'react-dom': { singleton: true }
+      }
+    });
+  });
+
+  it('should test remote module loading', async () => {
+    const container = { get: jest.fn(), init: jest.fn() };
+    
+    // Mock webpack module federation
+    window.__webpack_require__ = {
+      e: jest.fn().mockResolvedValue([]),
+      l: jest.fn().mockResolvedValue({ default: jest.fn() })
+    };
+    
+    const module = await loadRemoteModule('lead-management/LeadForm');
+    expect(module).toBeDefined();
+  });
+
+  it('should handle federation errors gracefully', async () => {
+    // Mock failed module loading
+    window.__webpack_require__ = {
+      e: jest.fn().mockRejectedValue(new Error('Module not found')),
+      l: jest.fn().mockRejectedValue(new Error('Load failed'))
+    };
+    
+    await expect(loadRemoteModule('non-existent/Module'))
+      .rejects
+      .toThrow('Module not found');
+  });
+});
+```
+
 ---
 
 ## 🚀 Test Automation Strategy
@@ -625,6 +918,8 @@ class TestReportGenerator {
 | Unit Tests | Continuous | Developers | Jest, Coverage |
 | Integration Tests | Daily | QA Team | Supertest, Pactum |
 | E2E Tests | Weekly | QA Team | Playwright, Detox |
+| Micro-App Tests | Daily | Micro-App Teams | Jest, Module Federation |
+| Cross-App Integration | Weekly | Integration Team | Event Bus, State Manager |
 | Performance Tests | Weekly | DevOps | Artillery, k6 |
 | Security Tests | Monthly | Security Team | OWASP ZAP, Snyk |
 
