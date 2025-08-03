@@ -1,4 +1,4 @@
-# 🗄️ Database Schema - Presidential Digs CRM
+# 🗄️ Database Schema - DealCycle CRM
 
 ## 📋 Database Overview
 
@@ -7,6 +7,8 @@
 **Indexing Strategy:** Compound indexes for performance
 **Backup Strategy:** Daily automated backups
 **Versioning:** Schema version tracking
+**AI Integration:** Enhanced schemas for AI-powered features
+**Automation Support:** Workflow and automation tracking
 
 ---
 
@@ -33,7 +35,11 @@
     llm_features_enabled: Boolean,
     custom_branding: Boolean,
     auto_tagging: Boolean,
-    ai_summaries: Boolean
+    ai_summaries: Boolean,
+    automation_enabled: Boolean,
+    advanced_analytics: Boolean,
+    ai_lead_scoring: Boolean,
+    ai_buyer_matching: Boolean
   },
   billing_info: {
     contact_name: String,
@@ -159,6 +165,18 @@
   custom_fields: Object,          // Flexible custom fields
   ai_summary: String,             // AI-generated summary
   ai_tags: [String],              // AI-generated tags
+  lead_score: Number,             // AI-powered lead score (0-100)
+  qualification_probability: Number, // AI probability of qualification
+  source: String,                 // Lead source (website, referral, etc.)
+  automation_data: {
+    workflow_id: ObjectId,        // Reference to active workflow
+    last_automation_step: String, // Last executed automation step
+    automation_history: [{
+      step: String,
+      executed_at: Date,
+      result: String
+    }]
+  },
   created_at: Date,
   updated_at: Date
 }
@@ -224,6 +242,12 @@
   total_deals: Number,
   total_investment: Number,
   average_deal_size: Number,
+  performance_metrics: {
+    conversion_rate: Number,
+    average_response_time: Number,
+    deal_velocity: Number,
+    roi_percentage: Number
+  },
   is_active: Boolean,
   is_verified: Boolean,
   last_contacted: Date,
@@ -518,6 +542,108 @@
 ```
 
 ---
+
+### **Workflows Collection**
+
+```javascript
+{
+  _id: ObjectId,
+  tenant_id: ObjectId,            // Reference to tenants collection
+  name: String,
+  description: String,
+  status: String,                 // active, inactive, draft
+  trigger: {
+    type: String,                 // lead_created, status_changed, communication_sent, scheduled
+    conditions: Object,
+    schedule: {
+      frequency: String,          // daily, weekly, monthly
+      time: String,
+      timezone: String
+    }
+  },
+  steps: [{
+    id: String,
+    type: String,                 // action, condition, delay
+    name: String,
+    config: Object,
+    order: Number,
+    next_step_id: String,
+    condition_branch: {
+      true_step_id: String,
+      false_step_id: String
+    }
+  }],
+  statistics: {
+    total_executions: Number,
+    successful_executions: Number,
+    failed_executions: Number,
+    last_executed: Date,
+    average_execution_time: Number
+  },
+  created_by: ObjectId,           // Reference to users collection
+  tags: [String],
+  created_at: Date,
+  updated_at: Date
+}
+```
+
+**Indexes:**
+```javascript
+// Primary index
+{ _id: 1 }
+
+// Tenant + status
+{ tenant_id: 1, status: 1 }
+
+// Tenant + trigger type
+{ tenant_id: 1, "trigger.type": 1 }
+
+// Tenant + created by
+{ tenant_id: 1, created_by: 1 }
+
+// Tenant + tags
+{ tenant_id: 1, tags: 1 }
+```
+
+### **Analytics Collection**
+
+```javascript
+{
+  _id: ObjectId,
+  tenant_id: ObjectId,            // Reference to tenants collection
+  metric_name: String,            // leads_created, deals_closed, conversion_rate, etc.
+  metric_value: Number,
+  metric_unit: String,            // count, percentage, currency, time
+  dimensions: {
+    user_id: ObjectId,            // Reference to users collection
+    lead_source: String,
+    lead_status: String,
+    date: Date,
+    automation_workflow: String
+  },
+  recorded_at: Date,
+  aggregation_period: String,     // daily, hourly, real_time
+  created_at: Date
+}
+```
+
+**Indexes:**
+```javascript
+// Primary index
+{ _id: 1 }
+
+// Tenant + metric + date
+{ tenant_id: 1, metric_name: 1, recorded_at: -1 }
+
+// Tenant + user + date
+{ tenant_id: 1, "dimensions.user_id": 1, recorded_at: -1 }
+
+// Tenant + source + date
+{ tenant_id: 1, "dimensions.lead_source": 1, recorded_at: -1 }
+
+// Tenant + aggregation period
+{ tenant_id: 1, aggregation_period: 1, recorded_at: -1 }
+```
 
 ### **Settings Collection**
 

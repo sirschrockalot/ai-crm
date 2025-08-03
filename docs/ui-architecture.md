@@ -1,15 +1,15 @@
-# 🏗️ Frontend Architecture Document - Presidential Digs CRM
+# 🏗️ Frontend Architecture Document - DealCycle CRM
 
 ## 📋 Document Information
 
 | Field | Value |
 |-------|-------|
 | **Document Type** | Frontend Architecture Specification |
-| **Project** | Presidential Digs CRM |
-| **Version** | 2.0 |
+| **Project** | DealCycle CRM |
+| **Version** | 3.0 |
 | **Last Updated** | 2024-12-19 |
 | **Owner** | Architect Agent |
-| **Status** | Draft |
+| **Status** | Updated |
 
 ---
 
@@ -17,28 +17,28 @@
 
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
+| 2024-12-19 | 3.0 | Updated to DealCycle CRM with modern design system and role-based dashboards | Architect Agent |
 | 2024-12-19 | 2.0 | Complete micro frontend architecture with Chakra UI | Architect Agent |
 
 ---
 
 ## 🎯 Template and Framework Selection
 
-### **Selected Architecture: Micro Frontend with Module Federation**
+### **Selected Architecture: Modern Monolithic with Component-Based Design**
 
 **Framework Strategy:**
-- **Host Application**: Next.js 14+ (App Router)
-- **Micro Frontends**: All Next.js applications
-- **Styling**: Chakra UI with custom design system
+- **Main Application**: Next.js 14+ (App Router)
+- **Styling**: TailwindCSS with custom design system
 - **State Management**: Zustand + React Query
 - **Real-time**: WebSocket integration
-- **Containerization**: Docker per module
+- **Containerization**: Docker with microservices backend
 
 **Rationale:**
-- **Scalability**: Independent teams can work on different modules
-- **Maintainability**: Isolated codebases reduce complexity
-- **Performance**: Lazy loading and independent deployment
-- **Brand Consistency**: Shared design system across modules
-- **Fault Tolerance**: Module failures don't break entire application
+- **Simplicity**: Single codebase reduces complexity and deployment overhead
+- **Performance**: Optimized bundle with code splitting and lazy loading
+- **Brand Consistency**: Shared design system across all components
+- **Developer Experience**: Easier debugging and state management
+- **Cost Efficiency**: Reduced infrastructure and maintenance costs
 
 ---
 
@@ -46,222 +46,193 @@
 
 | Category | Technology | Version | Purpose | Rationale |
 |----------|------------|---------|---------|-----------|
-| **Framework** | Next.js | 14+ | Host & Micro Frontends | SSR/SSG, built-in routing, excellent DX |
+| **Framework** | Next.js | 14+ | Main Application | SSR/SSG, built-in routing, excellent DX |
 | **Language** | TypeScript | 5+ | Type Safety | Complex CRM data models, team collaboration |
-| **Styling** | Chakra UI | 3+ | Component Library | Accessibility, theme system, customization |
+| **Styling** | TailwindCSS | 3+ | Utility-first CSS | Rapid development, consistent design, customization |
+| **UI Components** | Headless UI | Latest | Accessible Components | Accessibility, unstyled components, flexibility |
 | **State Management** | Zustand | 4+ | Client State | Lightweight, simple API, perfect for React |
 | **Server State** | React Query | 5+ | API State | Caching, synchronization, real-time updates |
-| **Module Federation** | @module-federation/nextjs-mf | Latest | Micro Frontend | Runtime module loading, shared dependencies |
-| **Real-time** | WebSocket | Native | Cross-module Communication | Live updates, event-driven architecture |
+| **Forms** | React Hook Form + Zod | Latest | Form Management | Type-safe forms, validation, performance |
+| **Charts** | Recharts | Latest | Data Visualization | Responsive charts, customization, accessibility |
+| **Real-time** | WebSocket | Native | Real-time Communication | Live updates, event-driven architecture |
 | **Testing** | Jest + RTL | Latest | Unit Testing | Component testing, mocking capabilities |
 | **E2E Testing** | Playwright | Latest | End-to-End | Cross-browser, reliable automation |
 | **Containerization** | Docker | Latest | Deployment | Consistent environments, scalability |
 | **Error Tracking** | Custom + Sentry | Latest | Monitoring | Centralized error management |
-| **Design System** | Custom on Chakra UI | 1.0 | UI Consistency | Brand alignment, component reusability |
+| **Design System** | Custom on TailwindCSS | 1.0 | UI Consistency | Brand alignment, component reusability |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-/presidential-digs-crm
-├── host/                           # Next.js Host Application
+/dealcycle-crm
+├── frontend/                        # Next.js Main Application
 │   ├── src/
 │   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Table.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Chart.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── layout/
+│   │   │   │   ├── Sidebar.tsx
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── Navigation.tsx
+│   │   │   │   ├── SearchBar.tsx
+│   │   │   │   └── index.ts
 │   │   │   ├── auth/
 │   │   │   │   ├── LoginForm.tsx
 │   │   │   │   ├── AuthGuard.tsx
 │   │   │   │   └── index.ts
-│   │   │   ├── navigation/
-│   │   │   │   ├── Sidebar.tsx
-│   │   │   │   ├── Header.tsx
-│   │   │   │   ├── Navigation.tsx
+│   │   │   ├── forms/
+│   │   │   │   ├── LeadForm.tsx
+│   │   │   │   ├── BuyerForm.tsx
+│   │   │   │   ├── WorkflowForm.tsx
 │   │   │   │   └── index.ts
-│   │   │   ├── profile/
-│   │   │   │   ├── ProfileForm.tsx
-│   │   │   │   ├── UserSettings.tsx
-│   │   │   │   └── index.ts
-│   │   │   └── layout/
-│   │   │       ├── AppLayout.tsx
-│   │   │       ├── ModuleContainer.tsx
-│   │   │       └── index.ts
+│   │   │   └── features/
+│   │   │       ├── leads/
+│   │   │       │   ├── LeadList.tsx
+│   │   │       │   ├── LeadCard.tsx
+│   │   │       │   ├── LeadDetail.tsx
+│   │   │       │   ├── LeadForm.tsx
+│   │   │       │   └── LeadImportExport.tsx
+│   │   │       ├── buyers/
+│   │   │       │   ├── BuyerList.tsx
+│   │   │       │   ├── BuyerCard.tsx
+│   │   │       │   ├── BuyerDetail.tsx
+│   │   │       │   ├── BuyerForm.tsx
+│   │   │       │   └── BuyerAnalytics.tsx
+│   │   │       ├── communications/
+│   │   │       │   ├── CommunicationHistory.tsx
+│   │   │       │   ├── SMSInterface.tsx
+│   │   │       │   ├── CallLog.tsx
+│   │   │       │   ├── CommunicationCenter.tsx
+│   │   │       │   └── CommunicationAnalytics.tsx
+│   │   │       ├── dashboard/
+│   │   │       │   ├── ExecutiveDashboard.tsx
+│   │   │       │   ├── AcquisitionsDashboard.tsx
+│   │   │       │   ├── DispositionDashboard.tsx
+│   │   │       │   ├── MobileDashboard.tsx
+│   │   │       │   ├── DashboardStats.tsx
+│   │   │       │   ├── RecentLeads.tsx
+│   │   │       │   ├── QuickActions.tsx
+│   │   │       │   └── ActivityFeed.tsx
+│   │   │       ├── automation/
+│   │   │       │   ├── WorkflowBuilder.tsx
+│   │   │       │   ├── WorkflowCanvas.tsx
+│   │   │       │   ├── WorkflowComponents.tsx
+│   │   │       │   ├── AutomationStats.tsx
+│   │   │       │   └── WorkflowList.tsx
+│   │   │       └── analytics/
+│   │   │           ├── AnalyticsDashboard.tsx
+│   │   │           ├── PerformanceMetrics.tsx
+│   │   │           ├── ConversionCharts.tsx
+│   │   │           ├── TeamPerformance.tsx
+│   │   │           └── CustomReports.tsx
 │   │   ├── pages/
 │   │   │   ├── _app.tsx
 │   │   │   ├── index.tsx
 │   │   │   ├── auth/
 │   │   │   │   ├── login.tsx
 │   │   │   │   └── callback.tsx
-│   │   │   ├── profile/
-│   │   │   │   └── settings.tsx
-│   │   │   └── modules/
-│   │   │       ├── leads/
-│   │   │       ├── buyers/
-│   │   │       ├── communications/
-│   │   │       ├── dashboard/
-│   │   │       └── settings/
-│   │   ├── stores/
-│   │   │   ├── authStore.ts
-│   │   │   ├── navigationStore.ts
-│   │   │   └── globalStore.ts
-│   │   ├── services/
-│   │   │   ├── authService.ts
-│   │   │   ├── websocketService.ts
-│   │   │   └── errorTrackingService.ts
-│   │   ├── utils/
-│   │   │   ├── constants.ts
-│   │   │   ├── helpers.ts
-│   │   │   └── types.ts
-│   │   └── styles/
-│   │       └── globals.css
-│   ├── public/
-│   ├── next.config.js
-│   ├── package.json
-│   └── Dockerfile
-├── micro-frontends/
-│   ├── leads/
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── LeadList.tsx
-│   │   │   │   ├── LeadCard.tsx
-│   │   │   │   ├── LeadForm.tsx
-│   │   │   │   ├── LeadPipeline.tsx
-│   │   │   │   └── LeadDetail.tsx
-│   │   │   ├── pages/
+│   │   │   ├── leads/
 │   │   │   │   ├── index.tsx
 │   │   │   │   ├── [id].tsx
-│   │   │   │   └── new.tsx
-│   │   │   ├── stores/
-│   │   │   │   └── leadStore.ts
-│   │   │   ├── services/
-│   │   │   │   └── leadService.ts
-│   │   │   └── types/
-│   │   │       └── lead.ts
-│   │   ├── webpack.config.js
-│   │   ├── package.json
-│   │   └── Dockerfile
-│   ├── buyers/
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── BuyerList.tsx
-│   │   │   │   ├── BuyerCard.tsx
-│   │   │   │   ├── BuyerForm.tsx
-│   │   │   │   └── BuyerMatching.tsx
-│   │   │   ├── pages/
-│   │   │   ├── stores/
-│   │   │   ├── services/
-│   │   │   └── types/
-│   │   ├── webpack.config.js
-│   │   ├── package.json
-│   │   └── Dockerfile
-│   ├── communications/
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── SMSInterface.tsx
-│   │   │   │   ├── CallLog.tsx
-│   │   │   │   ├── CommunicationHistory.tsx
-│   │   │   │   └── MessageComposer.tsx
-│   │   │   ├── pages/
-│   │   │   ├── stores/
-│   │   │   ├── services/
-│   │   │   └── types/
-│   │   ├── webpack.config.js
-│   │   ├── package.json
-│   │   └── Dockerfile
-│   ├── dashboard/
-│   │   ├── src/
-│   │   │   ├── components/
-│   │   │   │   ├── DashboardStats.tsx
-│   │   │   │   ├── RecentActivity.tsx
-│   │   │   │   ├── PerformanceChart.tsx
-│   │   │   │   └── QuickActions.tsx
-│   │   │   ├── pages/
-│   │   │   ├── stores/
-│   │   │   ├── services/
-│   │   │   └── types/
-│   │   ├── webpack.config.js
-│   │   ├── package.json
-│   │   └── Dockerfile
-│   └── settings/
-│       ├── src/
-│       │   ├── components/
-│       │   │   ├── TeamManagement.tsx
-│       │   │   ├── Integrations.tsx
-│       │   │   ├── Permissions.tsx
-│       │   │   └── SystemSettings.tsx
-│       │   ├── pages/
-│       │   ├── stores/
-│       │   ├── services/
-│       │   └── types/
-│       ├── webpack.config.js
-│       ├── package.json
-│       └── Dockerfile
-├── shared/
-│   ├── design-system/
-│   │   ├── packages/
-│   │   │   ├── core/
-│   │   │   │   ├── components/
-│   │   │   │   │   ├── Button/
-│   │   │   │   │   ├── Input/
-│   │   │   │   │   ├── Modal/
-│   │   │   │   │   ├── Table/
-│   │   │   │   │   └── index.ts
-│   │   │   │   ├── theme/
-│   │   │   │   │   ├── tokens.ts
-│   │   │   │   │   ├── colors.ts
-│   │   │   │   │   ├── typography.ts
-│   │   │   │   │   └── spacing.ts
-│   │   │   │   ├── utils/
-│   │   │   │   │   ├── helpers.ts
-│   │   │   │   │   └── constants.ts
-│   │   │   │   └── package.json
-│   │   │   ├── icons/
-│   │   │   │   ├── src/
-│   │   │   │   └── package.json
-│   │   │   └── illustrations/
-│   │   │       ├── src/
-│   │   │       └── package.json
-│   │   ├── storybook/
-│   │   │   ├── .storybook/
-│   │   │   └── stories/
-│   │   └── package.json
-│   ├── auth/
-│   │   ├── types.ts
-│   │   ├── guards.ts
-│   │   ├── tokenManager.ts
-│   │   └── index.ts
-│   ├── realtime/
-│   │   ├── websocket.ts
-│   │   ├── eventBus.ts
-│   │   └── index.ts
-│   ├── monitoring/
-│   │   ├── errorTracker.ts
-│   │   ├── performance.ts
-│   │   └── index.ts
-│   ├── types/
-│   │   ├── common.ts
-│   │   ├── api.ts
-│   │   └── index.ts
-│   └── utils/
-│       ├── validation.ts
-│       ├── formatting.ts
-│       └── constants.ts
+│   │   │   │   ├── new.tsx
+│   │   │   │   └── import-export.tsx
+│   │   │   ├── buyers/
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── [id].tsx
+│   │   │   │   ├── new.tsx
+│   │   │   │   └── analytics.tsx
+│   │   │   ├── communications/
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── [leadId].tsx
+│   │   │   │   └── center.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── executive.tsx
+│   │   │   │   ├── acquisitions.tsx
+│   │   │   │   ├── disposition.tsx
+│   │   │   │   └── mobile.tsx
+│   │   │   ├── automation/
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── builder.tsx
+│   │   │   │   └── workflows.tsx
+│   │   │   ├── analytics/
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── performance.tsx
+│   │   │   │   └── reports.tsx
+│   │   │   └── settings/
+│   │   │       ├── profile.tsx
+│   │   │       ├── team.tsx
+│   │   │       └── integrations.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useLeads.ts
+│   │   │   ├── useBuyers.ts
+│   │   │   ├── useCommunications.ts
+│   │   │   ├── useAutomation.ts
+│   │   │   ├── useAnalytics.ts
+│   │   │   └── useDashboard.ts
+│   │   ├── services/
+│   │   │   ├── api.ts
+│   │   │   ├── auth.ts
+│   │   │   ├── websocket.ts
+│   │   │   ├── twilio.ts
+│   │   │   └── ai.ts
+│   │   ├── stores/
+│   │   │   ├── authStore.ts
+│   │   │   ├── leadStore.ts
+│   │   │   ├── buyerStore.ts
+│   │   │   ├── communicationStore.ts
+│   │   │   ├── automationStore.ts
+│   │   │   ├── analyticsStore.ts
+│   │   │   └── uiStore.ts
+│   │   ├── types/
+│   │   │   ├── auth.ts
+│   │   │   ├── leads.ts
+│   │   │   ├── buyers.ts
+│   │   │   ├── communications.ts
+│   │   │   ├── automation.ts
+│   │   │   ├── analytics.ts
+│   │   │   └── api.ts
+│   │   ├── utils/
+│   │   │   ├── validation.ts
+│   │   │   ├── formatting.ts
+│   │   │   ├── constants.ts
+│   │   │   ├── charts.ts
+│   │   │   └── workflow.ts
+│   │   ├── styles/
+│   │   │   ├── globals.css
+│   │   │   ├── components.css
+│   │   │   └── design-system.css
+│   │   └── design-system/
+│   │       ├── colors.ts
+│   │       ├── typography.ts
+│   │       ├── spacing.ts
+│   │       ├── shadows.ts
+│   │       └── animations.ts
+│   ├── public/
+│   ├── next.config.js
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── Dockerfile
+├── backend/                         # NestJS Backend
 ├── infrastructure/
 │   ├── docker/
 │   │   ├── docker-compose.yml
 │   │   ├── docker-compose.prod.yml
 │   │   └── nginx/
 │   │       └── nginx.conf
-│   ├── kubernetes/
-│   │   ├── host-deployment.yaml
-│   │   ├── leads-deployment.yaml
-│   │   ├── buyers-deployment.yaml
-│   │   ├── communications-deployment.yaml
-│   │   ├── dashboard-deployment.yaml
-│   │   ├── settings-deployment.yaml
-│   │   └── ingress.yaml
 │   └── scripts/
-│       ├── build-all.sh
-│       ├── deploy-module.sh
+│       ├── build.sh
+│       ├── deploy.sh
 │       └── health-check.sh
 └── docs/
     ├── api/
@@ -278,7 +249,7 @@
 ```typescript
 // Example: LeadCard component
 import React from 'react';
-import { Box, Card, Text, Badge, Button } from '@chakra-ui/react';
+import { Card, Badge, Button } from '../ui';
 import { Lead } from '../types/lead';
 
 interface LeadCardProps {
@@ -303,37 +274,42 @@ export const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card p={4} shadow="md" borderWidth="1px">
-      <Box>
-        <Text fontSize="lg" fontWeight="bold">
-          {lead.propertyAddress}
-        </Text>
-        <Text fontSize="sm" color="gray.600">
-          {lead.ownerName}
-        </Text>
-        <Badge colorScheme={lead.status === 'active' ? 'green' : 'gray'}>
-          {lead.status}
-        </Badge>
-      </Box>
-      
-      <Box mt={4} display="flex" gap={2}>
-        <Button
-          size="sm"
-          colorScheme="blue"
-          onClick={handleEdit}
-          isLoading={isLoading}
-        >
-          Edit
-        </Button>
-        <Button
-          size="sm"
-          colorScheme="red"
-          onClick={handleDelete}
-          isLoading={isLoading}
-        >
-          Delete
-        </Button>
-      </Box>
+    <Card className="p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">
+            {lead.propertyAddress}
+          </h3>
+          <p className="text-sm text-gray-600">
+            {lead.ownerName}
+          </p>
+          <Badge 
+            variant={lead.status === 'active' ? 'success' : 'secondary'}
+            className="mt-2"
+          >
+            {lead.status}
+          </Badge>
+        </div>
+        
+        <div className="flex gap-2 pt-3">
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleEdit}
+            disabled={isLoading}
+          >
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="danger"
+            onClick={handleDelete}
+            disabled={isLoading}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
     </Card>
   );
 };
@@ -669,13 +645,12 @@ export const apiClient = new ApiClient(process.env.NEXT_PUBLIC_API_URL || '');
 ### **Route Configuration**
 
 ```typescript
-// host/src/pages/_app.tsx
-import { ChakraProvider } from '@chakra-ui/react';
+// frontend/src/pages/_app.tsx
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { theme } from '../shared/design-system/theme';
 import { AuthProvider } from '../components/auth/AuthProvider';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { WebSocketProvider } from '../components/realtime/WebSocketProvider';
+import '../styles/globals.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -690,13 +665,11 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ChakraProvider theme={theme}>
-          <AuthProvider>
-            <WebSocketProvider>
-              <Component {...pageProps} />
-            </WebSocketProvider>
-          </AuthProvider>
-        </ChakraProvider>
+        <AuthProvider>
+          <WebSocketProvider>
+            <Component {...pageProps} />
+          </WebSocketProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
@@ -706,31 +679,26 @@ export default MyApp;
 ```
 
 ```typescript
-// host/src/pages/modules/leads/index.tsx
-import dynamic from 'next/dynamic';
+// frontend/src/pages/leads/index.tsx
 import { Suspense } from 'react';
-import { Box, Spinner, Text } from '@chakra-ui/react';
-import { ModuleGuard } from '../../../components/auth/ModuleGuard';
-
-const LeadsModule = dynamic(
-  () => import('leads/LeadsModule'),
-  {
-    loading: () => (
-      <Box display="flex" justifyContent="center" alignItems="center" h="400px">
-        <Spinner size="xl" />
-      </Box>
-    ),
-    ssr: false,
-  }
-);
+import { LeadList } from '../../components/features/leads/LeadList';
+import { AuthGuard } from '../../components/auth/AuthGuard';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
 
 export default function LeadsPage() {
   return (
-    <ModuleGuard requiredPermissions={['leads:read']}>
-      <Suspense fallback={<Spinner />}>
-        <LeadsModule />
-      </Suspense>
-    </ModuleGuard>
+    <AuthGuard requiredPermissions={['leads:read']}>
+      <div className="container mx-auto px-4 py-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Leads</h1>
+          <p className="text-gray-600 mt-2">Manage your real estate leads</p>
+        </div>
+        
+        <Suspense fallback={<LoadingSpinner />}>
+          <LeadList />
+        </Suspense>
+      </div>
+    </AuthGuard>
   );
 }
 ```
@@ -741,80 +709,101 @@ export default function LeadsPage() {
 
 ### **Styling Approach**
 
-**Chakra UI with Custom Design System:**
-- Use Chakra UI components as base
-- Extend with custom design tokens
-- Implement consistent spacing and typography
-- Support dark mode and accessibility
+**TailwindCSS with Custom Design System:**
+- Use TailwindCSS utility classes for rapid development
+- Implement custom design tokens and components
+- Maintain consistent spacing, typography, and colors
+- Support responsive design and accessibility
+- Use Headless UI for accessible component primitives
 
-### **Global Theme Variables**
+### **Design System Configuration**
 
-```css
-/* shared/design-system/theme/globals.css */
-:root {
-  /* Colors */
-  --color-primary-50: #E6F3FF;
-  --color-primary-100: #CCE7FF;
-  --color-primary-500: #2563EB;
-  --color-primary-900: #1E3A8A;
-  
-  --color-secondary-50: #F0F9FF;
-  --color-secondary-500: #0EA5E9;
-  --color-secondary-900: #0C4A6E;
-  
-  --color-success-50: #F0FDF4;
-  --color-success-500: #22C55E;
-  --color-success-900: #14532D;
-  
-  --color-warning-50: #FFFBEB;
-  --color-warning-500: #F59E0B;
-  --color-warning-900: #78350F;
-  
-  --color-error-50: #FEF2F2;
-  --color-error-500: #EF4444;
-  --color-error-900: #7F1D1D;
-  
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
-  
-  /* Typography */
-  --font-family-heading: 'Inter', sans-serif;
-  --font-family-body: 'Inter', sans-serif;
-  
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
-  /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-}
-
-/* Dark mode variables */
-[data-theme="dark"] {
-  --color-primary-50: #1E3A8A;
-  --color-primary-100: #1E40AF;
-  --color-primary-500: #3B82F6;
-  --color-primary-900: #DBEAFE;
-  
-  /* ... other dark mode colors */
-}
+```javascript
+// tailwind.config.js
+module.exports = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#EFF6FF',
+          100: '#DBEAFE',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
+          900: '#1E3A8A',
+        },
+        secondary: {
+          50: '#F3E8FF',
+          100: '#EDE9FE',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+          700: '#6D28D9',
+          900: '#5B21B6',
+        },
+        success: {
+          50: '#ECFDF5',
+          100: '#D1FAE5',
+          500: '#10B981',
+          600: '#059669',
+          700: '#047857',
+          900: '#064E3B',
+        },
+        warning: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+          900: '#92400E',
+        },
+        error: {
+          50: '#FEF2F2',
+          100: '#FEE2E2',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
+          900: '#7F1D1D',
+        },
+        gray: {
+          50: '#F8FAFC',
+          100: '#F1F5F9',
+          500: '#64748B',
+          600: '#475569',
+          700: '#334155',
+          900: '#0F172A',
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+      },
+      boxShadow: {
+        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 2px 10px -2px rgba(0, 0, 0, 0.04)',
+      },
+      borderRadius: {
+        'xl': '0.75rem',
+        '2xl': '1rem',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-in-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'scale-in': 'scaleIn 0.2s ease-out',
+      },
+    },
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+  ],
+};
 ```
 
 ---
@@ -827,9 +816,7 @@ export default function LeadsPage() {
 // Example: LeadCard.test.tsx
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ChakraProvider } from '@chakra-ui/react';
 import { LeadCard } from './LeadCard';
-import { theme } from '../../../shared/design-system/theme';
 
 const mockLead = {
   id: '1',
@@ -840,12 +827,8 @@ const mockLead = {
   updatedAt: new Date().toISOString(),
 };
 
-const renderWithTheme = (component: React.ReactElement) => {
-  return render(
-    <ChakraProvider theme={theme}>
-      {component}
-    </ChakraProvider>
-  );
+const renderComponent = (component: React.ReactElement) => {
+  return render(component);
 };
 
 describe('LeadCard', () => {
@@ -857,7 +840,7 @@ describe('LeadCard', () => {
   });
 
   it('renders lead information correctly', () => {
-    renderWithTheme(
+    renderComponent(
       <LeadCard
         lead={mockLead}
         onEdit={mockOnEdit}
@@ -871,7 +854,7 @@ describe('LeadCard', () => {
   });
 
   it('calls onEdit when edit button is clicked', () => {
-    renderWithTheme(
+    renderComponent(
       <LeadCard
         lead={mockLead}
         onEdit={mockOnEdit}
@@ -884,7 +867,7 @@ describe('LeadCard', () => {
   });
 
   it('calls onDelete when delete button is clicked', () => {
-    renderWithTheme(
+    renderComponent(
       <LeadCard
         lead={mockLead}
         onEdit={mockOnEdit}
@@ -897,7 +880,7 @@ describe('LeadCard', () => {
   });
 
   it('shows loading state when isLoading is true', () => {
-    renderWithTheme(
+    renderComponent(
       <LeadCard
         lead={mockLead}
         onEdit={mockOnEdit}
@@ -930,12 +913,12 @@ describe('LeadCard', () => {
 
 ### **Required Environment Variables**
 
-**Host Application:**
+**Main Application:**
 ```bash
 # .env.local
 NEXT_PUBLIC_API_URL=http://localhost:3002/api
 NEXT_PUBLIC_WS_URL=ws://localhost:8080
-NEXT_PUBLIC_APP_NAME=Presidential Digs CRM
+NEXT_PUBLIC_APP_NAME=DealCycle CRM
 NEXT_PUBLIC_VERSION=1.0.0
 
 # Authentication
@@ -944,20 +927,14 @@ NEXTAUTH_SECRET=your-secret-key
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
-# Module Federation
-NEXT_PUBLIC_LEADS_URL=http://localhost:3001
-NEXT_PUBLIC_BUYERS_URL=http://localhost:3002
-NEXT_PUBLIC_COMMUNICATIONS_URL=http://localhost:3003
-NEXT_PUBLIC_DASHBOARD_URL=http://localhost:3004
-NEXT_PUBLIC_SETTINGS_URL=http://localhost:3005
-```
+# External Services
+NEXT_PUBLIC_TWILIO_ACCOUNT_SID=your-twilio-sid
+NEXT_PUBLIC_AI_API_KEY=your-ai-api-key
 
-**Micro Frontend Modules:**
-```bash
-# leads/.env.local
-NEXT_PUBLIC_API_URL=http://localhost:3002/api/leads
-NEXT_PUBLIC_MODULE_NAME=leads
-NEXT_PUBLIC_HOST_URL=http://localhost:3000
+# Feature Flags
+NEXT_PUBLIC_ENABLE_AUTOMATION=true
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+NEXT_PUBLIC_ENABLE_AI_FEATURES=true
 ```
 
 ---
@@ -981,30 +958,31 @@ NEXT_PUBLIC_HOST_URL=http://localhost:3000
 
 **Common Commands:**
 ```bash
-# Host application
-cd host && npm run dev
-cd host && npm run build
-cd host && npm run test
+# Main application
+cd frontend && npm run dev
+cd frontend && npm run build
+cd frontend && npm run test
 
-# Micro frontend modules
-cd micro-frontends/leads && npm run dev
-cd micro-frontends/leads && npm run build
-cd micro-frontends/leads && npm run test
-
-# Design system
-cd shared/design-system && npm run storybook
-cd shared/design-system && npm run build
+# Backend
+cd backend && npm run dev
+cd backend && npm run build
+cd backend && npm run test
 
 # Docker
 docker-compose up -d
 docker-compose down
+
+# Development
+npm run lint
+npm run type-check
+npm run storybook
 ```
 
 **Key Import Patterns:**
 ```typescript
 // Components
-import { Button, Input, Modal } from '@chakra-ui/react';
-import { LeadCard } from '../components/LeadCard';
+import { Button, Input, Modal, Card, Badge } from '../ui';
+import { LeadCard } from '../components/features/leads/LeadCard';
 
 // Hooks
 import { useLeadStore } from '../stores/leadStore';
@@ -1014,10 +992,10 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { leadService } from '../services/leadService';
 
 // Types
-import { Lead, CreateLeadDto } from '../types/lead';
+import { Lead, CreateLeadDto } from '../types/leads';
 
 // Utils
-import { formatCurrency, validateEmail } from '../utils/helpers';
+import { formatCurrency, validateEmail } from '../utils/formatting';
 ```
 
 **File Naming Conventions:**
@@ -1028,14 +1006,16 @@ import { formatCurrency, validateEmail } from '../utils/helpers';
 - Utils: `camelCase.ts` (e.g., `formatHelpers.ts`)
 
 **Project-Specific Patterns:**
-- Use Chakra UI components consistently
-- Implement error boundaries for all modules
+- Use TailwindCSS utility classes consistently
+- Implement error boundaries for all features
 - Use React Query for API state management
 - Follow the established folder structure
-- Use the shared design system components
+- Use the shared UI components from the design system
 - Implement proper loading and error states
 - Use TypeScript for all new code
 - Write tests for all components and utilities
+- Use Headless UI for accessible component primitives
+- Follow the established color palette and typography
 
 ---
 
@@ -1043,7 +1023,7 @@ import { formatCurrency, validateEmail } from '../utils/helpers';
 
 ### **Docker Configuration**
 
-**Host Application Dockerfile:**
+**Frontend Application Dockerfile:**
 ```dockerfile
 FROM node:18-alpine AS builder
 
@@ -1071,85 +1051,51 @@ ENV HOSTNAME "0.0.0.0"
 CMD ["node", "server.js"]
 ```
 
-**Micro Frontend Dockerfile:**
-```dockerfile
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine AS runner
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
-```
-
 ### **Docker Compose**
 
 ```yaml
 version: '3.8'
 
 services:
-  host:
-    build: ./host
+  frontend:
+    build: ./frontend
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=http://backend:3002/api
     depends_on:
-      - leads
-      - buyers
-      - communications
-      - dashboard
-      - settings
+      - backend
 
-  leads:
-    build: ./micro-frontends/leads
+  backend:
+    build: ./backend
     ports:
-      - "3001:80"
+      - "3002:3002"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3002/api/leads
+      - MONGODB_URI=mongodb://mongo:27017/dealcycle
+      - JWT_SECRET=your-jwt-secret
+      - TWILIO_ACCOUNT_SID=your-twilio-sid
+      - TWILIO_AUTH_TOKEN=your-twilio-token
+    depends_on:
+      - mongo
+      - redis
 
-  buyers:
-    build: ./micro-frontends/buyers
+  mongo:
+    image: mongo:5
     ports:
-      - "3002:80"
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
     environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3002/api/buyers
+      - MONGO_INITDB_DATABASE=dealcycle
 
-  communications:
-    build: ./micro-frontends/communications
+  redis:
+    image: redis:7-alpine
     ports:
-      - "3003:80"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3002/api/communications
-
-  dashboard:
-    build: ./micro-frontends/dashboard
-    ports:
-      - "3004:80"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3002/api/dashboard
-
-  settings:
-    build: ./micro-frontends/settings
-    ports:
-      - "3005:80"
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://backend:3002/api/settings
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   nginx:
     image: nginx:alpine
@@ -1159,12 +1105,12 @@ services:
     volumes:
       - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
-      - host
-      - leads
-      - buyers
-      - communications
-      - dashboard
-      - settings
+      - frontend
+      - backend
+
+volumes:
+  mongo_data:
+  redis_data:
 ```
 
 ---

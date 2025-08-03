@@ -1,26 +1,27 @@
-# 🎨 Front-End Specification - Presidential Digs CRM
+# 🎨 Front-End Specification - DealCycle CRM
 
 ## 📋 Document Information
 
 | Field | Value |
 |-------|-------|
 | **Document Type** | Front-End Specification |
-| **Project** | Presidential Digs CRM |
-| **Version** | 1.0 |
+| **Project** | DealCycle CRM |
+| **Version** | 2.0 |
 | **Created** | 2024-12-19 |
 | **Owner** | UX Expert |
-| **Status** | Draft |
+| **Status** | Updated |
 
 ---
 
 ## 🎯 Executive Summary
 
-**Presidential Digs CRM** is a modern, multi-tenant SaaS platform designed specifically for real estate wholesaling operations. This front-end specification defines the complete user interface architecture, design system, and user experience requirements for a desktop-first CRM that prioritizes efficiency, data visualization, and streamlined workflows.
+**DealCycle CRM** is a modern, multi-tenant SaaS platform designed specifically for real estate wholesaling operations. This front-end specification defines the complete user interface architecture, design system, and user experience requirements for a desktop-first CRM that prioritizes efficiency, data visualization, streamlined workflows, and AI-powered automation.
 
 **Key Design Principles:**
 - **Desktop-First Design** - Optimized for computer-based workflows
-- **Modern SaaS Aesthetics** - Clean, professional interface inspired by modern tools like Cursor
+- **Modern SaaS Aesthetics** - Clean, professional interface with TailwindCSS design system
 - **Efficiency-Driven UX** - Streamlined workflows for high-volume lead processing
+- **AI-Powered Automation** - Intelligent automation and AI-assisted workflows
 - **Real-Time Collaboration** - Live updates and multi-user coordination
 - **Accessibility-First** - Inclusive design for all users
 
@@ -93,7 +94,7 @@ graph TD
     A --> C[Deals Management]
     A --> D[Buyers Management]
     A --> E[Communications]
-    A --> F[Documents]
+    A --> F[Automation]
     A --> G[Analytics & Reports]
     A --> H[Settings]
     A --> I[User Management]
@@ -120,10 +121,10 @@ graph TD
     E --> E3[Text Messages]
     E --> E4[Email Templates]
 
-    F --> F1[Document Library]
-    F --> F2[Contract Templates]
-    F --> F3[Upload Documents]
-    F --> F4[Document Search]
+    F --> F1[Workflow Builder]
+    F --> F2[Automation Rules]
+    F --> F3[Automation Analytics]
+    F --> F4[AI-Powered Suggestions]
 
     G --> G1[Performance Dashboard]
     G --> G2[Lead Analytics]
@@ -150,7 +151,7 @@ graph TD
 - **Deals** - Transaction management and tracking
 - **Buyers** - Buyer database and relationships
 - **Communications** - Message center and communication tools
-- **Documents** - Document management and storage
+- **Automation** - Workflow builder and automation management
 - **Analytics** - Reports and performance metrics
 - **Settings** - System configuration and preferences
 
@@ -666,15 +667,15 @@ const automationRules = {
 **Frontend Framework:**
 - **Next.js 14+:** React framework with SSR/SSG
 - **TypeScript:** Type-safe development
-- **Chakra UI:** Component library and design system
+- **TailwindCSS:** Utility-first CSS framework
+- **Headless UI:** Accessible component primitives
 - **Zustand:** Lightweight state management
 - **React Query:** Server state management
 
 **Automation & AI:**
-- **React Bits:** Advanced React patterns and automation components
+- **React Hook Form + Zod:** Intelligent form automation and validation
+- **Recharts:** Data visualization and analytics
 - **Framer Motion:** Sophisticated animations and micro-interactions
-- **React Hook Form:** Intelligent form automation and validation
-- **Zod:** Schema validation and type inference
 - **React Query DevTools:** Development automation and debugging
 
 **Development Tools:**
@@ -704,12 +705,13 @@ const automationRules = {
 - **Templates:** Page layouts and structures
 - **Pages:** Complete user interfaces
 
-**Automation Components (React Bits Integration):**
+**Automation Components:**
 - **Smart Forms:** Auto-complete, validation, and intelligent defaults
-- **Automated Workflows:** Visual pipeline components with drag-and-drop
+- **Workflow Builder:** Visual pipeline components with drag-and-drop
 - **Intelligent Tables:** Auto-sorting, filtering, and bulk actions
 - **Smart Modals:** Context-aware modal systems with automation
 - **Automation Indicators:** Visual feedback for automated processes
+- **AI-Powered Charts:** Interactive data visualization with insights
 
 **Component Standards:**
 - **Props Interface:** TypeScript interfaces for all props
@@ -738,6 +740,7 @@ const automationRules = {
 - **AI Models:** Machine learning model state and predictions
 - **Automation History:** Audit trail of automated actions
 - **User Preferences:** Automation settings and learning patterns
+- **Analytics Data:** Real-time performance metrics and insights
 
 ---
 
@@ -827,9 +830,11 @@ const automationRules = {
 - Basic lead and deal management
 - Essential communication tools
 - Core analytics and reporting
+- Role-based dashboards
 
 ### **Phase 2: Advanced Features (Months 4-6)**
-- Advanced AI features
+- AI-powered lead scoring and buyer matching
+- Automation workflow builder
 - Enhanced analytics and BI
 - Mobile companion app
 - Third-party integrations
@@ -839,29 +844,33 @@ const automationRules = {
 - White-label customization
 - Advanced security features
 - API ecosystem
+- Advanced automation features
 
 ### **Phase 4: Market Expansion (Months 13-18)**
 - International markets
 - Industry-specific features
-- Advanced automation
+- Advanced AI and automation
 - Enterprise features
+- Automation marketplace
 
 ---
 
 ## 📚 References
 
 ### **Design Resources**
-- [Cursor Design System](https://cursor.com/home) - Modern SaaS design inspiration
-- [React Bits](https://reactbits.dev/) - Advanced React patterns and automation components
-- [Chakra UI Documentation](https://chakra-ui.com/) - Component library reference
+- [TailwindCSS Documentation](https://tailwindcss.com/) - Utility-first CSS framework
+- [Headless UI](https://headlessui.com/) - Accessible component primitives
 - [Inter Font](https://rsms.me/inter/) - Typography system
 - [Framer Motion](https://www.framer.com/motion/) - Animation and interaction library
+- [Recharts](https://recharts.org/) - Data visualization library
 
 ### **Technical Resources**
 - [Next.js Documentation](https://nextjs.org/docs) - Framework reference
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/) - Type safety guide
 - [React Query Documentation](https://tanstack.com/query) - Server state management
 - [Zustand Documentation](https://github.com/pmndrs/zustand) - State management
+- [React Hook Form](https://react-hook-form.com/) - Form management
+- [Zod Documentation](https://zod.dev/) - Schema validation
 
 ### **Accessibility Resources**
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) - Accessibility standards
@@ -891,6 +900,7 @@ const automationRules = {
 - **User Productivity:** 40% improvement in workflow efficiency
 - **Automation Efficiency:** 60% reduction in manual tasks through automation
 - **AI Accuracy:** 85%+ accuracy in automated lead qualification and matching
+- **Dashboard Efficiency:** 50% faster access to key metrics through role-based dashboards
 
 ---
 

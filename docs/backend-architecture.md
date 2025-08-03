@@ -1,15 +1,15 @@
-# 🏗️ Backend Architecture Document - Presidential Digs CRM
+# 🏗️ Backend Architecture Document - DealCycle CRM
 
 ## 📋 Document Information
 
 | Field | Value |
 |-------|-------|
 | **Document Type** | Backend Architecture Specification |
-| **Project** | Presidential Digs CRM |
-| **Version** | 2.0 |
+| **Project** | DealCycle CRM |
+| **Version** | 3.0 |
 | **Last Updated** | 2024-12-19 |
 | **Owner** | Architect Agent |
-| **Status** | Draft |
+| **Status** | Updated |
 
 ---
 
@@ -17,6 +17,7 @@
 
 | Date | Version | Description | Author |
 |------|---------|-------------|--------|
+| 2024-12-19 | 3.0 | Updated to DealCycle CRM with automation workflows and enhanced AI features | Architect Agent |
 | 2024-12-19 | 2.0 | Complete backend architecture with NestJS and microservices-ready design | Architect Agent |
 
 ---
@@ -186,18 +187,41 @@
 │   │   │   ├── ai.service.ts            # AI business logic
 │   │   │   ├── lead-analysis.service.ts # Lead analysis
 │   │   │   ├── communication-ai.service.ts # Communication AI
+│   │   │   ├── lead-scoring.service.ts  # AI-powered lead scoring
+│   │   │   ├── buyer-matching.service.ts # AI buyer matching
 │   │   │   └── dto/
 │   │   │       ├── analyze-lead.dto.ts  # Lead analysis request
-│   │   │       └── generate-response.dto.ts # Response generation
+│   │   │       ├── generate-response.dto.ts # Response generation
+│   │   │       ├── lead-scoring.dto.ts  # Lead scoring request
+│   │   │       └── buyer-matching.dto.ts # Buyer matching request
+│   │   ├── automation/
+│   │   │   ├── automation.module.ts     # Automation module
+│   │   │   ├── automation.controller.ts # Automation endpoints
+│   │   │   ├── automation.service.ts    # Automation business logic
+│   │   │   ├── workflow-engine.service.ts # Workflow execution engine
+│   │   │   ├── workflow-builder.service.ts # Visual workflow builder
+│   │   │   ├── trigger.service.ts       # Event triggers
+│   │   │   ├── action.service.ts        # Automation actions
+│   │   │   ├── condition.service.ts     # Automation conditions
+│   │   │   └── dto/
+│   │   │       ├── create-workflow.dto.ts # Create workflow
+│   │   │       ├── update-workflow.dto.ts # Update workflow
+│   │   │       ├── workflow-execution.dto.ts # Workflow execution
+│   │   │       └── automation-stats.dto.ts # Automation statistics
 │   │   ├── analytics/
 │   │   │   ├── analytics.module.ts      # Analytics module
 │   │   │   ├── analytics.controller.ts  # Analytics endpoints
 │   │   │   ├── analytics.service.ts     # Analytics logic
 │   │   │   ├── dashboard.service.ts     # Dashboard data
 │   │   │   ├── reporting.service.ts     # Report generation
+│   │   │   ├── performance-metrics.service.ts # Performance tracking
+│   │   │   ├── conversion-analytics.service.ts # Conversion analysis
+│   │   │   ├── team-performance.service.ts # Team analytics
 │   │   │   └── dto/
 │   │   │       ├── analytics-query.dto.ts # Analytics query
-│   │   │       └── report-request.dto.ts # Report request
+│   │   │       ├── report-request.dto.ts # Report request
+│   │   │       ├── performance-query.dto.ts # Performance query
+│   │   │       └── conversion-query.dto.ts # Conversion query
 │   │   ├── notifications/
 │   │   │   ├── notifications.module.ts  # Notifications module
 │   │   │   ├── notifications.controller.ts # Notification endpoints
@@ -1040,6 +1064,8 @@ export class Lead extends Document {
     urgency: string;
     motivation: string;
     suggested_actions: string[];
+    lead_score: number;
+    qualification_probability: number;
   };
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
@@ -1050,6 +1076,23 @@ export class Lead extends Document {
 
   @Prop({ type: Date })
   next_follow_up: Date;
+
+  @Prop({ type: Number, default: 0 })
+  lead_score: number;
+
+  @Prop({ type: String })
+  source: string;
+
+  @Prop({ type: Object })
+  automation_data: {
+    workflow_id: Types.ObjectId;
+    last_automation_step: string;
+    automation_history: Array<{
+      step: string;
+      executed_at: Date;
+      result: string;
+    }>;
+  };
 }
 
 export const LeadSchema = SchemaFactory.createForClass(Lead);
@@ -1059,6 +1102,119 @@ LeadSchema.index({ tenant_id: 1, status: 1 });
 LeadSchema.index({ tenant_id: 1, assigned_to: 1 });
 LeadSchema.index({ tenant_id: 1, propertyAddress: 'text' });
 LeadSchema.index({ tenant_id: 1, created_at: -1 });
+LeadSchema.index({ tenant_id: 1, lead_score: -1 });
+LeadSchema.index({ tenant_id: 1, source: 1 });
+```
+
+```typescript
+// src/modules/automation/workflow.schema.ts
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+
+@Schema({ timestamps: true })
+export class Workflow extends Document {
+  @Prop({ required: true, type: Types.ObjectId })
+  tenant_id: Types.ObjectId;
+
+  @Prop({ required: true })
+  name: string;
+
+  @Prop()
+  description: string;
+
+  @Prop({ type: String, enum: ['active', 'inactive', 'draft'], default: 'draft' })
+  status: string;
+
+  @Prop({ type: Object })
+  trigger: {
+    type: string; // lead_created, status_changed, communication_sent, scheduled
+    conditions: Object;
+    schedule?: {
+      frequency: string;
+      time: string;
+      timezone: string;
+    };
+  };
+
+  @Prop({ type: [Object] })
+  steps: Array<{
+    id: string;
+    type: string; // action, condition, delay
+    name: string;
+    config: Object;
+    order: number;
+    next_step_id?: string;
+    condition_branch?: {
+      true_step_id: string;
+      false_step_id: string;
+    };
+  }>;
+
+  @Prop({ type: Object })
+  statistics: {
+    total_executions: number;
+    successful_executions: number;
+    failed_executions: number;
+    last_executed: Date;
+    average_execution_time: number;
+  };
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  created_by: Types.ObjectId;
+
+  @Prop({ type: [String] })
+  tags: string[];
+}
+
+export const WorkflowSchema = SchemaFactory.createForClass(Workflow);
+
+// Indexes for performance
+WorkflowSchema.index({ tenant_id: 1, status: 1 });
+WorkflowSchema.index({ tenant_id: 1, 'trigger.type': 1 });
+WorkflowSchema.index({ tenant_id: 1, created_by: 1 });
+```
+
+```typescript
+// src/modules/analytics/analytics.schema.ts
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+
+@Schema({ timestamps: true })
+export class Analytics extends Document {
+  @Prop({ required: true, type: Types.ObjectId })
+  tenant_id: Types.ObjectId;
+
+  @Prop({ required: true })
+  metric_name: string;
+
+  @Prop({ required: true })
+  metric_value: number;
+
+  @Prop({ type: String })
+  metric_unit: string;
+
+  @Prop({ type: Object })
+  dimensions: {
+    user_id?: Types.ObjectId;
+    lead_source?: string;
+    lead_status?: string;
+    date?: Date;
+    automation_workflow?: string;
+  };
+
+  @Prop({ type: Date, required: true })
+  recorded_at: Date;
+
+  @Prop({ type: String, enum: ['daily', 'hourly', 'real_time'], default: 'daily' })
+  aggregation_period: string;
+}
+
+export const AnalyticsSchema = SchemaFactory.createForClass(Analytics);
+
+// Indexes for performance
+AnalyticsSchema.index({ tenant_id: 1, metric_name: 1, recorded_at: -1 });
+AnalyticsSchema.index({ tenant_id: 1, 'dimensions.user_id': 1, recorded_at: -1 });
+AnalyticsSchema.index({ tenant_id: 1, 'dimensions.lead_source': 1, recorded_at: -1 });
 ```
 
 ### **Database Optimization**
