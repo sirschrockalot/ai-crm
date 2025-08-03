@@ -595,6 +595,162 @@ export const RequireAdmin = () => Roles('SUPER_ADMIN', 'TENANT_ADMIN');
 export const RequireManager = () => Roles('SUPER_ADMIN', 'TENANT_ADMIN', 'MANAGER');
 ```
 
+### **Feature Flags System**
+
+```typescript
+// src/common/services/feature-flags.service.ts
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { RedisService } from '../caching/redis.service';
+
+@Injectable()
+export class FeatureFlagsService {
+  constructor(
+    private configService: ConfigService,
+    private redisService: RedisService,
+  ) {}
+
+  async isFeatureEnabled(
+    featureName: string,
+    tenantId?: string,
+    userId?: string,
+  ): Promise<boolean> {
+    // Check environment-level flags first
+    const envFlag = this.configService.get(`FEATURE_${featureName.toUpperCase()}`);
+    if (envFlag !== undefined) {
+      return envFlag === 'true';
+    }
+
+    // Check tenant-level flags
+    if (tenantId) {
+      const tenantFlag = await this.redisService.hget(
+        `tenant:${tenantId}:features`,
+        featureName,
+      );
+      if (tenantFlag !== null) {
+        return tenantFlag === 'true';
+      }
+    }
+
+    // Check user-level flags
+    if (userId) {
+      const userFlag = await this.redisService.hget(
+        `user:${userId}:features`,
+        featureName,
+      );
+      if (userFlag !== null) {
+        return userFlag === 'true';
+      }
+    }
+
+    // Default to disabled for safety
+    return false;
+  }
+
+  async setFeatureFlag(
+    featureName: string,
+    enabled: boolean,
+    tenantId?: string,
+    userId?: string,
+  ): Promise<void> {
+    if (tenantId) {
+      await this.redisService.hset(
+        `tenant:${tenantId}:features`,
+        featureName,
+        enabled.toString(),
+      );
+    }
+
+    if (userId) {
+      await this.redisService.hset(
+        `user:${userId}:features`,
+        featureName,
+        enabled.toString(),
+      );
+    }
+  }
+
+  async getEnabledFeatures(tenantId?: string, userId?: string): Promise<string[]> {
+    const features: string[] = [];
+
+    if (tenantId) {
+      const tenantFeatures = await this.redisService.hgetall(
+        `tenant:${tenantId}:features`,
+      );
+      Object.entries(tenantFeatures).forEach(([feature, enabled]) => {
+        if (enabled === 'true') features.push(feature);
+      });
+    }
+
+    if (userId) {
+      const userFeatures = await this.redisService.hgetall(
+        `user:${userId}:features`,
+      );
+      Object.entries(userFeatures).forEach(([feature, enabled]) => {
+        if (enabled === 'true') features.push(feature);
+      });
+    }
+
+    return [...new Set(features)];
+  }
+}
+```
+
+### **Feature Flags Decorator**
+
+```typescript
+// src/common/decorators/feature-flag.decorator.ts
+import { SetMetadata } from '@nestjs/common';
+
+export const FEATURE_FLAG_KEY = 'featureFlag';
+
+export const RequireFeature = (featureName: string) =>
+  SetMetadata(FEATURE_FLAG_KEY, featureName);
+```
+
+### **Feature Flags Guard**
+
+```typescript
+// src/common/guards/feature-flag.guard.ts
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { FeatureFlagsService } from '../services/feature-flags.service';
+
+@Injectable()
+export class FeatureFlagGuard implements CanActivate {
+  constructor(
+    private reflector: Reflector,
+    private featureFlagsService: FeatureFlagsService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredFeature = this.reflector.get<string>(
+      'featureFlag',
+      context.getHandler(),
+    );
+
+    if (!requiredFeature) {
+      return true;
+    }
+
+    const request = context.switchToHttp().getRequest();
+    const { user, tenant } = request;
+
+    const isEnabled = await this.featureFlagsService.isFeatureEnabled(
+      requiredFeature,
+      tenant?._id,
+      user?.id,
+    );
+
+    if (!isEnabled) {
+      throw new ForbiddenException(`Feature '${requiredFeature}' is not enabled`);
+    }
+
+    return true;
+  }
+}
+```
+
 ### **Multi-Tenant Security**
 
 ```typescript

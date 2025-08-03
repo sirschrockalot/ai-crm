@@ -28,7 +28,7 @@
 
 **Framework Strategy:**
 - **Main Application**: Next.js 14+ (App Router)
-- **Styling**: TailwindCSS with custom design system
+- **Styling**: Chakra UI with custom design system
 - **State Management**: Zustand + React Query
 - **Real-time**: WebSocket integration
 - **Containerization**: Docker with microservices backend
@@ -39,6 +39,7 @@
 - **Brand Consistency**: Shared design system across all components
 - **Developer Experience**: Easier debugging and state management
 - **Cost Efficiency**: Reduced infrastructure and maintenance costs
+- **Feature Flags**: Comprehensive feature flag system for safe deployments
 
 ---
 
@@ -48,8 +49,7 @@
 |----------|------------|---------|---------|-----------|
 | **Framework** | Next.js | 14+ | Main Application | SSR/SSG, built-in routing, excellent DX |
 | **Language** | TypeScript | 5+ | Type Safety | Complex CRM data models, team collaboration |
-| **Styling** | TailwindCSS | 3+ | Utility-first CSS | Rapid development, consistent design, customization |
-| **UI Components** | Headless UI | Latest | Accessible Components | Accessibility, unstyled components, flexibility |
+| **Styling** | Chakra UI | 3+ | Component Library | Accessibility, theme system, customization |
 | **State Management** | Zustand | 4+ | Client State | Lightweight, simple API, perfect for React |
 | **Server State** | React Query | 5+ | API State | Caching, synchronization, real-time updates |
 | **Forms** | React Hook Form + Zod | Latest | Form Management | Type-safe forms, validation, performance |
@@ -59,7 +59,8 @@
 | **E2E Testing** | Playwright | Latest | End-to-End | Cross-browser, reliable automation |
 | **Containerization** | Docker | Latest | Deployment | Consistent environments, scalability |
 | **Error Tracking** | Custom + Sentry | Latest | Monitoring | Centralized error management |
-| **Design System** | Custom on TailwindCSS | 1.0 | UI Consistency | Brand alignment, component reusability |
+| **Feature Flags** | Custom + Redis | Latest | Feature Management | Safe deployments, gradual rollouts |
+| **Design System** | Custom on Chakra UI | 1.0 | UI Consistency | Brand alignment, component reusability |
 
 ---
 
@@ -249,7 +250,7 @@
 ```typescript
 // Example: LeadCard component
 import React from 'react';
-import { Card, Badge, Button } from '../ui';
+import { Box, Card, Text, Badge, Button } from '@chakra-ui/react';
 import { Lead } from '../types/lead';
 
 interface LeadCardProps {
@@ -274,42 +275,37 @@ export const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="p-6 shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className="space-y-3">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">
-            {lead.propertyAddress}
-          </h3>
-          <p className="text-sm text-gray-600">
-            {lead.ownerName}
-          </p>
-          <Badge 
-            variant={lead.status === 'active' ? 'success' : 'secondary'}
-            className="mt-2"
-          >
-            {lead.status}
-          </Badge>
-        </div>
-        
-        <div className="flex gap-2 pt-3">
-          <Button
-            size="sm"
-            variant="primary"
-            onClick={handleEdit}
-            disabled={isLoading}
-          >
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="danger"
-            onClick={handleDelete}
-            disabled={isLoading}
-          >
-            Delete
-          </Button>
-        </div>
-      </div>
+    <Card p={4} shadow="md" borderWidth="1px" _hover={{ shadow: 'lg' }}>
+      <Box>
+        <Text fontSize="lg" fontWeight="bold">
+          {lead.propertyAddress}
+        </Text>
+        <Text fontSize="sm" color="gray.600">
+          {lead.ownerName}
+        </Text>
+        <Badge colorScheme={lead.status === 'active' ? 'green' : 'gray'}>
+          {lead.status}
+        </Badge>
+      </Box>
+      
+      <Box mt={4} display="flex" gap={2}>
+        <Button
+          size="sm"
+          colorScheme="blue"
+          onClick={handleEdit}
+          isLoading={isLoading}
+        >
+          Edit
+        </Button>
+        <Button
+          size="sm"
+          colorScheme="red"
+          onClick={handleDelete}
+          isLoading={isLoading}
+        >
+          Delete
+        </Button>
+      </Box>
     </Card>
   );
 };
@@ -709,101 +705,94 @@ export default function LeadsPage() {
 
 ### **Styling Approach**
 
-**TailwindCSS with Custom Design System:**
-- Use TailwindCSS utility classes for rapid development
-- Implement custom design tokens and components
-- Maintain consistent spacing, typography, and colors
-- Support responsive design and accessibility
-- Use Headless UI for accessible component primitives
+**Chakra UI with Custom Design System:**
+- Use Chakra UI components as base
+- Extend with custom design tokens
+- Implement consistent spacing and typography
+- Support dark mode and accessibility
+- Use feature flags for safe component rollouts
 
 ### **Design System Configuration**
 
-```javascript
-// tailwind.config.js
-module.exports = {
-  content: [
-    './src/**/*.{js,ts,jsx,tsx}',
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          900: '#1E3A8A',
-        },
-        secondary: {
-          50: '#F3E8FF',
-          100: '#EDE9FE',
-          500: '#8B5CF6',
-          600: '#7C3AED',
-          700: '#6D28D9',
-          900: '#5B21B6',
-        },
-        success: {
-          50: '#ECFDF5',
-          100: '#D1FAE5',
-          500: '#10B981',
-          600: '#059669',
-          700: '#047857',
-          900: '#064E3B',
-        },
-        warning: {
-          50: '#FFFBEB',
-          100: '#FEF3C7',
-          500: '#F59E0B',
-          600: '#D97706',
-          700: '#B45309',
-          900: '#92400E',
-        },
-        error: {
-          50: '#FEF2F2',
-          100: '#FEE2E2',
-          500: '#EF4444',
-          600: '#DC2626',
-          700: '#B91C1C',
-          900: '#7F1D1D',
-        },
-        gray: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          900: '#0F172A',
-        }
+```typescript
+// src/theme/index.ts
+import { extendTheme } from '@chakra-ui/react';
+
+export const theme = extendTheme({
+  colors: {
+    primary: {
+      50: '#EFF6FF',
+      100: '#DBEAFE',
+      500: '#3B82F6',
+      600: '#2563EB',
+      700: '#1D4ED8',
+      900: '#1E3A8A',
+    },
+    secondary: {
+      50: '#F3E8FF',
+      100: '#EDE9FE',
+      500: '#8B5CF6',
+      600: '#7C3AED',
+      700: '#6D28D9',
+      900: '#5B21B6',
+    },
+    success: {
+      50: '#ECFDF5',
+      100: '#D1FAE5',
+      500: '#10B981',
+      600: '#059669',
+      700: '#047857',
+      900: '#064E3B',
+    },
+    warning: {
+      50: '#FFFBEB',
+      100: '#FEF3C7',
+      500: '#F59E0B',
+      600: '#D97706',
+      700: '#B45309',
+      900: '#92400E',
+    },
+    error: {
+      50: '#FEF2F2',
+      100: '#FEE2E2',
+      500: '#EF4444',
+      600: '#DC2626',
+      700: '#B91C1C',
+      900: '#7F1D1D',
+    },
+    gray: {
+      50: '#F8FAFC',
+      100: '#F1F5F9',
+      500: '#64748B',
+      600: '#475569',
+      700: '#334155',
+      900: '#0F172A',
+    }
+  },
+  fonts: {
+    heading: 'Inter, system-ui, sans-serif',
+    body: 'Inter, system-ui, sans-serif',
+  },
+  components: {
+    Button: {
+      defaultProps: {
+        colorScheme: 'primary',
       },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      },
-      spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-      },
-      boxShadow: {
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-        'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-        'strong': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 2px 10px -2px rgba(0, 0, 0, 0.04)',
-      },
-      borderRadius: {
-        'xl': '0.75rem',
-        '2xl': '1rem',
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'scale-in': 'scaleIn 0.2s ease-out',
+    },
+    Card: {
+      baseStyle: {
+        container: {
+          shadow: 'md',
+          borderRadius: 'lg',
+        },
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ],
-};
+  config: {
+    initialColorMode: 'light',
+    useSystemColorMode: false,
+  },
+});
 ```
 
 ---
@@ -1327,4 +1316,5 @@ module.exports = {
 
 ---
 
+*This document serves as the comprehensive frontend architecture specification for the Presidential Digs CRM project. It should be updated as the project evolves and new requirements are identified.* 
 *This document serves as the comprehensive frontend architecture specification for the Presidential Digs CRM project. It should be updated as the project evolves and new requirements are identified.* 
