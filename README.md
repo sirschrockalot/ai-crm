@@ -1,163 +1,274 @@
 # DealCycle CRM
 
-A comprehensive Customer Relationship Management system designed specifically for real estate wholesaling operations. DealCycle streamlines lead management, buyer relationships, and deal pipeline tracking for acquisition and disposition teams.
+A modern, AI-powered CRM platform for real estate wholesalers, built with Next.js 14, NestJS, and React Native.
 
-## 🎯 Project Overview
+## 🚀 Quick Start
 
-DealCycle CRM is built to optimize the real estate wholesaling workflow, providing specialized tools for:
-- **Acquisition Teams**: Lead management, call tracking, and status updates
-- **Disposition Teams**: Buyer management, deal assignment, and pipeline tracking
-- **Business Users**: Analytics, reporting, and performance monitoring
-- **Administrators**: User management, system configuration, and data oversight
+### Prerequisites
+
+- Node.js 18+ 
+- npm 9+
+- Docker & Docker Compose
+- MongoDB 6.0+
+- Redis 7.0+
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/dealcycle-crm.git
+   cd dealcycle-crm
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm run install:all
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Start development environment**
+   ```bash
+   # Start all services with Docker
+   npm run docker:up
+   
+   # Or start individual services
+   npm run dev:backend
+   npm run dev:frontend
+   npm run dev:mobile
+   ```
 
 ## 🏗️ Project Structure
 
 ```
-ai_crm/
-├── docs/                          # Documentation and specifications
-│   ├── mockups/                   # HTML mockups for all screens
-│   │   ├── dashboard.html         # Main executive dashboard
-│   │   ├── acquisitions-dashboard.html  # Acquisition agent interface
-│   │   ├── disposition-dashboard.html   # Disposition agent interface
-│   │   ├── lead-import-export.html      # CSV import/export functionality
-│   │   └── ...                   # Additional mockups
-│   ├── prd/                      # Product Requirements Documents
-│   ├── stories/                  # User stories and requirements
-│   ├── architecture/             # System architecture documentation
-│   └── README-ux.md             # UX design guide
-├── web-bundles/                  # AI agent configurations
-└── README.md                     # This file
+dealcycle-crm/
+├── src/
+│   ├── backend/          # NestJS API
+│   │   ├── modules/      # Feature modules
+│   │   ├── common/       # Shared utilities
+│   │   └── config/       # Configuration
+│   ├── frontend/         # Next.js 14 App
+│   │   ├── components/   # React components
+│   │   ├── pages/        # Next.js pages
+│   │   ├── hooks/        # Custom hooks
+│   │   ├── services/     # API services
+│   │   └── micro-apps/   # Micro-frontend apps
+│   ├── mobile/           # React Native App
+│   │   ├── components/   # Mobile components
+│   │   ├── screens/      # Mobile screens
+│   │   └── services/     # Mobile services
+│   └── shared/           # Shared utilities & types
+├── docs/                 # Documentation
+├── .github/              # GitHub Actions
+└── monitoring/           # Monitoring configs
 ```
 
-## 🎨 Design System
+## 🛠️ Development Commands
 
-DealCycle follows a modern, dark-first design philosophy with:
-- **Minimal UI**: Clean, distraction-free interfaces
-- **Modular Layouts**: Composable panels and components
-- **Responsive Design**: Optimized for desktop with mobile support
-- **Smooth Animations**: Enhanced user experience with subtle transitions
+### Root Commands
+```bash
+npm run dev              # Start backend + frontend
+npm run test             # Run all tests
+npm run lint             # Lint all code
+npm run build            # Build all applications
+npm run docker:up        # Start Docker services
+npm run docker:down      # Stop Docker services
+```
 
-## 📱 Key Features
+### Backend Commands
+```bash
+npm run dev:backend      # Start backend in dev mode
+npm run test:backend     # Run backend tests
+npm run build:backend    # Build backend
+npm run lint:backend     # Lint backend code
+```
 
-### Core Functionality
-- **Lead Management**: Complete lead lifecycle tracking
-- **Pipeline Visualization**: Deal status and progression monitoring
-- **Buyer Database**: Comprehensive buyer relationship management
-- **Communication Tools**: SMS and call integration
-- **Analytics Dashboard**: Performance metrics and reporting
+### Frontend Commands
+```bash
+npm run dev:frontend     # Start frontend in dev mode
+npm run test:frontend    # Run frontend tests
+npm run build:frontend   # Build frontend
+npm run lint:frontend    # Lint frontend code
+```
 
-### Specialized Workflows
-- **Acquisition Agent Tools**:
-  - "Get Next Lead" functionality
-  - Call scheduling and callback management
-  - Quick status updates (Call Back, Offer Made, etc.)
-  - Real-time activity tracking
+### Mobile Commands
+```bash
+npm run dev:mobile       # Start mobile in dev mode
+npm run test:mobile      # Run mobile tests
+npm run build:mobile     # Build mobile app
+npm run lint:mobile      # Lint mobile code
+```
 
-- **Disposition Agent Tools**:
-  - Priority alerts and notifications
-  - Deal assignment and tracking
-  - Buyer communication management
-  - Pipeline filtering and sorting
+## 🧪 Testing
 
-### Data Management
-- **CSV Import/Export**: Bulk lead data handling
-- **File Validation**: Real-time upload validation
-- **Progress Tracking**: Visual feedback for long operations
-- **Activity Monitoring**: Complete audit trail
+### Test Coverage Requirements
+- **Backend**: 80%+ coverage
+- **Frontend**: 70%+ coverage
+- **Mobile**: 70%+ coverage
 
-## 🚀 Getting Started
+### Running Tests
+```bash
+# All tests
+npm run test
 
-### Prerequisites
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- No additional software required for mockup viewing
+# Specific test suites
+npm run test:backend
+npm run test:frontend
+npm run test:mobile
 
-### Viewing Mockups
-1. Navigate to `docs/mockups/`
-2. Open any HTML file in your browser
-3. All mockups are self-contained with CSS and JavaScript
+# Test with coverage
+npm run test:coverage
 
-### Key Mockups to Explore
-- **`index.html`**: Landing page with navigation to all screens
-- **`acquisitions-dashboard.html`**: Acquisition agent workflow
-- **`disposition-dashboard.html`**: Disposition agent workflow
-- **`lead-import-export.html`**: Data management interface
-- **`analytics.html`**: Performance reporting dashboard
+# Watch mode
+npm run test:watch
+```
 
-## 🛠️ Development Status
+## 🐳 Docker Development
 
-### ✅ Completed
-- [x] Complete UX design and mockups
-- [x] DealCycle branding implementation
-- [x] All core workflow mockups
-- [x] Lead import/export functionality
-- [x] Responsive design implementation
-- [x] Interactive charts and data visualization
+### Start Services
+```bash
+# Start all services
+docker-compose up -d
 
-### 🔄 Next Steps
-- [ ] Backend API development
-- [ ] Frontend React implementation
-- [ ] Database schema and setup
-- [ ] Authentication system
-- [ ] Real-time features
-- [ ] Production deployment
+# Start specific services
+docker-compose up -d backend frontend mongo redis
+```
 
-## 🎯 Target Users
+### View Logs
+```bash
+# All services
+docker-compose logs -f
 
-### Primary Users
-- **Acquisition Agents**: Lead generation and follow-up
-- **Disposition Agents**: Buyer management and deal closing
-- **Business Owners**: Performance monitoring and reporting
-- **Administrators**: System management and user oversight
+# Specific service
+docker-compose logs -f backend
+```
 
-### User Workflows
-1. **Acquisition Workflow**: Login → Dashboard → Get Next Lead → Call → Update Status → Repeat
-2. **Disposition Workflow**: Login → Dashboard → Review Deals → Assign Buyers → Track Progress
-3. **Management Workflow**: Login → Analytics → Review Reports → Make Decisions
+### Stop Services
+```bash
+docker-compose down
+```
 
-## 📊 Technology Stack
+## 🔧 Configuration
 
-### Frontend (Planned)
-- **React**: Modern component-based architecture
-- **TypeScript**: Type-safe development
-- **Tailwind CSS**: Utility-first styling
-- **Chart.js**: Data visualization
+### Environment Variables
+Copy `env.example` to `.env` and configure:
 
-### Backend (Planned)
-- **Node.js/Express**: API server
-- **PostgreSQL**: Primary database
-- **Redis**: Caching and sessions
-- **Google OAuth**: Authentication
+- **Database**: MongoDB connection string
+- **Redis**: Redis connection string
+- **Authentication**: JWT secret, Google OAuth
+- **External Services**: Twilio, Email, AI APIs
+- **Feature Flags**: Redis-based feature management
 
-### Infrastructure (Planned)
-- **Google Cloud Platform**: Hosting and services
-- **GitHub Actions**: CI/CD pipeline
-- **Docker**: Containerization
+### Feature Flags
+The application uses Redis-based feature flags for:
+- Gradual rollouts
+- A/B testing
+- Feature toggles
+- Environment-specific features
+
+## 📊 Monitoring
+
+### Prometheus & Grafana
+- **Prometheus**: http://localhost:9090
+- **Grafana**: http://localhost:3002 (admin/admin)
+
+### Application Metrics
+- API response times
+- Database query performance
+- Memory usage
+- Error rates
+- Feature flag usage
+
+## 🚀 Deployment
+
+### CI/CD Pipeline
+GitHub Actions automatically:
+1. Lints and type-checks code
+2. Runs tests with coverage
+3. Builds applications
+4. Security scans
+5. Deploys to staging/production
+
+### Environments
+- **Development**: Local Docker setup
+- **Staging**: Automated deployment from `develop` branch
+- **Production**: Automated deployment from `main` branch
+
+## 🏛️ Architecture
+
+### Backend (NestJS)
+- **Modules**: Auth, Leads, Users, Tenants, Analytics, Automation, AI
+- **Database**: MongoDB with Mongoose
+- **Caching**: Redis
+- **Queue**: Bull/BullMQ
+- **Search**: Meilisearch
+- **Monitoring**: Prometheus + Grafana
+
+### Frontend (Next.js 14)
+- **Framework**: Next.js 14 with App Router
+- **UI Library**: Chakra UI
+- **State Management**: Zustand
+- **Forms**: React Hook Form + Zod
+- **Charts**: Recharts
+- **Testing**: Jest + React Testing Library
+
+### Mobile (React Native)
+- **Framework**: React Native with Expo
+- **Navigation**: React Navigation
+- **UI Library**: React Native Paper
+- **Offline Support**: AsyncStorage + NetInfo
+- **Testing**: Jest + Detox
+
+## 🔐 Security
+
+### Authentication
+- Google OAuth 2.0
+- JWT tokens
+- Role-based access control (RBAC)
+- Multi-factor authentication (MFA)
+
+### Data Protection
+- Input validation with Zod
+- XSS protection
+- CSRF protection
+- Rate limiting
+- Data encryption (AES-256-GCM)
 
 ## 🤝 Contributing
 
-### Development Guidelines
-1. **Design First**: All features start with mockups
-2. **User-Centric**: Focus on user workflows and efficiency
-3. **Mobile Responsive**: Ensure mobile compatibility
-4. **Performance**: Optimize for speed and reliability
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Run linting and tests
+6. Submit a pull request
 
-### Code Standards
-- Follow established design patterns
-- Maintain consistent branding
-- Ensure accessibility compliance
-- Write comprehensive documentation
+### Development Standards
+- **Code Style**: ESLint + Prettier
+- **Type Safety**: TypeScript strict mode
+- **Testing**: Jest + Testing Library
+- **Documentation**: JSDoc comments
+- **Commits**: Conventional commits
+
+## 📚 Documentation
+
+- [Architecture Overview](docs/architecture/Architecture_Overview_Wholesaling_CRM.md)
+- [API Specifications](docs/api/api-specifications.md)
+- [Database Schema](docs/database/database-schema.md)
+- [Frontend Specification](docs/front-end-specification.md)
+- [Test Strategy](docs/qa/test-strategy.md)
+- [Epics & Stories](docs/epics/)
 
 ## 📄 License
 
-This project is proprietary software. All rights reserved.
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## 📞 Support
+## 🆘 Support
 
-For questions or support:
-- Review the mockups in `docs/mockups/`
-- Check the UX documentation in `docs/README-ux.md`
-- Explore the product requirements in `docs/prd/`
-
----
-
-**DealCycle CRM** - Streamlining real estate wholesaling operations with intelligent workflow management. 
+- **Issues**: [GitHub Issues](https://github.com/your-org/dealcycle-crm/issues)
+- **Documentation**: [Project Wiki](https://github.com/your-org/dealcycle-crm/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/dealcycle-crm/discussions) 

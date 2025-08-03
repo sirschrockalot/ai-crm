@@ -1,10 +1,10 @@
-# 🏗️ Architecture Overview – Presidential Digs CRM
+# 🏗️ Architecture Overview – DealCycle CRM
 
 ## 🔧 Stack Overview
 
 | Layer       | Technology                            |
 |-------------|----------------------------------------|
-| Frontend    | Next.js + TypeScript + TailwindCSS     |
+| Frontend    | Next.js 14 + TypeScript + TailwindCSS + Headless UI |
 | Backend     | NestJS (Node.js) + TypeScript          |
 | Database    | MongoDB (multi-tenant aware)           |
 | Auth        | Google OAuth 2.0 + JWT                 |
@@ -12,13 +12,16 @@
 | Monitoring  | Prometheus + Grafana                   |
 | Deployment  | Docker Compose (GCP-compatible)        |
 | Security    | RBAC, tenant guards, container hardening|
+| State Management | Zustand (frontend)                   |
+| Forms       | React Hook Form + Zod validation       |
+| Charts      | Recharts for data visualization        |
 
 ---
 
 ## 📁 Code Structure
 
 ```
-/presidential-digs-crm
+/dealcycle-crm
 ├── backend/
 │   ├── src/
 │   │   ├── auth/
@@ -51,6 +54,17 @@
 │   │   │   ├── ai.controller.ts
 │   │   │   ├── ai.service.ts
 │   │   │   └── ai.module.ts
+│   │   ├── automation/
+│   │   │   ├── automation.controller.ts
+│   │   │   ├── automation.service.ts
+│   │   │   ├── workflow.schema.ts
+│   │   │   ├── workflow-engine.service.ts
+│   │   │   └── automation.module.ts
+│   │   ├── analytics/
+│   │   │   ├── analytics.controller.ts
+│   │   │   ├── analytics.service.ts
+│   │   │   ├── dashboard.service.ts
+│   │   │   └── analytics.module.ts
 │   │   ├── common/
 │   │   │   ├── middleware/
 │   │   │   │   ├── tenant.middleware.ts
@@ -64,7 +78,9 @@
 │   │   │   └── dto/
 │   │   │       ├── create-lead.dto.ts
 │   │   │       ├── update-lead.dto.ts
-│   │   │       └── create-buyer.dto.ts
+│   │   │       ├── create-buyer.dto.ts
+│   │   │       ├── workflow.dto.ts
+│   │   │       └── dashboard.dto.ts
 │   │   ├── config/
 │   │   │   ├── database.config.ts
 │   │   │   ├── auth.config.ts
@@ -82,36 +98,61 @@
 │   │   │   │   ├── Input.tsx
 │   │   │   │   ├── Modal.tsx
 │   │   │   │   ├── Table.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Chart.tsx
 │   │   │   │   └── index.ts
 │   │   │   ├── layout/
 │   │   │   │   ├── Sidebar.tsx
 │   │   │   │   ├── Header.tsx
 │   │   │   │   ├── Navigation.tsx
+│   │   │   │   ├── SearchBar.tsx
 │   │   │   │   └── index.ts
 │   │   │   ├── forms/
 │   │   │   │   ├── LeadForm.tsx
 │   │   │   │   ├── BuyerForm.tsx
+│   │   │   │   ├── WorkflowForm.tsx
 │   │   │   │   └── index.ts
 │   │   │   └── features/
 │   │   │       ├── leads/
 │   │   │       │   ├── LeadList.tsx
 │   │   │       │   ├── LeadCard.tsx
 │   │   │       │   ├── LeadDetail.tsx
-│   │   │       │   └── LeadForm.tsx
+│   │   │       │   ├── LeadForm.tsx
+│   │   │       │   └── LeadImportExport.tsx
 │   │   │       ├── buyers/
 │   │   │       │   ├── BuyerList.tsx
 │   │   │       │   ├── BuyerCard.tsx
 │   │   │       │   ├── BuyerDetail.tsx
-│   │   │       │   └── BuyerForm.tsx
+│   │   │       │   ├── BuyerForm.tsx
+│   │   │       │   └── BuyerAnalytics.tsx
 │   │   │       ├── communications/
 │   │   │       │   ├── CommunicationHistory.tsx
 │   │   │       │   ├── SMSInterface.tsx
-│   │   │       │   └── CallLog.tsx
-│   │   │       └── dashboard/
-│   │   │           ├── DashboardStats.tsx
-│   │   │           ├── RecentLeads.tsx
-│   │   │           ├── QuickActions.tsx
-│   │   │           └── ActivityFeed.tsx
+│   │   │       │   ├── CallLog.tsx
+│   │   │       │   ├── CommunicationCenter.tsx
+│   │   │       │   └── CommunicationAnalytics.tsx
+│   │   │       ├── dashboard/
+│   │   │       │   ├── ExecutiveDashboard.tsx
+│   │   │       │   ├── AcquisitionsDashboard.tsx
+│   │   │       │   ├── DispositionDashboard.tsx
+│   │   │       │   ├── MobileDashboard.tsx
+│   │   │       │   ├── DashboardStats.tsx
+│   │   │       │   ├── RecentLeads.tsx
+│   │   │       │   ├── QuickActions.tsx
+│   │   │       │   └── ActivityFeed.tsx
+│   │   │       ├── automation/
+│   │   │       │   ├── WorkflowBuilder.tsx
+│   │   │       │   ├── WorkflowCanvas.tsx
+│   │   │       │   ├── WorkflowComponents.tsx
+│   │   │       │   ├── AutomationStats.tsx
+│   │   │       │   └── WorkflowList.tsx
+│   │   │       └── analytics/
+│   │   │           ├── AnalyticsDashboard.tsx
+│   │   │           ├── PerformanceMetrics.tsx
+│   │   │           ├── ConversionCharts.tsx
+│   │   │           ├── TeamPerformance.tsx
+│   │   │           └── CustomReports.tsx
 │   │   ├── pages/
 │   │   │   ├── _app.tsx
 │   │   │   ├── index.tsx
@@ -121,14 +162,30 @@
 │   │   │   ├── leads/
 │   │   │   │   ├── index.tsx
 │   │   │   │   ├── [id].tsx
-│   │   │   │   └── new.tsx
+│   │   │   │   ├── new.tsx
+│   │   │   │   └── import-export.tsx
 │   │   │   ├── buyers/
 │   │   │   │   ├── index.tsx
 │   │   │   │   ├── [id].tsx
-│   │   │   │   └── new.tsx
+│   │   │   │   ├── new.tsx
+│   │   │   │   └── analytics.tsx
 │   │   │   ├── communications/
 │   │   │   │   ├── index.tsx
-│   │   │   │   └── [leadId].tsx
+│   │   │   │   ├── [leadId].tsx
+│   │   │   │   └── center.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── executive.tsx
+│   │   │   │   ├── acquisitions.tsx
+│   │   │   │   ├── disposition.tsx
+│   │   │   │   └── mobile.tsx
+│   │   │   ├── automation/
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── builder.tsx
+│   │   │   │   └── workflows.tsx
+│   │   │   ├── analytics/
+│   │   │   │   ├── index.tsx
+│   │   │   │   ├── performance.tsx
+│   │   │   │   └── reports.tsx
 │   │   │   └── settings/
 │   │   │       ├── profile.tsx
 │   │   │       ├── team.tsx
@@ -137,27 +194,48 @@
 │   │   │   ├── useAuth.ts
 │   │   │   ├── useLeads.ts
 │   │   │   ├── useBuyers.ts
-│   │   │   └── useCommunications.ts
+│   │   │   ├── useCommunications.ts
+│   │   │   ├── useAutomation.ts
+│   │   │   ├── useAnalytics.ts
+│   │   │   └── useDashboard.ts
 │   │   ├── services/
 │   │   │   ├── api.ts
 │   │   │   ├── auth.ts
-│   │   │   └── websocket.ts
+│   │   │   ├── websocket.ts
+│   │   │   ├── twilio.ts
+│   │   │   └── ai.ts
 │   │   ├── stores/
 │   │   │   ├── authStore.ts
 │   │   │   ├── leadStore.ts
 │   │   │   ├── buyerStore.ts
+│   │   │   ├── communicationStore.ts
+│   │   │   ├── automationStore.ts
+│   │   │   ├── analyticsStore.ts
 │   │   │   └── uiStore.ts
 │   │   ├── types/
 │   │   │   ├── auth.ts
 │   │   │   ├── leads.ts
 │   │   │   ├── buyers.ts
+│   │   │   ├── communications.ts
+│   │   │   ├── automation.ts
+│   │   │   ├── analytics.ts
 │   │   │   └── api.ts
 │   │   ├── utils/
 │   │   │   ├── validation.ts
 │   │   │   ├── formatting.ts
-│   │   │   └── constants.ts
-│   │   └── styles/
-│   │       └── globals.css
+│   │   │   ├── constants.ts
+│   │   │   ├── charts.ts
+│   │   │   └── workflow.ts
+│   │   ├── styles/
+│   │   │   ├── globals.css
+│   │   │   ├── components.css
+│   │   │   └── design-system.css
+│   │   └── design-system/
+│   │       ├── colors.ts
+│   │       ├── typography.ts
+│   │       ├── spacing.ts
+│   │       ├── shadows.ts
+│   │       └── animations.ts
 │   ├── public/
 │   │   ├── images/
 │   │   └── icons/
@@ -205,6 +283,105 @@
 
 ---
 
+## 🎨 Design System Architecture
+
+### Color Palette
+```typescript
+// design-system/colors.ts
+export const colors = {
+  primary: {
+    50: '#EFF6FF',
+    500: '#3B82F6',
+    600: '#2563EB',
+    700: '#1D4ED8',
+  },
+  secondary: {
+    50: '#F3E8FF',
+    500: '#8B5CF6',
+    600: '#7C3AED',
+    700: '#6D28D9',
+  },
+  success: {
+    50: '#ECFDF5',
+    500: '#10B981',
+    600: '#059669',
+    700: '#047857',
+  },
+  gray: {
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155',
+    900: '#0F172A',
+  }
+};
+```
+
+### Typography System
+```typescript
+// design-system/typography.ts
+export const typography = {
+  fontFamily: {
+    sans: ['Inter', 'system-ui', 'sans-serif'],
+  },
+  fontSize: {
+    xs: '0.75rem',
+    sm: '0.875rem',
+    base: '1rem',
+    lg: '1.125rem',
+    xl: '1.25rem',
+    '2xl': '1.5rem',
+    '3xl': '1.875rem',
+    '4xl': '2.25rem',
+  },
+  fontWeight: {
+    normal: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+  }
+};
+```
+
+### Component Architecture
+```typescript
+// components/ui/Card.tsx
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  variant?: 'default' | 'elevated' | 'outlined';
+  padding?: 'sm' | 'md' | 'lg';
+}
+
+export const Card: React.FC<CardProps> = ({
+  children,
+  className = '',
+  variant = 'default',
+  padding = 'md'
+}) => {
+  const baseClasses = 'rounded-lg border transition-all duration-300';
+  const variantClasses = {
+    default: 'bg-white border-gray-200 shadow-sm',
+    elevated: 'bg-white border-gray-200 shadow-lg hover:shadow-xl',
+    outlined: 'bg-transparent border-gray-300'
+  };
+  const paddingClasses = {
+    sm: 'p-4',
+    md: 'p-6',
+    lg: 'p-8'
+  };
+
+  return (
+    <div className={`${baseClasses} ${variantClasses[variant]} ${paddingClasses[padding]} ${className}`}>
+      {children}
+    </div>
+  );
+};
+```
+
+---
+
 ## 🔐 Security Layers
 
 | Security Feature   | Description                                         |
@@ -212,19 +389,23 @@
 | Auth               | Google OAuth frontend + JWT for API access         |
 | RBAC               | `@Roles()` + `RolesGuard` for API access control   |
 | Tenant Scoping     | `tenant.middleware.ts` + `tenantId` on queries     |
-| Input Validation   | DTOs with `class-validator`                        |
+| Input Validation   | DTOs with `class-validator` + Zod on frontend      |
 | API Protection     | Helmet, rate limits, sanitization, CORS            |
 | Docker Security    | Non-root users, read-only FS, `no-new-privileges`  |
+| XSS Protection     | Content Security Policy, input sanitization        |
+| CSRF Protection    | CSRF tokens for state-changing operations          |
 
 ---
 
-## 📊 Monitoring
+## 📊 Monitoring & Analytics
 
 - **Prometheus**: scrape NestJS metrics at `/metrics`
 - **Grafana**: dashboards for uptime, latency, error rates
 - **Health Check**: `/api/health` for probes/load balancers
 - **Application Logs**: Structured logging with correlation IDs
 - **Error Tracking**: Sentry integration for error monitoring
+- **Performance Monitoring**: Real User Monitoring (RUM)
+- **Business Metrics**: Custom dashboards for KPIs and conversions
 
 ---
 
@@ -240,13 +421,15 @@
 | Monitoring         | Prometheus container OR GCP monitoring |
 | SSL Certificate    | `google_compute_managed_ssl_certificate` |
 | DNS                | `google_dns_record_set`        |
+| CDN                | `google_compute_backend_bucket` |
+| Redis              | Memorystore for caching        |
 
 ---
 
 ## ⚙️ GitHub Actions for CI/CD
 
 ```yaml
-name: Deploy CRM to GCP
+name: Deploy DealCycle CRM to GCP
 
 on:
   push:
@@ -265,6 +448,7 @@ jobs:
       - run: npm ci
       - run: npm run test
       - run: npm run lint
+      - run: npm run type-check
 
   build:
     needs: test
@@ -272,8 +456,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-docker@v3
-      - run: docker build -t presidential-digs-crm .
-      - run: docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/presidential-digs-crm:${{ github.sha }}
+      - run: docker build -t dealcycle-crm .
+      - run: docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/dealcycle-crm:${{ github.sha }}
 
   terraform:
     needs: build
@@ -300,6 +484,8 @@ jobs:
 | GPT Descriptions       | `/deals/:id/generate-copy`|
 | Buyer Matching         | `/leads/:id/match-buyers` |
 | Lead Qualification     | `/leads/:id/qualify`      |
+| Workflow Suggestions   | `/automation/suggest-workflow` |
+| Performance Insights   | `/analytics/ai-insights`  |
 
 ---
 
@@ -349,9 +535,75 @@ interface Tenant {
     call_enabled: boolean;
     llm_features_enabled: boolean;
     custom_branding: boolean;
+    automation_enabled: boolean;
+    advanced_analytics: boolean;
   };
   created_at: Date;
   updated_at: Date;
+}
+```
+
+---
+
+## 🤖 Automation Workflow Engine
+
+### Workflow Schema
+```typescript
+interface Workflow {
+  _id: ObjectId;
+  tenant_id: ObjectId;
+  name: string;
+  description: string;
+  trigger: {
+    type: 'lead_created' | 'lead_status_changed' | 'communication_sent' | 'scheduled';
+    conditions: WorkflowCondition[];
+  };
+  steps: WorkflowStep[];
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
+interface WorkflowStep {
+  id: string;
+  type: 'action' | 'condition' | 'delay' | 'notification';
+  config: {
+    action?: 'send_sms' | 'send_email' | 'assign_lead' | 'update_status';
+    condition?: 'lead_value' | 'lead_source' | 'communication_count';
+    delay?: number; // minutes
+    notification?: 'email' | 'sms' | 'in_app';
+  };
+  next_steps: string[]; // IDs of next steps
+}
+```
+
+### Workflow Engine Service
+```typescript
+@Injectable()
+export class WorkflowEngineService {
+  async executeWorkflow(workflowId: string, context: any) {
+    const workflow = await this.getWorkflow(workflowId);
+    const execution = await this.createExecution(workflowId, context);
+    
+    for (const step of workflow.steps) {
+      await this.executeStep(step, context, execution);
+    }
+  }
+
+  private async executeStep(step: WorkflowStep, context: any, execution: any) {
+    switch (step.type) {
+      case 'action':
+        await this.executeAction(step.config.action, context);
+        break;
+      case 'condition':
+        const result = await this.evaluateCondition(step.config.condition, context);
+        // Route to appropriate next step based on result
+        break;
+      case 'delay':
+        await this.scheduleDelay(step.config.delay, execution);
+        break;
+    }
+  }
 }
 ```
 
@@ -366,6 +618,9 @@ interface Tenant {
 - **Static Generation**: Pre-render static pages
 - **Bundle Analysis**: Regular bundle size monitoring
 - **Caching Strategy**: Redis for API response caching
+- **Service Workers**: Offline functionality and caching
+- **Lazy Loading**: Component and route lazy loading
+- **Virtual Scrolling**: For large data sets
 
 ### Backend Optimizations
 
@@ -374,6 +629,8 @@ interface Tenant {
 - **Caching**: Redis for frequently accessed data
 - **Connection Pooling**: Optimized database connections
 - **Rate Limiting**: API rate limiting and throttling
+- **Background Jobs**: Queue-based processing for heavy tasks
+- **Database Sharding**: For large-scale deployments
 
 ### Performance Targets
 
@@ -382,6 +639,7 @@ interface Tenant {
 - **Cumulative Layout Shift**: < 0.1
 - **Time to Interactive**: < 3.5s
 - **API Response Time**: < 500ms average
+- **Core Web Vitals**: All metrics in "Good" range
 
 ---
 
@@ -534,6 +792,8 @@ export class RolesGuard implements CanActivate {
   notes: String,
   communication_count: Number,
   last_contacted: Date,
+  ai_summary: String,
+  lead_score: Number,
   created_at: Date,
   updated_at: Date
 }
@@ -557,6 +817,11 @@ export class RolesGuard implements CanActivate {
   notes: String,
   total_deals: Number,
   total_investment: Number,
+  performance_metrics: {
+    response_time: Number,
+    conversion_rate: Number,
+    average_deal_size: Number
+  },
   is_active: Boolean,
   created_at: Date,
   updated_at: Date
@@ -580,7 +845,61 @@ export class RolesGuard implements CanActivate {
   duration: Number,
   scheduled_at: Date,
   sent_at: Date,
+  ai_suggestions: [String],
   created_at: Date
+}
+```
+
+### Workflows Collection
+
+```javascript
+{
+  _id: ObjectId,
+  tenant_id: ObjectId,
+  name: String,
+  description: String,
+  trigger: {
+    type: String,
+    conditions: [Object]
+  },
+  steps: [{
+    id: String,
+    type: String,
+    config: Object,
+    next_steps: [String]
+  }],
+  is_active: Boolean,
+  execution_count: Number,
+  success_rate: Number,
+  created_at: Date,
+  updated_at: Date
+}
+```
+
+### Analytics Collection
+
+```javascript
+{
+  _id: ObjectId,
+  tenant_id: ObjectId,
+  date: Date,
+  metrics: {
+    leads_created: Number,
+    leads_converted: Number,
+    communications_sent: Number,
+    deals_closed: Number,
+    revenue_generated: Number
+  },
+  user_activity: {
+    active_users: Number,
+    page_views: Number,
+    session_duration: Number
+  },
+  performance: {
+    response_time: Number,
+    error_rate: Number,
+    uptime: Number
+  }
 }
 ```
 
@@ -601,10 +920,13 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongo:27017/crm
+      - MONGODB_URI=mongodb://mongo:27017/dealcycle
       - JWT_SECRET=dev-secret
+      - TWILIO_ACCOUNT_SID=dev-sid
+      - TWILIO_AUTH_TOKEN=dev-token
     depends_on:
       - mongo
+      - redis
 
   frontend:
     build: ./frontend
@@ -619,6 +941,13 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
 
   prometheus:
     image: prom/prometheus
@@ -638,6 +967,7 @@ services:
 
 volumes:
   mongo_data:
+  redis_data:
   grafana_data:
 ```
 
@@ -649,6 +979,8 @@ volumes:
 - **CDN**: Cloud CDN for static assets
 - **Monitoring**: Cloud Monitoring integration
 - **Logging**: Cloud Logging with structured logs
+- **Redis**: Memorystore for caching and sessions
+- **Backup**: Automated daily backups with retention policies
 
 ---
 
@@ -660,6 +992,7 @@ volumes:
 - **Database Sharding**: MongoDB sharding for large datasets
 - **Caching Layer**: Redis cluster for session and data caching
 - **CDN**: Global content delivery for static assets
+- **Microservices**: Future migration path for specific domains
 
 ### Performance Monitoring
 
@@ -667,6 +1000,7 @@ volumes:
 - **Infrastructure Metrics**: CPU, memory, disk usage
 - **User Experience Metrics**: Page load times, API response times
 - **Business Metrics**: Lead conversion rates, user engagement
+- **Real-time Monitoring**: Live dashboards and alerting
 
 ### Disaster Recovery
 
@@ -674,7 +1008,8 @@ volumes:
 - **Multi-Region**: Cross-region deployment for high availability
 - **Monitoring Alerts**: Proactive alerting for issues
 - **Rollback Strategy**: Automated rollback procedures
+- **Data Recovery**: Point-in-time recovery capabilities
 
 ---
 
-This architecture provides a solid foundation for the Presidential Digs CRM with scalability, security, and maintainability in mind. The multi-tenant design supports future SaaS expansion while the modular structure enables easy development and testing.
+This architecture provides a solid foundation for the DealCycle CRM with scalability, security, and maintainability in mind. The multi-tenant design supports future SaaS expansion while the modular structure enables easy development and testing. The modern UI/UX design system ensures a professional and intuitive user experience across all devices.

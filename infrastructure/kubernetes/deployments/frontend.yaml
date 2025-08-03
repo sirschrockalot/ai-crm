@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dealcycle-frontend
+  namespace: dealcycle-crm
+  labels:
+    app: dealcycle-frontend
+    version: v1.0.0
+    environment: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dealcycle-frontend
+  template:
+    metadata:
+      labels:
+        app: dealcycle-frontend
+        version: v1.0.0
+    spec:
+      nodeSelector:
+        workload: frontend
+      containers:
+      - name: frontend
+        image: dealcycle-crm:latest
+        ports:
+        - containerPort: 3001
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: NEXT_PUBLIC_API_URL
+          value: "https://api.dealcycle-crm.com"
+        - name: NEXT_PUBLIC_APP_NAME
+          value: "DealCycle CRM"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+      imagePullSecrets:
+      - name: dealcycle-registry-secret
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0 
