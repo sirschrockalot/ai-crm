@@ -7,6 +7,7 @@ import { ScoringController } from './controllers/scoring.controller';
 import { QueueController } from './controllers/queue.controller';
 import { ImportExportController } from './controllers/import-export.controller';
 import { BulkOperationsController } from './controllers/bulk-operations.controller';
+import { CommunicationController } from './controllers/communication.controller';
 import { LeadsService } from './leads.service';
 import { Lead, LeadSchema } from './schemas/lead.schema';
 import { 
@@ -24,6 +25,7 @@ import { LeadScoringService } from './services/lead-scoring.service';
 import { LeadQueueService } from './services/lead-queue.service';
 import { LeadImportExportService } from './services/lead-import-export.service';
 import { BulkOperationsService } from './services/bulk-operations.service';
+import { CommunicationService } from './services/communication.service';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { BulkOperationsService } from './services/bulk-operations.service';
     QueueController,
     ImportExportController,
     BulkOperationsController,
+    CommunicationController,
   ],
   providers: [
     LeadsService,
@@ -50,6 +53,7 @@ import { BulkOperationsService } from './services/bulk-operations.service';
     LeadQueueService,
     LeadImportExportService,
     BulkOperationsService,
+    CommunicationService,
   ],
   exports: [
     LeadsService,
@@ -58,6 +62,7 @@ import { BulkOperationsService } from './services/bulk-operations.service';
     LeadQueueService,
     LeadImportExportService,
     BulkOperationsService,
+    CommunicationService,
   ],
 })
 export class LeadsModule {} 
