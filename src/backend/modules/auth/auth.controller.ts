@@ -8,18 +8,26 @@ import {
   HttpStatus,
   HttpCode,
   UnauthorizedException,
+  BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { AuthService, JwtPayload, GoogleUser } from './auth.service';
+import { TestModeService } from './services/test-mode.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
+import { TestModeGuard } from './guards/test-mode.guard';
+import { TestUser } from './decorators/test-user.decorator';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly testModeService: TestModeService,
+  ) {}
 
   @Get('google')
   @UseGuards(GoogleOAuthGuard)
@@ -30,6 +38,47 @@ export class AuthController {
     // The guard will handle the redirect to Google
   }
 
+  @Post('register/google')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register user via Google OAuth token' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid OAuth token or registration failed' })
+  async registerWithGoogle(@Req() req: Request) {
+    try {
+      const { accessToken, tenantId } = req.body;
+      
+      if (!accessToken) {
+        throw new BadRequestException('Google access token is required');
+      }
+
+      // Validate Google token and get user data
+      const googleUser = await this.authService.validateGoogleToken(accessToken);
+      
+      // Register user from OAuth data
+      const jwtPayload = await this.authService.registerUserFromOAuth(googleUser, tenantId);
+      
+      // Generate JWT token
+      const token = await this.authService.generateToken(jwtPayload);
+      
+      return {
+        success: true,
+        message: 'User registered successfully',
+        data: {
+          token,
+          user: {
+            id: jwtPayload.sub,
+            email: googleUser.email,
+            firstName: googleUser.firstName,
+            lastName: googleUser.lastName,
+            picture: googleUser.picture,
+          },
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException(`Registration failed: ${error.message}`);
+    }
+  }
+
   @Get('google/callback')
   @UseGuards(GoogleOAuthGuard)
   @ApiOperation({ summary: 'Handle Google OAuth callback' })
@@ -38,8 +87,8 @@ export class AuthController {
     try {
       const googleUser = req.user as GoogleUser;
       
-      // Create JWT payload from Google user data
-      const jwtPayload = await this.authService.handleGoogleOAuthUser(googleUser);
+      // Register or find user from OAuth data
+      const jwtPayload = await this.authService.registerUserFromOAuth(googleUser);
       
       // Generate JWT token
       const token = await this.authService.generateToken(jwtPayload);
@@ -48,11 +97,11 @@ export class AuthController {
       // For now, return JSON response
       return res.status(HttpStatus.OK).json({
         success: true,
-        message: 'Google OAuth authentication successful',
+        message: 'Google OAuth registration successful',
         data: {
           token,
           user: {
-            id: googleUser.id,
+            id: jwtPayload.sub,
             email: googleUser.email,
             firstName: googleUser.firstName,
             lastName: googleUser.lastName,
@@ -61,9 +110,9 @@ export class AuthController {
         },
       });
     } catch (error) {
-      return res.status(HttpStatus.UNAUTHORIZED).json({
+      return res.status(HttpStatus.BAD_REQUEST).json({
         success: false,
-        message: 'Google OAuth authentication failed',
+        message: 'Google OAuth registration failed',
         error: error.message,
       });
     }
@@ -111,6 +160,80 @@ export class AuthController {
     return {
       success: true,
       message: 'Logout successful',
+    };
+  }
+
+  @Get('test-mode/status')
+  @ApiOperation({ summary: 'Get test mode status' })
+  @ApiResponse({ status: 200, description: 'Test mode status retrieved' })
+  async getTestModeStatus() {
+    const isEnabled = this.testModeService.isTestModeEnabled();
+    const testUsers = isEnabled ? this.testModeService.getAllTestUsers() : [];
+    
+    return {
+      success: true,
+      message: 'Test mode status retrieved',
+      data: {
+        enabled: isEnabled,
+        testUsers: testUsers.map(user => ({
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          roles: user.roles,
+        })),
+      },
+    };
+  }
+
+  @Post('test-mode/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with test user' })
+  @ApiResponse({ status: 200, description: 'Test login successful' })
+  @ApiResponse({ status: 400, description: 'Test mode disabled or invalid credentials' })
+  @ApiQuery({ name: 'role', required: false, enum: ['admin', 'acquisitions', 'dispositions'] })
+  @ApiQuery({ name: 'email', required: false, type: String })
+  async testModeLogin(
+    @Query('role') role?: string,
+    @Query('email') email?: string,
+  ) {
+    if (!this.testModeService.isTestModeEnabled()) {
+      throw new BadRequestException('Test mode is not enabled');
+    }
+
+    let testUser = null;
+    if (role) {
+      testUser = this.testModeService.getTestUser(role);
+    } else if (email) {
+      testUser = this.testModeService.validateTestUser(email);
+    } else {
+      testUser = this.testModeService.getDefaultTestUser();
+    }
+
+    if (!testUser) {
+      throw new BadRequestException('Invalid test user credentials');
+    }
+
+    // Create JWT payload and token
+    const payload = this.testModeService.createTestUserPayload(testUser);
+    const token = await this.authService.generateToken(payload);
+
+    this.testModeService.logTestModeUsage('Test user logged in', testUser);
+
+    return {
+      success: true,
+      message: 'Test login successful',
+      data: {
+        token,
+        user: {
+          id: testUser.id,
+          email: testUser.email,
+          firstName: testUser.firstName,
+          lastName: testUser.lastName,
+          roles: testUser.roles,
+          isTestUser: true,
+        },
+      },
     };
   }
 

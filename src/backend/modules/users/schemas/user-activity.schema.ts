@@ -8,6 +8,8 @@ export enum ActivityType {
   LOGOUT = 'logout',
   PROFILE_UPDATE = 'profile_update',
   SETTINGS_UPDATE = 'settings_update',
+  PREFERENCES_UPDATE = 'preferences_update',
+  PREFERENCES_RESET = 'preferences_reset',
   PASSWORD_CHANGE = 'password_change',
   EMAIL_VERIFICATION = 'email_verification',
   PHONE_VERIFICATION = 'phone_verification',
@@ -20,6 +22,11 @@ export enum ActivityType {
   DATA_IMPORT = 'data_import',
   API_ACCESS = 'api_access',
   SECURITY_EVENT = 'security_event',
+  SEARCH = 'search',
+  INVITATION_SENT = 'invitation_sent',
+  INVITATION_ACCEPTED = 'invitation_accepted',
+  INVITATION_CANCELLED = 'invitation_cancelled',
+  INVITATION_RESENT = 'invitation_resent',
 }
 
 export enum ActivitySeverity {

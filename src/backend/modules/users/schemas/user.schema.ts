@@ -15,6 +15,8 @@ export enum UserRole {
   MANAGER = 'manager',
   USER = 'user',
   VIEWER = 'viewer',
+  ACQUISITIONS = 'acquisitions',
+  DISPOSITIONS = 'dispositions',
 }
 
 @Schema({ timestamps: true })
@@ -37,8 +39,8 @@ export class User {
   @Prop({ required: true, enum: UserStatus, default: UserStatus.PENDING })
   status: UserStatus;
 
-  @Prop({ required: true, enum: UserRole, default: UserRole.USER })
-  role: UserRole;
+  @Prop({ type: [String], default: [UserRole.USER] })
+  roles: string[];
 
   @Prop({ type: Types.ObjectId, ref: 'Tenant' })
   tenantId?: Types.ObjectId;
@@ -119,9 +121,24 @@ UserSchema.index({ email: 1 });
 UserSchema.index({ googleId: 1 });
 UserSchema.index({ tenantId: 1 });
 UserSchema.index({ status: 1 });
-UserSchema.index({ role: 1 });
+UserSchema.index({ roles: 1 });
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ lastActiveAt: -1 });
+
+// Search optimization indexes
+UserSchema.index({ firstName: 1, lastName: 1 });
+UserSchema.index({ displayName: 1 });
+UserSchema.index({ 'profile.company': 1 });
+UserSchema.index({ 'profile.position': 1 });
+UserSchema.index({ tags: 1 });
+
+// Compound indexes for common search patterns
+UserSchema.index({ tenantId: 1, status: 1 });
+UserSchema.index({ tenantId: 1, roles: 1 });
+UserSchema.index({ tenantId: 1, createdAt: -1 });
+UserSchema.index({ tenantId: 1, lastActiveAt: -1 });
+UserSchema.index({ status: 1, createdAt: -1 });
+UserSchema.index({ roles: 1, createdAt: -1 });
 
 // Virtual for full name
 UserSchema.virtual('fullName').get(function() {

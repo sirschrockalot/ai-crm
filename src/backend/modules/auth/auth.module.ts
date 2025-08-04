@@ -5,11 +5,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { TestModeService } from './services/test-mode.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleOAuthStrategy } from './strategies/google-oauth.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
+import { TestModeGuard } from './guards/test-mode.guard';
 import { UsersModule } from '../users/users.module';
+import testModeConfig from '../../config/test-mode.config';
 
 @Module({
   imports: [
@@ -24,16 +27,19 @@ import { UsersModule } from '../users/users.module';
       }),
       inject: [ConfigService],
     }),
+    ConfigModule.forFeature(testModeConfig),
     UsersModule,
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
+    TestModeService,
     JwtStrategy,
     GoogleOAuthStrategy,
     JwtAuthGuard,
     GoogleOAuthGuard,
+    TestModeGuard,
   ],
-  exports: [AuthService, JwtAuthGuard, GoogleOAuthGuard],
+  exports: [AuthService, JwtAuthGuard, GoogleOAuthGuard, TestModeService, TestModeGuard],
 })
 export class AuthModule {} 

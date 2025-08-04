@@ -243,10 +243,11 @@ export class UpdateUserDto {
   @IsEnum(UserStatus)
   status?: UserStatus;
 
-  @ApiPropertyOptional({ description: 'User role' })
+  @ApiPropertyOptional({ description: 'User roles' })
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsArray()
+  @IsString({ each: true })
+  roles?: string[];
 
   @ApiPropertyOptional({ description: 'User profile information' })
   @IsOptional()
@@ -298,7 +299,7 @@ export class UserSearchDto {
   @IsOptional()
   limit?: number;
 
-  @ApiPropertyOptional({ description: 'Search term for email, name, or display name' })
+  @ApiPropertyOptional({ description: 'Search term for email, name, display name, company, position, bio, or tags' })
   @IsOptional()
   @IsString()
   search?: string;
@@ -308,10 +309,45 @@ export class UserSearchDto {
   @IsEnum(UserStatus)
   status?: UserStatus;
 
-  @ApiPropertyOptional({ description: 'Filter by user role', enum: UserRole })
+  @ApiPropertyOptional({ description: 'Filter by user role' })
   @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
+  @IsString()
+  role?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by company' })
+  @IsOptional()
+  @IsString()
+  company?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by position' })
+  @IsOptional()
+  @IsString()
+  position?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by tags (comma-separated)' })
+  @IsOptional()
+  @IsString()
+  tags?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by date range - created after' })
+  @IsOptional()
+  @IsDateString()
+  createdAfter?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by date range - created before' })
+  @IsOptional()
+  @IsDateString()
+  createdBefore?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by date range - last active after' })
+  @IsOptional()
+  @IsDateString()
+  lastActiveAfter?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by date range - last active before' })
+  @IsOptional()
+  @IsDateString()
+  lastActiveBefore?: string;
 
   @ApiPropertyOptional({ description: 'Sort by field', default: 'createdAt' })
   @IsOptional()
@@ -335,10 +371,11 @@ export class UpdateUserStatusDto {
   reason?: string;
 }
 
-export class UpdateUserRoleDto {
-  @ApiProperty({ description: 'New user role', enum: UserRole })
-  @IsEnum(UserRole)
-  role: UserRole;
+export class UpdateUserRolesDto {
+  @ApiProperty({ description: 'New user roles' })
+  @IsArray()
+  @IsString({ each: true })
+  roles: string[];
 
   @ApiPropertyOptional({ description: 'Reason for role change' })
   @IsOptional()
@@ -374,4 +411,41 @@ export class UserActivitySearchDto {
   @IsOptional()
   @IsDateString()
   endDate?: string;
+
+  @ApiPropertyOptional({ description: 'Search term for description, IP, user agent, etc.' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({ description: 'Sort by field', default: 'performedAt' })
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  @ApiPropertyOptional({ description: 'Sort order', default: 'desc' })
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'asc' | 'desc';
+}
+
+export class ActivityExportDto {
+  @ApiPropertyOptional({ description: 'User ID to filter by' })
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by date range - start' })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by date range - end' })
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @ApiPropertyOptional({ description: 'Export format', enum: ['json', 'csv'], default: 'json' })
+  @IsOptional()
+  @IsString()
+  format?: 'json' | 'csv';
 } 
