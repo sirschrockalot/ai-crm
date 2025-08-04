@@ -6,9 +6,35 @@ export type LeadDocument = Lead & Document;
 export enum LeadStatus {
   NEW = 'new',
   CONTACTED = 'contacted',
+  QUALIFIED = 'qualified',
+  INTERESTED = 'interested',
+  NEGOTIATING = 'negotiating',
+  CLOSED_WON = 'closed_won',
+  CLOSED_LOST = 'closed_lost',
+  INACTIVE = 'inactive',
+  FOLLOW_UP = 'follow_up',
+  APPOINTMENT_SCHEDULED = 'appointment_scheduled',
+  PROPERTY_VIEWED = 'property_viewed',
+  OFFER_MADE = 'offer_made',
   UNDER_CONTRACT = 'under_contract',
-  CLOSED = 'closed',
-  LOST = 'lost',
+}
+
+export enum LeadSource {
+  WEBSITE = 'website',
+  REFERRAL = 'referral',
+  SOCIAL_MEDIA = 'social_media',
+  COLD_CALL = 'cold_call',
+  EMAIL_CAMPAIGN = 'email_campaign',
+  SMS_CAMPAIGN = 'sms_campaign',
+  OPEN_HOUSE = 'open_house',
+  FOR_SALE_SIGN = 'for_sale_sign',
+  ONLINE_AD = 'online_ad',
+  PRINT_AD = 'print_ad',
+  RADIO_AD = 'radio_ad',
+  TV_AD = 'tv_ad',
+  EVENT = 'event',
+  PARTNER = 'partner',
+  OTHER = 'other',
 }
 
 export enum LeadPriority {
@@ -20,215 +46,361 @@ export enum LeadPriority {
 
 export enum PropertyType {
   SINGLE_FAMILY = 'single_family',
+  TOWNHOUSE = 'townhouse',
+  CONDOMINIUM = 'condominium',
+  DUPLEX = 'duplex',
+  TRIPLEX = 'triplex',
+  FOURPLEX = 'fourplex',
   MULTI_FAMILY = 'multi_family',
   COMMERCIAL = 'commercial',
   LAND = 'land',
-}
-
-export enum LeadSource {
-  WEBSITE = 'website',
-  REFERRAL = 'referral',
-  COLD_CALL = 'cold_call',
-  SOCIAL_MEDIA = 'social_media',
-  PAID_ADS = 'paid_ads',
-  DIRECT_MAIL = 'direct_mail',
-  DRIVING_FOR_DOLLARS = 'driving_for_dollars',
   OTHER = 'other',
 }
 
-@Schema({ _id: false })
-export class Address {
-  @Prop()
-  street?: string;
-
-  @Prop()
-  city?: string;
-
-  @Prop()
-  state?: string;
-
-  @Prop()
-  zipCode?: string;
-
-  @Prop()
-  county?: string;
-
-  @Prop()
-  fullAddress?: string;
+export enum TransactionType {
+  BUY = 'buy',
+  SELL = 'sell',
+  RENT = 'rent',
+  INVEST = 'invest',
+  REFINANCE = 'refinance',
 }
 
-@Schema({ _id: false })
-export class PropertyDetails {
-  @Prop({ enum: PropertyType })
-  type?: PropertyType;
-
-  @Prop({ min: 0 })
-  bedrooms?: number;
-
-  @Prop({ min: 0 })
-  bathrooms?: number;
-
-  @Prop({ min: 0 })
-  squareFeet?: number;
-
-  @Prop({ min: 0 })
-  lotSize?: number;
-
-  @Prop({ min: 1800, max: new Date().getFullYear() })
-  yearBuilt?: number;
+export interface ContactInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  preferredContactMethod: 'email' | 'phone' | 'sms' | 'mail';
+  timeZone?: string;
+  language?: string;
 }
 
-@Schema({ _id: false })
-export class AutomationStep {
-  @Prop({ required: true })
-  step: string;
-
-  @Prop({ required: true })
-  executedAt: Date;
-
-  @Prop()
-  result?: string;
-
-  @Prop({ type: Object })
-  metadata?: Record<string, any>;
+export interface PropertyPreferences {
+  propertyType: PropertyType[];
+  transactionType: TransactionType;
+  minPrice?: number;
+  maxPrice?: number;
+  minBedrooms?: number;
+  maxBedrooms?: number;
+  minBathrooms?: number;
+  maxBathrooms?: number;
+  minSquareFootage?: number;
+  maxSquareFootage?: number;
+  preferredLocations: string[];
+  mustHaveFeatures: string[];
+  niceToHaveFeatures: string[];
+  dealBreakers: string[];
+  timeline: 'immediate' | '1-3_months' | '3-6_months' | '6-12_months' | 'flexible';
+  notes?: string;
 }
 
-@Schema({ _id: false })
-export class AutomationData {
-  @Prop({ type: Types.ObjectId, ref: 'Workflow' })
-  workflowId?: Types.ObjectId;
+export interface FinancialInfo {
+  preApproved: boolean;
+  preApprovalAmount?: number;
+  downPaymentAmount?: number;
+  downPaymentPercentage?: number;
+  creditScore?: number;
+  annualIncome?: number;
+  employmentStatus: 'employed' | 'self_employed' | 'retired' | 'unemployed' | 'student' | 'other';
+  employmentLength?: number; // in months
+  lender?: string;
+  loanType?: 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'other';
+  monthlyDebt?: number;
+  monthlyIncome?: number;
+  debtToIncomeRatio?: number;
+  notes?: string;
+}
 
-  @Prop()
-  lastAutomationStep?: string;
+export interface CommunicationHistory {
+  type: 'call' | 'email' | 'sms' | 'meeting' | 'text' | 'other';
+  direction: 'inbound' | 'outbound';
+  subject?: string;
+  content: string;
+  timestamp: Date;
+  duration?: number; // for calls, in seconds
+  outcome: 'successful' | 'no_answer' | 'voicemail' | 'busy' | 'wrong_number' | 'other';
+  followUpRequired: boolean;
+  followUpDate?: Date;
+  notes?: string;
+  attachments?: string[]; // file URLs
+}
 
-  @Prop({ type: [AutomationStep], default: [] })
-  automationHistory: AutomationStep[];
+export interface LeadActivity {
+  type: 'status_change' | 'assignment' | 'note_added' | 'communication' | 'appointment' | 'property_viewed' | 'offer_made' | 'other';
+  description: string;
+  timestamp: Date;
+  userId: Types.ObjectId;
+  metadata?: any;
+}
+
+export interface Appointment {
+  date: Date;
+  duration: number; // in minutes
+  type: 'phone_call' | 'video_call' | 'in_person' | 'property_tour' | 'open_house' | 'closing' | 'other';
+  location?: string;
+  notes?: string;
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+  reminderSent: boolean;
+  reminderDate?: Date;
+}
+
+export interface PropertyViewed {
+  propertyId?: string;
+  propertyAddress: string;
+  date: Date;
+  notes?: string;
+  rating?: number; // 1-5 stars
+  feedback?: string;
+  followUpRequired: boolean;
+  followUpDate?: Date;
+}
+
+export interface Offer {
+  propertyId?: string;
+  propertyAddress: string;
+  offerAmount: number;
+  offerDate: Date;
+  status: 'draft' | 'submitted' | 'accepted' | 'rejected' | 'countered' | 'expired';
+  terms?: string;
+  contingencies?: string[];
+  closingDate?: Date;
+  notes?: string;
 }
 
 @Schema({ timestamps: true })
 export class Lead {
-  @Prop({ type: Types.ObjectId, ref: 'Tenant', required: true })
-  tenantId: Types.ObjectId;
+  @Prop({ required: true })
+  leadId: string; // UUID
 
-  @Prop({ required: true, trim: true })
-  name: string;
+  @Prop({ required: true })
+  tenantId: string; // Multi-tenant support
 
-  @Prop({ trim: true })
-  phone?: string;
-
-  @Prop({ trim: true, lowercase: true })
-  email?: string;
-
-  @Prop({ type: Address })
-  address?: Address;
-
-  @Prop({ type: PropertyDetails })
-  propertyDetails?: PropertyDetails;
-
-  @Prop({ min: 0 })
-  estimatedValue?: number;
-
-  @Prop({ min: 0 })
-  askingPrice?: number;
-
-  @Prop({ enum: LeadSource, default: LeadSource.OTHER })
-  source: LeadSource;
-
-  @Prop({ enum: LeadStatus, default: LeadStatus.NEW })
+  @Prop({ required: true })
   status: LeadStatus;
 
-  @Prop({ enum: LeadPriority, default: LeadPriority.MEDIUM })
+  @Prop({ required: true })
+  source: LeadSource;
+
+  @Prop({ required: true, enum: LeadPriority, default: LeadPriority.MEDIUM })
   priority: LeadPriority;
 
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  assignedTo?: Types.ObjectId;
+  @Prop({ required: true, type: Object })
+  contactInfo: ContactInfo;
 
-  @Prop({ type: [String], default: [] })
+  @Prop({ type: Object })
+  propertyPreferences: PropertyPreferences;
+
+  @Prop({ type: Object })
+  financialInfo: FinancialInfo;
+
+  @Prop({ type: [Object], default: [] })
+  communicationHistory: CommunicationHistory[];
+
+  @Prop({ type: [Object], default: [] })
+  activities: LeadActivity[];
+
+  @Prop({ type: [Object], default: [] })
+  appointments: Appointment[];
+
+  @Prop({ type: [Object], default: [] })
+  propertiesViewed: PropertyViewed[];
+
+  @Prop({ type: [Object], default: [] })
+  offers: Offer[];
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  assignedTo: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  createdBy: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  updatedBy: Types.ObjectId;
+
+  @Prop()
+  score?: number; // Lead scoring (0-100)
+
+  @Prop()
   tags: string[];
 
   @Prop()
   notes?: string;
 
-  @Prop({ default: 0, min: 0 })
-  communicationCount: number;
+  @Prop()
+  nextFollowUpDate?: Date;
 
   @Prop()
-  lastContacted?: Date;
+  lastContactDate?: Date;
 
   @Prop()
-  nextFollowUp?: Date;
+  expectedCloseDate?: Date;
 
-  @Prop({ type: Object })
+  @Prop()
+  actualCloseDate?: Date;
+
+  @Prop()
+  closeValue?: number;
+
+  @Prop()
+  commissionAmount?: number;
+
+  @Prop()
+  commissionPercentage?: number;
+
+  @Prop()
+  marketingCampaign?: string;
+
+  @Prop()
+  utmSource?: string;
+
+  @Prop()
+  utmMedium?: string;
+
+  @Prop()
+  utmCampaign?: string;
+
+  @Prop()
+  utmTerm?: string;
+
+  @Prop()
+  utmContent?: string;
+
+  @Prop()
+  referrer?: string;
+
+  @Prop()
+  ipAddress?: string;
+
+  @Prop()
+  userAgent?: string;
+
+  @Prop()
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+
+  @Prop()
+  browser?: string;
+
+  @Prop()
+  operatingSystem?: string;
+
+  @Prop()
+  location?: {
+    city: string;
+    state: string;
+    country: string;
+    latitude?: number;
+    longitude?: number;
+  };
+
+  @Prop()
+  timeOnSite?: number; // in seconds
+
+  @Prop()
+  pagesViewed?: string[];
+
+  @Prop()
+  formSubmissions?: {
+    formName: string;
+    submittedAt: Date;
+    data: any;
+  }[];
+
+  @Prop()
+  emailOpens?: {
+    emailId: string;
+    openedAt: Date;
+    ipAddress?: string;
+  }[];
+
+  @Prop()
+  emailClicks?: {
+    emailId: string;
+    linkUrl: string;
+    clickedAt: Date;
+    ipAddress?: string;
+  }[];
+
+  @Prop()
+  smsResponses?: {
+    messageId: string;
+    response: string;
+    timestamp: Date;
+  }[];
+
+  @Prop()
+  socialMediaEngagement?: {
+    platform: string;
+    action: string;
+    timestamp: Date;
+    metadata?: any;
+  }[];
+
+  @Prop()
   customFields?: Record<string, any>;
 
   @Prop()
-  aiSummary?: string;
+  createdAt: Date;
 
-  @Prop({ type: [String], default: [] })
-  aiTags: string[];
+  @Prop()
+  updatedAt: Date;
 
-  @Prop({ min: 0, max: 100, default: 0 })
-  leadScore: number;
-
-  @Prop({ min: 0, max: 1, default: 0 })
-  qualificationProbability: number;
-
-  @Prop({ type: AutomationData, default: {} })
-  automationData: AutomationData;
-
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  createdBy?: Types.ObjectId;
-
-  @Prop({ type: Types.ObjectId, ref: 'User' })
-  updatedBy?: Types.ObjectId;
-
-  @Prop({ type: Object })
-  metadata?: Record<string, any>;
+  @Prop()
+  deletedAt?: Date;
 }
 
 export const LeadSchema = SchemaFactory.createForClass(Lead);
 
-// Add indexes for better query performance
+// Indexes for performance
+LeadSchema.index({ leadId: 1 });
+LeadSchema.index({ tenantId: 1 });
+LeadSchema.index({ status: 1 });
+LeadSchema.index({ source: 1 });
+LeadSchema.index({ priority: 1 });
+LeadSchema.index({ assignedTo: 1 });
+LeadSchema.index({ createdBy: 1 });
+LeadSchema.index({ 'contactInfo.email': 1 });
+LeadSchema.index({ 'contactInfo.phone': 1 });
+LeadSchema.index({ createdAt: 1 });
+LeadSchema.index({ updatedAt: 1 });
+LeadSchema.index({ nextFollowUpDate: 1 });
+LeadSchema.index({ lastContactDate: 1 });
+LeadSchema.index({ expectedCloseDate: 1 });
+LeadSchema.index({ score: 1 });
+
+// Compound indexes
 LeadSchema.index({ tenantId: 1, status: 1 });
 LeadSchema.index({ tenantId: 1, assignedTo: 1 });
-LeadSchema.index({ tenantId: 1, phone: 1 });
-LeadSchema.index({ tenantId: 1, email: 1 });
 LeadSchema.index({ tenantId: 1, source: 1 });
-LeadSchema.index({ tenantId: 1, tags: 1 });
-LeadSchema.index({ tenantId: 1, lastContacted: -1 });
-LeadSchema.index({ tenantId: 1, nextFollowUp: 1 });
 LeadSchema.index({ tenantId: 1, priority: 1 });
-LeadSchema.index({ tenantId: 1, leadScore: -1 });
-LeadSchema.index({ tenantId: 1, createdAt: -1 });
-LeadSchema.index({ tenantId: 1, updatedAt: -1 });
+LeadSchema.index({ tenantId: 1, createdAt: 1 });
+LeadSchema.index({ tenantId: 1, nextFollowUpDate: 1 });
+LeadSchema.index({ tenantId: 1, lastContactDate: 1 });
 
 // Text search index
-LeadSchema.index(
-  { 
-    tenantId: 1, 
-    name: 'text', 
-    phone: 'text', 
-    email: 'text',
-    notes: 'text',
-    'address.fullAddress': 'text'
-  },
-  { 
-    name: 'lead_text_search',
-    weights: {
-      name: 10,
-      phone: 8,
-      email: 8,
-      notes: 5,
-      'address.fullAddress': 6
-    }
-  }
-);
+LeadSchema.index({
+  'contactInfo.firstName': 'text',
+  'contactInfo.lastName': 'text',
+  'contactInfo.email': 'text',
+  'contactInfo.phone': 'text',
+  notes: 'text',
+  tags: 'text',
+});
 
-// Compound indexes for common queries
-LeadSchema.index({ tenantId: 1, status: 1, priority: 1 });
-LeadSchema.index({ tenantId: 1, assignedTo: 1, status: 1 });
-LeadSchema.index({ tenantId: 1, source: 1, status: 1 });
-LeadSchema.index({ tenantId: 1, tags: 1, status: 1 });
+// Geospatial index for location-based queries
+LeadSchema.index({ 'location.latitude': 1, 'location.longitude': 1 });
 
-// Geospatial index for address-based queries (if needed in future)
-// LeadSchema.index({ 'address.location': '2dsphere' }); 
+// TTL index for soft delete
+LeadSchema.index({ deletedAt: 1 });
+
+// Sparse indexes for optional fields
+LeadSchema.index({ score: 1 }, { sparse: true });
+LeadSchema.index({ expectedCloseDate: 1 }, { sparse: true });
+LeadSchema.index({ closeValue: 1 }, { sparse: true }); 

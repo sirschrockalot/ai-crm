@@ -1,434 +1,930 @@
-import { IsEmail, IsString, IsOptional, IsEnum, IsArray, IsNumber, IsObject, ValidateNested, IsDateString, Min, Max } from 'class-validator';
+import { IsString, IsEnum, IsOptional, IsObject, IsArray, IsNumber, IsBoolean, IsEmail, IsDateString, ValidateNested, IsUUID, Min, Max, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Types } from 'mongoose';
+import { LeadStatus, LeadSource, LeadPriority, PropertyType, TransactionType } from '../schemas/lead.schema';
 
-import { LeadStatus, LeadPriority, PropertyType, LeadSource } from '../schemas/lead.schema';
-
-export class AddressDto {
-  @ApiPropertyOptional()
-  @IsOptional()
+export class ContactInfoDto {
   @IsString()
-  street?: string;
+  firstName: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
   @IsString()
-  city?: string;
+  lastName: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  state?: string;
+  @IsEmail()
+  email: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
   @IsString()
-  zipCode?: string;
+  phone: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
   @IsString()
-  county?: string;
+  @IsOptional()
+  alternatePhone?: string;
 
-  @ApiPropertyOptional()
+  @IsObject()
   @IsOptional()
+  address?: {
+    @IsString()
+    street: string;
+
+    @IsString()
+    city: string;
+
+    @IsString()
+    state: string;
+
+    @IsString()
+    zipCode: string;
+
+    @IsString()
+    country: string;
+  };
+
+  @IsIn(['email', 'phone', 'sms', 'mail'])
+  preferredContactMethod: 'email' | 'phone' | 'sms' | 'mail';
+
   @IsString()
-  fullAddress?: string;
+  @IsOptional()
+  timeZone?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string;
 }
 
-export class PropertyDetailsDto {
-  @ApiPropertyOptional({ enum: PropertyType })
-  @IsOptional()
-  @IsEnum(PropertyType)
-  type?: PropertyType;
+export class PropertyPreferencesDto {
+  @IsArray()
+  @IsEnum(PropertyType, { each: true })
+  propertyType: PropertyType[];
 
-  @ApiPropertyOptional({ minimum: 0 })
-  @IsOptional()
+  @IsEnum(TransactionType)
+  transactionType: TransactionType;
+
   @IsNumber()
   @Min(0)
-  bedrooms?: number;
-
-  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
+  minPrice?: number;
+
   @IsNumber()
   @Min(0)
-  bathrooms?: number;
-
-  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
+  maxPrice?: number;
+
   @IsNumber()
   @Min(0)
-  squareFeet?: number;
-
-  @ApiPropertyOptional({ minimum: 0 })
   @IsOptional()
+  minBedrooms?: number;
+
   @IsNumber()
   @Min(0)
-  lotSize?: number;
-
-  @ApiPropertyOptional({ minimum: 1800 })
   @IsOptional()
+  maxBedrooms?: number;
+
   @IsNumber()
-  @Min(1800)
-  yearBuilt?: number;
+  @Min(0)
+  @IsOptional()
+  minBathrooms?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  maxBathrooms?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  minSquareFootage?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  maxSquareFootage?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  preferredLocations: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  mustHaveFeatures: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  niceToHaveFeatures: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  dealBreakers: string[];
+
+  @IsIn(['immediate', '1-3_months', '3-6_months', '6-12_months', 'flexible'])
+  timeline: 'immediate' | '1-3_months' | '3-6_months' | '6-12_months' | 'flexible';
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
+
+export class FinancialInfoDto {
+  @IsBoolean()
+  preApproved: boolean;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  preApprovalAmount?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  downPaymentAmount?: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  downPaymentPercentage?: number;
+
+  @IsNumber()
+  @Min(300)
+  @Max(850)
+  @IsOptional()
+  creditScore?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  annualIncome?: number;
+
+  @IsIn(['employed', 'self_employed', 'retired', 'unemployed', 'student', 'other'])
+  employmentStatus: 'employed' | 'self_employed' | 'retired' | 'unemployed' | 'student' | 'other';
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  employmentLength?: number;
+
+  @IsString()
+  @IsOptional()
+  lender?: string;
+
+  @IsIn(['conventional', 'fha', 'va', 'usda', 'jumbo', 'other'])
+  @IsOptional()
+  loanType?: 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'other';
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  monthlyDebt?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  monthlyIncome?: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  debtToIncomeRatio?: number;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+}
+
+export class CommunicationHistoryDto {
+  @IsIn(['call', 'email', 'sms', 'meeting', 'text', 'other'])
+  type: 'call' | 'email' | 'sms' | 'meeting' | 'text' | 'other';
+
+  @IsIn(['inbound', 'outbound'])
+  direction: 'inbound' | 'outbound';
+
+  @IsString()
+  @IsOptional()
+  subject?: string;
+
+  @IsString()
+  content: string;
+
+  @IsDateString()
+  timestamp: Date;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  duration?: number;
+
+  @IsIn(['successful', 'no_answer', 'voicemail', 'busy', 'wrong_number', 'other'])
+  outcome: 'successful' | 'no_answer' | 'voicemail' | 'busy' | 'wrong_number' | 'other';
+
+  @IsBoolean()
+  followUpRequired: boolean;
+
+  @IsDateString()
+  @IsOptional()
+  followUpDate?: Date;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  attachments?: string[];
+}
+
+export class LeadActivityDto {
+  @IsIn(['status_change', 'assignment', 'note_added', 'communication', 'appointment', 'property_viewed', 'offer_made', 'other'])
+  type: 'status_change' | 'assignment' | 'note_added' | 'communication' | 'appointment' | 'property_viewed' | 'offer_made' | 'other';
+
+  @IsString()
+  description: string;
+
+  @IsDateString()
+  timestamp: Date;
+
+  @IsUUID()
+  userId: string;
+
+  @IsObject()
+  @IsOptional()
+  metadata?: any;
+}
+
+export class AppointmentDto {
+  @IsDateString()
+  date: Date;
+
+  @IsNumber()
+  @Min(15)
+  @Max(480)
+  duration: number;
+
+  @IsIn(['phone_call', 'video_call', 'in_person', 'property_tour', 'open_house', 'closing', 'other'])
+  type: 'phone_call' | 'video_call' | 'in_person' | 'property_tour' | 'open_house' | 'closing' | 'other';
+
+  @IsString()
+  @IsOptional()
+  location?: string;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsIn(['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'])
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+
+  @IsBoolean()
+  reminderSent: boolean;
+
+  @IsDateString()
+  @IsOptional()
+  reminderDate?: Date;
+}
+
+export class PropertyViewedDto {
+  @IsString()
+  @IsOptional()
+  propertyId?: string;
+
+  @IsString()
+  propertyAddress: string;
+
+  @IsDateString()
+  date: Date;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  @IsOptional()
+  rating?: number;
+
+  @IsString()
+  @IsOptional()
+  feedback?: string;
+
+  @IsBoolean()
+  followUpRequired: boolean;
+
+  @IsDateString()
+  @IsOptional()
+  followUpDate?: Date;
+}
+
+export class OfferDto {
+  @IsString()
+  @IsOptional()
+  propertyId?: string;
+
+  @IsString()
+  propertyAddress: string;
+
+  @IsNumber()
+  @Min(0)
+  offerAmount: number;
+
+  @IsDateString()
+  offerDate: Date;
+
+  @IsIn(['draft', 'submitted', 'accepted', 'rejected', 'countered', 'expired'])
+  status: 'draft' | 'submitted' | 'accepted' | 'rejected' | 'countered' | 'expired';
+
+  @IsString()
+  @IsOptional()
+  terms?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  contingencies?: string[];
+
+  @IsDateString()
+  @IsOptional()
+  closingDate?: Date;
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
 }
 
 export class CreateLeadDto {
-  @ApiProperty({ description: 'Lead name/contact person' })
-  @IsString()
-  name: string;
-
-  @ApiPropertyOptional({ description: 'Phone number' })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiPropertyOptional({ description: 'Email address' })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({ description: 'Property address' })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => AddressDto)
-  address?: AddressDto;
-
-  @ApiPropertyOptional({ description: 'Property details' })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => PropertyDetailsDto)
-  propertyDetails?: PropertyDetailsDto;
-
-  @ApiPropertyOptional({ description: 'Estimated property value', minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  estimatedValue?: number;
-
-  @ApiPropertyOptional({ description: 'Asking price', minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  askingPrice?: number;
-
-  @ApiPropertyOptional({ description: 'Lead source', enum: LeadSource, default: LeadSource.OTHER })
-  @IsOptional()
-  @IsEnum(LeadSource)
-  source?: LeadSource;
-
-  @ApiPropertyOptional({ description: 'Lead status', enum: LeadStatus, default: LeadStatus.NEW })
-  @IsOptional()
   @IsEnum(LeadStatus)
-  status?: LeadStatus;
-
-  @ApiPropertyOptional({ description: 'Lead priority', enum: LeadPriority, default: LeadPriority.MEDIUM })
   @IsOptional()
+  status?: LeadStatus = LeadStatus.NEW;
+
+  @IsEnum(LeadSource)
+  source: LeadSource;
+
   @IsEnum(LeadPriority)
-  priority?: LeadPriority;
-
-  @ApiPropertyOptional({ description: 'Assigned user ID' })
   @IsOptional()
-  assignedTo?: Types.ObjectId;
+  priority?: LeadPriority = LeadPriority.MEDIUM;
 
-  @ApiPropertyOptional({ description: 'Tags for categorization' })
+  @ValidateNested()
+  @Type(() => ContactInfoDto)
+  contactInfo: ContactInfoDto;
+
+  @ValidateNested()
+  @Type(() => PropertyPreferencesDto)
   @IsOptional()
+  propertyPreferences?: PropertyPreferencesDto;
+
+  @ValidateNested()
+  @Type(() => FinancialInfoDto)
+  @IsOptional()
+  financialInfo?: FinancialInfoDto;
+
+  @IsUUID()
+  assignedTo: string;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  score?: number;
+
   @IsArray()
   @IsString({ each: true })
+  @IsOptional()
   tags?: string[];
 
-  @ApiPropertyOptional({ description: 'Notes about the lead' })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   notes?: string;
 
-  @ApiPropertyOptional({ description: 'Next follow-up date' })
-  @IsOptional()
   @IsDateString()
-  nextFollowUp?: string;
-
-  @ApiPropertyOptional({ description: 'Custom fields' })
   @IsOptional()
+  nextFollowUpDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  expectedCloseDate?: Date;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  closeValue?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  commissionAmount?: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  commissionPercentage?: number;
+
+  @IsString()
+  @IsOptional()
+  marketingCampaign?: string;
+
+  @IsString()
+  @IsOptional()
+  utmSource?: string;
+
+  @IsString()
+  @IsOptional()
+  utmMedium?: string;
+
+  @IsString()
+  @IsOptional()
+  utmCampaign?: string;
+
+  @IsString()
+  @IsOptional()
+  utmTerm?: string;
+
+  @IsString()
+  @IsOptional()
+  utmContent?: string;
+
+  @IsString()
+  @IsOptional()
+  referrer?: string;
+
+  @IsString()
+  @IsOptional()
+  ipAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  userAgent?: string;
+
+  @IsIn(['desktop', 'mobile', 'tablet'])
+  @IsOptional()
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+
+  @IsString()
+  @IsOptional()
+  browser?: string;
+
+  @IsString()
+  @IsOptional()
+  operatingSystem?: string;
+
   @IsObject()
+  @IsOptional()
+  location?: {
+    @IsString()
+    city: string;
+
+    @IsString()
+    state: string;
+
+    @IsString()
+    country: string;
+
+    @IsNumber()
+    @IsOptional()
+    latitude?: number;
+
+    @IsNumber()
+    @IsOptional()
+    longitude?: number;
+  };
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  timeOnSite?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  pagesViewed?: string[];
+
+  @IsObject()
+  @IsOptional()
   customFields?: Record<string, any>;
 }
 
 export class UpdateLeadDto {
-  @ApiPropertyOptional({ description: 'Lead name/contact person' })
-  @IsOptional()
-  @IsString()
-  name?: string;
-
-  @ApiPropertyOptional({ description: 'Phone number' })
-  @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @ApiPropertyOptional({ description: 'Email address' })
-  @IsOptional()
-  @IsEmail()
-  email?: string;
-
-  @ApiPropertyOptional({ description: 'Property address' })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => AddressDto)
-  address?: AddressDto;
-
-  @ApiPropertyOptional({ description: 'Property details' })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => PropertyDetailsDto)
-  propertyDetails?: PropertyDetailsDto;
-
-  @ApiPropertyOptional({ description: 'Estimated property value', minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  estimatedValue?: number;
-
-  @ApiPropertyOptional({ description: 'Asking price', minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  askingPrice?: number;
-
-  @ApiPropertyOptional({ description: 'Lead source', enum: LeadSource })
-  @IsOptional()
-  @IsEnum(LeadSource)
-  source?: LeadSource;
-
-  @ApiPropertyOptional({ description: 'Lead status', enum: LeadStatus })
-  @IsOptional()
   @IsEnum(LeadStatus)
+  @IsOptional()
   status?: LeadStatus;
 
-  @ApiPropertyOptional({ description: 'Lead priority', enum: LeadPriority })
+  @IsEnum(LeadSource)
   @IsOptional()
+  source?: LeadSource;
+
   @IsEnum(LeadPriority)
+  @IsOptional()
   priority?: LeadPriority;
 
-  @ApiPropertyOptional({ description: 'Assigned user ID' })
+  @ValidateNested()
+  @Type(() => ContactInfoDto)
   @IsOptional()
-  assignedTo?: Types.ObjectId;
+  contactInfo?: Partial<ContactInfoDto>;
 
-  @ApiPropertyOptional({ description: 'Tags for categorization' })
+  @ValidateNested()
+  @Type(() => PropertyPreferencesDto)
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
+  propertyPreferences?: Partial<PropertyPreferencesDto>;
 
-  @ApiPropertyOptional({ description: 'Notes about the lead' })
+  @ValidateNested()
+  @Type(() => FinancialInfoDto)
   @IsOptional()
-  @IsString()
-  notes?: string;
+  financialInfo?: Partial<FinancialInfoDto>;
 
-  @ApiPropertyOptional({ description: 'Next follow-up date' })
+  @IsUUID()
   @IsOptional()
-  @IsDateString()
-  nextFollowUp?: string;
+  assignedTo?: string;
 
-  @ApiPropertyOptional({ description: 'Custom fields' })
-  @IsOptional()
-  @IsObject()
-  customFields?: Record<string, any>;
-
-  @ApiPropertyOptional({ description: 'AI summary' })
-  @IsOptional()
-  @IsString()
-  aiSummary?: string;
-
-  @ApiPropertyOptional({ description: 'AI-generated tags' })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  aiTags?: string[];
-
-  @ApiPropertyOptional({ description: 'Lead score (0-100)', minimum: 0, maximum: 100 })
-  @IsOptional()
   @IsNumber()
   @Min(0)
   @Max(100)
-  leadScore?: number;
-
-  @ApiPropertyOptional({ description: 'Qualification probability (0-1)', minimum: 0, maximum: 1 })
   @IsOptional()
+  score?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  tags?: string[];
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsDateString()
+  @IsOptional()
+  nextFollowUpDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  expectedCloseDate?: Date;
+
   @IsNumber()
   @Min(0)
-  @Max(1)
-  qualificationProbability?: number;
+  @IsOptional()
+  closeValue?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  commissionAmount?: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  @IsOptional()
+  commissionPercentage?: number;
+
+  @IsObject()
+  @IsOptional()
+  customFields?: Record<string, any>;
+}
+
+export class LeadResponseDto {
+  @IsUUID()
+  leadId: string;
+
+  @IsString()
+  tenantId: string;
+
+  @IsEnum(LeadStatus)
+  status: LeadStatus;
+
+  @IsEnum(LeadSource)
+  source: LeadSource;
+
+  @IsEnum(LeadPriority)
+  priority: LeadPriority;
+
+  @IsObject()
+  contactInfo: ContactInfoDto;
+
+  @IsObject()
+  @IsOptional()
+  propertyPreferences?: PropertyPreferencesDto;
+
+  @IsObject()
+  @IsOptional()
+  financialInfo?: FinancialInfoDto;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CommunicationHistoryDto)
+  communicationHistory: CommunicationHistoryDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LeadActivityDto)
+  activities: LeadActivityDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AppointmentDto)
+  appointments: AppointmentDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PropertyViewedDto)
+  propertiesViewed: PropertyViewedDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OfferDto)
+  offers: OfferDto[];
+
+  @IsString()
+  assignedTo: string;
+
+  @IsString()
+  @IsOptional()
+  createdBy?: string;
+
+  @IsString()
+  @IsOptional()
+  updatedBy?: string;
+
+  @IsNumber()
+  @IsOptional()
+  score?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  tags: string[];
+
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @IsDateString()
+  @IsOptional()
+  nextFollowUpDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  lastContactDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  expectedCloseDate?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  actualCloseDate?: Date;
+
+  @IsNumber()
+  @IsOptional()
+  closeValue?: number;
+
+  @IsNumber()
+  @IsOptional()
+  commissionAmount?: number;
+
+  @IsNumber()
+  @IsOptional()
+  commissionPercentage?: number;
+
+  @IsString()
+  @IsOptional()
+  marketingCampaign?: string;
+
+  @IsString()
+  @IsOptional()
+  utmSource?: string;
+
+  @IsString()
+  @IsOptional()
+  utmMedium?: string;
+
+  @IsString()
+  @IsOptional()
+  utmCampaign?: string;
+
+  @IsString()
+  @IsOptional()
+  utmTerm?: string;
+
+  @IsString()
+  @IsOptional()
+  utmContent?: string;
+
+  @IsString()
+  @IsOptional()
+  referrer?: string;
+
+  @IsString()
+  @IsOptional()
+  ipAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  userAgent?: string;
+
+  @IsString()
+  @IsOptional()
+  deviceType?: string;
+
+  @IsString()
+  @IsOptional()
+  browser?: string;
+
+  @IsString()
+  @IsOptional()
+  operatingSystem?: string;
+
+  @IsObject()
+  @IsOptional()
+  location?: {
+    city: string;
+    state: string;
+    country: string;
+    latitude?: number;
+    longitude?: number;
+  };
+
+  @IsNumber()
+  @IsOptional()
+  timeOnSite?: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  pagesViewed?: string[];
+
+  @IsObject()
+  @IsOptional()
+  customFields?: Record<string, any>;
+
+  @IsDateString()
+  createdAt: Date;
+
+  @IsDateString()
+  updatedAt: Date;
+}
+
+export class LeadListResponseDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => LeadResponseDto)
+  leads: LeadResponseDto[];
+
+  @IsNumber()
+  total: number;
+
+  @IsNumber()
+  page: number;
+
+  @IsNumber()
+  limit: number;
+
+  @IsNumber()
+  totalPages: number;
 }
 
 export class LeadSearchDto {
-  @ApiPropertyOptional({ description: 'Page number', default: 1 })
-  @IsOptional()
-  page?: number;
-
-  @ApiPropertyOptional({ description: 'Items per page', default: 10 })
-  @IsOptional()
-  limit?: number;
-
-  @ApiPropertyOptional({ description: 'Search term for name, phone, email, notes, or address' })
-  @IsOptional()
   @IsString()
+  @IsOptional()
   search?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by lead status', enum: LeadStatus })
-  @IsOptional()
   @IsEnum(LeadStatus)
+  @IsOptional()
   status?: LeadStatus;
 
-  @ApiPropertyOptional({ description: 'Filter by lead priority', enum: LeadPriority })
-  @IsOptional()
-  @IsEnum(LeadPriority)
-  priority?: LeadPriority;
-
-  @ApiPropertyOptional({ description: 'Filter by lead source', enum: LeadSource })
-  @IsOptional()
   @IsEnum(LeadSource)
+  @IsOptional()
   source?: LeadSource;
 
-  @ApiPropertyOptional({ description: 'Filter by assigned user ID' })
+  @IsEnum(LeadPriority)
   @IsOptional()
-  assignedTo?: Types.ObjectId;
+  priority?: LeadPriority;
 
-  @ApiPropertyOptional({ description: 'Filter by tags (comma-separated)' })
+  @IsUUID()
   @IsOptional()
-  @IsString()
-  tags?: string;
+  assignedTo?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by property type', enum: PropertyType })
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  @IsEnum(PropertyType)
-  propertyType?: PropertyType;
+  tags?: string[];
 
-  @ApiPropertyOptional({ description: 'Filter by minimum estimated value' })
+  @IsDateString()
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  minEstimatedValue?: number;
+  createdAfter?: Date;
 
-  @ApiPropertyOptional({ description: 'Filter by maximum estimated value' })
+  @IsDateString()
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  maxEstimatedValue?: number;
+  createdBefore?: Date;
 
-  @ApiPropertyOptional({ description: 'Filter by minimum lead score' })
+  @IsDateString()
   @IsOptional()
+  lastContactAfter?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  lastContactBefore?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  nextFollowUpAfter?: Date;
+
+  @IsDateString()
+  @IsOptional()
+  nextFollowUpBefore?: Date;
+
   @IsNumber()
   @Min(0)
   @Max(100)
-  minLeadScore?: number;
-
-  @ApiPropertyOptional({ description: 'Filter by maximum lead score' })
   @IsOptional()
+  minScore?: number;
+
   @IsNumber()
   @Min(0)
   @Max(100)
-  maxLeadScore?: number;
-
-  @ApiPropertyOptional({ description: 'Filter by date range - created after' })
   @IsOptional()
-  @IsDateString()
-  createdAfter?: string;
+  maxScore?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by date range - created before' })
-  @IsOptional()
-  @IsDateString()
-  createdBefore?: string;
-
-  @ApiPropertyOptional({ description: 'Filter by date range - last contacted after' })
-  @IsOptional()
-  @IsDateString()
-  lastContactedAfter?: string;
-
-  @ApiPropertyOptional({ description: 'Filter by date range - last contacted before' })
-  @IsOptional()
-  @IsDateString()
-  lastContactedBefore?: string;
-
-  @ApiPropertyOptional({ description: 'Filter by date range - next follow-up after' })
-  @IsOptional()
-  @IsDateString()
-  nextFollowUpAfter?: string;
-
-  @ApiPropertyOptional({ description: 'Filter by date range - next follow-up before' })
-  @IsOptional()
-  @IsDateString()
-  nextFollowUpBefore?: string;
-
-  @ApiPropertyOptional({ description: 'Sort by field', default: 'createdAt' })
-  @IsOptional()
   @IsString()
-  sortBy?: string;
-
-  @ApiPropertyOptional({ description: 'Sort order', default: 'desc' })
   @IsOptional()
-  @IsString()
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: string = 'createdAt';
+
+  @IsIn(['asc', 'desc'])
+  @IsOptional()
+  sortOrder?: 'asc' | 'desc' = 'desc';
+
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
+  page?: number = 1;
+
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  @IsOptional()
+  limit?: number = 10;
 }
 
-export class LeadBulkUpdateDto {
-  @ApiProperty({ description: 'Array of lead IDs to update' })
+export class BulkLeadOperationDto {
   @IsArray()
-  leadIds: Types.ObjectId[];
+  @IsUUID(undefined, { each: true })
+  leadIds: string[];
 
-  @ApiPropertyOptional({ description: 'Lead status to set', enum: LeadStatus })
-  @IsOptional()
   @IsEnum(LeadStatus)
+  @IsOptional()
   status?: LeadStatus;
 
-  @ApiPropertyOptional({ description: 'Lead priority to set', enum: LeadPriority })
-  @IsOptional()
   @IsEnum(LeadPriority)
+  @IsOptional()
   priority?: LeadPriority;
 
-  @ApiPropertyOptional({ description: 'Assigned user ID to set' })
+  @IsUUID()
   @IsOptional()
-  assignedTo?: Types.ObjectId;
+  assignedTo?: string;
 
-  @ApiPropertyOptional({ description: 'Tags to add' })
-  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  tagsToAdd?: string[];
-
-  @ApiPropertyOptional({ description: 'Tags to remove' })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tagsToRemove?: string[];
+  tags?: string[];
+
+  @IsDateString()
+  @IsOptional()
+  nextFollowUpDate?: Date;
 }
 
-export class LeadExportDto {
-  @ApiPropertyOptional({ description: 'Filter by lead status', enum: LeadStatus })
-  @IsOptional()
-  @IsEnum(LeadStatus)
-  status?: LeadStatus;
+export class BulkLeadCreateDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateLeadDto)
+  leads: CreateLeadDto[];
+}
 
-  @ApiPropertyOptional({ description: 'Filter by lead source', enum: LeadSource })
-  @IsOptional()
-  @IsEnum(LeadSource)
-  source?: LeadSource;
+export class LeadStatsDto {
+  @IsNumber()
+  totalLeads: number;
 
-  @ApiPropertyOptional({ description: 'Filter by assigned user ID' })
-  @IsOptional()
-  assignedTo?: Types.ObjectId;
+  @IsNumber()
+  newLeads: number;
 
-  @ApiPropertyOptional({ description: 'Filter by date range - created after' })
-  @IsOptional()
-  @IsDateString()
-  createdAfter?: string;
+  @IsNumber()
+  contactedLeads: number;
 
-  @ApiPropertyOptional({ description: 'Filter by date range - created before' })
-  @IsOptional()
-  @IsDateString()
-  createdBefore?: string;
+  @IsNumber()
+  qualifiedLeads: number;
 
-  @ApiPropertyOptional({ description: 'Export format', enum: ['json', 'csv'], default: 'json' })
-  @IsOptional()
-  @IsString()
-  format?: 'json' | 'csv';
+  @IsNumber()
+  interestedLeads: number;
+
+  @IsNumber()
+  negotiatingLeads: number;
+
+  @IsNumber()
+  closedWonLeads: number;
+
+  @IsNumber()
+  closedLostLeads: number;
+
+  @IsNumber()
+  averageScore: number;
+
+  @IsNumber()
+  totalValue: number;
+
+  @IsNumber()
+  conversionRate: number;
 } 
