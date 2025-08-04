@@ -20,12 +20,14 @@ import {
   QueueAnalytics,
   QueueAnalyticsSchema 
 } from './schemas/queue.schema';
+import { CommunicationLog, CommunicationLogSchema } from './schemas/communication-log.schema';
 import { LeadValidationService } from './services/lead-validation.service';
 import { LeadScoringService } from './services/lead-scoring.service';
 import { LeadQueueService } from './services/lead-queue.service';
 import { LeadImportExportService } from './services/lead-import-export.service';
 import { BulkOperationsService } from './services/bulk-operations.service';
 import { CommunicationService } from './services/communication.service';
+import { CommunicationTrackingService } from './services/communication-tracking.service';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { CommunicationService } from './services/communication.service';
       { name: QueueConfiguration.name, schema: QueueConfigurationSchema },
       { name: AssignmentHistory.name, schema: AssignmentHistorySchema },
       { name: QueueAnalytics.name, schema: QueueAnalyticsSchema },
+      { name: CommunicationLog.name, schema: CommunicationLogSchema },
     ]),
     ConfigModule,
   ],
@@ -54,6 +57,7 @@ import { CommunicationService } from './services/communication.service';
     LeadImportExportService,
     BulkOperationsService,
     CommunicationService,
+    CommunicationTrackingService,
   ],
   exports: [
     LeadsService,
@@ -63,6 +67,7 @@ import { CommunicationService } from './services/communication.service';
     LeadImportExportService,
     BulkOperationsService,
     CommunicationService,
+    CommunicationTrackingService,
   ],
 })
 export class LeadsModule {} 

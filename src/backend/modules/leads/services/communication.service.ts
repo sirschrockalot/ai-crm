@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as twilio from 'twilio';
 import { Lead } from '../schemas/lead.schema';
+import { CommunicationTrackingService } from './communication-tracking.service';
 
 export interface CommunicationTemplate {
   id: string;
@@ -67,6 +68,7 @@ export class CommunicationService {
   constructor(
     private configService: ConfigService,
     @InjectModel(Lead.name) private leadModel: Model<Lead>,
+    private communicationTrackingService: CommunicationTrackingService,
   ) {
     // Initialize Twilio client
     const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
@@ -94,15 +96,8 @@ export class CommunicationService {
         throw new BadRequestException('Invalid phone number format');
       }
 
-      // Send SMS via Twilio
-      const message = await this.twilioClient.messages.create({
-        body: request.body,
-        from: request.from,
-        to: validatedNumber,
-      });
-
-      // Log communication
-      await this.logCommunication({
+      // Log communication attempt
+      const logEntry = await this.communicationTrackingService.logCommunication({
         leadId: request.leadId,
         userId: request.userId,
         tenantId: request.tenantId,
@@ -111,10 +106,21 @@ export class CommunicationService {
         to: validatedNumber,
         from: request.from,
         content: request.body,
-        status: message.status as any,
-        messageId: message.sid,
-        cost: parseFloat(message.price || '0'),
+        status: 'queued',
       });
+
+      // Send SMS via Twilio
+      const message = await this.twilioClient.messages.create({
+        body: request.body,
+        from: request.from,
+        to: validatedNumber,
+      });
+
+      // Update log with result
+      await this.communicationTrackingService.updateCommunicationStatus(
+        logEntry.messageId || message.sid,
+        message.status as any,
+      );
 
       return {
         success: true,
@@ -125,19 +131,14 @@ export class CommunicationService {
     } catch (error) {
       this.logger.error('SMS sending failed:', error);
 
-      // Log failed communication
-      await this.logCommunication({
-        leadId: request.leadId,
-        userId: request.userId,
-        tenantId: request.tenantId,
-        type: 'sms',
-        direction: 'outbound',
-        to: request.to,
-        from: request.from,
-        content: request.body,
-        status: 'failed',
-        error: error.message,
-      });
+      // Update log with error
+      if (request.leadId) {
+        await this.communicationTrackingService.updateCommunicationStatus(
+          'temp-id',
+          'failed',
+          error.message,
+        );
+      }
 
       return {
         success: false,
@@ -161,15 +162,8 @@ export class CommunicationService {
         throw new BadRequestException('Invalid phone number format');
       }
 
-      // Make voice call via Twilio
-      const call = await this.twilioClient.calls.create({
-        twiml: request.twiml,
-        from: request.from,
-        to: validatedNumber,
-      });
-
-      // Log communication
-      await this.logCommunication({
+      // Log communication attempt
+      const logEntry = await this.communicationTrackingService.logCommunication({
         leadId: request.leadId,
         userId: request.userId,
         tenantId: request.tenantId,
@@ -178,10 +172,21 @@ export class CommunicationService {
         to: validatedNumber,
         from: request.from,
         content: request.twiml,
-        status: call.status as any,
-        messageId: call.sid,
-        cost: parseFloat(call.price || '0'),
+        status: 'queued',
       });
+
+      // Make voice call via Twilio
+      const call = await this.twilioClient.calls.create({
+        twiml: request.twiml,
+        from: request.from,
+        to: validatedNumber,
+      });
+
+      // Update log with result
+      await this.communicationTrackingService.updateCommunicationStatus(
+        logEntry.messageId || call.sid,
+        call.status as any,
+      );
 
       return {
         success: true,
@@ -192,19 +197,14 @@ export class CommunicationService {
     } catch (error) {
       this.logger.error('Voice call failed:', error);
 
-      // Log failed communication
-      await this.logCommunication({
-        leadId: request.leadId,
-        userId: request.userId,
-        tenantId: request.tenantId,
-        type: 'voice',
-        direction: 'outbound',
-        to: request.to,
-        from: request.from,
-        content: request.twiml,
-        status: 'failed',
-        error: error.message,
-      });
+      // Update log with error
+      if (request.leadId) {
+        await this.communicationTrackingService.updateCommunicationStatus(
+          'temp-id',
+          'failed',
+          error.message,
+        );
+      }
 
       return {
         success: false,
@@ -338,12 +338,8 @@ export class CommunicationService {
   /**
    * Get communication history for a lead
    */
-  async getCommunicationHistory(
-    leadId: string,
-    tenantId: string,
-  ): Promise<CommunicationLog[]> {
-    // In real implementation, this would fetch from database
-    return [];
+  async getCommunicationHistory(leadId: string, tenantId: string): Promise<CommunicationLog[]> {
+    return await this.communicationTrackingService.getCommunicationHistory(leadId, tenantId);
   }
 
   /**
@@ -355,13 +351,34 @@ export class CommunicationService {
     totalCost: number;
     successRate: number;
   }> {
-    // In real implementation, this would calculate from database
+    const stats = await this.communicationTrackingService.getCommunicationStats(tenantId);
     return {
-      totalSms: 0,
-      totalVoice: 0,
-      totalCost: 0,
-      successRate: 0,
+      totalSms: stats.totalSms,
+      totalVoice: stats.totalVoice,
+      totalCost: stats.totalCost,
+      successRate: stats.successRate,
     };
+  }
+
+  /**
+   * Get communication analytics
+   */
+  async getCommunicationAnalytics(tenantId: string, dateFrom?: Date, dateTo?: Date) {
+    return await this.communicationTrackingService.getCommunicationAnalytics(tenantId, dateFrom, dateTo);
+  }
+
+  /**
+   * Search communications
+   */
+  async searchCommunications(tenantId: string, filters: any, limit: number = 50, offset: number = 0) {
+    return await this.communicationTrackingService.searchCommunications(tenantId, filters, limit, offset);
+  }
+
+  /**
+   * Get cost analysis
+   */
+  async getCostAnalysis(tenantId: string, dateFrom?: Date, dateTo?: Date) {
+    return await this.communicationTrackingService.getCostAnalysis(tenantId, dateFrom, dateTo);
   }
 
   /**
@@ -394,14 +411,6 @@ export class CommunicationService {
   private async getTemplate(templateId: string, tenantId: string): Promise<CommunicationTemplate | null> {
     const templates = await this.getTemplates(tenantId);
     return templates.find(t => t.id === templateId) || null;
-  }
-
-  /**
-   * Log communication activity
-   */
-  private async logCommunication(log: Omit<CommunicationLog, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
-    // In real implementation, this would save to database
-    this.logger.log(`Communication logged: ${log.type} to ${log.to} - ${log.status}`);
   }
 
   /**
