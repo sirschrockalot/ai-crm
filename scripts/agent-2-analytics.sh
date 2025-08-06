@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Agent 2: Analytics Specialist Startup Script
+# This script starts Agent 2 with specific focus on Stories 3.2, 3.3
+
+echo "📊 Agent 2: Analytics Specialist"
+echo "================================"
+echo ""
+echo "🎯 Mission: Migrate Analytics Features with Shared Services"
+echo "📋 Stories: 3.2, 3.3 - Analytics Migration"
+echo "⏰ Timeline: 4-5 days total"
+echo "🚨 Priority: MEDIUM (Can start after Agent 1)"
+echo ""
+
+echo "📖 Reading Assignment Documentation..."
+echo "- Story 3.2: docs/stories/3.2.migrate-analytics-pages-dashboards.md"
+echo "- Story 3.3: docs/stories/3.3.integrate-analytics-shared-services.md"
+echo ""
+
+echo "🔧 Technical Focus Areas:"
+echo "1. Data Visualization: Migrate analytics components using Recharts"
+echo "2. Real-time Updates: Implement WebSocket connections for live data"
+echo "3. Dashboard Layouts: Preserve existing dashboard configurations"
+echo "4. Export Functionality: Maintain PDF/CSV export capabilities"
+echo "5. Responsive Design: Ensure analytics works on all devices"
+echo ""
+
+echo "📁 Key Files to Modify:"
+echo "- src/frontend/pages/analytics/"
+echo "- src/frontend/components/analytics/"
+echo "- src/frontend/hooks/useAnalytics.ts"
+echo "- src/frontend/hooks/useDashboard.ts"
+echo ""
+
+echo "🎯 Success Criteria:"
+echo "- All analytics pages load correctly with proper data"
+echo "- Dashboard layouts and widgets work as expected"
+echo "- Real-time updates and notifications work properly"
+echo "- Export functionality works correctly"
+echo ""
+
+echo "🤝 Coordination Points:"
+echo "- May need lead data from Agent 1 for analytics integration"
+echo "- May need analytics data for Agent 4 (Dashboard) widgets"
+echo "- Will prepare for Agent 5 (Integration) component consolidation"
+echo ""
+
+echo "📚 Shared Resources to Use:"
+echo "- Shared component library from Story 1.2"
+echo "- Chart component and data visualization tools"
+echo "- Shared hooks (useApi, useAuth, useAnalytics)"
+echo "- Design system with Chakra UI theme"
+echo ""
+
+echo "🚀 Agent 2 is ready to begin implementation!"
+echo "Starting work on Stories 3.2, 3.3: Analytics Migration"
+echo ""
+echo "💡 Next Steps:"
+echo "1. Read both story documentations thoroughly"
+echo "2. Review the existing analytics implementation"
+echo "3. Plan the migration with shared services"
+echo "4. Begin implementation following the detailed checklists"
+echo "5. Commit progress daily with descriptive messages"
+echo ""
+echo "Good luck, Agent 2! Let's build amazing analytics migration! 🎉" 
