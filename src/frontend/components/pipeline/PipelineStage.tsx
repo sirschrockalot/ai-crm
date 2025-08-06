@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, VStack, Heading, Text, Badge, useColorModeValue } from '@chakra-ui/react';
+import { Draggable } from 'react-beautiful-dnd';
 import { PipelineCard } from './PipelineCard';
 import { PipelineLead, PipelineStage as PipelineStageType } from './PipelineBoard';
 
@@ -7,12 +8,14 @@ interface PipelineStageProps {
   stage: PipelineStageType;
   onLeadMove?: (leadId: string, fromStageId: string, toStageId: string) => void;
   onLeadClick?: (lead: PipelineLead) => void;
+  isDragEnabled?: boolean;
 }
 
 export const PipelineStage: React.FC<PipelineStageProps> = ({
   stage,
   onLeadMove,
   onLeadClick,
+  isDragEnabled = false,
 }) => {
   const bgColor = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
@@ -77,14 +80,38 @@ export const PipelineStage: React.FC<PipelineStageProps> = ({
               No leads in this stage
             </Box>
           ) : (
-            stage.leads.map((lead) => (
-              <PipelineCard
-                key={lead.id}
-                lead={lead}
-                stageId={stage.id}
-                onMove={onLeadMove}
-                onClick={onLeadClick}
-              />
+            stage.leads.map((lead, index) => (
+              isDragEnabled ? (
+                <Draggable key={lead.id} draggableId={lead.id} index={index}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        opacity: snapshot.isDragging ? 0.8 : 1,
+                        transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'none',
+                      }}
+                    >
+                      <PipelineCard
+                        lead={lead}
+                        stageId={stage.id}
+                        onMove={onLeadMove}
+                        onClick={onLeadClick}
+                      />
+                    </div>
+                  )}
+                </Draggable>
+              ) : (
+                <PipelineCard
+                  key={lead.id}
+                  lead={lead}
+                  stageId={stage.id}
+                  onMove={onLeadMove}
+                  onClick={onLeadClick}
+                />
+              )
             ))
           )}
         </VStack>

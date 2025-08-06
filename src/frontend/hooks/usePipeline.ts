@@ -1,252 +1,201 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { useToast } from '@chakra-ui/react';
-import pipelineService from '../services/pipelineService';
-import { Lead, PipelineStage, LeadMoveRequest } from '../types/pipeline';
+import { useState, useCallback } from 'react';
+import { useApi } from './useApi';
+import { PipelineLead, PipelineStage } from '../components/pipeline';
 
-interface UsePipelineOptions {
-  tenantId: string;
-  autoRefresh?: boolean;
-  refreshInterval?: number;
+export interface PipelineData {
+  stages: PipelineStage[];
+  totalLeads: number;
+  totalValue: number;
+  conversionRate: number;
 }
 
-export const usePipeline = ({ tenantId, autoRefresh = true, refreshInterval = 30000 }: UsePipelineOptions) => {
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
-  const queryClient = useQueryClient();
+export interface MoveLeadRequest {
+  leadId: string;
+  fromStageId: string;
+  toStageId: string;
+}
 
-  // Fetch pipeline stages
-  const {
-    data: stages = [],
-    isLoading: stagesLoading,
-    error: stagesError,
-    refetch: refetchStages,
-  } = useQuery(
-    ['pipeline-stages', tenantId],
-    () => pipelineService.getPipelineStages(tenantId),
-    {
-      refetchInterval: autoRefresh ? refreshInterval : false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+export interface UpdateStatusRequest {
+  leadId: string;
+  newStatus: string;
+}
+
+export function usePipeline() {
+  const [pipelineData, setPipelineData] = useState<PipelineData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const pipelineApi = useApi<PipelineData>();
+  const moveApi = useApi<any>();
+  const statusApi = useApi<any>();
+
+  // Fetch pipeline data
+  const fetchPipelineData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await pipelineApi.execute('GET', '/api/leads/pipeline');
+      
+      if (response.success) {
+        setPipelineData(response.data);
+      } else {
+        setError(response.message || 'Failed to fetch pipeline data');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
     }
-  );
+  }, [pipelineApi]);
 
-  // Fetch all leads
-  const {
-    data: leads = [],
-    isLoading: leadsLoading,
-    error: leadsError,
-    refetch: refetchLeads,
-  } = useQuery(
-    ['pipeline-leads', tenantId],
-    () => pipelineService.getAllLeads(tenantId),
-    {
-      refetchInterval: autoRefresh ? refreshInterval : false,
-      staleTime: 2 * 60 * 1000, // 2 minutes
+  // Move lead between stages
+  const moveLead = useCallback(async (request: MoveLeadRequest) => {
+    try {
+      setError(null);
+      
+      const response = await moveApi.execute('PUT', '/api/leads/pipeline/move', request);
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to move lead');
+      }
+      
+      // Refresh pipeline data after successful move
+      await fetchPipelineData();
+      
+      return response;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
     }
-  );
+  }, [moveApi, fetchPipelineData]);
 
-  // Move lead mutation
-  const moveLeadMutation = useMutation(
-    (request: LeadMoveRequest) => pipelineService.moveLead(request),
-    {
-      onSuccess: (data) => {
-        toast({
-          title: 'Lead moved successfully',
-          description: data.message || 'Lead has been moved to the new stage',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        
-        // Invalidate and refetch leads
-        queryClient.invalidateQueries(['pipeline-leads', tenantId]);
-        queryClient.invalidateQueries(['pipeline-stages', tenantId]);
-      },
-      onError: (error: any) => {
-        toast({
-          title: 'Error moving lead',
-          description: error.response?.data?.message || 'Failed to move lead',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      },
+  // Update lead status
+  const updateLeadStatus = useCallback(async (request: UpdateStatusRequest) => {
+    try {
+      setError(null);
+      
+      const response = await statusApi.execute('PUT', `/api/leads/${request.leadId}/status`, {
+        status: request.newStatus,
+      });
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to update lead status');
+      }
+      
+      return response;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
     }
-  );
+  }, [statusApi]);
 
-  // Create stage mutation
-  const createStageMutation = useMutation(
-    (stage: Partial<PipelineStage>) => pipelineService.createStage(stage),
-    {
-      onSuccess: () => {
-        toast({
-          title: 'Stage created successfully',
-          description: 'New stage has been added to the pipeline',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        queryClient.invalidateQueries(['pipeline-stages', tenantId]);
-      },
-      onError: (error: any) => {
-        toast({
-          title: 'Error creating stage',
-          description: error.response?.data?.message || 'Failed to create stage',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      },
+  // Get stage by ID
+  const getStageById = useCallback((stageId: string) => {
+    return pipelineData?.stages.find(stage => stage.id === stageId);
+  }, [pipelineData]);
+
+  // Get lead by ID
+  const getLeadById = useCallback((leadId: string) => {
+    for (const stage of pipelineData?.stages || []) {
+      const lead = stage.leads.find(l => l.id === leadId);
+      if (lead) return lead;
     }
-  );
+    return null;
+  }, [pipelineData]);
 
-  // Update stage mutation
-  const updateStageMutation = useMutation(
-    ({ stageId, updates }: { stageId: string; updates: Partial<PipelineStage> }) =>
-      pipelineService.updateStage(stageId, updates),
-    {
-      onSuccess: () => {
-        toast({
-          title: 'Stage updated successfully',
-          description: 'Stage has been updated',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        queryClient.invalidateQueries(['pipeline-stages', tenantId]);
-      },
-      onError: (error: any) => {
-        toast({
-          title: 'Error updating stage',
-          description: error.response?.data?.message || 'Failed to update stage',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      },
+  // Calculate pipeline statistics
+  const getPipelineStats = useCallback(() => {
+    if (!pipelineData) return null;
+
+    const totalLeads = pipelineData.stages.reduce((sum, stage) => sum + stage.leads.length, 0);
+    const totalValue = pipelineData.stages.reduce((sum, stage) => {
+      return sum + stage.leads.reduce((leadSum, lead) => leadSum + lead.estimatedValue, 0);
+    }, 0);
+
+    const convertedLeads = pipelineData.stages
+      .filter(stage => stage.name.toLowerCase().includes('converted'))
+      .reduce((sum, stage) => sum + stage.leads.length, 0);
+
+    const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+
+    return {
+      totalLeads,
+      totalValue,
+      conversionRate,
+      stageCount: pipelineData.stages.length,
+    };
+  }, [pipelineData]);
+
+  // Filter leads by criteria
+  const filterLeads = useCallback((criteria: {
+    status?: string;
+    propertyType?: string;
+    assignedAgent?: string;
+    minValue?: number;
+    maxValue?: number;
+  }) => {
+    if (!pipelineData) return [];
+
+    const filteredLeads: PipelineLead[] = [];
+
+    for (const stage of pipelineData.stages) {
+      for (const lead of stage.leads) {
+        let matches = true;
+
+        if (criteria.status && lead.status !== criteria.status) {
+          matches = false;
+        }
+
+        if (criteria.propertyType && lead.propertyType !== criteria.propertyType) {
+          matches = false;
+        }
+
+        if (criteria.assignedAgent && lead.assignedAgent !== criteria.assignedAgent) {
+          matches = false;
+        }
+
+        if (criteria.minValue && lead.estimatedValue < criteria.minValue) {
+          matches = false;
+        }
+
+        if (criteria.maxValue && lead.estimatedValue > criteria.maxValue) {
+          matches = false;
+        }
+
+        if (matches) {
+          filteredLeads.push(lead);
+        }
+      }
     }
-  );
 
-  // Create lead mutation
-  const createLeadMutation = useMutation(
-    (lead: Partial<Lead>) => pipelineService.createLead(lead),
-    {
-      onSuccess: () => {
-        toast({
-          title: 'Lead created successfully',
-          description: 'New lead has been added to the pipeline',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        queryClient.invalidateQueries(['pipeline-leads', tenantId]);
-      },
-      onError: (error: any) => {
-        toast({
-          title: 'Error creating lead',
-          description: error.response?.data?.message || 'Failed to create lead',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      },
-    }
-  );
-
-  // Update lead mutation
-  const updateLeadMutation = useMutation(
-    ({ leadId, updates }: { leadId: string; updates: Partial<Lead> }) =>
-      pipelineService.updateLead(leadId, updates),
-    {
-      onSuccess: () => {
-        toast({
-          title: 'Lead updated successfully',
-          description: 'Lead has been updated',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        queryClient.invalidateQueries(['pipeline-leads', tenantId]);
-      },
-      onError: (error: any) => {
-        toast({
-          title: 'Error updating lead',
-          description: error.response?.data?.message || 'Failed to update lead',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      },
-    }
-  );
-
-  // Handle lead move
-  const handleLeadMove = useCallback(
-    (leadId: string, fromStageId: string, toStageId: string) => {
-      const request: LeadMoveRequest = {
-        leadId,
-        fromStageId,
-        toStageId,
-        userId: 'current-user-id', // TODO: Get from auth context
-        tenantId,
-      };
-
-      moveLeadMutation.mutate(request);
-    },
-    [moveLeadMutation, tenantId]
-  );
-
-  // Get leads for a specific stage
-  const getLeadsForStage = useCallback(
-    (stageId: string) => {
-      return leads.filter(lead => lead.stageId === stageId);
-    },
-    [leads]
-  );
-
-  // Refresh data
-  const refreshData = useCallback(() => {
-    refetchStages();
-    refetchLeads();
-  }, [refetchStages, refetchLeads]);
-
-  // Loading state
-  const isDataLoading = stagesLoading || leadsLoading || isLoading;
-
-  // Error state
-  const hasError = stagesError || leadsError;
+    return filteredLeads;
+  }, [pipelineData]);
 
   return {
     // Data
-    stages,
-    leads,
-    selectedLead,
-    
-    // Loading states
-    isLoading: isDataLoading,
-    isMovingLead: moveLeadMutation.isLoading,
-    isCreatingStage: createStageMutation.isLoading,
-    isUpdatingStage: updateStageMutation.isLoading,
-    isCreatingLead: createLeadMutation.isLoading,
-    isUpdatingLead: updateLeadMutation.isLoading,
-    
-    // Error states
-    hasError,
-    stagesError,
-    leadsError,
+    pipelineData,
+    loading: loading || pipelineApi.loading || moveApi.loading || statusApi.loading,
+    error: error || pipelineApi.error || moveApi.error || statusApi.error,
     
     // Actions
-    handleLeadMove,
-    getLeadsForStage,
-    setSelectedLead,
-    refreshData,
+    fetchPipelineData,
+    moveLead,
+    updateLeadStatus,
     
-    // Mutations
-    moveLeadMutation,
-    createStageMutation,
-    updateStageMutation,
-    createLeadMutation,
-    updateLeadMutation,
+    // Utilities
+    getStageById,
+    getLeadById,
+    getPipelineStats,
+    filterLeads,
+    
+    // Reset
+    reset: () => {
+      setPipelineData(null);
+      setError(null);
+      pipelineApi.reset();
+      moveApi.reset();
+      statusApi.reset();
+    },
   };
-}; 
+} 
