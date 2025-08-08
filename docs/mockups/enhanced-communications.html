@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Communications Center - DealCycle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #1E293B;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            color: #10B981;
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .communication-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .channel-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .channel-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: none;
+            color: #64748B;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .channel-tab.active {
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
+        }
+
+        .channel-tab:hover {
+            color: #3B82F6;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #3B82F6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #2563EB;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #64748B;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+        }
+
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+
+        .template-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E2E8F0;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .template-card {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #F8FAFC;
+        }
+
+        .template-card:hover {
+            border-color: #3B82F6;
+            background: #EFF6FF;
+        }
+
+        .template-card h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-card p {
+            font-size: 0.75rem;
+            color: #64748B;
+            line-height: 1.4;
+        }
+
+        .communication-history {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: #F8FAFC;
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .history-icon.sms {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .history-icon.email {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .history-icon.voice {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .history-message {
+            font-size: 0.875rem;
+            color: #374151;
+            line-height: 1.4;
+        }
+
+        .history-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .status-sent {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .status-delivered {
+            background: #DBEAFE;
+            color: #1D4ED8;
+        }
+
+        .status-failed {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .analytics-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+            margin-top: 2rem;
+        }
+
+        .chart-container {
+            height: 200px;
+            background: #F8FAFC;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748B;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .channel-tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">DealCycle</div>
+            <div class="user-info">
+                <span>John Smith</span>
+                <div class="user-avatar">JS</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">💬 Enhanced Communications Center</h1>
+            <p class="page-subtitle">Multi-channel communication with SMS, email, and voice integration</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Communications</h3>
+                <div class="stat-value">1,247</div>
+                <div class="stat-change">+12% this week</div>
+            </div>
+            <div class="stat-card">
+                <h3>SMS Messages</h3>
+                <div class="stat-value">892</div>
+                <div class="stat-change">95% delivery rate</div>
+            </div>
+            <div class="stat-card">
+                <h3>Emails Sent</h3>
+                <div class="stat-value">234</div>
+                <div class="stat-change">87% open rate</div>
+            </div>
+            <div class="stat-card">
+                <h3>Voice Calls</h3>
+                <div class="stat-value">121</div>
+                <div class="stat-change">Avg 3.2 min</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="communication-panel">
+                <h3 class="section-title">📤 Send Communication</h3>
+                
+                <div class="channel-tabs">
+                    <button class="channel-tab active">📱 SMS</button>
+                    <button class="channel-tab">📧 Email</button>
+                    <button class="channel-tab">📞 Voice</button>
+                </div>
+
+                <form>
+                    <div class="form-group">
+                        <label class="form-label">Recipient</label>
+                        <select class="form-input form-select">
+                            <option>Select a lead or buyer...</option>
+                            <option>John Doe - Lead #1234</option>
+                            <option>Sarah Wilson - Buyer #567</option>
+                            <option>Mike Johnson - Lead #890</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Message Type</label>
+                        <select class="form-input form-select">
+                            <option>Custom Message</option>
+                            <option>Follow-up Reminder</option>
+                            <option>Property Update</option>
+                            <option>Meeting Confirmation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Message Content</label>
+                        <textarea class="form-input form-textarea" placeholder="Enter your message here...">Hi John, I wanted to follow up on the property at 123 Main St. Are you still interested in discussing this opportunity?</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Schedule</label>
+                        <select class="form-input form-select">
+                            <option>Send Now</option>
+                            <option>Send in 1 hour</option>
+                            <option>Send tomorrow at 9 AM</option>
+                            <option>Send next Monday</option>
+                        </select>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button class="btn">
+                            <span>📤</span>
+                            Send Now
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>⏰</span>
+                            Schedule
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>👁️</span>
+                            Preview
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>💾</span>
+                            Save Draft
+                        </button>
+                    </div>
+                </form>
+
+                <div class="template-section">
+                    <h4 class="section-title">📋 Quick Templates</h4>
+                    <div class="template-grid">
+                        <div class="template-card">
+                            <h4>Follow-up Call</h4>
+                            <p>Hi [Name], I wanted to follow up on our conversation about [Property]. Are you still interested?</p>
+                        </div>
+                        <div class="template-card">
+                            <h4>Property Update</h4>
+                            <p>Good news! The property at [Address] is still available. Would you like to schedule a viewing?</p>
+                        </div>
+                        <div class="template-card">
+                            <h4>Meeting Confirmation</h4>
+                            <p>Confirming our meeting tomorrow at [Time] to discuss [Property]. Looking forward to it!</p>
+                        </div>
+                        <div class="template-card">
+                            <h4>Buyer Alert</h4>
+                            <p>New property matching your criteria: [Address]. Price: [Price]. Interested in learning more?</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="communication-history">
+                <h3 class="section-title">📋 Communication History</h3>
+                
+                <div class="history-item">
+                    <div class="history-icon sms">📱</div>
+                    <div class="history-content">
+                        <div class="history-header">
+                            <div class="history-title">SMS to John Doe</div>
+                            <div class="history-time">2 hours ago</div>
+                        </div>
+                        <div class="history-message">Hi John, I wanted to follow up on the property at 123 Main St. Are you still interested in discussing this opportunity?</div>
+                        <span class="history-status status-delivered">Delivered</span>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-icon email">📧</div>
+                    <div class="history-content">
+                        <div class="history-header">
+                            <div class="history-title">Email to Sarah Wilson</div>
+                            <div class="history-time">1 day ago</div>
+                        </div>
+                        <div class="history-message">Subject: New Property Alert - 456 Oak Ave\n\nHi Sarah, I found a property that matches your criteria perfectly...</div>
+                        <span class="history-status status-sent">Sent</span>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-icon voice">📞</div>
+                    <div class="history-content">
+                        <div class="history-header">
+                            <div class="history-title">Voice call to Mike Johnson</div>
+                            <div class="history-time">2 days ago</div>
+                        </div>
+                        <div class="history-message">Call duration: 4 minutes 32 seconds\nDiscussed property details and next steps</div>
+                        <span class="history-status status-sent">Completed</span>
+                    </div>
+                </div>
+
+                <div class="history-item">
+                    <div class="history-icon sms">📱</div>
+                    <div class="history-content">
+                        <div class="history-header">
+                            <div class="history-title">SMS to Lisa Brown</div>
+                            <div class="history-time">3 days ago</div>
+                        </div>
+                        <div class="history-message">Hi Lisa, just checking in about the property viewing scheduled for tomorrow at 2 PM.</div>
+                        <span class="history-status status-failed">Failed</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="analytics-panel">
+            <h3 class="section-title">📊 Communication Analytics</h3>
+            <div class="quick-actions">
+                <button class="action-btn">
+                    <span>📈</span>
+                    Response Rate
+                </button>
+                <button class="action-btn">
+                    <span>⏱️</span>
+                    Response Time
+                </button>
+                <button class="action-btn">
+                    <span>📊</span>
+                    Channel Performance
+                </button>
+                <button class="action-btn">
+                    <span>💰</span>
+                    Cost Analysis
+                </button>
+            </div>
+            <div class="chart-container">
+                📊 Communication Analytics Chart - Response rates, delivery times, and channel performance
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

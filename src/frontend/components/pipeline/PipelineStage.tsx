@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, VStack, Heading, Text, Badge, useColorModeValue } from '@chakra-ui/react';
+import { Box, VStack, HStack, Heading, Text, Badge, useColorModeValue } from '@chakra-ui/react';
 import { Draggable } from 'react-beautiful-dnd';
 import { PipelineCard } from './PipelineCard';
 import { PipelineLead, PipelineStage as PipelineStageType } from './PipelineBoard';

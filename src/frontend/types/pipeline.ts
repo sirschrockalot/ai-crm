@@ -1,44 +1,42 @@
 export interface Lead {
   id: string;
+  leadId: string;
   firstName: string;
   lastName: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  title?: string;
+  email: string;
+  phone: string;
+  company: string;
+  status: string;
+  priority: string;
+  value: number;
   stageId: string;
-  status: 'active' | 'inactive' | 'pending' | 'blocked';
-  priority?: 'high' | 'medium' | 'low';
-  value?: number;
-  score?: number;
-  source?: string;
-  avatar?: string;
-  createdAt: string;
-  updatedAt: string;
-  lastContact?: string;
+  assignedTo?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  lastContactedAt?: Date;
   notes?: string;
   tags?: string[];
-  assignedTo?: string;
-  tenantId: string;
+  source: string;
+  score?: number;
 }
 
 export interface PipelineStage {
   id: string;
   name: string;
   description?: string;
-  type: 'prospecting' | 'qualification' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost' | 'custom';
   order: number;
-  color?: string;
+  color: string;
   isActive: boolean;
-  tenantId: string;
-  createdAt: string;
-  updatedAt: string;
-  settings?: {
-    autoAssign?: boolean;
-    maxLeads?: number;
-    timeLimit?: number;
-    requiredFields?: string[];
-  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PipelineStats {
+  totalLeads: number;
+  totalValue: number;
+  averageValue: number;
+  conversionRate: number;
+  stageDistribution: Record<string, number>;
 }
 
 export interface Pipeline {

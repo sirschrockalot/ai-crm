@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: deps
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_APP_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    command: npm run dev
+    networks:
+      - dealcycle-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  backend:
+    image: node:18-alpine
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../backend:/app
+    command: npm run start:dev
+    networks:
+      - dealcycle-network
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MongoDB for local development
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=dealcycle
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - dealcycle-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - dealcycle-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Prometheus for monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - dealcycle-network
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - dealcycle-network
+    depends_on:
+      - prometheus
+
+volumes:
+  mongodb_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  dealcycle-network:
+    driver: bridge 

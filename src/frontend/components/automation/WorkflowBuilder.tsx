@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, VStack, HStack, Heading, Text, Button, useToast, Select, Input, Textarea } from '@chakra-ui/react';
 import { Card, ErrorBoundary } from '../../components/ui';
-import { Workflow, WorkflowTriggerType, WorkflowPriority } from '../../types';
+import { Workflow, WorkflowAction } from '../../types';
 
 interface WorkflowBuilderProps {
   workflow?: Workflow;
@@ -38,9 +38,13 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
 
   const handleAddAction = () => {
     if (newAction.type && newAction.config.template) {
+      const action: WorkflowAction = {
+        type: newAction.type as WorkflowAction['type'],
+        config: newAction.config
+      };
       setFormData(prev => ({
         ...prev,
-        actions: [...(prev.actions || []), { ...newAction }]
+        actions: [...(prev.actions || []), action]
       }));
       setNewAction({ type: 'email', config: { template: '', delay: '' } });
     }
@@ -153,7 +157,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
                   <VStack align="start" spacing={1}>
                     <Text fontWeight="semibold">{action.type}</Text>
                     <Text fontSize="sm" color="gray.600">
-                      {action.config.template || action.config.message || 'No details'}
+                      {action.config.template || 'No details'}
                     </Text>
                   </VStack>
                   <Button
@@ -188,12 +192,12 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
                   <Box flex={2}>
                     <Text fontSize="sm" mb={1}>Configuration</Text>
                     <Input
-                      value={newAction.config.template || newAction.config.message || ''}
+                      value={newAction.config.template || ''}
                       onChange={(e) => setNewAction(prev => ({
                         ...prev,
-                        config: { ...prev.config, template: e.target.value, message: e.target.value }
+                        config: { ...prev.config, template: e.target.value }
                       }))}
-                      placeholder="Template name, message, or configuration"
+                      placeholder="Template name or configuration"
                     />
                   </Box>
 

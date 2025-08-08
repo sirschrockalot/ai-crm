@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracking Dashboard - DealCycle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #1E293B;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .stat-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            color: #10B981;
+            font-weight: 500;
+        }
+
+        .stat-change.negative {
+            color: #EF4444;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #3B82F6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #2563EB;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #64748B;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .timesheet-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #64748B;
+            font-size: 0.875rem;
+            padding: 0.5rem;
+        }
+
+        .day-cell {
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            min-height: 80px;
+            background: #F8FAFC;
+        }
+
+        .day-cell.today {
+            background: #DBEAFE;
+            border-color: #3B82F6;
+        }
+
+        .time-input {
+            width: 100%;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background: white;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .project-select {
+            width: 100%;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background: white;
+            margin-top: 0.25rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            background: white;
+            color: #64748B;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+        }
+
+        .recent-entries {
+            margin-top: 1.5rem;
+        }
+
+        .entry-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            background: #F8FAFC;
+        }
+
+        .entry-info h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 0.25rem;
+        }
+
+        .entry-info p {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .entry-time {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #3B82F6;
+        }
+
+        .approval-queue {
+            margin-top: 1.5rem;
+        }
+
+        .approval-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background: white;
+        }
+
+        .approval-info h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 0.25rem;
+        }
+
+        .approval-info p {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .status-approved {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .status-rejected {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .project-list {
+            margin-top: 1rem;
+        }
+
+        .project-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            background: #F8FAFC;
+        }
+
+        .project-info h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 0.25rem;
+        }
+
+        .project-info p {
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+
+        .project-hours {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #10B981;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .timesheet-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 0.25rem;
+            }
+            
+            .day-cell {
+                padding: 0.5rem;
+                min-height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">DealCycle</div>
+            <div class="user-info">
+                <span>John Smith</span>
+                <div class="user-avatar">JS</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">⏰ Time Tracking Dashboard</h1>
+            <p class="page-subtitle">Track your time, manage projects, and submit timesheets</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>This Week</h3>
+                <div class="stat-value">32.5h</div>
+                <div class="stat-change">+2.5h from last week</div>
+            </div>
+            <div class="stat-card">
+                <h3>Billable Hours</h3>
+                <div class="stat-value">28.0h</div>
+                <div class="stat-change">86% billable</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Projects</h3>
+                <div class="stat-value">5</div>
+                <div class="stat-change">2 pending approval</div>
+            </div>
+            <div class="stat-card">
+                <h3>Timesheet Status</h3>
+                <div class="stat-value">Draft</div>
+                <div class="stat-change">Due Friday</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-content">
+                <div class="section-title">
+                    📅 Weekly Timesheet
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="action-btn">
+                        <span>⏱️</span>
+                        Start Timer
+                    </button>
+                    <button class="action-btn">
+                        <span>📝</span>
+                        Add Entry
+                    </button>
+                    <button class="action-btn">
+                        <span>💾</span>
+                        Save Draft
+                    </button>
+                    <button class="btn btn-success">
+                        <span>📤</span>
+                        Submit for Approval
+                    </button>
+                </div>
+
+                <div class="timesheet-grid">
+                    <div class="day-header">Mon</div>
+                    <div class="day-header">Tue</div>
+                    <div class="day-header">Wed</div>
+                    <div class="day-header">Thu</div>
+                    <div class="day-header">Fri</div>
+                    <div class="day-header">Sat</div>
+                    <div class="day-header">Sun</div>
+                    
+                    <div class="day-cell">
+                        <input type="text" class="time-input" placeholder="8.0" value="8.0">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                    <div class="day-cell">
+                        <input type="text" class="time-input" placeholder="8.0" value="7.5">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                    <div class="day-cell">
+                        <input type="text" class="time-input" placeholder="8.0" value="8.0">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                    <div class="day-cell">
+                        <input type="text" class="time-input" placeholder="8.0" value="6.0">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                    <div class="day-cell today">
+                        <input type="text" class="time-input" placeholder="8.0" value="3.0">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                    <div class="day-cell">
+                        <input type="text" class="time-input" placeholder="0.0">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                    <div class="day-cell">
+                        <input type="text" class="time-input" placeholder="0.0">
+                        <select class="project-select">
+                            <option>Lead Management</option>
+                            <option>Buyer Outreach</option>
+                            <option>Property Analysis</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="recent-entries">
+                    <h3 class="section-title">📝 Recent Time Entries</h3>
+                    <div class="entry-item">
+                        <div class="entry-info">
+                            <h4>Lead Management</h4>
+                            <p>Follow-up calls and lead qualification</p>
+                        </div>
+                        <div class="entry-time">2.5h</div>
+                    </div>
+                    <div class="entry-item">
+                        <div class="entry-info">
+                            <h4>Buyer Outreach</h4>
+                            <p>Email campaigns and buyer matching</p>
+                        </div>
+                        <div class="entry-time">1.5h</div>
+                    </div>
+                    <div class="entry-item">
+                        <div class="entry-info">
+                            <h4>Property Analysis</h4>
+                            <p>Market research and property evaluation</p>
+                        </div>
+                        <div class="entry-time">3.0h</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <h3 class="section-title">📊 Project Overview</h3>
+                    <div class="project-list">
+                        <div class="project-item">
+                            <div class="project-info">
+                                <h4>Lead Management</h4>
+                                <p>Active leads and follow-ups</p>
+                            </div>
+                            <div class="project-hours">12.5h</div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-info">
+                                <h4>Buyer Outreach</h4>
+                                <p>Buyer database and matching</p>
+                            </div>
+                            <div class="project-hours">8.0h</div>
+                        </div>
+                        <div class="project-item">
+                            <div class="project-info">
+                                <h4>Property Analysis</h4>
+                                <p>Market research and evaluation</p>
+                            </div>
+                            <div class="project-hours">12.0h</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3 class="section-title">✅ Approval Queue</h3>
+                    <div class="approval-queue">
+                        <div class="approval-item">
+                            <div class="approval-info">
+                                <h4>Sarah Johnson</h4>
+                                <p>Week of Dec 4-10</p>
+                                <span class="status-badge status-pending">Pending</span>
+                            </div>
+                            <div class="approval-actions">
+                                <button class="btn btn-success btn-sm">Approve</button>
+                                <button class="btn btn-secondary btn-sm">Reject</button>
+                            </div>
+                        </div>
+                        <div class="approval-item">
+                            <div class="approval-info">
+                                <h4>Mike Davis</h4>
+                                <p>Week of Dec 4-10</p>
+                                <span class="status-badge status-approved">Approved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3 class="section-title">⚡ Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button class="btn">
+                            <span>⏱️</span>
+                            Start Timer
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>📝</span>
+                            Add Time Entry
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>📊</span>
+                            View Reports
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>⚙️</span>
+                            Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

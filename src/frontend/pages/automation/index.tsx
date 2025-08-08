@@ -16,8 +16,6 @@ const AutomationPage: React.FC = () => {
     updateWorkflow,
     deleteWorkflow,
     toggleWorkflow,
-    executeWorkflow,
-    fetchExecutions,
   } = useAutomation();
   
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -28,55 +26,6 @@ const AutomationPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<boolean | 'all'>('all');
   const [showExecution, setShowExecution] = useState(false);
   const toast = useToast();
-
-  // Mock data for workflows
-  const mockWorkflows: Workflow[] = [
-    {
-      id: '1',
-      name: 'Welcome Email Sequence',
-      description: 'Send welcome emails to new leads',
-      triggerType: 'automatic',
-      triggerCondition: 'Lead status = new',
-      actions: [
-        { type: 'email', config: { template: 'welcome', delay: '1h' } },
-        { type: 'notification', config: { message: 'Welcome email sent' } }
-      ],
-      isActive: true,
-      priority: 'high',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      name: 'Follow-up Reminder',
-      description: 'Send follow-up reminders for contacted leads',
-      triggerType: 'scheduled',
-      triggerCondition: 'Lead status = contacted AND days since last contact > 3',
-      actions: [
-        { type: 'email', config: { template: 'follow-up', delay: '3d' } },
-        { type: 'sms', config: { message: 'Follow-up reminder sent' } }
-      ],
-      isActive: true,
-      priority: 'medium',
-      createdAt: new Date('2024-01-05'),
-      updatedAt: new Date('2024-01-20')
-    },
-    {
-      id: '3',
-      name: 'Qualification Check',
-      description: 'Automatically qualify leads based on criteria',
-      triggerType: 'automatic',
-      triggerCondition: 'Lead property value > 100000 AND lead source = website',
-      actions: [
-        { type: 'status_change', config: { newStatus: 'qualified' } },
-        { type: 'notification', config: { message: 'Lead auto-qualified' } }
-      ],
-      isActive: false,
-      priority: 'low',
-      createdAt: new Date('2024-01-10'),
-      updatedAt: new Date('2024-01-25')
-    }
-  ];
 
   useEffect(() => {
     fetchWorkflows();

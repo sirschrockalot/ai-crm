@@ -11,8 +11,6 @@ interface PipelineCardProps {
 
 export const PipelineCard: React.FC<PipelineCardProps> = ({
   lead,
-  stageId,
-  onMove,
   onClick,
 }) => {
   const bgColor = useColorModeValue('white', 'gray.600');
@@ -45,10 +43,6 @@ export const PipelineCard: React.FC<PipelineCardProps> = ({
       month: 'short',
       day: 'numeric',
     });
-  };
-
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
   return (

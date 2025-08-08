@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Features - DealCycle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F8FAFC;
+            color: #1E293B;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            color: #64748B;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            color: #10B981;
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #E2E8F0;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-feature-card {
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #F8FAFC;
+        }
+
+        .ai-feature-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #8B5CF6, #3B82F6);
+            color: white;
+        }
+
+        .ai-feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .ai-feature-description {
+            color: #64748B;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .ai-content {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ai-content h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-content p {
+            font-size: 0.875rem;
+            color: #6B7280;
+            line-height: 1.5;
+        }
+
+        .ai-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #3B82F6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #2563EB;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #64748B;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: #10B981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            background: white;
+        }
+
+        .suggestion-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            background: #FEF3C7;
+            color: #D97706;
+            flex-shrink: 0;
+        }
+
+        .suggestion-content {
+            flex: 1;
+        }
+
+        .suggestion-text {
+            font-size: 0.875rem;
+            color: #374151;
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: #EFF6FF;
+            color: #1D4ED8;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tag.ai-generated {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .matching-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            background: #D1FAE5;
+            color: #059669;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .lead-summary {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .summary-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .summary-confidence {
+            font-size: 0.75rem;
+            color: #10B981;
+            font-weight: 500;
+        }
+
+        .summary-content {
+            font-size: 0.875rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        .property-description {
+            background: white;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .description-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .description-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+        }
+
+        .description-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .description-content {
+            font-size: 0.875rem;
+            color: #374151;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">DealCycle</div>
+            <div class="user-info">
+                <span>John Smith</span>
+                <div class="user-avatar">JS</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1 class="page-title">🤖 AI-Powered Features</h1>
+            <p class="page-subtitle">Intelligent automation and AI assistance for enhanced productivity</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>AI Accuracy</h3>
+                <div class="stat-value">87%</div>
+                <div class="stat-change">+5% this month</div>
+            </div>
+            <div class="stat-card">
+                <h3>Time Saved</h3>
+                <div class="stat-value">12.5h</div>
+                <div class="stat-change">This week</div>
+            </div>
+            <div class="stat-card">
+                <h3>Suggestions Used</h3>
+                <div class="stat-value">234</div>
+                <div class="stat-change">+18% acceptance</div>
+            </div>
+            <div class="stat-card">
+                <h3>Auto-Tagged Leads</h3>
+                <div class="stat-value">156</div>
+                <div class="stat-change">This week</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-content">
+                <div class="ai-feature-card">
+                    <div class="ai-feature-header">
+                        <div class="ai-icon">📝</div>
+                        <div class="ai-feature-title">AI-Generated Lead Summary</div>
+                    </div>
+                    <div class="ai-feature-description">
+                        Automatically generate comprehensive lead summaries from conversation history and notes.
+                    </div>
+                    <div class="ai-content">
+                        <h4>Lead Summary for John Doe</h4>
+                        <p>John is a motivated seller looking to sell his 3-bedroom property at 123 Main St. He's facing financial difficulties and needs to close within 30 days. The property is in good condition but needs minor repairs. John is open to offers below market value and prefers cash buyers. He's been responsive to calls and shows urgency in selling.</p>
+                        <div class="tag-list">
+                            <span class="tag">Motivated Seller</span>
+                            <span class="tag">Cash Preferred</span>
+                            <span class="tag">Urgent Timeline</span>
+                            <span class="tag ai-generated">AI Generated</span>
+                        </div>
+                    </div>
+                    <div class="ai-actions">
+                        <button class="btn">✅ Accept</button>
+                        <button class="btn btn-secondary">✏️ Edit</button>
+                        <button class="btn btn-secondary">🔄 Regenerate</button>
+                    </div>
+                </div>
+
+                <div class="ai-feature-card">
+                    <div class="ai-feature-header">
+                        <div class="ai-icon">💬</div>
+                        <div class="ai-feature-title">Communication Reply Suggestions</div>
+                    </div>
+                    <div class="ai-feature-description">
+                        Get intelligent reply suggestions based on conversation context and lead status.
+                    </div>
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">💡</div>
+                        <div class="suggestion-content">
+                            <div class="suggestion-text">"Hi John, I understand you're looking to sell quickly. I can offer a cash deal that closes within 14 days. Would you be interested in discussing the details?"</div>
+                            <div class="suggestion-actions">
+                                <button class="btn btn-sm">Use</button>
+                                <button class="btn btn-secondary btn-sm">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">💡</div>
+                        <div class="suggestion-content">
+                            <div class="suggestion-text">"I'd like to schedule a property viewing this week. What times work best for you?"</div>
+                            <div class="suggestion-actions">
+                                <button class="btn btn-sm">Use</button>
+                                <button class="btn btn-secondary btn-sm">Edit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-feature-card">
+                    <div class="ai-feature-header">
+                        <div class="ai-icon">🏷️</div>
+                        <div class="ai-feature-title">Automatic Lead Tagging</div>
+                    </div>
+                    <div class="ai-feature-description">
+                        Automatically categorize and tag leads based on conversation content and behavior patterns.
+                    </div>
+                    <div class="ai-content">
+                        <h4>Suggested Tags for Sarah Wilson</h4>
+                        <div class="tag-list">
+                            <span class="tag">Cash Buyer</span>
+                            <span class="tag">Investor</span>
+                            <span class="tag">Quick Close</span>
+                            <span class="tag">High Budget</span>
+                            <span class="tag ai-generated">AI Generated</span>
+                        </div>
+                    </div>
+                    <div class="ai-actions">
+                        <button class="btn btn-success">✅ Apply Tags</button>
+                        <button class="btn btn-secondary">✏️ Edit</button>
+                    </div>
+                </div>
+
+                <div class="ai-feature-card">
+                    <div class="ai-feature-header">
+                        <div class="ai-icon">🏠</div>
+                        <div class="ai-feature-title">Property Description Generation</div>
+                    </div>
+                    <div class="ai-feature-description">
+                        Generate compelling property descriptions for marketing materials and buyer outreach.
+                    </div>
+                    <div class="property-description">
+                        <div class="description-header">
+                            <div class="description-title">Generated Description</div>
+                            <div class="description-actions">
+                                <button class="btn btn-sm">Use</button>
+                                <button class="btn btn-secondary btn-sm">Edit</button>
+                            </div>
+                        </div>
+                        <div class="description-content">
+                            "Excellent investment opportunity! This 3-bedroom, 2-bathroom property at 123 Main St features a spacious layout, updated kitchen, and large backyard. Perfect for investors seeking quick returns or families looking for a great home. Motivated seller, flexible terms available."
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <h3 class="section-title">🎯 Buyer Matching</h3>
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">👥</div>
+                        <div class="suggestion-content">
+                            <div class="suggestion-text">
+                                <strong>Mike Johnson</strong><br>
+                                <span class="matching-score">95% Match</span>
+                            </div>
+                            <div class="suggestion-text">
+                                Looking for: 3BR, $200-300k, cash buyer
+                            </div>
+                            <div class="suggestion-actions">
+                                <button class="btn btn-sm">Contact</button>
+                                <button class="btn btn-secondary btn-sm">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="suggestion-item">
+                        <div class="suggestion-icon">👥</div>
+                        <div class="suggestion-content">
+                            <div class="suggestion-text">
+                                <strong>Lisa Brown</strong><br>
+                                <span class="matching-score">87% Match</span>
+                            </div>
+                            <div class="suggestion-text">
+                                Looking for: 3BR, $250-350k, quick close
+                            </div>
+                            <div class="suggestion-actions">
+                                <button class="btn btn-sm">Contact</button>
+                                <button class="btn btn-secondary btn-sm">View Profile</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3 class="section-title">📊 Lead Scoring</h3>
+                    <div class="ai-content">
+                        <h4>Top Priority Leads</h4>
+                        <div class="suggestion-item">
+                            <div class="suggestion-content">
+                                <div class="suggestion-text">
+                                    <strong>John Doe</strong><br>
+                                    <span class="matching-score">Score: 92</span>
+                                </div>
+                                <div class="suggestion-text">
+                                    High motivation, urgent timeline
+                                </div>
+                            </div>
+                        </div>
+                        <div class="suggestion-item">
+                            <div class="suggestion-content">
+                                <div class="suggestion-text">
+                                    <strong>Sarah Wilson</strong><br>
+                                    <span class="matching-score">Score: 88</span>
+                                </div>
+                                <div class="suggestion-text">
+                                    Cash buyer, quick decision maker
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h3 class="section-title">⚡ Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <button class="btn">
+                            <span>🤖</span>
+                            Generate Summary
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>💬</span>
+                            Get Reply Suggestions
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>🏷️</span>
+                            Auto-Tag Leads
+                        </button>
+                        <button class="btn btn-secondary">
+                            <span>🏠</span>
+                            Generate Description
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

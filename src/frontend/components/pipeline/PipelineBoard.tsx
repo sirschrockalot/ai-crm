@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, VStack, HStack, Heading, Text, useColorModeValue } from '@chakra-ui/react';
 import { PipelineStage } from './PipelineStage';
-import { PipelineCard } from './PipelineCard';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 
 export interface PipelineLead {

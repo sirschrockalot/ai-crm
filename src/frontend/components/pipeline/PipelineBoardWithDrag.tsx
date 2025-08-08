@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { Box, VStack, HStack, Heading, Text, useColorModeValue, useToast } from '@chakra-ui/react';
 import { PipelineStage } from './PipelineStage';
-import { PipelineLead, PipelineStage as PipelineStageType, PipelineBoardProps } from './PipelineBoard';
+import { PipelineStage as PipelineStageType, PipelineBoardProps } from './PipelineBoard';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 
 interface PipelineBoardWithDragProps extends Omit<PipelineBoardProps, 'onLeadMove'> {

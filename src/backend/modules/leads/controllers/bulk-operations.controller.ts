@@ -4,6 +4,7 @@ import {
   Get,
   Body,
   Query,
+  Param,
   UseGuards,
   BadRequestException,
 } from '@nestjs/common';
@@ -12,7 +13,7 @@ import { RolesGuard } from '../../../common/guards/roles.guard';
 import { Roles } from '../../../common/decorators/roles.decorator';
 import { TenantId } from '../../../common/decorators/tenant-id.decorator';
 import { UserId } from '../../../common/decorators/user-id.decorator';
-import { BulkOperationsService, BulkOperationRequest, BulkOperationResult } from '../services/bulk-operations.service';
+import { BulkOperationsService, BulkOperationRequest, BulkOperationResult, BulkOperationLog } from '../services/bulk-operations.service';
 
 export interface BulkOperationDto {
   leadIds: string[];
@@ -44,6 +45,51 @@ export class BulkOperationsController {
     };
 
     return await this.bulkOperationsService.executeBulkOperation(request);
+  }
+
+  /**
+   * Undo a bulk operation
+   */
+  @Post('undo/:operationId')
+  @Roles('admin', 'manager')
+  async undoBulkOperation(
+    @Param('operationId') operationId: string,
+    @UserId() userId: string,
+  ): Promise<BulkOperationResult> {
+    return await this.bulkOperationsService.undoBulkOperation(operationId, userId);
+  }
+
+  /**
+   * Get operation progress
+   */
+  @Get('progress/:operationId')
+  @Roles('admin', 'manager')
+  async getOperationProgress(
+    @Param('operationId') operationId: string,
+  ): Promise<{
+    operationId: string;
+    status: string;
+    progress: number;
+    totalRecords: number;
+    processedRecords: number;
+    failedRecords: number;
+    errors: any[];
+    warnings: string[];
+  } | null> {
+    return await this.bulkOperationsService.getOperationProgress(operationId);
+  }
+
+  /**
+   * Get operation history
+   */
+  @Get('history')
+  @Roles('admin', 'manager')
+  async getOperationHistory(
+    @TenantId() tenantId: string,
+    @Query('limit') limitParam?: string,
+  ): Promise<BulkOperationLog[]> {
+    const limit = limitParam ? parseInt(limitParam, 10) : 50;
+    return await this.bulkOperationsService.getOperationHistory(tenantId, limit);
   }
 
   /**
@@ -99,14 +145,13 @@ export class BulkOperationsController {
       throw new BadRequestException('At least one lead ID is required');
     }
 
-    const { validIds, invalidIds } = await this.bulkOperationsService.validateLeadIds(leadIds, tenantId);
+    const validation = await this.bulkOperationsService.validateLeadIds(leadIds, tenantId);
 
     return {
-      validIds,
-      invalidIds,
+      ...validation,
       totalIds: leadIds.length,
-      validCount: validIds.length,
-      invalidCount: invalidIds.length,
+      validCount: validation.validIds.length,
+      invalidCount: validation.invalidIds.length,
     };
   }
 
@@ -135,7 +180,7 @@ export class BulkOperationsController {
   }
 
   /**
-   * Bulk delete leads (soft delete)
+   * Bulk delete leads
    */
   @Post('delete')
   @Roles('admin', 'manager')
@@ -181,14 +226,14 @@ export class BulkOperationsController {
   }
 
   /**
-   * Bulk change lead status
+   * Bulk change status
    */
   @Post('change-status')
   @Roles('admin', 'manager')
   async bulkChangeStatus(
     @Body() statusDto: {
       leadIds: string[];
-      status: 'active' | 'inactive' | 'pending' | 'blocked';
+      status: string;
     },
     @TenantId() tenantId: string,
     @UserId() userId: string,
@@ -205,7 +250,7 @@ export class BulkOperationsController {
   }
 
   /**
-   * Bulk change lead stage
+   * Bulk change stage
    */
   @Post('change-stage')
   @Roles('admin', 'manager')

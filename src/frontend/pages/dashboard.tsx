@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Grid, Heading, Text, VStack, HStack, Stat, StatLabel, StatNumber, StatHelpText, StatArrow } from '@chakra-ui/react';
-import { Sidebar, Header, Navigation, SearchBar } from '../components/layout';
-import { Card, Button, Badge, Chart, ErrorBoundary } from '../components/ui';
+import React, { useEffect } from 'react';
+import { Box, HStack } from '@chakra-ui/react';
+import { Sidebar, Header, Navigation } from '../components/layout';
+import { ErrorBoundary } from '../components/ui';
 import { DashboardOverview, DashboardCharts } from '../components/dashboard';
 import { useDashboard } from '../hooks/useDashboard';
 
 const DashboardPage: React.FC = () => {
   const {
-    dashboardData,
     loading,
-    error,
     fetchDashboardData,
     refreshDashboard,
   } = useDashboard();

@@ -37,10 +37,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     }
   };
 
-  const getGrowthColor = (growth: number) => {
-    return growth >= 0 ? 'green' : 'red';
-  };
-
   const getGrowthArrow = (growth: number) => {
     return growth >= 0 ? 'increase' : 'decrease';
   };

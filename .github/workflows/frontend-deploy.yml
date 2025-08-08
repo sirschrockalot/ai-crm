@@ -1,0 +1,274 @@
+name: Frontend Build and Deploy
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/frontend/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/frontend/**'
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/frontend
+
+jobs:
+  test:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: src/frontend
+        run: npm ci
+        
+      - name: Run linting
+        working-directory: src/frontend
+        run: npm run lint
+        
+      - name: Run type checking
+        working-directory: src/frontend
+        run: npm run type-check
+        
+      - name: Run tests
+        working-directory: src/frontend
+        run: npm run test:coverage
+        
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          directory: src/frontend/coverage
+          flags: frontend
+          name: frontend-coverage
+
+  build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+          
+      - name: Install dependencies
+        working-directory: src/frontend
+        run: npm ci
+        
+      - name: Build application
+        working-directory: src/frontend
+        run: npm run build
+        env:
+          NODE_ENV: production
+          
+      - name: Build Storybook
+        working-directory: src/frontend
+        run: npm run build-storybook
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: src/frontend/.next
+          retention-days: 7
+
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: src/frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region us-west-2 --name dealcycle-staging-cluster
+        
+      - name: Deploy to staging
+        run: |
+          kubectl set image deployment/dealcycle-frontend-staging \
+            dealcycle-frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --namespace=dealcycle-staging
+          
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/dealcycle-frontend-staging \
+            --namespace=dealcycle-staging --timeout=300s
+            
+      - name: Health check
+        run: |
+          kubectl port-forward svc/dealcycle-frontend-staging 3001:3001 \
+            --namespace=dealcycle-staging &
+          sleep 10
+          curl -f http://localhost:3001/api/health
+          
+      - name: Notify deployment
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "✅ Frontend deployed to staging successfully!"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          
+      - name: Update kubeconfig
+        run: aws eks update-kubeconfig --region us-west-2 --name dealcycle-production-cluster
+        
+      - name: Deploy to production
+        run: |
+          kubectl set image deployment/dealcycle-frontend-production \
+            dealcycle-frontend=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --namespace=dealcycle-production
+          
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/dealcycle-frontend-production \
+            --namespace=dealcycle-production --timeout=300s
+            
+      - name: Health check
+        run: |
+          kubectl port-forward svc/dealcycle-frontend-production 3001:3001 \
+            --namespace=dealcycle-production &
+          sleep 10
+          curl -f http://localhost:3001/api/health
+          
+      - name: Notify deployment
+        if: success()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "🚀 Frontend deployed to production successfully!"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    if: failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          
+      - name: Update kubeconfig
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            aws eks update-kubeconfig --region us-west-2 --name dealcycle-production-cluster
+          else
+            aws eks update-kubeconfig --region us-west-2 --name dealcycle-staging-cluster
+          fi
+          
+      - name: Rollback deployment
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            kubectl rollout undo deployment/dealcycle-frontend-production \
+              --namespace=dealcycle-production
+          else
+            kubectl rollout undo deployment/dealcycle-frontend-staging \
+              --namespace=dealcycle-staging
+          fi
+          
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "⚠️ Deployment failed, rollback initiated"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} 

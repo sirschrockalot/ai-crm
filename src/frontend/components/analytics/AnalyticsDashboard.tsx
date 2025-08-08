@@ -230,8 +230,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 type="line"
                 data={monthlyLeadGrowth}
                 height={300}
-                xKey="name"
-                yKey="value"
+                xAxisDataKey="name"
+                yAxisDataKey="value"
               />
             </Card>
             <Card header="Conversion Rate Over Time">
@@ -239,8 +239,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 type="line"
                 data={conversionRateData}
                 height={300}
-                xKey="name"
-                yKey="value"
+                xAxisDataKey="name"
+                yAxisDataKey="value"
               />
             </Card>
             <Card header="Buyer Type Distribution">
@@ -248,8 +248,8 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 type="bar"
                 data={buyerTypeData}
                 height={300}
-                xKey="name"
-                yKey="value"
+                xAxisDataKey="name"
+                yAxisDataKey="value"
                 colors={Object.values(buyerTypeData).map(() => getBuyerTypeColor('individual'))}
               />
             </Card>

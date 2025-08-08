@@ -56,7 +56,7 @@ Build a custom full-stack CRM platform specifically designed for real estate who
 
 **Key Differentiators:**
 - **Wholesaling-Specific Workflows:** Built-in acquisition and disposition lifecycle management
-- **Integrated Communication:** Native texting and calling capabilities with Twilio integration
+- **Integrated Communication:** Native texting, calling, and email capabilities with multi-channel integration
 - **Buyer Management:** Specialized tools for managing buyer database and deal matching
 - **AI-Powered Assistance:** LLM integration for lead summaries, communication suggestions, and auto-tagging
 - **Cost Efficiency:** In-house solution reduces monthly SaaS costs significantly
@@ -95,10 +95,11 @@ Phase 3: Expanded platform for broader real estate investment community
 **Current Behaviors and Workflows:**
 - Use generic CRM tools (Salesforce, HubSpot, Pipedrive) with workarounds
 - Manual processes for lead tracking and buyer coordination
-- Separate tools for texting/calling (Twilio, etc.) and CRM functions
+- Separate tools for texting/calling (Twilio, etc.), email (Mailchimp, etc.), and CRM functions
 - Spreadsheet-based buyer management and deal tracking
 - Inconsistent data entry and reporting across team members
 - Manual buyer matching based on property criteria
+- Fragmented communication across multiple platforms
 
 **Specific Needs and Pain Points:**
 - **Acquisition Reps:** Need efficient lead capture, qualification, and seller communication tools
@@ -113,6 +114,7 @@ Phase 3: Expanded platform for broader real estate investment community
 - Better coordination between acquisition and disposition teams
 - Data-driven insights for business optimization
 - Automated buyer matching and communication
+- Unified communication platform for all channels
 
 **Secondary User Segment: Future SaaS Customers**
 
@@ -140,6 +142,8 @@ Phase 3: Expanded platform for broader real estate investment community
 3. **Business Owners:** Access real-time deal flow reports with 95% data accuracy
 4. **External Buyers:** Self-service deal claiming process under 2 minutes
 5. **AI Features:** 90% user acceptance rate for AI-generated suggestions
+6. **Communication:** 95% of communications tracked across all channels (SMS, email, voice)
+7. **Time Tracking:** 90% of users submit accurate timesheets on time
 
 **Key Performance Indicators (KPIs):**
 
@@ -150,6 +154,7 @@ Phase 3: Expanded platform for broader real estate investment community
 5. **Buyer Match Rate:** Percentage of dispositions successfully matched to buyers
 6. **System Uptime:** 99.9% availability for critical business operations
 7. **AI Accuracy:** Percentage of AI suggestions accepted by users
+8. **Time Tracking Accuracy:** 95% of time entries are accurate and complete
 
 ---
 
@@ -160,7 +165,7 @@ Phase 3: Expanded platform for broader real estate investment community
 1. **Authentication & User Management**
    - Google OAuth login with JWT security
    - Multi-tenant user management with role-based access control
-   - User roles: Admin, Acquisition Rep, Disposition Manager
+   - User roles: Admin, Acquisition Rep, Disposition Manager, Team Member
    - Session management and token refresh
 
 2. **Lead Management System**
@@ -182,12 +187,14 @@ Phase 3: Expanded platform for broader real estate investment community
 
 4. **Communication Integration**
    - SMS integration with Twilio API
+   - Email integration with SendGrid/Mailgun API
    - Call initiation and logging capabilities
-   - Communication history tracking
+   - Communication history tracking across all channels
    - Scheduled communication functionality
    - Communication templates and automation
    - Real-time messaging interface
    - Communication analytics and reporting
+   - Multi-channel communication orchestration
 
 5. **AI-Powered Features**
    - LLM-generated lead summaries
@@ -210,6 +217,7 @@ Phase 3: Expanded platform for broader real estate investment community
    - Executive Dashboard: High-level KPIs and business overview
    - Acquisitions Dashboard: Lead management and acquisition metrics
    - Disposition Dashboard: Buyer management and deal disposition
+   - Time Tracking Dashboard: Individual and team time tracking metrics
    - Mobile Dashboard: Responsive design for field operations
 
 8. **Automation Workflows**
@@ -226,7 +234,23 @@ Phase 3: Expanded platform for broader real estate investment community
    - Health check endpoints
    - Comprehensive API documentation
 
-10. **Infrastructure & Deployment**
+10. **Time Tracking & Project Management**
+    - Individual time entry creation and management
+    - Weekly timesheet interface with bulk entry capabilities
+    - Project and task integration for time categorization
+    - Billable/non-billable time tracking with custom rates
+    - Timesheet approval workflow for managers
+    - Time tracking analytics and reporting
+    - Data validation and business rules enforcement
+    - Mobile-responsive time tracking interface
+
+11. **API & Documentation**
+    - RESTful API with Swagger documentation
+    - API authentication and rate limiting
+    - Health check endpoints
+    - Comprehensive API documentation
+
+12. **Infrastructure & Deployment**
     - Docker containerization
     - Google Cloud Platform deployment
     - Prometheus metrics and Grafana dashboards
@@ -243,6 +267,7 @@ Phase 3: Expanded platform for broader real estate investment community
 - White-label customization options (Phase 2)
 - Advanced AI features (Phase 2)
 - Payment processing integration (Phase 2)
+- Advanced time tracking features (Phase 2)
 
 **MVP Success Criteria:**
 
@@ -253,6 +278,7 @@ Phase 3: Expanded platform for broader real estate investment community
 - All core wholesaling workflows supported without workarounds
 - Foundation established for Phase 2 SaaS productization
 - AI features achieve 80% user acceptance rate
+- Time tracking achieves 85% user adoption within 3 months
 
 ---
 
@@ -300,13 +326,16 @@ Phase 3: Expanded platform for broader real estate investment community
 **Technology Preferences:**
 
 **Frontend:**
-- **Framework:** Next.js 14 with TypeScript
-- **Styling:** TailwindCSS for rapid development and consistency
-- **State Management:** Zustand for lightweight, TypeScript-friendly state management
-- **UI Components:** Headless UI for accessible component primitives
+- **Framework:** Next.js 14.0.0 with React 18.2.0 and TypeScript
+- **Architecture:** Monolithic application with feature-based organization
+- **Styling:** Chakra UI with custom theme for consistent design
+- **State Management:** React hooks and context for state management
+- **UI Components:** Chakra UI components with custom design system
 - **Forms:** React Hook Form with Zod validation
 - **Charts:** Recharts for data visualization
-- **Design System:** Inter font family, modern color palette, responsive design
+- **Testing:** Jest and React Testing Library
+- **Build:** Single Next.js build process with optimized bundling
+- **Code Organization:** Feature-based structure with shared components and utilities
 
 **Backend:**
 - **Framework:** NestJS with TypeScript
@@ -322,11 +351,27 @@ Phase 3: Expanded platform for broader real estate investment community
 - **Monitoring:** Prometheus metrics with Grafana dashboards
 - **Security:** Helmet, rate limiting, CORS, input validation
 
+**Third-party Integrations:**
+- **Communication:** Twilio (SMS/voice), SendGrid/Mailgun (email)
+- **Authentication:** Google OAuth 2.0
+- **AI/ML:** OpenAI GPT-4, Anthropic Claude APIs
+
 **Architecture Considerations:**
-- **Repository Structure:** Monorepo with frontend and backend packages
+- **Repository Structure:** Monorepo with monolithic frontend and backend packages
 - **Service Architecture:** Monolithic backend with modular design
-- **Integration Requirements:** Twilio for SMS/calls, Google OAuth, LLM APIs
+- **Frontend Architecture:** Unified Next.js application with feature-based organization
+- **Integration Requirements:** Twilio for SMS/calls, SendGrid/Mailgun for email, Google OAuth, LLM APIs
 - **Security/Compliance:** Multi-tenant data isolation, RBAC, audit logging
+- **Communication Architecture:** Unified communication service supporting multiple channels
+
+**Frontend Architecture:**
+- **Framework:** Next.js 14.0.0 with React 18.2.0
+- **Architecture:** Monolithic application with feature-based organization
+- **State Management:** React hooks and context for state management
+- **Styling:** Chakra UI with custom theme
+- **Testing:** Jest and React Testing Library
+- **Build:** Single Next.js build process with optimized bundling
+- **Code Organization:** Feature-based structure with shared components and utilities
 
 **UI/UX Design Specifications:**
 - **Color Palette:** Primary blue (#3B82F6), secondary purple (#8B5CF6), success green (#10B981)
@@ -338,6 +383,48 @@ Phase 3: Expanded platform for broader real estate investment community
 
 ---
 
+## 🏗️ Frontend Architecture Migration
+
+### **Migration Overview**
+
+The frontend architecture is being consolidated from a micro-apps structure to a unified monolithic Next.js application. This change simplifies development, deployment, and maintenance while maintaining all existing functionality.
+
+### **Current State**
+- **Micro-apps Structure:** Separate applications for lead-management, analytics, automation, and dashboard
+- **Complexity:** Multiple build processes, deployment configurations, and code duplication
+- **Maintenance:** Separate testing and deployment pipelines for each micro-app
+
+### **Target State**
+- **Monolithic Structure:** Single Next.js application with feature-based organization
+- **Simplified Development:** Unified codebase with shared components and utilities
+- **Streamlined Deployment:** Single build and deployment process
+- **Improved Maintainability:** Consolidated testing and development workflow
+
+### **Migration Benefits**
+- **Development Efficiency:** Reduced complexity and faster development cycles
+- **Code Reusability:** Shared components and utilities across all features
+- **Deployment Simplicity:** Single build and deployment process
+- **Testing Consistency:** Unified testing framework and coverage
+- **Performance Optimization:** Better code splitting and bundling optimization
+- **Maintenance Reduction:** Single codebase to maintain and update
+
+### **Migration Approach**
+1. **Incremental Migration:** Migrate features one by one to minimize risk
+2. **Feature Preservation:** Maintain all existing functionality during migration
+3. **Testing Validation:** Comprehensive testing at each migration step
+4. **Performance Monitoring:** Ensure performance is maintained or improved
+5. **User Experience:** Seamless transition with no disruption to users
+
+### **Technical Implementation**
+- **Code Organization:** Feature-based structure with shared components
+- **State Management:** React hooks and context for unified state management
+- **Routing:** Next.js routing with feature-based organization
+- **Styling:** Chakra UI with consistent design system
+- **Testing:** Jest and React Testing Library with comprehensive coverage
+- **Build Process:** Single Next.js build with optimized bundling
+
+---
+
 ## ⚠️ Constraints & Assumptions
 
 **Constraints:**
@@ -345,7 +432,7 @@ Phase 3: Expanded platform for broader real estate investment community
 **Budget:**
 - Development budget: $50K-$100K for MVP development
 - Infrastructure costs: $500-$1K/month for GCP hosting
-- Third-party service costs: $200-$500/month for Twilio, LLM APIs
+- Third-party service costs: $300-$700/month for Twilio, SendGrid/Mailgun, LLM APIs
 
 **Timeline:**
 - MVP development: 10-12 weeks
@@ -363,6 +450,7 @@ Phase 3: Expanded platform for broader real estate investment community
 - AI integration reliability and accuracy
 - Third-party API dependencies (Twilio, Google, LLM providers)
 - Real-time communication requirements
+- Frontend architecture consolidation (micro-apps to monolithic)
 
 **Key Assumptions:**
 
@@ -457,6 +545,7 @@ Phase 3: Expanded platform for broader real estate investment community
 
 **Technical Research:**
 - Twilio API: Reliable for SMS and voice communication
+- SendGrid/Mailgun API: Industry standard for transactional email delivery
 - Google OAuth: Industry standard for authentication
 - LLM APIs: GPT-4 provides 85% accuracy for lead summaries
 - MongoDB: Scales well for multi-tenant applications
@@ -481,6 +570,8 @@ Phase 3: Expanded platform for broader real estate investment community
 - Next.js Documentation: https://nextjs.org/docs
 - MongoDB Multi-tenant Architecture: https://docs.mongodb.com/
 - Twilio API Documentation: https://www.twilio.com/docs
+- SendGrid API Documentation: https://sendgrid.com/docs/api-reference/
+- Mailgun API Documentation: https://documentation.mailgun.com/
 - Google OAuth Documentation: https://developers.google.com/identity/protocols/oauth2
 
 **Industry Resources:**
@@ -490,26 +581,421 @@ Phase 3: Expanded platform for broader real estate investment community
 
 ---
 
+## 📧 Email Integration Feature Specification
+
+### Overview
+
+The email integration feature extends the existing communication capabilities to include email as a primary communication channel alongside SMS and voice calls. This enhancement provides a unified communication platform for all lead interactions.
+
+### Business Value
+
+**User Benefits:**
+- **Unified Communication:** All communication channels (SMS, email, voice) in one platform
+- **Professional Communication:** Email templates for formal communications and follow-ups
+- **Better Tracking:** Complete communication history across all channels
+- **Cost Efficiency:** Reduce dependency on separate email marketing tools
+- **Automation:** Email sequences and templates for consistent messaging
+
+**Business Impact:**
+- **Improved Response Rates:** Multi-channel communication increases engagement
+- **Professional Image:** Branded email templates enhance company reputation
+- **Better Analytics:** Comprehensive communication metrics across all channels
+- **Cost Reduction:** Eliminate need for separate email marketing platforms
+
+### Technical Implementation
+
+**Email Service Integration:**
+- **Primary Provider:** SendGrid (recommended) or Mailgun as alternative
+- **Authentication:** API key-based authentication with environment variables
+- **Delivery Tracking:** Webhook integration for delivery status updates
+- **Template System:** HTML email templates with variable substitution
+
+**Integration Points:**
+- **CommunicationService:** Extend existing service with email methods
+- **CommunicationController:** Add email endpoints following existing patterns
+- **CommunicationPanel:** Update UI to include email functionality
+- **CommunicationLog:** Extend schema to support email-specific fields
+- **Analytics:** Include email metrics in communication analytics
+
+**Email Templates:**
+- **Welcome Email:** Initial contact with lead information
+- **Follow-up Email:** Scheduled follow-up communications
+- **Property Update:** Notifications about property status changes
+- **Deal Alert:** Notifications about new deals matching buyer criteria
+- **Custom Templates:** User-defined templates with variable support
+
+### User Experience
+
+**Email Composition:**
+- **Template Selection:** Choose from pre-built or custom templates
+- **Variable Substitution:** Dynamic content insertion (lead name, property details, etc.)
+- **Preview Functionality:** Preview emails before sending
+- **Scheduling:** Schedule emails for future delivery
+- **Bulk Sending:** Send emails to multiple leads simultaneously
+
+**Email Management:**
+- **Delivery Status:** Track sent, delivered, opened, clicked status
+- **Bounce Handling:** Automatic handling of bounced emails
+- **Unsubscribe Management:** Respect unsubscribe requests
+- **Spam Compliance:** Follow email best practices and regulations
+
+### Success Metrics
+
+**Email-Specific KPIs:**
+- **Delivery Rate:** Target 95%+ email delivery rate
+- **Open Rate:** Track email open rates for engagement
+- **Click Rate:** Monitor click-through rates on email content
+- **Response Rate:** Measure lead responses to email communications
+- **Bounce Rate:** Maintain bounce rate below 5%
+
+**Integration Success:**
+- **User Adoption:** 80% of users utilize email within 3 months
+- **Communication Efficiency:** 30% reduction in communication setup time
+- **Lead Engagement:** 25% increase in lead response rates
+- **Cost Savings:** 50% reduction in email marketing tool costs
+
+### Implementation Timeline
+
+**Phase 1 (Week 1-2):**
+- Email service integration (SendGrid/Mailgun)
+- Basic email sending functionality
+- Email template system
+
+**Phase 2 (Week 3-4):**
+- Email tracking and analytics
+- UI integration in CommunicationPanel
+- Email history and management
+
+**Phase 3 (Week 5-6):**
+- Advanced email features (scheduling, bulk sending)
+- Email automation workflows
+- Performance optimization
+
+### Risk Mitigation
+
+**Technical Risks:**
+- **Email Delivery Issues:** Use reputable email service providers
+- **Template Complexity:** Start with simple templates, add complexity gradually
+- **Integration Complexity:** Follow existing communication patterns
+
+**Business Risks:**
+- **User Adoption:** Provide training and clear value proposition
+- **Email Compliance:** Follow CAN-SPAM and GDPR requirements
+- **Cost Management:** Monitor email service costs and usage
+
+---
+
+## ⏰ Time Tracking & Project Management Feature Specification
+
+### Overview
+
+The time tracking and project management feature provides comprehensive time entry capabilities, weekly timesheet management, project integration, and approval workflows. This system enables users to track billable and non-billable time, manage projects and tasks, and generate detailed reports for productivity analysis.
+
+### Business Value
+
+**User Benefits:**
+- **Accurate Time Tracking:** Individual time entries with project and task association
+- **Weekly Timesheet Management:** Bulk time entry and submission capabilities
+- **Project Integration:** Seamless integration with project and task management
+- **Billable Time Tracking:** Custom hourly rates and revenue tracking
+- **Approval Workflow:** Manager review and approval system
+- **Analytics & Reporting:** Comprehensive time tracking insights
+
+**Business Impact:**
+- **Revenue Tracking:** Accurate billable time tracking for client billing
+- **Productivity Insights:** Detailed analytics on time allocation and efficiency
+- **Project Management:** Better understanding of project time investment
+- **Team Oversight:** Manager approval workflow ensures data quality
+- **Compliance:** Proper time tracking for regulatory and client requirements
+
+### Epic 1: Core Time Entry Management
+
+**Goal:** Enable users to create, edit, and manage individual time entries with project and task association
+
+**User Stories:**
+
+**US-1.1:** As a user, I want to create a new time entry with project, task, start/end times, and description so I can track my work accurately
+
+**US-1.2:** As a user, I want to edit existing time entries so I can correct mistakes or update information
+
+**US-1.3:** As a user, I want to delete time entries so I can remove incorrect or duplicate entries
+
+**US-1.4:** As a user, I want to mark time entries as billable/non-billable with custom hourly rates so I can track revenue
+
+**US-1.5:** As a user, I want to see the calculated duration when I enter start and end times so I can verify accuracy
+
+**US-1.6:** As a user, I want to select from available projects and tasks so I can properly categorize my work
+
+**Acceptance Criteria:**
+- Time entry modal supports all required fields (project, task, start/end times, description, billable status, rate)
+- Form validation prevents invalid entries (end time after start time, required fields)
+- Duration calculation updates in real-time
+- Project selection filters available tasks
+- CRUD operations work seamlessly with backend API
+
+### Epic 2: Weekly Timesheet Management
+
+**Goal:** Provide a comprehensive weekly timesheet interface for bulk time entry and submission
+
+**User Stories:**
+
+**US-2.1:** As a user, I want to view and edit my weekly timesheet in a grid format so I can easily enter hours for each day
+
+**US-2.2:** As a user, I want to save my timesheet as a draft so I can work on it incrementally
+
+**US-2.3:** As a user, I want to submit my completed timesheet for approval so it can be reviewed
+
+**US-2.4:** As a user, I want to navigate between different weeks so I can work on historical or future timesheets
+
+**US-2.5:** As a user, I want to add notes to my timesheet so I can provide context for my work
+
+**US-2.6:** As a user, I want to see the total hours for the week so I can verify my entries
+
+**Acceptance Criteria:**
+- Weekly grid shows Monday-Sunday with hour input fields
+- Draft saving preserves work in progress
+- Submission workflow prevents further editing
+- Week navigation allows date selection
+- Notes field supports multi-line text
+- Real-time total calculation
+- Status tracking (draft/submitted/approved/rejected)
+
+### Epic 3: Timesheet Search and Retrieval
+
+**Goal:** Enable users to search, view, and retrieve historical timesheet data
+
+**User Stories:**
+
+**US-3.1:** As a user, I want to search for submitted timesheets by specific date so I can review past entries
+
+**US-3.2:** As a user, I want to search for timesheets by month so I can see all entries for a period
+
+**US-3.3:** As a user, I want to view submitted timesheets in read-only mode so I can reference them
+
+**US-3.4:** As a user, I want to see a list of all my submitted timesheets so I can browse my history
+
+**US-3.5:** As a user, I want to filter timesheets by status so I can find specific types of entries
+
+**Acceptance Criteria:**
+- Date search returns timesheet for specific week
+- Month search returns all timesheets for that month
+- Read-only view displays timesheet data clearly
+- Search results show status, dates, and total hours
+- Filtering by status (draft/submitted/approved/rejected) works correctly
+
+### Epic 4: Project and Task Integration
+
+**Goal:** Seamlessly integrate time entries with project and task management
+
+**User Stories:**
+
+**US-4.1:** As a user, I want to select from available projects when creating time entries so I can properly categorize work
+
+**US-4.2:** As a user, I want to select from tasks within a project so I can track specific work items
+
+**US-4.3:** As a user, I want to see project and task information in my time entries so I can understand what I worked on
+
+**US-4.4:** As a user, I want to filter time entries by project so I can focus on specific work areas
+
+**US-4.5:** As a user, I want to see time spent on each task so I can track progress
+
+**Acceptance Criteria:**
+- Project selection populates available tasks
+- Task selection is dependent on project choice
+- Time entries display project and task names
+- Filtering by project works in reports and views
+- Task-level time tracking is accurate
+
+### Epic 5: Reporting and Analytics
+
+**Goal:** Provide comprehensive reporting and analytics for time tracking data
+
+**User Stories:**
+
+**US-5.1:** As a user, I want to see weekly time summaries so I can understand my work patterns
+
+**US-5.2:** As a user, I want to view monthly trends so I can track productivity over time
+
+**US-5.3:** As a user, I want to see project-based time reports so I can understand time allocation
+
+**US-5.4:** As a user, I want to view team performance data so I can understand collective productivity
+
+**US-5.5:** As a user, I want to export time data so I can use it in external tools
+
+**US-5.6:** As a user, I want to see billable vs non-billable time breakdowns so I can track revenue
+
+**Acceptance Criteria:**
+- Weekly charts show daily hour distribution
+- Monthly trends display productivity patterns
+- Project reports show time allocation percentages
+- Team performance metrics are calculated correctly
+- Export functionality supports common formats
+- Billable time calculations are accurate
+
+### Epic 6: Approval Workflow
+
+**Goal:** Implement a robust approval system for timesheet submissions
+
+**User Stories:**
+
+**US-6.1:** As a manager, I want to see submitted timesheets from my team so I can review them
+
+**US-6.2:** As a manager, I want to approve or reject timesheets so I can ensure accuracy
+
+**US-6.3:** As a manager, I want to add comments when rejecting timesheets so I can provide feedback
+
+**US-6.4:** As a user, I want to be notified when my timesheet is approved or rejected so I know the status
+
+**US-6.5:** As a manager, I want to see timesheet status across my team so I can track completion rates
+
+**Acceptance Criteria:**
+- Manager dashboard shows pending timesheets
+- Approval/rejection actions update status
+- Comments can be added to rejections
+- Notification system alerts users of status changes
+- Team status overview is available to managers
+
+### Epic 7: Data Validation and Business Rules
+
+**Goal:** Ensure data integrity and enforce business rules for time tracking
+
+**User Stories:**
+
+**US-7.1:** As a user, I want validation to prevent overlapping time entries so I don't double-book time
+
+**US-7.2:** As a user, I want validation to ensure hours don't exceed 24 per day so entries are realistic
+
+**US-7.3:** As a user, I want validation to prevent future time entries so I can't log time that hasn't happened
+
+**US-7.4:** As a user, I want validation to ensure required fields are completed so data is complete
+
+**US-7.5:** As a user, I want to see validation errors clearly so I can fix issues quickly
+
+**Acceptance Criteria:**
+- Overlap detection prevents conflicting entries
+- Daily hour limits are enforced
+- Future date validation works correctly
+- Required field validation is comprehensive
+- Error messages are clear and actionable
+
+### Epic 8: User Experience and Interface
+
+**Goal:** Provide an intuitive and efficient user interface for time tracking
+
+**User Stories:**
+
+**US-8.1:** As a user, I want a responsive interface that works on mobile devices so I can enter time anywhere
+
+**US-8.2:** As a user, I want keyboard shortcuts for common actions so I can work efficiently
+
+**US-8.3:** As a user, I want auto-save functionality so I don't lose my work
+
+**US-8.4:** As a user, I want clear visual feedback for actions so I know what's happening
+
+**US-8.5:** As a user, I want a consistent design language so the interface feels cohesive
+
+**Acceptance Criteria:**
+- Mobile-responsive design works on all screen sizes
+- Keyboard shortcuts are documented and functional
+- Auto-save preserves work automatically
+- Loading states and success/error messages are clear
+- Design consistency across all time tracking interfaces
+
+### Technical Implementation
+
+**Database Schema:**
+- **TimeEntry:** Individual time entries with project/task association
+- **Timesheet:** Weekly timesheet collections with approval status
+- **Project:** Project definitions with metadata
+- **Task:** Task definitions within projects
+- **Approval:** Approval workflow tracking
+
+**API Endpoints:**
+- **Time Entries:** CRUD operations for individual time entries
+- **Timesheets:** Weekly timesheet management and submission
+- **Projects/Tasks:** Project and task management
+- **Approvals:** Manager approval workflow
+- **Reports:** Time tracking analytics and exports
+
+**User Interface:**
+- **Time Entry Modal:** Individual time entry creation and editing
+- **Weekly Timesheet:** Grid-based weekly time entry interface
+- **Project Selection:** Dropdown and search for projects/tasks
+- **Approval Dashboard:** Manager interface for timesheet review
+- **Reports Dashboard:** Analytics and reporting interface
+
+### Success Metrics
+
+**Time Tracking KPIs:**
+- **Time Entry Accuracy:** 95% of time entries are accurate and complete
+- **Timesheet Completion:** 90% of users submit timesheets on time
+- **Approval Efficiency:** Average approval time under 24 hours
+- **Data Quality:** Less than 5% of entries require correction
+- **User Adoption:** 85% of users actively use time tracking within 3 months
+
+**Business Impact:**
+- **Revenue Tracking:** 100% of billable time is captured and tracked
+- **Project Insights:** Detailed time allocation data for all projects
+- **Team Productivity:** 20% improvement in time tracking efficiency
+- **Compliance:** Full audit trail for all time entries
+
+### Implementation Timeline
+
+**Phase 1 (Weeks 1-2):**
+- Core time entry functionality
+- Basic project and task integration
+- Simple weekly timesheet interface
+
+**Phase 2 (Weeks 3-4):**
+- Approval workflow implementation
+- Advanced validation and business rules
+- Mobile-responsive interface
+
+**Phase 3 (Weeks 5-6):**
+- Reporting and analytics
+- Export functionality
+- Performance optimization
+
+### Risk Mitigation
+
+**Technical Risks:**
+- **Data Integrity:** Comprehensive validation and business rules
+- **Performance:** Efficient database queries and caching
+- **User Experience:** Intuitive interface with clear feedback
+
+**Business Risks:**
+- **User Adoption:** Training and clear value proposition
+- **Data Accuracy:** Validation rules and approval workflow
+- **Compliance:** Audit trail and approval tracking
+
+---
+
 ## 🎯 Next Steps
 
 **Immediate Actions:**
 
-1. **Technical Architecture Finalization**
+1. **Frontend Architecture Migration**
+   - Consolidate micro-apps into monolithic Next.js application
+   - Migrate lead-management, analytics, automation, and dashboard features
+   - Establish unified component library and utilities
+   - Update build and deployment processes
+
+2. **Technical Architecture Finalization**
    - Complete detailed API specifications
    - Finalize database schema design
    - Set up development environment
 
-2. **Development Team Setup**
+3. **Development Team Setup**
    - Hire or assign development resources
    - Set up project management tools
    - Establish development workflow
 
-3. **User Research Validation**
+4. **User Research Validation**
    - Conduct user interviews with target customers
    - Validate feature priorities
    - Gather feedback on AI features
 
-4. **Technical Feasibility Testing**
+5. **Technical Feasibility Testing**
    - Test LLM API integrations
    - Validate Twilio communication features
    - Verify Google OAuth implementation
@@ -540,4 +1026,4 @@ This PRD provides the comprehensive foundation for DealCycle CRM development. Th
 - 99.9% system uptime
 - 80% AI feature acceptance rate
 
-**The PRD is ready for development handoff. All core requirements are defined, technical architecture is specified, and success criteria are established. The development team can now begin implementation with confidence.** 
+**The PRD is ready for development handoff. All core requirements are defined, technical architecture is specified (including frontend consolidation from micro-apps to monolithic), and success criteria are established. The development team can now begin implementation with confidence, starting with the frontend architecture migration.** 

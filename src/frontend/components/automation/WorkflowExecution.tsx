@@ -37,7 +37,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 }) => {
   const toast = useToast();
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
-  const [loading, setLoading] = useState(false);
 
   // Mock execution data
   const mockExecutions: WorkflowExecution[] = [

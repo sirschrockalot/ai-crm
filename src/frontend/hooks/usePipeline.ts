@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { useApi } from './useApi';
-import { PipelineLead, PipelineStage } from '../components/pipeline';
+import { PipelineLead, PipelineStageType } from '../components/pipeline';
 
 export interface PipelineData {
-  stages: PipelineStage[];
+  stages: PipelineStageType[];
   totalLeads: number;
   totalValue: number;
   conversionRate: number;
@@ -35,13 +35,12 @@ export function usePipeline() {
       setLoading(true);
       setError(null);
       
-      const response = await pipelineApi.execute('GET', '/api/leads/pipeline');
+      const response = await pipelineApi.execute({
+        method: 'GET',
+        url: '/api/leads/pipeline'
+      });
       
-      if (response.success) {
-        setPipelineData(response.data);
-      } else {
-        setError(response.message || 'Failed to fetch pipeline data');
-      }
+      setPipelineData(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -54,16 +53,14 @@ export function usePipeline() {
     try {
       setError(null);
       
-      const response = await moveApi.execute('PUT', '/api/leads/pipeline/move', request);
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to move lead');
-      }
+      await moveApi.execute({
+        method: 'PUT',
+        url: '/api/leads/pipeline/move',
+        data: request
+      });
       
       // Refresh pipeline data after successful move
       await fetchPipelineData();
-      
-      return response;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;
@@ -75,15 +72,13 @@ export function usePipeline() {
     try {
       setError(null);
       
-      const response = await statusApi.execute('PUT', `/api/leads/${request.leadId}/status`, {
-        status: request.newStatus,
+      await statusApi.execute({
+        method: 'PUT',
+        url: `/api/leads/${request.leadId}/status`,
+        data: {
+          status: request.newStatus,
+        }
       });
-      
-      if (!response.success) {
-        throw new Error(response.message || 'Failed to update lead status');
-      }
-      
-      return response;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
       throw err;

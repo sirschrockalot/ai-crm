@@ -20,11 +20,11 @@ const customJestConfig = {
     '^@/types/(.*)$': '<rootDir>/src/types/$1',
   },
   collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/**/*.stories.{js,jsx,ts,tsx}',
-    '!src/**/*.test.{js,jsx,ts,tsx}',
-    '!src/**/*.spec.{js,jsx,ts,tsx}',
+    '**/*.{js,jsx,ts,tsx}',
+    '!**/*.d.ts',
+    '!**/*.stories.{js,jsx,ts,tsx}',
+    '!**/*.test.{js,jsx,ts,tsx}',
+    '!**/*.spec.{js,jsx,ts,tsx}',
   ],
   coverageThreshold: {
     global: {
@@ -35,8 +35,8 @@ const customJestConfig = {
     },
   },
   testMatch: [
-    '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
-    '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+    '<rootDir>/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/**/*.{test,spec}.{js,jsx,ts,tsx}',
   ],
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
