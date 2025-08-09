@@ -1,0 +1,89 @@
+export interface Lead {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  propertyAddress?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  propertyType: PropertyType;
+  estimatedValue: number;
+  status: LeadStatus;
+  assignedTo?: string;
+  notes?: string;
+  source?: string;
+  company?: string;
+  score?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PipelineStage {
+  id: string;
+  name: string;
+  order: number;
+  color: string;
+  leads: Lead[];
+}
+
+export type PropertyType = 'single_family' | 'multi_family' | 'commercial' | 'land';
+
+export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+
+export interface LeadMoveRequest {
+  leadId: string;
+  fromStageId: string;
+  toStageId: string;
+}
+
+export interface LeadMoveResponse {
+  success: boolean;
+  lead: Lead;
+  message?: string;
+}
+
+export interface PipelineData {
+  stages: PipelineStage[];
+  leads: Lead[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface LeadFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  propertyAddress?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  propertyType: PropertyType;
+  estimatedValue: number;
+  status: LeadStatus;
+  assignedTo?: string;
+  notes?: string;
+  source?: string;
+  company?: string;
+}
+
+export interface CommunicationMessage {
+  id: string;
+  leadId: string;
+  type: 'sms' | 'email' | 'call';
+  content: string;
+  timestamp: Date;
+  status: 'sent' | 'delivered' | 'failed';
+}
+
+export interface ImportExportProgress {
+  total: number;
+  processed: number;
+  success: number;
+  failed: number;
+  errors: string[];
+}

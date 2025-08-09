@@ -19,9 +19,9 @@ import {
   MFAStatisticsDto,
 } from './dto/mfa.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { TenantGuard } from '../auth/guards/tenant.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { TenantGuard } from '../../common/guards/tenant.guard';
 import { Request } from 'express';
 
 @ApiTags('Multi-Factor Authentication')

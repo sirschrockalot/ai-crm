@@ -11,6 +11,13 @@ export interface TenantContext {
 
 export interface RequestWithTenant extends Request {
   tenant: TenantContext;
+  user?: {
+    sub: string;
+    email: string;
+    tenantId?: string;
+    roles?: string[];
+    status?: string;
+  };
 }
 
 @Injectable()

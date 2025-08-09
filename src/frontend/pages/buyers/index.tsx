@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { Box, VStack, HStack, Heading, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { Sidebar, Header, Navigation, SearchBar } from '../../components/layout';
 import { Card, Button, Badge, Table, Modal } from '../../components/ui';
@@ -7,6 +8,7 @@ import { useBuyers } from '../../hooks/services/useBuyers';
 import { Buyer, BuyerType } from '../../types';
 
 const BuyersPage: React.FC = () => {
+  const router = useRouter();
   const { buyers, loading, error, fetchBuyers, createBuyer, updateBuyer, deleteBuyer, toggleBuyerStatus } = useBuyers();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
@@ -196,6 +198,13 @@ const BuyersPage: React.FC = () => {
           <Button
             size="sm"
             variant="outline"
+            onClick={() => router.push(`/buyers/${buyer.id}`)}
+          >
+            View
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
             onClick={() => {
               setSelectedBuyer(buyer);
               onOpen();
@@ -231,10 +240,21 @@ const BuyersPage: React.FC = () => {
           <Navigation />
           <VStack align="stretch" spacing={6}>
             <HStack justify="space-between">
-              <Heading size="lg">Buyers Management</Heading>
-              <Button variant="primary" onClick={onOpen}>
-                Add New Buyer
-              </Button>
+              <VStack align="start" spacing={2}>
+                <Heading size="lg">Buyers Management</Heading>
+                <Text color="gray.600">Manage your buyer database and preferences</Text>
+              </VStack>
+              <HStack spacing={3}>
+                <Button variant="outline" onClick={() => router.push('/buyers/analytics')}>
+                  Analytics
+                </Button>
+                <Button variant="outline" onClick={() => router.push('/buyers/matching')}>
+                  Matching
+                </Button>
+                <Button variant="primary" onClick={onOpen}>
+                  Add New Buyer
+                </Button>
+              </HStack>
             </HStack>
 
             {/* Filters */}

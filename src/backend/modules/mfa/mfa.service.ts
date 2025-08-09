@@ -90,6 +90,7 @@ export class MFAService {
         resource: 'mfa',
         action: 'setup',
         outcome: 'success',
+        severity: 'medium',
         details: {
           mfaId: savedMFA._id.toString(),
           userEmail: setupDto.userEmail,
@@ -143,6 +144,7 @@ export class MFAService {
         resource: 'mfa',
         action: 'enable',
         outcome: 'success',
+        severity: 'medium',
         details: {
           mfaId: mfa._id.toString(),
         },
@@ -180,6 +182,7 @@ export class MFAService {
         resource: 'mfa',
         action: 'disable',
         outcome: 'success',
+        severity: 'medium',
         details: {
           mfaId: mfa._id.toString(),
           reason: disableDto.reason,
@@ -245,6 +248,7 @@ export class MFAService {
           resource: 'mfa',
           action: 'verify_totp',
           outcome: 'failure',
+          severity: 'high',
           details: {
             mfaId: mfa._id.toString(),
             failedAttempts: mfa.failedAttempts + 1,
@@ -271,6 +275,7 @@ export class MFAService {
         resource: 'mfa',
         action: 'verify_totp',
         outcome: 'success',
+        severity: 'low',
         details: {
           mfaId: mfa._id.toString(),
         },
@@ -335,6 +340,7 @@ export class MFAService {
         resource: 'mfa',
         action: 'use_backup_code',
         outcome: 'success',
+        severity: 'medium',
         details: {
           mfaId: mfa._id.toString(),
           remainingCodes: mfa.backupCodes.length,
@@ -382,6 +388,7 @@ export class MFAService {
         resource: 'mfa',
         action: 'regenerate_backup_codes',
         outcome: 'success',
+        severity: 'medium',
         details: {
           mfaId: mfa._id.toString(),
           reason: regenerateDto.reason,

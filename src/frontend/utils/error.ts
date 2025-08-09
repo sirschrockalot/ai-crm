@@ -282,7 +282,7 @@ export function withErrorHandling<T extends any[], R>(
 }
 
 // Error boundary hook for React components
-export function useErrorBoundary() {
+export function useErrorHandler() {
   const [error, setError] = useState<Error | null>(null);
 
   const handleError = useCallback((error: Error) => {

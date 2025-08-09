@@ -181,12 +181,12 @@ export class CommunicationController {
       throw new BadRequestException('Lead not found');
     }
 
-    if (!lead.phone) {
+    if (!lead.contactInfo?.phone) {
       throw new BadRequestException('Lead has no phone number');
     }
 
     const request: SendSmsRequest = {
-      to: lead.phone,
+      to: lead.contactInfo.phone,
       from: process.env.TWILIO_PHONE_NUMBER || '',
       body: body.message,
       leadId,
@@ -214,14 +214,14 @@ export class CommunicationController {
       throw new BadRequestException('Lead not found');
     }
 
-    if (!lead.phone) {
+    if (!lead.contactInfo?.phone) {
       throw new BadRequestException('Lead has no phone number');
     }
 
     const twiml = `<Response><Say>${body.message}</Say></Response>`;
 
     const request: SendVoiceRequest = {
-      to: lead.phone,
+      to: lead.contactInfo.phone,
       from: process.env.TWILIO_PHONE_NUMBER || '',
       twiml,
       leadId,
@@ -276,14 +276,14 @@ export class CommunicationController {
         } else {
           // Get lead information
           const lead = await this.communicationService['leadModel'].findById(leadId).exec();
-          if (!lead || !lead.phone) {
+          if (!lead || !lead.contactInfo?.phone) {
             result = {
               success: false,
               error: 'Lead not found or has no phone number',
             };
           } else {
             const request: SendSmsRequest = {
-              to: lead.phone,
+              to: lead.contactInfo.phone,
               from: process.env.TWILIO_PHONE_NUMBER || '',
               body: body.message,
               leadId,

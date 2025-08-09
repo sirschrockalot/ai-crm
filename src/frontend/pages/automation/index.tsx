@@ -1,388 +1,482 @@
 import React, { useState, useEffect } from 'react';
-import { Box, VStack, HStack, Heading, Text, useDisclosure, useToast, Switch } from '@chakra-ui/react';
-import { Sidebar, Header, Navigation, SearchBar } from '../../components/layout';
-import { Card, Button, Badge, Table, Modal, ErrorBoundary } from '../../components/ui';
-import { WorkflowBuilder, WorkflowExecution } from '../../components/automation';
-import { useAutomation } from '../../hooks/useAutomation';
-import { Workflow, WorkflowTriggerType, WorkflowPriority } from '../../types';
+import {
+  Box,
+  VStack,
+  HStack,
+  Heading,
+  Text,
+  Button,
+  useToast,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
+  SimpleGrid,
+  Card,
+  CardBody,
+  CardHeader,
+  IconButton,
+  Tooltip,
+  Badge,
+  Flex,
+  Stat,
+  StatLabel,
+  StatNumber,
+  StatHelpText,
+  StatArrow,
+  useColorModeValue,
+  Progress,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+} from '@chakra-ui/react';
+import { 
+  FiZap, 
+  FiBarChart, 
+  FiSettings, 
+  FiUsers, 
+  FiPlus, 
+  FiRefreshCw, 
+  FiDownload,
+  FiFilter,
+  FiTrendingUp,
+  FiClock,
+  FiEdit,
+} from 'react-icons/fi';
+import { Sidebar, Header, Navigation } from '../../components/layout';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
+import { 
+  AutomationErrorBoundary, 
+  AutomationLoading,
+  AutomationStats,
+  WorkflowList,
+} from '../../features/automation';
+import { useAutomation } from '../../features/automation/hooks/useAutomation';
 
 const AutomationPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [timeRange] = useState<'today' | 'week' | 'month' | 'year'>('week');
+  
   const {
     workflows,
+    stats,
     loading,
     error,
-    fetchWorkflows,
-    createWorkflow,
-    updateWorkflow,
-    deleteWorkflow,
-    toggleWorkflow,
+    isAuthenticated,
+    // user,
+    loadWorkflows,
+    loadStats,
   } = useAutomation();
   
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [triggerTypeFilter, setTriggerTypeFilter] = useState<WorkflowTriggerType | 'all'>('all');
-  const [priorityFilter, setPriorityFilter] = useState<WorkflowPriority | 'all'>('all');
-  const [activeFilter, setActiveFilter] = useState<boolean | 'all'>('all');
-  const [showExecution, setShowExecution] = useState(false);
   const toast = useToast();
+  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const textColor = useColorModeValue('gray.800', 'gray.100');
+  const subTextColor = useColorModeValue('gray.600', 'gray.400');
+  const itemBg = useColorModeValue('gray.50', 'gray.700');
 
   useEffect(() => {
-    fetchWorkflows();
-  }, [fetchWorkflows]);
+    if (isAuthenticated) {
+      loadWorkflows();
+      loadStats(timeRange);
+    }
+  }, [isAuthenticated, loadWorkflows, loadStats, timeRange]);
 
-  const handleCreateWorkflow = async (data: any) => {
+  const handleNavigateTo = (path: string) => {
+    window.location.href = path;
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
     try {
-      await createWorkflow(data);
+      await loadWorkflows();
+      await loadStats(timeRange);
       toast({
-        title: 'Workflow created successfully',
+        title: 'Data Refreshed',
+        description: 'Automation data has been updated',
         status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: 'Refresh Failed',
+        description: 'Failed to refresh automation data',
+        status: 'error',
         duration: 3000,
+        isClosable: true,
       });
-      onClose();
-    } catch (error) {
-      toast({
-        title: 'Error creating workflow',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        status: 'error',
-        duration: 5000,
-      });
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
-  const handleUpdateWorkflow = async (data: any) => {
-    if (!selectedWorkflow) return;
-    try {
-      await updateWorkflow(selectedWorkflow.id, data);
-      toast({
-        title: 'Workflow updated successfully',
-        status: 'success',
-        duration: 3000,
-      });
-      onClose();
-    } catch (error) {
-      toast({
-        title: 'Error updating workflow',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        status: 'error',
-        duration: 5000,
-      });
-    }
+  const handleExport = () => {
+    // TODO: Implement automation export functionality
+    toast({
+      title: 'Export Automation',
+      description: 'Automation export functionality coming soon...',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
-  const handleDeleteWorkflow = async (id: string) => {
-    try {
-      await deleteWorkflow(id);
-      toast({
-        title: 'Workflow deleted successfully',
-        status: 'success',
-        duration: 3000,
-      });
-    } catch (error) {
-      toast({
-        title: 'Error deleting workflow',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        status: 'error',
-        duration: 5000,
-      });
-    }
+  const handleFilter = () => {
+    // TODO: Implement automation filtering functionality
+    toast({
+      title: 'Filter Automation',
+      description: 'Advanced filtering functionality coming soon...',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
-  const handleToggleWorkflow = async (id: string) => {
-    try {
-      const workflow = workflows.find(w => w.id === id);
-      if (workflow) {
-        await toggleWorkflow(id, !workflow.isActive);
-        toast({
-          title: 'Workflow status updated',
-          status: 'success',
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      toast({
-        title: 'Error updating workflow status',
-        description: error instanceof Error ? error.message : 'Unknown error',
-        status: 'error',
-        duration: 5000,
-      });
-    }
+  const handleWorkflowSelect = (workflow: any) => {
+    // Navigate to workflow builder
+    window.location.href = `/automation/builder?id=${workflow.id}`;
   };
 
-  const filteredWorkflows = workflows.filter(workflow => {
-    const matchesSearch = 
-      workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      workflow.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesTriggerType = triggerTypeFilter === 'all' || workflow.triggerType === triggerTypeFilter;
-    const matchesPriority = priorityFilter === 'all' || workflow.priority === priorityFilter;
-    const matchesActive = activeFilter === 'all' || workflow.isActive === activeFilter;
-    
-    return matchesSearch && matchesTriggerType && matchesPriority && matchesActive;
-  });
-
-  const getTriggerTypeColor = (type: WorkflowTriggerType) => {
-    switch (type) {
-      case 'manual': return 'blue';
-      case 'automatic': return 'green';
-      case 'scheduled': return 'purple';
-      default: return 'gray';
-    }
+  const handleWorkflowDelete = (_workflowId: string) => {
+    // TODO: Implement workflow deletion
+    toast({
+      title: 'Delete Workflow',
+      description: 'Workflow deletion functionality coming soon...',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
-  const getPriorityColor = (priority: WorkflowPriority) => {
-    switch (priority) {
-      case 'low': return 'gray';
-      case 'medium': return 'yellow';
-      case 'high': return 'red';
-      default: return 'gray';
-    }
+  const handleWorkflowDuplicate = (_workflowId: string) => {
+    // TODO: Implement workflow duplication
+    toast({
+      title: 'Duplicate Workflow',
+      description: 'Workflow duplication functionality coming soon...',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    });
   };
 
-  const columns = [
-    {
-      key: 'name',
-      header: 'Workflow Name',
-      accessor: (workflow: Workflow) => workflow.name,
-    },
-    {
-      key: 'description',
-      header: 'Description',
-      accessor: (workflow: Workflow) => workflow.description,
-    },
-    {
-      key: 'triggerType',
-      header: 'Trigger Type',
-      accessor: (workflow: Workflow) => (
-        <Badge colorScheme={getTriggerTypeColor(workflow.triggerType)}>
-          {workflow.triggerType}
-        </Badge>
-      ),
-    },
-    {
-      key: 'priority',
-      header: 'Priority',
-      accessor: (workflow: Workflow) => (
-        <Badge colorScheme={getPriorityColor(workflow.priority)}>
-          {workflow.priority}
-        </Badge>
-      ),
-    },
-    {
-      key: 'isActive',
-      header: 'Status',
-      accessor: (workflow: Workflow) => (
-        <Badge colorScheme={workflow.isActive ? 'green' : 'red'}>
-          {workflow.isActive ? 'Active' : 'Inactive'}
-        </Badge>
-      ),
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      accessor: (workflow: Workflow) => (
-        <HStack spacing={2}>
-          <Switch
-            isChecked={workflow.isActive}
-            onChange={() => handleToggleWorkflow(workflow.id)}
-            size="sm"
-          />
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setSelectedWorkflow(workflow);
-              onOpen();
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            variant="danger"
-            onClick={() => handleDeleteWorkflow(workflow.id)}
-          >
-            Delete
-          </Button>
-        </HStack>
-      ),
-    },
-  ];
+  const handleWorkflowExport = (_workflow: any) => {
+    // TODO: Implement workflow export
+    toast({
+      title: 'Export Workflow',
+      description: 'Workflow export functionality coming soon...',
+      status: 'info',
+      duration: 3000,
+      isClosable: true,
+    });
+  };
 
-  return (
-    <ErrorBoundary>
-      <Box minH="100vh" bg="gray.50">
+  const handleFilterChange = (_filters: any) => {
+    // TODO: Implement filter changes
+    console.log('Filter changes:', _filters);
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <Box minH="100vh" bg={bgColor}>
         <Header />
         <HStack align="flex-start" spacing={0}>
           <Sidebar />
           <Box flex={1} p={6}>
             <Navigation />
-            <VStack align="stretch" spacing={6}>
-              <HStack justify="space-between">
-                <Heading size="lg">Automation Workflows</Heading>
-                <Button variant="primary" onClick={onOpen}>
-                  Create Workflow
-                </Button>
-              </HStack>
+            <Alert status="warning" borderRadius="md">
+              <AlertIcon />
+              <AlertTitle>Authentication Required</AlertTitle>
+              <AlertDescription>
+                Please log in to access automation features.
+              </AlertDescription>
+            </Alert>
+          </Box>
+        </HStack>
+      </Box>
+    );
+  }
 
-            {/* Filters */}
-            <Card>
-              <VStack align="stretch" spacing={4}>
-                <HStack justify="space-between">
-                  <Text fontWeight="semibold">Filters</Text>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setSearchTerm('');
-                      setTriggerTypeFilter('all');
-                      setPriorityFilter('all');
-                      setActiveFilter('all');
-                    }}
-                  >
-                    Clear Filters
-                  </Button>
-                </HStack>
-                <HStack spacing={4} wrap="wrap">
-                  <SearchBar />
-                  <select
-                    value={triggerTypeFilter}
-                    onChange={(e) => setTriggerTypeFilter(e.target.value as WorkflowTriggerType | 'all')}
-                    style={{ padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}
-                  >
-                    <option value="all">All Trigger Types</option>
-                    <option value="manual">Manual</option>
-                    <option value="automatic">Automatic</option>
-                    <option value="scheduled">Scheduled</option>
-                  </select>
-                  <select
-                    value={priorityFilter}
-                    onChange={(e) => setPriorityFilter(e.target.value as WorkflowPriority | 'all')}
-                    style={{ padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}
-                  >
-                    <option value="all">All Priorities</option>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                  <select
-                    value={activeFilter === 'all' ? 'all' : activeFilter.toString()}
-                    onChange={(e) => setActiveFilter(e.target.value === 'all' ? 'all' : e.target.value === 'true')}
-                    style={{ padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}
-                  >
-                    <option value="all">All Statuses</option>
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
-                </HStack>
-              </VStack>
-            </Card>
+  if (loading && !error) {
+    return (
+      <Box minH="100vh" bg={bgColor}>
+        <Header />
+        <HStack align="flex-start" spacing={0}>
+          <Sidebar />
+          <Box flex={1} p={6}>
+            <Navigation />
+            <AutomationLoading variant="skeleton" message="Loading automation dashboard..." />
+          </Box>
+        </HStack>
+      </Box>
+    );
+  }
 
-            {/* Stats */}
-            <HStack spacing={4}>
-              <Card>
-                <Text fontSize="sm" color="gray.600">Total Workflows</Text>
-                <Text fontSize="2xl" fontWeight="bold">{workflows.length}</Text>
-              </Card>
-              <Card>
-                <Text fontSize="sm" color="gray.600">Active Workflows</Text>
-                <Text fontSize="2xl" fontWeight="bold">
-                  {workflows.filter(w => w.isActive).length}
-                </Text>
-              </Card>
-              <Card>
-                <Text fontSize="sm" color="gray.600">Automatic Triggers</Text>
-                <Text fontSize="2xl" fontWeight="bold">
-                  {workflows.filter(w => w.triggerType === 'automatic').length}
-                </Text>
-              </Card>
-              <Card>
-                <Text fontSize="sm" color="gray.600">High Priority</Text>
-                <Text fontSize="2xl" fontWeight="bold">
-                  {workflows.filter(w => w.priority === 'high').length}
-                </Text>
-              </Card>
-            </HStack>
-
-            {/* Workflows Table */}
-            <Card header="Workflows">
-              {loading ? (
-                <Text>Loading workflows...</Text>
-              ) : error ? (
-                <Text color="red.500">Error loading workflows: {error}</Text>
-              ) : (
-                <Table
-                  data={filteredWorkflows}
-                  columns={columns}
-                  sortable
-                  pagination
-                  pageSize={10}
-                />
-              )}
-            </Card>
-
-            {/* Workflow Performance */}
-            <Card header="Workflow Performance">
-              <VStack align="stretch" spacing={4}>
-                <HStack justify="space-between">
-                  <Text fontWeight="semibold">Recent Executions</Text>
-                  <Button size="sm" variant="outline">View All</Button>
-                </HStack>
-                <VStack align="stretch" spacing={3}>
-                  {[
-                    { workflow: 'Welcome Email Sequence', status: 'Success', time: '2 minutes ago', executions: 15 },
-                    { workflow: 'Follow-up Reminder', status: 'Success', time: '15 minutes ago', executions: 8 },
-                    { workflow: 'Qualification Check', status: 'Failed', time: '1 hour ago', executions: 3 },
-                    { workflow: 'Welcome Email Sequence', status: 'Success', time: '2 hours ago', executions: 12 },
-                  ].map((execution, index) => (
-                    <HStack key={index} justify="space-between" p={3} bg="gray.50" borderRadius="md">
-                      <VStack align="start" spacing={1}>
-                        <Text fontWeight="medium">{execution.workflow}</Text>
-                        <Text fontSize="sm" color="gray.500">{execution.time}</Text>
-                      </VStack>
-                      <HStack spacing={4}>
-                        <Badge colorScheme={execution.status === 'Success' ? 'green' : 'red'}>
-                          {execution.status}
-                        </Badge>
-                        <Text fontSize="sm">{execution.executions} executions</Text>
-                      </HStack>
+  return (
+    <ErrorBoundary>
+      <AutomationErrorBoundary>
+        <Box minH="100vh" bg={bgColor}>
+          <Header />
+          <HStack align="flex-start" spacing={0}>
+            <Sidebar />
+            <Box flex={1}>
+              <Navigation />
+              <VStack align="stretch" spacing={6} p={{ base: 4, md: 6 }}>
+                {/* Page Header */}
+                <Box bg={cardBg} p={6} borderRadius="lg" shadow="sm">
+                  <Flex justify="space-between" align="center" mb={4}>
+                    <VStack align="flex-start" spacing={1}>
+                      <Heading size="lg" color={textColor}>
+                        Automation Dashboard
+                      </Heading>
+                      <Text color={subTextColor}>
+                        Manage your automation workflows and monitor performance
+                      </Text>
+                    </VStack>
+                    
+                    <HStack spacing={3}>
+                      <Tooltip label="Refresh data">
+                        <IconButton
+                          aria-label="Refresh data"
+                          icon={<FiRefreshCw />}
+                          onClick={handleRefresh}
+                          isLoading={isRefreshing}
+                          variant="ghost"
+                          size="sm"
+                        />
+                      </Tooltip>
+                      
+                      <Tooltip label="Filter automation">
+                        <IconButton
+                          aria-label="Filter automation"
+                          icon={<FiFilter />}
+                          onClick={handleFilter}
+                          variant="ghost"
+                          size="sm"
+                        />
+                      </Tooltip>
+                      
+                      <Tooltip label="Export automation">
+                        <IconButton
+                          aria-label="Export automation"
+                          icon={<FiDownload />}
+                          onClick={handleExport}
+                          variant="ghost"
+                          size="sm"
+                        />
+                      </Tooltip>
+                      
+                      <Button
+                        leftIcon={<FiPlus />}
+                        colorScheme="blue"
+                        size="sm"
+                        onClick={() => handleNavigateTo('/automation/builder')}
+                      >
+                        Create Workflow
+                      </Button>
                     </HStack>
-                  ))}
-                </VStack>
+                  </Flex>
+
+                  {/* Quick Stats */}
+                  <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+                    <Stat>
+                      <StatLabel color={subTextColor}>Total Workflows</StatLabel>
+                      <StatNumber color={textColor}>{stats?.totalWorkflows || 0}</StatNumber>
+                      <StatHelpText>
+                        <StatArrow type="increase" />
+                        {stats?.activeWorkflows || 0} active
+                      </StatHelpText>
+                    </Stat>
+                    
+                    <Stat>
+                      <StatLabel color={subTextColor}>Executions Today</StatLabel>
+                      <StatNumber color={textColor}>{stats?.executionsToday || 0}</StatNumber>
+                      <StatHelpText>
+                        <StatArrow type="increase" />
+                        {stats?.successRate || 0}% success
+                      </StatHelpText>
+                    </Stat>
+                    
+                    <Stat>
+                      <StatLabel color={subTextColor}>Avg Execution Time</StatLabel>
+                      <StatNumber color={textColor}>
+                        {stats?.averageExecutionTime ? `${(stats.averageExecutionTime / 1000).toFixed(1)}s` : '0s'}
+                      </StatNumber>
+                      <StatHelpText>
+                        <FiClock size={12} />
+                        Last 24 hours
+                      </StatHelpText>
+                    </Stat>
+                    
+                    <Stat>
+                      <StatLabel color={subTextColor}>Success Rate</StatLabel>
+                      <StatNumber color={textColor}>{stats?.successRate || 0}%</StatNumber>
+                      <StatHelpText>
+                        <Progress 
+                          value={stats?.successRate || 0} 
+                          size="sm" 
+                          colorScheme={stats?.successRate && stats.successRate > 90 ? 'green' : 'orange'}
+                        />
+                      </StatHelpText>
+                    </Stat>
+                  </SimpleGrid>
+                </Box>
+
+                {/* Main Content */}
+                <Tabs index={activeTab} onChange={setActiveTab} variant="enclosed">
+                  <TabList bg={cardBg} borderRadius="lg" p={2}>
+                    <Tab>
+                      <HStack spacing={2}>
+                        <FiBarChart />
+                        <Text>Overview</Text>
+                      </HStack>
+                    </Tab>
+                    <Tab>
+                      <HStack spacing={2}>
+                        <FiZap />
+                        <Text>Workflows</Text>
+                        <Badge colorScheme="blue" size="sm">
+                          {workflows?.length || 0}
+                        </Badge>
+                      </HStack>
+                    </Tab>
+                    <Tab>
+                      <HStack spacing={2}>
+                        <FiTrendingUp />
+                        <Text>Analytics</Text>
+                      </HStack>
+                    </Tab>
+                    <Tab>
+                      <HStack spacing={2}>
+                        <FiSettings />
+                        <Text>Settings</Text>
+                      </HStack>
+                    </Tab>
+                  </TabList>
+
+                  <TabPanels>
+                    {/* Overview Tab */}
+                    <TabPanel p={0} pt={6}>
+                      <VStack spacing={6} align="stretch">
+                        {/* Recent Activity */}
+                        <Card bg={cardBg} shadow="sm">
+                          <CardHeader>
+                            <Heading size="md" color={textColor}>Recent Activity</Heading>
+                          </CardHeader>
+                          <CardBody>
+                            <VStack spacing={4} align="stretch">
+                                                             {workflows?.slice(0, 5).map((workflow: any) => (
+                                 <HStack key={workflow.id} justify="space-between" p={3} bg={itemBg} borderRadius="md">
+                                  <VStack align="flex-start" spacing={1}>
+                                    <Text fontWeight="semibold" color={textColor}>
+                                      {workflow.name}
+                                    </Text>
+                                    <Text fontSize="sm" color={subTextColor}>
+                                      Last executed: {workflow.updatedAt ? new Date(workflow.updatedAt).toLocaleDateString() : 'Never'}
+                                    </Text>
+                                  </VStack>
+                                  <HStack spacing={2}>
+                                    <Badge colorScheme={workflow.isActive ? 'green' : 'gray'}>
+                                      {workflow.isActive ? 'Active' : 'Inactive'}
+                                    </Badge>
+                                    <IconButton
+                                      aria-label="Edit workflow"
+                                      icon={<FiEdit />}
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleWorkflowSelect(workflow)}
+                                    />
+                                  </HStack>
+                                </HStack>
+                              ))}
+                            </VStack>
+                          </CardBody>
+                        </Card>
+
+                        {/* Performance Metrics */}
+                        <Card bg={cardBg} shadow="sm">
+                          <CardHeader>
+                            <Heading size="md" color={textColor}>Performance Metrics</Heading>
+                          </CardHeader>
+                          <CardBody>
+                            <AutomationStats
+                              stats={stats}
+                              timeRange={timeRange}
+                              onFilterChange={handleFilterChange}
+                            />
+                          </CardBody>
+                        </Card>
+                      </VStack>
+                    </TabPanel>
+
+                    {/* Workflows Tab */}
+                    <TabPanel p={0} pt={6}>
+                      <WorkflowList
+                        workflows={workflows || []}
+                        onWorkflowSelect={handleWorkflowSelect}
+                        onWorkflowDelete={handleWorkflowDelete}
+                        onWorkflowDuplicate={handleWorkflowDuplicate}
+                        onWorkflowExport={handleWorkflowExport}
+                      />
+                    </TabPanel>
+
+                    {/* Analytics Tab */}
+                    <TabPanel p={0} pt={6}>
+                      <Card bg={cardBg} shadow="sm">
+                        <CardHeader>
+                          <Heading size="md" color={textColor}>Analytics Dashboard</Heading>
+                        </CardHeader>
+                        <CardBody>
+                          <VStack spacing={4} align="stretch">
+                            <Text color={subTextColor}>
+                              Advanced analytics and reporting features coming soon...
+                            </Text>
+                            <HStack spacing={4}>
+                              <Button leftIcon={<FiTrendingUp />} variant="outline">
+                                View Reports
+                              </Button>
+                              <Button leftIcon={<FiDownload />} variant="outline">
+                                Export Data
+                              </Button>
+                            </HStack>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    </TabPanel>
+
+                    {/* Settings Tab */}
+                    <TabPanel p={0} pt={6}>
+                      <Card bg={cardBg} shadow="sm">
+                        <CardHeader>
+                          <Heading size="md" color={textColor}>Automation Settings</Heading>
+                        </CardHeader>
+                        <CardBody>
+                          <VStack spacing={4} align="stretch">
+                            <Text color={subTextColor}>
+                              Automation configuration and settings coming soon...
+                            </Text>
+                            <HStack spacing={4}>
+                              <Button leftIcon={<FiSettings />} variant="outline">
+                                General Settings
+                              </Button>
+                              <Button leftIcon={<FiUsers />} variant="outline">
+                                User Permissions
+                              </Button>
+                            </HStack>
+                          </VStack>
+                        </CardBody>
+                      </Card>
+                    </TabPanel>
+                  </TabPanels>
+                </Tabs>
               </VStack>
-            </Card>
-          </VStack>
+            </Box>
+          </HStack>
         </Box>
-      </HStack>
-
-      {/* Workflow Builder Modal */}
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        title={selectedWorkflow ? 'Edit Workflow' : 'Create New Workflow'}
-        size="xl"
-      >
-        <WorkflowBuilder
-          workflow={selectedWorkflow || undefined}
-          onSave={selectedWorkflow ? handleUpdateWorkflow : handleCreateWorkflow}
-          onCancel={onClose}
-          loading={loading}
-        />
-      </Modal>
-
-      {/* Workflow Execution Modal */}
-      <Modal
-        isOpen={showExecution}
-        onClose={() => setShowExecution(false)}
-        title="Workflow Execution"
-        size="xl"
-      >
-        <WorkflowExecution
-          workflow={selectedWorkflow}
-          onClose={() => setShowExecution(false)}
-        />
-      </Modal>
-    </Box>
+      </AutomationErrorBoundary>
     </ErrorBoundary>
   );
 };

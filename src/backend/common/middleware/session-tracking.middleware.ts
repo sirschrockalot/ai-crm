@@ -2,13 +2,17 @@ import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
+interface RequestWithStartTime extends Request {
+  startTime?: number;
+}
+
 @Injectable()
 export class SessionTrackingMiddleware implements NestMiddleware {
   private readonly logger = new Logger(SessionTrackingMiddleware.name);
 
   constructor(private readonly eventEmitter: EventEmitter2) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  use(req: RequestWithStartTime, res: Response, next: NextFunction) {
     // Extract session information from request
     const sessionId = this.extractSessionId(req);
     const userId = this.extractUserId(req);
@@ -41,7 +45,7 @@ export class SessionTrackingMiddleware implements NestMiddleware {
         method: req.method,
         url: req.url,
         statusCode: res.statusCode,
-        responseTime: Date.now() - req.startTime,
+        responseTime: Date.now() - (req.startTime || Date.now()),
         timestamp: new Date(),
       });
     });

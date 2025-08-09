@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../../common/guards/roles.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 import { QueueService, QueueStats } from '../services/queue.service';
 import { CreateQueueItemDto, UpdateQueueItemDto, QueueResponseDto } from '../dto/queue.dto';
 

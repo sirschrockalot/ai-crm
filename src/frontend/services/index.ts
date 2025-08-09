@@ -1,10 +1,9 @@
 // Services barrel export
 // This file will export all API services for clean imports
 
-// TODO: Export services as they are created
-// export * from './authService';
-// export * from './leadService';
-// export * from './buyerService';
-// export * from './communicationService';
-// export * from './automationService';
-// export * from './analyticsService'; 
+export { default as communicationService } from './communicationService';
+export { default as importExportService } from './importExportService';
+export { default as pipelineService } from './pipelineService';
+export { default as apiService } from './apiService';
+export { default as realtimeService } from './realtimeService';
+export { default as loadingService } from './loadingService'; 

@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as twilio from 'twilio';
 import { Lead } from '../schemas/lead.schema';
 import { CommunicationTrackingService } from './communication-tracking.service';
@@ -98,7 +98,7 @@ export class CommunicationService {
 
       // Log communication attempt
       const logEntry = await this.communicationTrackingService.logCommunication({
-        leadId: request.leadId,
+        leadId: request.leadId ? new Types.ObjectId(request.leadId) : undefined,
         userId: request.userId,
         tenantId: request.tenantId,
         type: 'sms',
@@ -164,7 +164,7 @@ export class CommunicationService {
 
       // Log communication attempt
       const logEntry = await this.communicationTrackingService.logCommunication({
-        leadId: request.leadId,
+        leadId: request.leadId ? new Types.ObjectId(request.leadId) : undefined,
         userId: request.userId,
         tenantId: request.tenantId,
         type: 'voice',
@@ -229,7 +229,7 @@ export class CommunicationService {
       throw new BadRequestException('Lead not found');
     }
 
-    if (!lead.phone) {
+    if (!lead.contactInfo?.phone) {
       throw new BadRequestException('Lead has no phone number');
     }
 
@@ -247,7 +247,7 @@ export class CommunicationService {
 
     // Send SMS
     return await this.sendSms({
-      to: lead.phone,
+      to: lead.contactInfo.phone,
       from: this.configService.get<string>('TWILIO_PHONE_NUMBER') || '',
       body: content,
       leadId,
@@ -272,7 +272,7 @@ export class CommunicationService {
       throw new BadRequestException('Lead not found');
     }
 
-    if (!lead.phone) {
+    if (!lead.contactInfo?.phone) {
       throw new BadRequestException('Lead has no phone number');
     }
 
@@ -290,7 +290,7 @@ export class CommunicationService {
 
     // Make voice call
     return await this.makeVoiceCall({
-      to: lead.phone,
+      to: lead.contactInfo.phone,
       from: this.configService.get<string>('TWILIO_PHONE_NUMBER') || '',
       twiml,
       leadId,
@@ -439,7 +439,7 @@ export class CommunicationService {
       return {
         accountSid: account.sid,
         phoneNumbers: incomingPhoneNumbers.map(p => p.phoneNumber),
-        balance: parseFloat(account.balance || '0'),
+        balance: parseFloat((account.balance as any) || '0'),
       };
     } catch (error) {
       this.logger.error('Failed to get Twilio account info:', error);

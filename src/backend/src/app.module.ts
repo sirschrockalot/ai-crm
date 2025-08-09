@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
@@ -40,15 +40,15 @@ export class AppModule implements NestModule {
     consumer
       .apply(TenantIsolationMiddleware)
       .exclude(
-        { path: 'auth/login', method: 'POST' },
-        { path: 'auth/google', method: 'GET' },
-        { path: 'auth/google/callback', method: 'GET' },
-        { path: 'auth/refresh', method: 'POST' },
-        { path: 'auth/password-reset/request', method: 'POST' },
-        { path: 'auth/password-reset/verify', method: 'POST' },
-        { path: 'auth/password-reset/reset', method: 'POST' },
-        { path: 'health', method: 'GET' },
-        { path: 'metrics', method: 'GET' },
+        { path: 'auth/login', method: RequestMethod.POST },
+        { path: 'auth/google', method: RequestMethod.GET },
+        { path: 'auth/google/callback', method: RequestMethod.GET },
+        { path: 'auth/refresh', method: RequestMethod.POST },
+        { path: 'auth/password-reset/request', method: RequestMethod.POST },
+        { path: 'auth/password-reset/verify', method: RequestMethod.POST },
+        { path: 'auth/password-reset/reset', method: RequestMethod.POST },
+        { path: 'health', method: RequestMethod.GET },
+        { path: 'metrics', method: RequestMethod.GET },
       )
       .forRoutes('*');
   }

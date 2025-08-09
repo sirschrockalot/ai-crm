@@ -12,6 +12,21 @@ export { default as Loading } from './Loading';
 export { default as Modal } from './Modal';
 export { default as Table } from './Table';
 
+// Export Breadcrumb component
+export * from './Breadcrumb';
+
+// Export RouteTransition component
+export * from './RouteTransition';
+
+// Export RouteGuard component
+export * from './RouteGuard';
+
+// Export ResponsiveContainer component
+export * from './ResponsiveContainer';
+
+// Export PerformanceMonitor component
+export * from './PerformanceMonitor';
+
 // Export ErrorBoundary components
 export * from './ErrorBoundary';
 

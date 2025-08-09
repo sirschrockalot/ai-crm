@@ -47,13 +47,13 @@ export class LeadsService {
       leadId,
       tenantId: req.tenant.tenantId,
       assignedTo: new Types.ObjectId(createLeadDto.assignedTo),
-      createdBy: new Types.ObjectId(req.user.id),
-      updatedBy: new Types.ObjectId(req.user.id),
+      createdBy: new Types.ObjectId(req.user.sub),
+      updatedBy: new Types.ObjectId(req.user.sub),
       activities: [{
         type: 'status_change',
         description: `Lead created with status: ${createLeadDto.status || LeadStatus.NEW}`,
         timestamp: new Date(),
-        userId: new Types.ObjectId(req.user.id),
+        userId: new Types.ObjectId(req.user.sub),
       }],
     });
 
@@ -140,7 +140,7 @@ export class LeadsService {
     }
 
     // Check if user has permission to update this lead
-    if (!this.canUpdateLead(lead, req.user.id)) {
+    if (!this.canUpdateLead(lead, req.user.sub)) {
       throw new ForbiddenException('Insufficient permissions to update this lead');
     }
 
@@ -157,7 +157,7 @@ export class LeadsService {
     // Prepare update data
     const updateData: any = {
       ...updateLeadDto,
-      updatedBy: new Types.ObjectId(req.user.id),
+      updatedBy: new Types.ObjectId(req.user.sub),
     };
 
     // Update assignedTo if provided
@@ -172,7 +172,7 @@ export class LeadsService {
           type: 'status_change',
           description: `Status changed from ${lead.status} to ${updateLeadDto.status}`,
           timestamp: new Date(),
-          userId: new Types.ObjectId(req.user.id),
+          userId: new Types.ObjectId(req.user.sub),
         }
       };
     }
@@ -184,7 +184,7 @@ export class LeadsService {
         type: 'assignment',
         description: `Lead reassigned to user ${updateLeadDto.assignedTo}`,
         timestamp: new Date(),
-        userId: new Types.ObjectId(req.user.id),
+        userId: new Types.ObjectId(req.user.sub),
       });
     }
 
@@ -217,7 +217,7 @@ export class LeadsService {
     }
 
     // Check if user has permission to delete this lead
-    if (!this.canDeleteLead(lead, req.user.id)) {
+    if (!this.canDeleteLead(lead, req.user.sub)) {
       throw new ForbiddenException('Insufficient permissions to delete this lead');
     }
 
@@ -226,7 +226,7 @@ export class LeadsService {
       { leadId, tenantId: req.tenant.tenantId },
       { 
         deletedAt: new Date(),
-        updatedBy: new Types.ObjectId(req.user.id),
+        updatedBy: new Types.ObjectId(req.user.sub),
       }
     );
   }
@@ -250,7 +250,7 @@ export class LeadsService {
 
     // Check permissions for all leads
     for (const lead of leads) {
-      if (!this.canUpdateLead(lead, req.user.id)) {
+      if (!this.canUpdateLead(lead, req.user.sub)) {
         throw new ForbiddenException(`Insufficient permissions to update lead ${lead.leadId}`);
       }
     }
@@ -258,7 +258,7 @@ export class LeadsService {
     // Prepare update data
     const update: any = {
       ...updateData,
-      updatedBy: new Types.ObjectId(req.user.id),
+      updatedBy: new Types.ObjectId(req.user.sub),
     };
 
     if (updateData.assignedTo) {
@@ -271,7 +271,7 @@ export class LeadsService {
         type: 'other',
         description: `Bulk update: ${Object.keys(updateData).join(', ')}`,
         timestamp: new Date(),
-        userId: new Types.ObjectId(req.user.id),
+        userId: new Types.ObjectId(req.user.sub),
       }
     };
 
@@ -310,13 +310,13 @@ export class LeadsService {
           leadId,
           tenantId: req.tenant.tenantId,
           assignedTo: new Types.ObjectId(createLeadDto.assignedTo),
-          createdBy: new Types.ObjectId(req.user.id),
-          updatedBy: new Types.ObjectId(req.user.id),
+          createdBy: new Types.ObjectId(req.user.sub),
+          updatedBy: new Types.ObjectId(req.user.sub),
           activities: [{
             type: 'status_change',
             description: `Lead created with status: ${createLeadDto.status || LeadStatus.NEW}`,
             timestamp: new Date(),
-            userId: new Types.ObjectId(req.user.id),
+            userId: new Types.ObjectId(req.user.sub),
           }],
         });
 

@@ -25,11 +25,11 @@ export interface RoleCacheEntry {
 export class PermissionCacheService {
   private readonly logger = new Logger(PermissionCacheService.name);
   private readonly redis: Redis.Redis;
-  private readonly cacheTTL = 3600; // 1 hour in seconds
+  private cacheTTL = 3600; // 1 hour in seconds
 
   constructor(private readonly configService: ConfigService) {
     // Initialize Redis connection
-    this.redis = new Redis({
+    this.redis = new (Redis as any)({
       host: this.configService.get('REDIS_HOST', 'localhost'),
       port: this.configService.get('REDIS_PORT', 6379),
       password: this.configService.get('REDIS_PASSWORD'),
@@ -298,7 +298,7 @@ export class PermissionCacheService {
         totalKeys: keys.length,
         userPermissionKeys: userKeys.length,
         rolePermissionKeys: roleKeys.length,
-        memoryUsage: await this.redis.memory('USAGE'),
+        memoryUsage: await this.redis.memory('STATS'),
       };
     } catch (error) {
       this.logger.error('Error getting cache statistics:', error);

@@ -23,7 +23,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Permissions } from '../../common/constants/permissions';
+import { PERMISSIONS } from '../../common/constants/permissions';
 import { TenantsService } from './tenants.service';
 import {
   CreateTenantDto,
@@ -42,7 +42,7 @@ export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
   @Post()
-  @Roles(Permissions.TENANT_CREATE)
+  @Roles(PERMISSIONS.TENANT_CREATE)
   @ApiOperation({ summary: 'Create a new tenant' })
   @ApiResponse({
     status: 201,
@@ -55,11 +55,11 @@ export class TenantsController {
     @Body() createTenantDto: CreateTenantDto,
     @Request() req: RequestWithTenant,
   ): Promise<TenantResponseDto> {
-    return this.tenantsService.createTenant(createTenantDto, req.user.id);
+    return this.tenantsService.createTenant(createTenantDto, req.user.sub);
   }
 
   @Get()
-  @Roles(Permissions.TENANT_READ)
+  @Roles(PERMISSIONS.TENANT_READ)
   @ApiOperation({ summary: 'Get all tenants with pagination and filtering' })
   @ApiResponse({
     status: 200,
@@ -82,7 +82,7 @@ export class TenantsController {
   }
 
   @Get(':tenantId')
-  @Roles(Permissions.TENANT_READ)
+  @Roles(PERMISSIONS.TENANT_READ)
   @ApiOperation({ summary: 'Get a specific tenant by ID' })
   @ApiResponse({
     status: 200,
@@ -96,7 +96,7 @@ export class TenantsController {
   }
 
   @Get('subdomain/:subdomain')
-  @Roles(Permissions.TENANT_READ)
+  @Roles(PERMISSIONS.TENANT_READ)
   @ApiOperation({ summary: 'Get a tenant by subdomain' })
   @ApiResponse({
     status: 200,
@@ -110,7 +110,7 @@ export class TenantsController {
   }
 
   @Put(':tenantId')
-  @Roles(Permissions.TENANT_UPDATE)
+  @Roles(PERMISSIONS.TENANT_UPDATE)
   @ApiOperation({ summary: 'Update a tenant' })
   @ApiResponse({
     status: 200,
@@ -125,11 +125,11 @@ export class TenantsController {
     @Body() updateTenantDto: UpdateTenantDto,
     @Request() req: RequestWithTenant,
   ): Promise<TenantResponseDto> {
-    return this.tenantsService.updateTenant(tenantId, updateTenantDto, req.user.id);
+    return this.tenantsService.updateTenant(tenantId, updateTenantDto, req.user.sub);
   }
 
   @Delete(':tenantId')
-  @Roles(Permissions.TENANT_DELETE)
+  @Roles(PERMISSIONS.TENANT_DELETE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a tenant (soft delete)' })
   @ApiResponse({ status: 204, description: 'Tenant deleted successfully' })
@@ -140,11 +140,11 @@ export class TenantsController {
     @Param('tenantId') tenantId: string,
     @Request() req: RequestWithTenant,
   ): Promise<void> {
-    return this.tenantsService.deleteTenant(tenantId, req.user.id);
+    return this.tenantsService.deleteTenant(tenantId, req.user.sub);
   }
 
   @Post(':tenantId/activate')
-  @Roles(Permissions.TENANT_UPDATE)
+  @Roles(PERMISSIONS.TENANT_UPDATE)
   @ApiOperation({ summary: 'Activate a tenant' })
   @ApiResponse({
     status: 200,
@@ -158,11 +158,11 @@ export class TenantsController {
     @Param('tenantId') tenantId: string,
     @Request() req: RequestWithTenant,
   ): Promise<TenantResponseDto> {
-    return this.tenantsService.activateTenant(tenantId, req.user.id);
+    return this.tenantsService.activateTenant(tenantId, req.user.sub);
   }
 
   @Post(':tenantId/suspend')
-  @Roles(Permissions.TENANT_UPDATE)
+  @Roles(PERMISSIONS.TENANT_UPDATE)
   @ApiOperation({ summary: 'Suspend a tenant' })
   @ApiResponse({
     status: 200,
@@ -176,11 +176,11 @@ export class TenantsController {
     @Param('tenantId') tenantId: string,
     @Request() req: RequestWithTenant,
   ): Promise<TenantResponseDto> {
-    return this.tenantsService.suspendTenant(tenantId, req.user.id);
+    return this.tenantsService.suspendTenant(tenantId, req.user.sub);
   }
 
   @Get(':tenantId/stats')
-  @Roles(Permissions.TENANT_READ)
+  @Roles(PERMISSIONS.TENANT_READ)
   @ApiOperation({ summary: 'Get tenant statistics' })
   @ApiResponse({
     status: 200,
@@ -194,7 +194,7 @@ export class TenantsController {
   }
 
   @Post(':tenantId/users/:userId')
-  @Roles(Permissions.TENANT_USER_MANAGE)
+  @Roles(PERMISSIONS.TENANT_USER_MANAGE)
   @ApiOperation({ summary: 'Add a user to a tenant' })
   @ApiResponse({ status: 200, description: 'User added to tenant successfully' })
   @ApiResponse({ status: 404, description: 'Tenant or user not found' })
@@ -208,11 +208,11 @@ export class TenantsController {
     @Query('role') role: 'admin' | 'member',
     @Request() req: RequestWithTenant,
   ): Promise<void> {
-    return this.tenantsService.addUserToTenant(tenantId, userId, role, req.user.id);
+    return this.tenantsService.addUserToTenant(tenantId, userId, role, req.user.sub);
   }
 
   @Delete(':tenantId/users/:userId')
-  @Roles(Permissions.TENANT_USER_MANAGE)
+  @Roles(PERMISSIONS.TENANT_USER_MANAGE)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a user from a tenant' })
   @ApiResponse({ status: 204, description: 'User removed from tenant successfully' })
@@ -225,6 +225,6 @@ export class TenantsController {
     @Param('userId') userId: string,
     @Request() req: RequestWithTenant,
   ): Promise<void> {
-    return this.tenantsService.removeUserFromTenant(tenantId, userId, req.user.id);
+    return this.tenantsService.removeUserFromTenant(tenantId, userId, req.user.sub);
   }
 } 

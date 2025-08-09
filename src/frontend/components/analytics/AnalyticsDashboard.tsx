@@ -1,7 +1,9 @@
 import React from 'react';
-import { Box, VStack, HStack, Heading, Text, Grid, Select, useToast } from '@chakra-ui/react';
-import { Card, Chart, ErrorBoundary } from '../../components/ui';
+import { Box, VStack, HStack, Heading, Text, Grid, Select, useToast, Button, useColorModeValue } from '@chakra-ui/react';
+import { Card, ErrorBoundary } from '../../components/ui';
+import { Chart } from '../../features/analytics/components/Chart';
 import { LeadStatus, PropertyType, BuyerType } from '../../types';
+import { DownloadIcon } from '@chakra-ui/icons';
 
 interface AnalyticsDashboardProps {
   leads: any[];
@@ -19,6 +21,12 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   onTimeRangeChange,
 }) => {
   const toast = useToast();
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const textColor = useColorModeValue('gray.800', 'white');
+  const subTextColor = useColorModeValue('gray.600', 'gray.400');
+  const headingColor = useColorModeValue('gray.800', 'white');
+  const metricColor = useColorModeValue('gray.800', 'white');
 
   // Lead Status Distribution
   const leadStatusData = [
@@ -84,36 +92,6 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const totalPipelineValue = leads.reduce((sum, lead) => sum + lead.estimatedValue, 0);
   const activeBuyers = buyers.filter(b => b.isActive).length;
 
-  const getStatusColor = (status: LeadStatus) => {
-    switch (status) {
-      case 'new': return '#3182CE';
-      case 'contacted': return '#D69E2E';
-      case 'qualified': return '#38A169';
-      case 'converted': return '#805AD5';
-      case 'lost': return '#E53E3E';
-      default: return '#718096';
-    }
-  };
-
-  const getPropertyTypeColor = (type: PropertyType) => {
-    switch (type) {
-      case 'single_family': return '#3182CE';
-      case 'multi_family': return '#38A169';
-      case 'commercial': return '#805AD5';
-      case 'land': return '#D69E2E';
-      default: return '#718096';
-    }
-  };
-
-  const getBuyerTypeColor = (type: BuyerType) => {
-    switch (type) {
-      case 'individual': return '#3182CE';
-      case 'company': return '#38A169';
-      case 'investor': return '#805AD5';
-      default: return '#718096';
-    }
-  };
-
   const handleExport = (type: 'pdf' | 'csv') => {
     try {
       // In a real implementation, this would generate and download the file
@@ -143,17 +121,21 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
   return (
     <ErrorBoundary>
-      <Box p={6}>
+      <Box p={6} bg={bgColor} borderRadius="lg" border="1px solid" borderColor={borderColor}>
         <VStack align="stretch" spacing={6}>
           {/* Header */}
-          <HStack justify="space-between">
-            <Heading size="lg">Analytics Dashboard</Heading>
+          <HStack justify="space-between" align="center">
+            <Heading size="lg" color={headingColor}>
+              Analytics Dashboard
+            </Heading>
             <HStack spacing={4}>
               <Select
                 value={timeRange}
                 onChange={(e) => onTimeRangeChange(e.target.value)}
                 size="sm"
                 maxW="150px"
+                bg={bgColor}
+                borderColor={borderColor}
               >
                 <option value="7d">Last 7 days</option>
                 <option value="30d">Last 30 days</option>
@@ -161,8 +143,22 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 <option value="1y">Last year</option>
               </Select>
               <HStack spacing={2}>
-                <button onClick={() => handleExport('pdf')}>Export PDF</button>
-                <button onClick={() => handleExport('csv')}>Export CSV</button>
+                <Button
+                  leftIcon={<DownloadIcon />}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleExport('pdf')}
+                >
+                  PDF
+                </Button>
+                <Button
+                  leftIcon={<DownloadIcon />}
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleExport('csv')}
+                >
+                  CSV
+                </Button>
               </HStack>
             </HStack>
           </HStack>
@@ -172,37 +168,49 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <Card>
               <VStack align="center" spacing={2}>
                 <Text fontSize="sm" color="gray.600">Total Leads</Text>
-                <Text fontSize="2xl" fontWeight="bold">{totalLeads}</Text>
+                <Text fontSize="2xl" fontWeight="bold" color={metricColor}>
+                  {totalLeads.toLocaleString()}
+                </Text>
               </VStack>
             </Card>
             <Card>
               <VStack align="center" spacing={2}>
                 <Text fontSize="sm" color="gray.600">Conversion Rate</Text>
-                <Text fontSize="2xl" fontWeight="bold">{conversionRate}%</Text>
+                <Text fontSize="2xl" fontWeight="bold" color="green.500">
+                  {conversionRate}%
+                </Text>
               </VStack>
             </Card>
             <Card>
               <VStack align="center" spacing={2}>
                 <Text fontSize="sm" color="gray.600">Avg Lead Value</Text>
-                <Text fontSize="2xl" fontWeight="bold">${averageLeadValue}</Text>
+                <Text fontSize="2xl" fontWeight="bold" color={metricColor}>
+                  ${averageLeadValue}
+                </Text>
               </VStack>
             </Card>
             <Card>
               <VStack align="center" spacing={2}>
                 <Text fontSize="sm" color="gray.600">Pipeline Value</Text>
-                <Text fontSize="2xl" fontWeight="bold">${totalPipelineValue.toLocaleString()}</Text>
+                <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+                  ${totalPipelineValue.toLocaleString()}
+                </Text>
               </VStack>
             </Card>
             <Card>
               <VStack align="center" spacing={2}>
                 <Text fontSize="sm" color="gray.600">Total Buyers</Text>
-                <Text fontSize="2xl" fontWeight="bold">{totalBuyers}</Text>
+                <Text fontSize="2xl" fontWeight="bold" color={metricColor}>
+                  {totalBuyers.toLocaleString()}
+                </Text>
               </VStack>
             </Card>
             <Card>
               <VStack align="center" spacing={2}>
                 <Text fontSize="sm" color="gray.600">Active Buyers</Text>
-                <Text fontSize="2xl" fontWeight="bold">{activeBuyers}</Text>
+                <Text fontSize="2xl" fontWeight="bold" color="purple.500">
+                  {activeBuyers.toLocaleString()}
+                </Text>
               </VStack>
             </Card>
           </Grid>
@@ -214,15 +222,21 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 type="pie"
                 data={leadStatusData}
                 height={300}
-                colors={Object.values(leadStatusData).map(() => getStatusColor('new'))}
+                options={{
+                  showLegend: true,
+                  animate: true,
+                }}
               />
             </Card>
             <Card header="Property Type Distribution">
               <Chart
-                type="pie"
+                type="doughnut"
                 data={propertyTypeData}
                 height={300}
-                colors={Object.values(propertyTypeData).map(() => getPropertyTypeColor('single_family'))}
+                options={{
+                  showLegend: true,
+                  animate: true,
+                }}
               />
             </Card>
             <Card header="Monthly Lead Growth">
@@ -230,17 +244,25 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 type="line"
                 data={monthlyLeadGrowth}
                 height={300}
-                xAxisDataKey="name"
-                yAxisDataKey="value"
+                options={{
+                  xAxisLabel: 'Month',
+                  yAxisLabel: 'Leads',
+                  showGrid: true,
+                  animate: true,
+                }}
               />
             </Card>
             <Card header="Conversion Rate Over Time">
               <Chart
-                type="line"
+                type="area"
                 data={conversionRateData}
                 height={300}
-                xAxisDataKey="name"
-                yAxisDataKey="value"
+                options={{
+                  xAxisLabel: 'Month',
+                  yAxisLabel: 'Conversion Rate (%)',
+                  showGrid: true,
+                  animate: true,
+                }}
               />
             </Card>
             <Card header="Buyer Type Distribution">
@@ -248,9 +270,27 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 type="bar"
                 data={buyerTypeData}
                 height={300}
-                xAxisDataKey="name"
-                yAxisDataKey="value"
-                colors={Object.values(buyerTypeData).map(() => getBuyerTypeColor('individual'))}
+                options={{
+                  xAxisLabel: 'Buyer Type',
+                  yAxisLabel: 'Count',
+                  showGrid: true,
+                  animate: true,
+                }}
+              />
+            </Card>
+            <Card header="Lead Funnel">
+              <Chart
+                type="funnel"
+                data={[
+                  { name: 'New Leads', value: totalLeads },
+                  { name: 'Contacted', value: leads.filter(l => l.status === 'contacted').length },
+                  { name: 'Qualified', value: leads.filter(l => l.status === 'qualified').length },
+                  { name: 'Converted', value: leads.filter(l => l.status === 'converted').length },
+                ]}
+                height={300}
+                options={{
+                  animate: true,
+                }}
               />
             </Card>
           </Grid>

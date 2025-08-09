@@ -1,8 +1,17 @@
-// Analytics feature barrel export
-// This file will export all analytics components and utilities
-
-// TODO: Export analytics components as they are migrated
-// export * from './components';
-// export * from './hooks';
-// export * from './services';
-// export * from './types'; 
+// Analytics Feature Exports
+export * from './components/AnalyticsDashboard';
+export * from './components/PerformanceMetrics';
+export * from './components/ConversionCharts';
+export * from './components/TeamPerformance';
+export * from './components/CustomReports';
+export * from './components/Chart';
+export * from './components/MetricCard';
+export * from './components/FilterPanel';
+export * from './components/DashboardWidget';
+export * from './components/DashboardBuilder';
+export * from './components/AnalyticsNavigation';
+export * from './components/AnalyticsErrorBoundary';
+export * from './components/AnalyticsLoading';
+export * from './hooks/useAnalytics';
+export * from './types/analytics';
+export * from './utils/dataProcessing'; 

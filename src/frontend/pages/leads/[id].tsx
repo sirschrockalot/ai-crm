@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { Box, VStack, HStack, Heading, Text, useToast, Divider, Avatar, Grid } from '@chakra-ui/react';
+import { Box, VStack, HStack, Heading, Text, useToast, Divider, Avatar, Grid, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import { Sidebar, Header, Navigation } from '../../components/layout';
-import { Card, Button, Badge, Modal } from '../../components/ui';
+import { Card, Button, Badge, Modal, Breadcrumb } from '../../components/ui';
 import { LeadForm } from '../../components/forms';
 import { useLeads } from '../../hooks/services/useLeads';
 import { Lead, LeadStatus, PropertyType } from '../../types';
 
 const LeadDetailPage: React.FC = () => {
   const router = useRouter();
-  const { id } = router.query;
+  const { id, tab, action } = router.query;
   const { leads, loading, error, fetchLeads, updateLead } = useLeads();
   const [lead, setLead] = useState<Lead | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
+
+  // Route guard - redirect if no ID
+  useEffect(() => {
+    if (router.isReady && !id) {
+      router.push('/leads');
+    }
+  }, [router.isReady, id, router]);
 
   useEffect(() => {
     if (id && leads.length > 0) {
@@ -28,6 +36,7 @@ const LeadDetailPage: React.FC = () => {
 
   const handleUpdateLead = async (data: any) => {
     if (!lead) return;
+    setIsLoading(true);
     try {
       await updateLead(lead.id, data);
       toast({
@@ -43,7 +52,24 @@ const LeadDetailPage: React.FC = () => {
         status: 'error',
         duration: 5000,
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  // Handle query parameter changes
+  const handleTabChange = (newTab: string) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, tab: newTab },
+    }, undefined, { shallow: true });
+  };
+
+  const handleAction = (actionType: string) => {
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, action: actionType },
+    }, undefined, { shallow: true });
   };
 
   const getStatusColor = (status: LeadStatus) => {
@@ -67,7 +93,7 @@ const LeadDetailPage: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading || !router.isReady) {
     return (
       <Box minH="100vh" bg="gray.50">
         <Header />
@@ -75,7 +101,10 @@ const LeadDetailPage: React.FC = () => {
           <Sidebar />
           <Box flex={1} p={6}>
             <Navigation />
-            <Text>Loading lead details...</Text>
+            <VStack spacing={4} align="center" justify="center" minH="400px">
+              <Spinner size="xl" color="blue.500" />
+              <Text>Loading lead details...</Text>
+            </VStack>
           </Box>
         </HStack>
       </Box>
@@ -90,7 +119,16 @@ const LeadDetailPage: React.FC = () => {
           <Sidebar />
           <Box flex={1} p={6}>
             <Navigation />
-            <Text color="red.500">Error loading lead: {error}</Text>
+            <Alert status="error" borderRadius="md">
+              <AlertIcon />
+              <VStack align="start" spacing={2}>
+                <Text fontWeight="semibold">Error loading lead</Text>
+                <Text fontSize="sm">{error}</Text>
+                <Button size="sm" onClick={() => router.push('/leads')}>
+                  Back to Leads
+                </Button>
+              </VStack>
+            </Alert>
           </Box>
         </HStack>
       </Box>
@@ -120,6 +158,7 @@ const LeadDetailPage: React.FC = () => {
         <Box flex={1} p={6}>
           <Navigation />
           <VStack align="stretch" spacing={6}>
+            <Breadcrumb />
             {/* Header */}
             <HStack justify="space-between">
               <VStack align="start" spacing={2}>

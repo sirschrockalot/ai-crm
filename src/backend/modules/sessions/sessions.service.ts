@@ -24,7 +24,7 @@ export class SessionsService {
     private readonly eventEmitter: EventEmitter2,
   ) {
     // Initialize Redis connection
-    this.redis = new Redis({
+    this.redis = new (Redis as any)({
       host: this.configService.get('REDIS_HOST', 'localhost'),
       port: this.configService.get('REDIS_PORT', 6379),
       password: this.configService.get('REDIS_PASSWORD'),
@@ -94,6 +94,7 @@ export class SessionsService {
         resource: 'session',
         action: 'create',
         outcome: 'success',
+        severity: 'low',
         details: {
           sessionId: savedSession._id.toString(),
           deviceFingerprint: savedSession.deviceInfo?.fingerprint,
@@ -263,6 +264,7 @@ export class SessionsService {
         resource: 'session',
         action: 'terminate',
         outcome: 'success',
+        severity: 'low',
         details: {
           sessionId: session._id.toString(),
           terminatedBy: terminateSessionDto.terminatedBy.toString(),
@@ -306,6 +308,7 @@ export class SessionsService {
         resource: 'session',
         action: 'add_security_flag',
         outcome: 'success',
+        severity: 'medium',
         details: {
           sessionId: session._id.toString(),
           flag: sessionSecurityDto.flag,

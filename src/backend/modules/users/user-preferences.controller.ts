@@ -16,8 +16,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery }
 import { UserPreferencesService } from './services/user-preferences.service';
 import { UpdateUserPreferencesDto } from './dto/user-preferences.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../rbac/guards/roles.guard';
-import { Roles } from '../rbac/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { UserRole } from './schemas/user.schema';
 import { CurrentUser } from '../auth/decorators/auth.decorator';
 

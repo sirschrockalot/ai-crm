@@ -7,7 +7,6 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
     'prettier',
   ],
   parser: '@typescript-eslint/parser',
@@ -18,7 +17,7 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: ['@typescript-eslint', 'react', 'react-hooks'],
+  plugins: ['@typescript-eslint'],
   settings: {
     react: {
       version: 'detect',
@@ -31,12 +30,6 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'warn',
-    
-    // React rules
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'off',
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
     
     // General rules
     'no-console': 'warn',
@@ -75,6 +68,13 @@ module.exports = {
         'plugin:react/recommended',
         'plugin:react-hooks/recommended',
       ],
+      plugins: ['react', 'react-hooks'],
+      rules: {
+        'react/react-in-jsx-scope': 'off',
+        'react/prop-types': 'off',
+        'react-hooks/rules-of-hooks': 'error',
+        'react-hooks/exhaustive-deps': 'warn',
+      },
     },
     {
       files: ['src/mobile/**/*.ts', 'src/mobile/**/*.tsx'],
@@ -86,6 +86,7 @@ module.exports = {
         'plugin:react-hooks/recommended',
         'plugin:react-native/all',
       ],
+      plugins: ['react', 'react-hooks', 'react-native'],
     },
   ],
   ignorePatterns: [

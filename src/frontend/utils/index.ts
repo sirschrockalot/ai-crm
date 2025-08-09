@@ -6,4 +6,5 @@ export * from './date';
 export * from './currency';
 export * from './validation';
 export * from './data';
-export * from './error'; 
+export * from './error';
+export * from './phone'; 

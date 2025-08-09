@@ -1,8 +1,186 @@
-// Performance optimization utilities for DealCycle CRM Frontend
+// Performance optimization utilities
 
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { ComponentType } from 'react';
+
+export interface PerformanceMetrics {
+  loadTime: number;
+  renderTime: number;
+  memoryUsage: number;
+  bundleSize: number;
+}
+
+export class PerformanceOptimizer {
+  private static instance: PerformanceOptimizer;
+  private metrics: Map<string, PerformanceMetrics> = new Map();
+
+  static getInstance(): PerformanceOptimizer {
+    if (!PerformanceOptimizer.instance) {
+      PerformanceOptimizer.instance = new PerformanceOptimizer();
+    }
+    return PerformanceOptimizer.instance;
+  }
+
+  // Measure page load time
+  measureLoadTime(pageName: string): () => number {
+    const startTime = performance.now();
+    return () => {
+      const loadTime = performance.now() - startTime;
+      this.recordMetric(pageName, 'loadTime', loadTime);
+      return loadTime;
+    };
+  }
+
+  // Measure component render time
+  measureRenderTime(componentName: string): () => number {
+    const startTime = performance.now();
+    return () => {
+      const renderTime = performance.now() - startTime;
+      this.recordMetric(componentName, 'renderTime', renderTime);
+      return renderTime;
+    };
+  }
+
+  // Get memory usage
+  getMemoryUsage(): number {
+    if ('memory' in performance) {
+      return (performance as any).memory.usedJSHeapSize / 1024 / 1024; // MB
+    }
+    return 0;
+  }
+
+  // Record performance metric
+  private recordMetric(name: string, type: keyof PerformanceMetrics, value: number): void {
+    const existing = this.metrics.get(name) || {
+      loadTime: 0,
+      renderTime: 0,
+      memoryUsage: 0,
+      bundleSize: 0,
+    };
+
+    this.metrics.set(name, {
+      ...existing,
+      [type]: value,
+    });
+  }
+
+  // Get performance metrics
+  getMetrics(name?: string): PerformanceMetrics | Map<string, PerformanceMetrics> {
+    if (name) {
+      return this.metrics.get(name) || {
+        loadTime: 0,
+        renderTime: 0,
+        memoryUsage: 0,
+        bundleSize: 0,
+      };
+    }
+    return this.metrics;
+  }
+
+  // Clear metrics
+  clearMetrics(): void {
+    this.metrics.clear();
+  }
+}
+
+// Lazy loading utility
+export const lazyLoad = <T extends React.ComponentType<any>>(
+  importFunc: () => Promise<{ default: T }>,
+  fallback?: React.ReactNode
+): React.LazyExoticComponent<T> => {
+  return React.lazy(importFunc);
+};
+
+// Debounce utility
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
+// Throttle utility
+export const throttle = <T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): ((...args: Parameters<T>) => void) => {
+  let inThrottle: boolean;
+  return (...args: Parameters<T>) => {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+};
+
+// Memoization utility
+export const memoize = <T extends (...args: any[]) => any>(
+  func: T,
+  resolver?: (...args: Parameters<T>) => string
+): T => {
+  const cache = new Map<string, ReturnType<T>>();
+  
+  return ((...args: Parameters<T>) => {
+    const key = resolver ? resolver(...args) : JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    
+    const result = func(...args);
+    cache.set(key, result);
+    return result;
+  }) as T;
+};
+
+// Bundle size optimization
+export const optimizeBundle = {
+  // Split large components
+  splitComponent: (component: React.ComponentType, chunkName?: string) => {
+    return React.lazy(() => 
+      import(/* webpackChunkName: "[request]" */ `../components/${component.name}`)
+    );
+  },
+
+  // Preload critical components
+  preloadComponent: (componentPath: string) => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'script';
+    link.href = componentPath;
+    document.head.appendChild(link);
+  },
+
+  // Optimize images
+  optimizeImage: (src: string, width: number, height: number) => {
+    return `${src}?w=${width}&h=${height}&fit=crop&auto=format`;
+  },
+};
+
+// Performance monitoring hook
+export const usePerformanceMonitor = (componentName: string) => {
+  const optimizer = PerformanceOptimizer.getInstance();
+  
+  const measureRender = () => {
+    return optimizer.measureRenderTime(componentName);
+  };
+
+  const getMetrics = () => {
+    return optimizer.getMetrics(componentName) as PerformanceMetrics;
+  };
+
+  return {
+    measureRender,
+    getMetrics,
+    memoryUsage: optimizer.getMemoryUsage(),
+  };
+};
 
 // Preload components for better performance
 export function preloadComponent<T extends ComponentType<any>>(
@@ -189,33 +367,6 @@ export function preloadCriticalResources(): void {
   criticalFont.href = '/fonts/inter-var.woff2';
   criticalFont.crossOrigin = 'anonymous';
   document.head.appendChild(criticalFont);
-}
-
-// Debounce utility for performance
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
-
-// Throttle utility for performance
-export function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return (...args: Parameters<T>) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
 }
 
 // Intersection Observer for lazy loading

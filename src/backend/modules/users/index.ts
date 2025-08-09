@@ -14,7 +14,7 @@ export {
   UpdateUserDto,
   UserSearchDto,
   UpdateUserStatusDto,
-  UpdateUserRoleDto,
+  UpdateUserRolesDto,
   UserActivitySearchDto,
   ProfileDto,
   AddressDto,

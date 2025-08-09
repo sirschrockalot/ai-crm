@@ -22,19 +22,10 @@ export class ContactInfoDto {
   @IsObject()
   @IsOptional()
   address?: {
-    @IsString()
     street: string;
-
-    @IsString()
     city: string;
-
-    @IsString()
     state: string;
-
-    @IsString()
     zipCode: string;
-
-    @IsString()
     country: string;
   };
 
@@ -469,21 +460,10 @@ export class CreateLeadDto {
   @IsObject()
   @IsOptional()
   location?: {
-    @IsString()
     city: string;
-
-    @IsString()
     state: string;
-
-    @IsString()
     country: string;
-
-    @IsNumber()
-    @IsOptional()
     latitude?: number;
-
-    @IsNumber()
-    @IsOptional()
     longitude?: number;
   };
 

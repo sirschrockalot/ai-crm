@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '../../common/guards/roles.guard';
+import { RolesGuard } from '../../../common/guards/roles.guard';
 import { AssignmentService, AssignmentResult, AssignmentStats } from '../services/assignment.service';
 import { CreateAssignmentDto, UpdateAssignmentDto, AssignmentResponseDto } from '../dto/assignment.dto';
 

@@ -3,16 +3,28 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import { 
-  QueueEntry, 
-  QueueEntryDocument, 
-  QueuePriority, 
-  QueueStatus,
-  QueueConfiguration,
-  QueueConfigurationDocument 
+  QueueItem, 
+  QueueItemDocument
 } from '../schemas/queue.schema';
 import { Lead, LeadDocument } from '../schemas/lead.schema';
 import { LeadScoringService } from './lead-scoring.service';
 import { RequestWithTenant } from '../../../common/middleware/tenant-isolation.middleware';
+
+export enum QueuePriority {
+  LOW = 1,
+  MEDIUM = 2,
+  HIGH = 3,
+  URGENT = 4,
+  CRITICAL = 5,
+}
+
+export enum QueueStatus {
+  PENDING = 'pending',
+  ASSIGNED = 'assigned',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
 
 export interface QueueEntryData {
   leadId: string;
@@ -23,6 +35,44 @@ export interface QueueEntryData {
   notes?: string;
   tags?: string[];
   metadata?: Record<string, any>;
+}
+
+export interface QueueEntry {
+  queueId: string;
+  tenantId: string;
+  leadId: string;
+  priority: QueuePriority;
+  status: QueueStatus;
+  score: number;
+  queuePosition: number;
+  waitTime: number;
+  estimatedProcessingTime?: number;
+  assignmentReason?: string;
+  notes?: string;
+  tags?: string[];
+  metadata?: Record<string, any>;
+  assignedTo?: string;
+  assignedAt?: Date;
+  completedAt?: Date;
+  cancelledAt?: Date;
+  reason?: string;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+export interface QueueConfiguration {
+  maxQueueSize: number;
+  queueEntryExpiration: number;
+  autoAssignmentEnabled: boolean;
+  priorityWeighting: {
+    score: number;
+    waitTime: number;
+    urgency: number;
+  };
+  agentCapacity: number;
+  processingTimeEstimate: number;
+  retryAttempts: number;
+  retryDelay: number;
 }
 
 export interface QueueStatus {
@@ -44,8 +94,7 @@ export class LeadQueueService {
   private readonly logger = new Logger(LeadQueueService.name);
 
   constructor(
-    @InjectModel(QueueEntry.name) private queueEntryModel: Model<QueueEntryDocument>,
-    @InjectModel(QueueConfiguration.name) private queueConfigModel: Model<QueueConfigurationDocument>,
+    @InjectModel(QueueItem.name) private queueItemModel: Model<QueueItemDocument>,
     @InjectModel(Lead.name) private leadModel: Model<LeadDocument>,
     private readonly leadScoringService: LeadScoringService,
   ) {}
@@ -87,7 +136,7 @@ export class LeadQueueService {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + config.queueEntryExpiration);
 
-    const queueEntry = new this.queueEntryModel({
+    const queueEntry = new this.queueItemModel({
       queueId: uuidv4(),
       tenantId: req.tenant.tenantId,
       leadId: queueData.leadId,
@@ -118,7 +167,7 @@ export class LeadQueueService {
     const config = await this.getQueueConfiguration(req.tenant.tenantId);
 
     // Find the next lead based on priority and FIFO order
-    const nextLead = await this.queueEntryModel
+    const nextLead = await this.queueItemModel
       .findOne({
         tenantId: req.tenant.tenantId,
         status: QueueStatus.PENDING,
@@ -162,7 +211,7 @@ export class LeadQueueService {
     // Update queue entry
     queueEntry.status = QueueStatus.ASSIGNED;
     queueEntry.assignedTo = new Types.ObjectId(agentId);
-    queueEntry.assignedBy = new Types.ObjectId(req.user.id);
+    queueEntry.assignedBy = new Types.ObjectId(req.user.sub);
     queueEntry.assignedAt = new Date();
 
     const updatedEntry = await queueEntry.save();
@@ -417,7 +466,7 @@ export class LeadQueueService {
 
     Object.assign(config, updates);
     config.updatedAt = new Date();
-    config.updatedBy = new Types.ObjectId(req.user.id);
+    config.updatedBy = new Types.ObjectId(req.user.sub);
 
     const updatedConfig = await config.save();
     this.logger.log(`Updated queue configuration for tenant ${req.tenant.tenantId}`);

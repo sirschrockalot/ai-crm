@@ -190,7 +190,7 @@ export function useLeads() {
   }, [singleLeadApi, fetchLeads, filters]);
 
   // Import/Export functionality
-  const importLeads = useCallback(async (file: File) => {
+  const importLeads = useCallback(async (file: File): Promise<LeadImportResult> => {
     try {
       setError(null);
       const formData = new FormData();
@@ -207,7 +207,7 @@ export function useLeads() {
 
       // Refresh leads list
       await fetchLeads(filters);
-      return response;
+      return response as LeadImportResult;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to import leads';
       setError(errorMessage);

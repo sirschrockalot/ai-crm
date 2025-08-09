@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Types } from 'mongoose';
 import { UsersService } from '../users/users.service';
 import { ActivityType, ActivitySeverity } from '../users/schemas/user-activity.schema';
 
@@ -76,11 +77,11 @@ export class AuthService {
   async registerUserFromOAuth(googleUser: GoogleUser, tenantId?: string): Promise<JwtPayload> {
     try {
       // Find or create user from OAuth data
-      const user = await this.usersService.findOrCreateFromOAuth(googleUser, tenantId);
+      const user = await this.usersService.findOrCreateFromOAuth(googleUser, new Types.ObjectId(tenantId));
       
       // Create JWT payload from user data
       return {
-        sub: user._id.toString(),
+        sub: user._id?.toString() || '',
         email: user.email,
         tenantId: user.tenantId?.toString(),
         roles: user.roles,
@@ -143,8 +144,8 @@ export class AuthService {
       // Log logout activity
       if (userId || payload.sub) {
         await this.usersService.logUserActivity({
-          userId: userId || payload.sub,
-          tenantId: payload.tenantId,
+          userId: new Types.ObjectId(userId || payload.sub),
+          tenantId: new Types.ObjectId(payload.tenantId),
           type: ActivityType.LOGOUT,
           description: 'User logged out',
           severity: ActivitySeverity.LOW,
@@ -179,8 +180,8 @@ export class AuthService {
   ): Promise<void> {
     try {
       await this.usersService.logUserActivity({
-        userId,
-        tenantId,
+        userId: new Types.ObjectId(userId),
+        tenantId: new Types.ObjectId(tenantId),
         type: ActivityType.LOGIN,
         description: success ? 'User logged in successfully' : 'Login attempt failed',
         severity: success ? ActivitySeverity.LOW : ActivitySeverity.MEDIUM,

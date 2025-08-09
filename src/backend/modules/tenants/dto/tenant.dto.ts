@@ -2,6 +2,106 @@ import { IsString, IsEnum, IsOptional, IsObject, IsArray, IsNumber, IsBoolean, I
 import { Type } from 'class-transformer';
 import { TenantStatus, TenantPlan, TenantSettings } from '../schemas/tenant.schema';
 
+export class TenantFeaturesDto {
+  @IsBoolean()
+  aiLeadScoring: boolean;
+
+  @IsBoolean()
+  advancedAnalytics: boolean;
+
+  @IsBoolean()
+  automationWorkflows: boolean;
+
+  @IsBoolean()
+  mobileApp: boolean;
+
+  @IsBoolean()
+  apiAccess: boolean;
+
+  @IsBoolean()
+  customIntegrations: boolean;
+}
+
+export class PasswordPolicyDto {
+  @IsNumber()
+  minLength: number;
+
+  @IsBoolean()
+  requireUppercase: boolean;
+
+  @IsBoolean()
+  requireLowercase: boolean;
+
+  @IsBoolean()
+  requireNumbers: boolean;
+
+  @IsBoolean()
+  requireSpecialChars: boolean;
+}
+
+export class TenantSecurityDto {
+  @IsBoolean()
+  requireMfa: boolean;
+
+  @IsNumber()
+  sessionTimeout: number;
+
+  @ValidateNested()
+  @Type(() => PasswordPolicyDto)
+  passwordPolicy: PasswordPolicyDto;
+
+  @IsArray()
+  @IsString({ each: true })
+  ipWhitelist: string[];
+}
+
+export class NotificationPreferencesDto {
+  @IsBoolean()
+  leadAssigned: boolean;
+
+  @IsBoolean()
+  leadStatusChanged: boolean;
+
+  @IsBoolean()
+  automationTriggered: boolean;
+
+  @IsBoolean()
+  systemAlerts: boolean;
+}
+
+export class TenantNotificationsDto {
+  @IsBoolean()
+  emailNotifications: boolean;
+
+  @IsBoolean()
+  smsNotifications: boolean;
+
+  @IsBoolean()
+  inAppNotifications: boolean;
+
+  @ValidateNested()
+  @Type(() => NotificationPreferencesDto)
+  notificationPreferences: NotificationPreferencesDto;
+}
+
+export class TenantIntegrationsDto {
+  @IsBoolean()
+  googleWorkspace: boolean;
+
+  @IsBoolean()
+  microsoft365: boolean;
+
+  @IsBoolean()
+  slack: boolean;
+
+  @IsBoolean()
+  zapier: boolean;
+
+  @IsArray()
+  @IsString({ each: true })
+  customWebhooks: string[];
+}
+
 export class TenantSettingsDto {
   @IsString()
   companyName: string;
@@ -15,103 +115,21 @@ export class TenantSettingsDto {
   @IsString()
   currency: string;
 
-  @IsObject()
-  features: {
-    @IsBoolean()
-    aiLeadScoring: boolean;
+  @ValidateNested()
+  @Type(() => TenantFeaturesDto)
+  features: TenantFeaturesDto;
 
-    @IsBoolean()
-    advancedAnalytics: boolean;
+  @ValidateNested()
+  @Type(() => TenantSecurityDto)
+  security: TenantSecurityDto;
 
-    @IsBoolean()
-    automationWorkflows: boolean;
+  @ValidateNested()
+  @Type(() => TenantNotificationsDto)
+  notifications: TenantNotificationsDto;
 
-    @IsBoolean()
-    mobileApp: boolean;
-
-    @IsBoolean()
-    apiAccess: boolean;
-
-    @IsBoolean()
-    customIntegrations: boolean;
-  };
-
-  @IsObject()
-  security: {
-    @IsBoolean()
-    requireMfa: boolean;
-
-    @IsNumber()
-    sessionTimeout: number;
-
-    @IsObject()
-    passwordPolicy: {
-      @IsNumber()
-      minLength: number;
-
-      @IsBoolean()
-      requireUppercase: boolean;
-
-      @IsBoolean()
-      requireLowercase: boolean;
-
-      @IsBoolean()
-      requireNumbers: boolean;
-
-      @IsBoolean()
-      requireSpecialChars: boolean;
-    };
-
-    @IsArray()
-    @IsString({ each: true })
-    ipWhitelist: string[];
-  };
-
-  @IsObject()
-  notifications: {
-    @IsBoolean()
-    emailNotifications: boolean;
-
-    @IsBoolean()
-    smsNotifications: boolean;
-
-    @IsBoolean()
-    inAppNotifications: boolean;
-
-    @IsObject()
-    notificationPreferences: {
-      @IsBoolean()
-      leadAssigned: boolean;
-
-      @IsBoolean()
-      leadStatusChanged: boolean;
-
-      @IsBoolean()
-      automationTriggered: boolean;
-
-      @IsBoolean()
-      systemAlerts: boolean;
-    };
-  };
-
-  @IsObject()
-  integrations: {
-    @IsBoolean()
-    googleWorkspace: boolean;
-
-    @IsBoolean()
-    microsoft365: boolean;
-
-    @IsBoolean()
-    slack: boolean;
-
-    @IsBoolean()
-    zapier: boolean;
-
-    @IsArray()
-    @IsString({ each: true })
-    customWebhooks: string[];
-  };
+  @ValidateNested()
+  @Type(() => TenantIntegrationsDto)
+  integrations: TenantIntegrationsDto;
 }
 
 export class CreateTenantDto {
@@ -149,24 +167,27 @@ export class CreateTenantDto {
   @IsOptional()
   phone?: string;
 
-  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDto)
   @IsOptional()
-  address?: {
-    @IsString()
-    street: string;
+  address?: AddressDto;
+}
 
-    @IsString()
-    city: string;
+export class AddressDto {
+  @IsString()
+  street: string;
 
-    @IsString()
-    state: string;
+  @IsString()
+  city: string;
 
-    @IsString()
-    zipCode: string;
+  @IsString()
+  state: string;
 
-    @IsString()
-    country: string;
-  };
+  @IsString()
+  zipCode: string;
+
+  @IsString()
+  country: string;
 }
 
 export class UpdateTenantDto {
@@ -239,24 +260,10 @@ export class UpdateTenantDto {
   @IsOptional()
   phone?: string;
 
-  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDto)
   @IsOptional()
-  address?: {
-    @IsString()
-    street: string;
-
-    @IsString()
-    city: string;
-
-    @IsString()
-    state: string;
-
-    @IsString()
-    zipCode: string;
-
-    @IsString()
-    country: string;
-  };
+  address?: AddressDto;
 }
 
 export class TenantResponseDto {
@@ -337,15 +344,10 @@ export class TenantResponseDto {
   @IsOptional()
   phone?: string;
 
-  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDto)
   @IsOptional()
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
+  address?: AddressDto;
 
   @IsObject()
   @IsOptional()

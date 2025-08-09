@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateLeadDto, UpdateLeadDto } from '../dto/lead.dto';
-import { Lead, LeadStatus, LeadSource, LeadPriority } from '../schemas/lead.schema';
+import { Lead, LeadStatus, LeadSource, LeadPriority, PropertyType, TransactionType } from '../schemas/lead.schema';
 
 export interface ValidationError {
   field: string;
@@ -518,7 +518,7 @@ export class LeadValidationService {
 
     // Remove duplicates from the array
     const uniqueDuplicates = duplicateLeads.filter((lead, index, self) => 
-      index === self.findIndex(l => l._id.toString() === lead._id.toString())
+      index === self.findIndex(l => l._id?.toString() === lead._id?.toString())
     );
 
     return {
@@ -555,9 +555,7 @@ export class LeadValidationService {
     }
 
     // Clean company name if present
-    if (cleansed.contactInfo?.companyName) {
-      cleansed.contactInfo.companyName = this.normalizeCompanyName(cleansed.contactInfo.companyName);
-    }
+    // Note: companyName is not part of ContactInfo interface, so we'll skip this
 
     // Normalize status and priority
     if (cleansed.status) {

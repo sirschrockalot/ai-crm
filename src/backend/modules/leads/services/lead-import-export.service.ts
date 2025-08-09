@@ -36,6 +36,7 @@ export interface ExportResult {
   filePath?: string;
   recordCount: number;
   errors?: string[];
+  warnings?: string[];
 }
 
 @Injectable()
@@ -92,7 +93,7 @@ export class LeadImportExportService {
       for (const record of records) {
         try {
           const processedRecord = this.processImportRecord(record, options.fieldMapping);
-          const validationResult = await this.leadValidationService.validateLead(processedRecord);
+          const validationResult = await this.leadValidationService.validateCreateLead(processedRecord);
 
           if (!validationResult.isValid) {
             errors.push({
@@ -109,7 +110,7 @@ export class LeadImportExportService {
           if (options.skipDuplicates) {
             const existingLead = await this.findDuplicate(processedRecord, tenantId);
             if (existingLead) {
-              result.warnings.push(`Row ${record.rowNumber}: Duplicate lead found (${existingLead.email})`);
+              result.warnings.push(`Row ${record.rowNumber}: Duplicate lead found (${existingLead.contactInfo?.email})`);
               continue;
             }
           }
@@ -118,7 +119,7 @@ export class LeadImportExportService {
           if (options.updateExisting) {
             const existingLead = await this.findExistingLead(processedRecord, tenantId);
             if (existingLead) {
-              await this.leadModel.findByIdAndUpdate(existingLead._id, processedRecord);
+              await this.leadModel.findByIdAndUpdate(existingLead._id?.toString() || '', processedRecord);
             } else {
               await this.leadModel.create({ ...processedRecord, tenantId });
             }
@@ -204,7 +205,7 @@ export class LeadImportExportService {
 
       return {
         success: true,
-        filePath: csvWriter.path,
+        filePath: (csvWriter as any).path,
         recordCount: leads.length,
       };
     } catch (error) {
@@ -323,11 +324,11 @@ export class LeadImportExportService {
    * Find duplicate lead
    */
   private async findDuplicate(lead: Partial<Lead>, tenantId: string): Promise<Lead | null> {
-    if (lead.email) {
-      return await this.leadModel.findOne({ email: lead.email, tenantId }).exec();
+    if (lead.contactInfo?.email) {
+      return await this.leadModel.findOne({ 'contactInfo.email': lead.contactInfo.email, tenantId }).exec();
     }
-    if (lead.phone) {
-      return await this.leadModel.findOne({ phone: lead.phone, tenantId }).exec();
+    if (lead.contactInfo?.phone) {
+      return await this.leadModel.findOne({ 'contactInfo.phone': lead.contactInfo.phone, tenantId }).exec();
     }
     return null;
   }
@@ -336,8 +337,8 @@ export class LeadImportExportService {
    * Find existing lead for update
    */
   private async findExistingLead(lead: Partial<Lead>, tenantId: string): Promise<Lead | null> {
-    if (lead.email) {
-      return await this.leadModel.findOne({ email: lead.email, tenantId }).exec();
+    if (lead.contactInfo?.email) {
+      return await this.leadModel.findOne({ 'contactInfo.email': lead.contactInfo.email, tenantId }).exec();
     }
     return null;
   }

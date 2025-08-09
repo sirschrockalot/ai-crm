@@ -18,11 +18,15 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Alert,
+  AlertIcon,
+  AlertTitle,
+  AlertDescription,
 } from '@chakra-ui/react';
 import { FiSearch, FiDownload, FiUpload, FiMoreVertical, FiEdit, FiTrash2, FiEye } from 'react-icons/fi';
-import { useLeads } from '../../../hooks/useLeads';
+import { useLeads } from '../../../hooks/services/useLeads';
 import { Lead, LeadStatus, PropertyType } from '../../../types';
-import { Table, Card, ErrorBoundary } from '../../ui';
+import { Table, Card, ErrorBoundary, Loading } from '../../ui';
 import LeadForm from '../../forms/LeadForm';
 import { LeadDetail } from '../LeadDetail/LeadDetail';
 
@@ -30,17 +34,37 @@ interface LeadListProps {
   onLeadSelect?: (lead: Lead) => void;
   showFilters?: boolean;
   showBulkActions?: boolean;
+  selectedLeads?: string[];
+  onSelectionChange?: (selectedIds: string[]) => void;
+  filters?: {
+    status?: string;
+    propertyType?: string;
+    search?: string;
+    minValue?: string;
+    maxValue?: string;
+    assignedTo?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
+  onFiltersChange?: (filters: any) => void;
 }
 
 export const LeadList: React.FC<LeadListProps> = ({
   onLeadSelect,
   showFilters = true,
   showBulkActions = true,
+  selectedLeads: externalSelectedLeads,
+  onSelectionChange,
+  filters: externalFilters,
+  onFiltersChange,
 }) => {
   const toast = useToast();
   const {
-    filteredLeads,
-    filters,
+    leads,
+    loading,
+    error,
+    isAuthenticated,
+    user,
     fetchLeads,
     createLead,
     updateLead,
@@ -49,33 +73,73 @@ export const LeadList: React.FC<LeadListProps> = ({
     bulkDeleteLeads,
     importLeads,
     exportLeads,
-    updateFilters,
-    updateSortConfig,
-    resetFilters,
     getLeadStats,
   } = useLeads();
 
-  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [internalSelectedLeads, setInternalSelectedLeads] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [viewingLead, setViewingLead] = useState<Lead | null>(null);
+  const [internalFilters, setInternalFilters] = useState<{
+    status?: LeadStatus;
+    propertyType?: PropertyType;
+    minValue?: number;
+    maxValue?: number;
+  }>({});
+
+  // Use external state if provided, otherwise use internal state
+  const selectedLeads = externalSelectedLeads || internalSelectedLeads;
+  const setSelectedLeads = onSelectionChange || setInternalSelectedLeads;
+  const filters = externalFilters || internalFilters;
+  const setFilters = onFiltersChange || setInternalFilters;
 
   const { isOpen: isDetailOpen, onOpen: onDetailOpen, onClose: onDetailClose } = useDisclosure();
 
-  // Fetch leads on component mount
+  // Check authentication on mount
   useEffect(() => {
+    if (!isAuthenticated) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please log in to access lead management features.',
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    // Fetch leads on component mount
     fetchLeads();
-  }, [fetchLeads]);
+  }, [fetchLeads, isAuthenticated, toast]);
 
   // Update search filter
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      updateFilters({ search: searchTerm });
+      if (searchTerm) {
+        // In a real implementation, this would update the API filters
+        // For now, we'll just update local state
+        setFilters(prev => ({ ...prev, search: searchTerm }));
+      }
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, updateFilters]);
+  }, [searchTerm, setFilters]);
+
+  // Sync external filters with internal state
+  useEffect(() => {
+    if (externalFilters) {
+      setInternalFilters({
+        status: externalFilters.status as LeadStatus,
+        propertyType: externalFilters.propertyType as PropertyType,
+        minValue: externalFilters.minValue ? Number(externalFilters.minValue) : undefined,
+        maxValue: externalFilters.maxValue ? Number(externalFilters.maxValue) : undefined,
+      });
+      if (externalFilters.search) {
+        setSearchTerm(externalFilters.search);
+      }
+    }
+  }, [externalFilters]);
 
   // Handle lead form submission
   const handleLeadSubmit = async (data: any) => {
@@ -200,6 +264,64 @@ export const LeadList: React.FC<LeadListProps> = ({
     }
   };
 
+  // Update filters
+  const updateFilters = (newFilters: Partial<typeof filters>) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  // Reset filters
+  const resetFilters = () => {
+    setFilters({});
+    setSearchTerm('');
+  };
+
+  // Filter leads based on current filters
+  const filteredLeads = leads.filter(lead => {
+    if (filters.status && lead.status !== filters.status) return false;
+    if (filters.propertyType && lead.propertyType !== filters.propertyType) return false;
+    if (filters.minValue && lead.estimatedValue < filters.minValue) return false;
+    if (filters.maxValue && lead.estimatedValue > filters.maxValue) return false;
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        lead.firstName.toLowerCase().includes(searchLower) ||
+        lead.lastName.toLowerCase().includes(searchLower) ||
+        lead.email.toLowerCase().includes(searchLower) ||
+        lead.phone.includes(searchTerm)
+      );
+    }
+    return true;
+  });
+
+  // Show authentication error
+  if (!isAuthenticated) {
+    return (
+      <Alert status="warning">
+        <AlertIcon />
+        <AlertTitle>Authentication Required</AlertTitle>
+        <AlertDescription>
+          Please log in to access lead management features.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
+  // Show loading state
+  if (loading && leads.length === 0) {
+    return <Loading variant="spinner" size="lg" />;
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <Alert status="error">
+        <AlertIcon />
+        <AlertTitle>Error Loading Leads</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
   // Table columns configuration
   const columns = [
     {
@@ -286,12 +408,6 @@ export const LeadList: React.FC<LeadListProps> = ({
       sortable: true,
     },
     {
-      key: 'assignedTo',
-      header: 'Assigned To',
-      accessor: (lead: Lead) => <Text>{lead.assignedTo || 'Unassigned'}</Text>,
-      sortable: true,
-    },
-    {
       key: 'actions',
       header: 'Actions',
       accessor: (lead: Lead) => (
@@ -335,8 +451,6 @@ export const LeadList: React.FC<LeadListProps> = ({
     },
   ];
 
-  const stats = getLeadStats();
-
   return (
     <ErrorBoundary>
       <VStack align="stretch" spacing={6}>
@@ -345,19 +459,21 @@ export const LeadList: React.FC<LeadListProps> = ({
           <VStack align="start" spacing={1}>
             <Heading size="lg">Lead Management</Heading>
             <Text color="gray.600">
-              {stats.total} total leads • {stats.conversionRate.toFixed(1)}% conversion rate
+              {filteredLeads.length} leads • {user?.firstName} {user?.lastName}
             </Text>
           </VStack>
           <HStack spacing={3}>
             <Button
               leftIcon={<FiUpload />}
               onClick={() => document.getElementById('file-import')?.click()}
+              isLoading={loading}
             >
               Import
             </Button>
             <Button
               leftIcon={<FiDownload />}
               onClick={handleExport}
+              isLoading={loading}
             >
               Export
             </Button>
@@ -367,6 +483,7 @@ export const LeadList: React.FC<LeadListProps> = ({
                 setEditingLead(null);
                 setShowLeadForm(true);
               }}
+              isLoading={loading}
             >
               Add Lead
             </Button>
@@ -468,6 +585,7 @@ export const LeadList: React.FC<LeadListProps> = ({
                   colorScheme="red"
                   size="sm"
                   onClick={handleBulkDelete}
+                  isLoading={loading}
                 >
                   Delete Selected
                 </Button>
@@ -478,12 +596,15 @@ export const LeadList: React.FC<LeadListProps> = ({
 
         {/* Leads Table */}
         <Card>
-          <Table
-            data={filteredLeads}
-            columns={columns}
-            onSort={(field, direction) => updateSortConfig(field as keyof Lead, direction)}
-            onRowClick={(lead) => onLeadSelect?.(lead)}
-          />
+          {loading ? (
+            <Loading variant="skeleton" />
+          ) : (
+            <Table
+              data={filteredLeads}
+              columns={columns}
+              onRowClick={(lead) => onLeadSelect?.(lead)}
+            />
+          )}
         </Card>
 
         {/* Hidden file input for import */}
