@@ -12,6 +12,9 @@ export * from './dashboard';
 // Shared Components
 export * from './shared';
 
+// Auth Components
+export * from './auth';
+
 // Feature-specific components
 export * from './leads';
 export * from './analytics';

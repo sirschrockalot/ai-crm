@@ -6,4 +6,5 @@ export { default as importExportService } from './importExportService';
 export { default as pipelineService } from './pipelineService';
 export { default as apiService } from './apiService';
 export { default as realtimeService } from './realtimeService';
-export { default as loadingService } from './loadingService'; 
+export { default as loadingService } from './loadingService';
+export { authService } from './authService'; 

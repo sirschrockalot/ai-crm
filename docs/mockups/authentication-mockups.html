@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DealCycle CRM - Authentication UI Mockups</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .mockups-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .mockup-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .mockup-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .mockup-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .mockup-header h3 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+
+        .mockup-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .mockup-content {
+            padding: 30px;
+        }
+
+        .auth-form {
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            height: 60px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-title h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-title p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-input.error {
+            border-color: #e53e3e;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #666;
+            border: 1px solid #e1e5e9;
+        }
+
+        .btn-ghost:hover {
+            background: #f8f9fa;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e5e9;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            background: #4285f4;
+            border-radius: 4px;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin: 0 10px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .alert-info {
+            background: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+        }
+
+        .alert-warning {
+            background: #fef5e7;
+            color: #c05621;
+            border: 1px solid #faf089;
+        }
+
+        .alert-success {
+            background: #f0fff4;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background: #f0f0f0;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .test-user-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            margin-top: 15px;
+        }
+
+        .user-info h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .user-info p {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .features-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .features-list h4 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .features-list ul {
+            list-style: none;
+        }
+
+        .features-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .mockups-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DealCycle CRM</h1>
+            <p>Authentication UI Mockups</p>
+        </div>
+
+        <div class="mockups-grid">
+            <!-- Login Page -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <h3>Login Page</h3>
+                    <p>Primary authentication page with Google OAuth and email/password options</p>
+                </div>
+                <div class="mockup-content">
+                    <div class="auth-form">
+                        <div class="logo">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjNjY3ZWVhIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjM1IiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVhbEN5Y2xlIENSTTwvdGV4dD4KPC9zdmc+" alt="DealCycle CRM">
+                        </div>
+                        
+                        <div class="form-title">
+                            <h2>Welcome to DealCycle CRM</h2>
+                            <p>Sign in to your account to continue</p>
+                        </div>
+
+                        <button class="btn btn-outline google-btn">
+                            <div class="google-icon"></div>
+                            Continue with Google
+                        </button>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" placeholder="Enter your email">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" placeholder="Enter your password">
+                        </div>
+
+                        <button class="btn btn-primary">Sign In</button>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+
+                        <button class="btn btn-ghost">🧪 Test Mode Login</button>
+
+                        <div class="footer-links">
+                            <a href="#">Create account</a>
+                            <a href="#">Forgot password?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Page -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <h3>Registration Page</h3>
+                    <p>New user registration with comprehensive form validation</p>
+                </div>
+                <div class="mockup-content">
+                    <div class="auth-form">
+                        <div class="logo">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjNjY3ZWVhIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjM1IiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVhbEN5Y2xlIENSTTwvdGV4dD4KPC9zdmc+" alt="DealCycle CRM">
+                        </div>
+                        
+                        <div class="form-title">
+                            <h2>Create Your Account</h2>
+                            <p>Join DealCycle CRM to streamline your real estate operations</p>
+                        </div>
+
+                        <button class="btn btn-outline google-btn">
+                            <div class="google-icon"></div>
+                            Sign up with Google
+                        </button>
+
+                        <div class="divider">
+                            <span>or</span>
+                        </div>
+
+                        <div class="alert alert-info">
+                            Create an account to access the full DealCycle CRM platform
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-input" placeholder="Enter your first name">
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-input" placeholder="Enter your last name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" placeholder="Enter your email address">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Company Name</label>
+                            <input type="text" class="form-input" placeholder="Enter your company name">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" placeholder="Create a strong password">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-input" placeholder="Confirm your password">
+                        </div>
+
+                        <button class="btn btn-primary">Create Account</button>
+
+                        <div class="footer-links">
+                            <span>Already have an account? </span>
+                            <a href="#">Sign in here</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Reset Page -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <h3>Password Reset Page</h3>
+                    <p>Forgot password flow with email verification</p>
+                </div>
+                <div class="mockup-content">
+                    <div class="auth-form">
+                        <div class="logo">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjNjY3ZWVhIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjM1IiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVhbEN5Y2xlIENSTTwvdGV4dD4KPC9zdmc+" alt="DealCycle CRM">
+                        </div>
+                        
+                        <div class="form-title">
+                            <h2>Reset Your Password</h2>
+                            <p>Enter your email address and we'll send you a link to reset your password</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-input" placeholder="Enter your email address">
+                        </div>
+
+                        <button class="btn btn-primary">Send Reset Link</button>
+
+                        <div class="footer-links">
+                            <span>Remember your password? </span>
+                            <a href="#">Sign in here</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MFA Setup Page -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <h3>MFA Setup Page</h3>
+                    <p>Two-factor authentication setup with QR code</p>
+                </div>
+                <div class="mockup-content">
+                    <div class="auth-form">
+                        <div class="logo">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjNjY3ZWVhIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjM1IiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVhbEN5Y2xlIENSTTwvdGV4dD4KPC9zdmc+" alt="DealCycle CRM">
+                        </div>
+                        
+                        <div class="form-title">
+                            <h2>Set Up Two-Factor Authentication</h2>
+                            <p>Enhance your account security by enabling two-factor authentication</p>
+                        </div>
+
+                        <div class="alert alert-info">
+                            Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.) to set up two-factor authentication.
+                        </div>
+
+                        <div style="text-align: center; margin: 20px 0;">
+                            <h4 style="margin-bottom: 15px;">Step 1: Scan QR Code</h4>
+                            <div class="qr-code">
+                                QR Code<br>200x200px
+                            </div>
+                        </div>
+
+                        <div class="divider">
+                            <span>then</span>
+                        </div>
+
+                        <div style="text-align: center; margin: 20px 0;">
+                            <h4 style="margin-bottom: 15px;">Step 2: Enter Verification Code</h4>
+                            <div class="form-group">
+                                <label class="form-label">6-Digit Code</label>
+                                <input type="text" class="form-input" placeholder="000000" maxlength="6">
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-primary" style="flex: 1;">Verify & Enable MFA</button>
+                                <button class="btn btn-ghost">Skip for Now</button>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong><br>
+                            • Save your backup codes in a secure location<br>
+                            • You'll need this code to sign in from now on<br>
+                            • If you lose your device, use backup codes to access your account
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Mode Login -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <h3>Test Mode Login</h3>
+                    <p>Development and testing environment access</p>
+                </div>
+                <div class="mockup-content">
+                    <div class="auth-form">
+                        <div class="logo">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjNjY3ZWVhIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjM1IiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVhbEN5Y2xlIENSTTwvdGV4dD4KPC9zdmc+" alt="DealCycle CRM">
+                        </div>
+                        
+                        <div class="form-title">
+                            <h2>Test Mode Login</h2>
+                            <p>Development and testing environment</p>
+                        </div>
+
+                        <div class="alert alert-warning">
+                            This is a test environment. Select a test user to quickly access the system for development and testing purposes.
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Select Test User:</label>
+                            <select class="test-user-select">
+                                <option value="">Choose a test user</option>
+                                <option value="1">Admin User - Admin</option>
+                                <option value="2">Acquisition Rep - Acquisition Rep</option>
+                                <option value="3">Disposition Manager - Disposition Manager</option>
+                                <option value="4">Team Member - Team Member</option>
+                            </select>
+                        </div>
+
+                        <div class="user-info">
+                            <h4>Selected User:</h4>
+                            <p><strong>Name:</strong> Admin User</p>
+                            <p><strong>Email:</strong> admin@dealcycle.com</p>
+                            <p><strong>Role:</strong> Admin</p>
+                        </div>
+
+                        <button class="btn btn-primary">Login as Test User</button>
+
+                        <button class="btn btn-ghost">Back to Regular Login</button>
+
+                        <div style="text-align: center; margin-top: 20px;">
+                            <small style="color: #666;">Test mode is only available in development environment</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OAuth Callback -->
+            <div class="mockup-card">
+                <div class="mockup-header">
+                    <h3>OAuth Callback Page</h3>
+                    <p>Google OAuth authentication response handling</p>
+                </div>
+                <div class="mockup-content">
+                    <div class="auth-form">
+                        <div class="logo">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMjAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjNjY3ZWVhIiByeD0iOCIvPgo8dGV4dCB4PSIxMDAiIHk9IjM1IiBmb250LWZhbWlseT0iSW50ZXIiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+RGVhbEN5Y2xlIENSTTwvdGV4dD4KPC9zdmc+" alt="DealCycle CRM">
+                        </div>
+                        
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 20px;">⏳</div>
+                            <h2 style="margin-bottom: 10px;">Completing authentication...</h2>
+                            <p style="color: #666;">Please wait while we complete your sign-in process</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Overview -->
+        <div class="mockup-card">
+            <div class="mockup-header">
+                <h3>Authentication Features Overview</h3>
+                <p>Complete authentication system with security and user experience features</p>
+            </div>
+            <div class="mockup-content">
+                <div class="features-list">
+                    <h4>✅ Implemented Features:</h4>
+                    <ul>
+                        <li>Google OAuth 2.0 integration with secure callback handling</li>
+                        <li>Email/password authentication with form validation</li>
+                        <li>User registration with comprehensive validation</li>
+                        <li>Password reset functionality with email verification</li>
+                        <li>Two-factor authentication (MFA) with QR code setup</li>
+                        <li>Test mode login for development and testing</li>
+                        <li>Route protection with role-based access control</li>
+                        <li>JWT token management with secure storage</li>
+                        <li>Session management and auto-refresh</li>
+                        <li>Responsive design for all device sizes</li>
+                        <li>Accessibility compliance (WCAG 2.1 AA)</li>
+                        <li>Error handling with user-friendly messages</li>
+                        <li>Multi-tenant authentication support</li>
+                        <li>Security headers and CSRF protection</li>
+                        <li>Comprehensive API service layer</li>
+                    </ul>
+                </div>
+
+                <div class="features-list">
+                    <h4>🔧 Technical Implementation:</h4>
+                    <ul>
+                        <li>React Hook Form with Zod validation</li>
+                        <li>Chakra UI components for consistent design</li>
+                        <li>TypeScript for type safety</li>
+                        <li>Next.js routing and API routes</li>
+                        <li>Axios for HTTP requests with interceptors</li>
+                        <li>Secure token storage and management</li>
+                        <li>Role-based access control (RBAC)</li>
+                        <li>Multi-tenant architecture support</li>
+                        <li>Comprehensive error handling</li>
+                        <li>Loading states and user feedback</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
