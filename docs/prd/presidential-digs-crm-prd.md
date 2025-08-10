@@ -175,7 +175,13 @@ Phase 3: Expanded platform for broader real estate investment community
    - Lead tagging and categorization
    - Lead search and filtering capabilities
    - Lead pipeline visualization
-   - Lead import/export functionality
+   - **Lead Import/Export Functionality**
+     - CSV file import with validation and error handling
+     - Bulk lead import with duplicate detection and field mapping
+     - Export leads to CSV with customizable field selection
+     - Import/export activity tracking and history
+     - Template download for standardized import format
+     - Bulk operations (update, delete, assign, status change)
 
 3. **Buyer Management System**
    - Buyer profile creation and management
@@ -220,7 +226,16 @@ Phase 3: Expanded platform for broader real estate investment community
    - Time Tracking Dashboard: Individual and team time tracking metrics
    - Mobile Dashboard: Responsive design for field operations
 
-8. **Automation Workflows**
+8. **Global Navigation System**
+   - Persistent navigation panel available on all screens
+   - Consistent navigation structure across all application pages
+   - Role-based navigation menu items and permissions
+   - Breadcrumb navigation for deep page hierarchies
+   - Quick access to frequently used features
+   - Mobile-responsive navigation with collapsible menu
+   - Navigation state persistence across page refreshes
+
+9. **Automation Workflows**
    - Automated lead assignment
    - Scheduled follow-up sequences
    - Automated buyer matching
@@ -228,13 +243,13 @@ Phase 3: Expanded platform for broader real estate investment community
    - Task automation and reminders
    - Workflow builder interface
 
-9. **API & Documentation**
+10. **API & Documentation**
    - RESTful API with Swagger documentation
    - API authentication and rate limiting
    - Health check endpoints
    - Comprehensive API documentation
 
-10. **Time Tracking & Project Management**
+11. **Time Tracking & Project Management**
     - Individual time entry creation and management
     - Weekly timesheet interface with bulk entry capabilities
     - Project and task integration for time categorization
@@ -244,13 +259,13 @@ Phase 3: Expanded platform for broader real estate investment community
     - Data validation and business rules enforcement
     - Mobile-responsive time tracking interface
 
-11. **API & Documentation**
+12. **API & Documentation**
     - RESTful API with Swagger documentation
     - API authentication and rate limiting
     - Health check endpoints
     - Comprehensive API documentation
 
-12. **Infrastructure & Deployment**
+13. **Infrastructure & Deployment**
     - Docker containerization
     - Google Cloud Platform deployment
     - Prometheus metrics and Grafana dashboards
@@ -279,6 +294,7 @@ Phase 3: Expanded platform for broader real estate investment community
 - Foundation established for Phase 2 SaaS productization
 - AI features achieve 80% user acceptance rate
 - Time tracking achieves 85% user adoption within 3 months
+- Global navigation system achieves 100% screen coverage and 95% user navigation success rate
 
 ---
 
@@ -380,6 +396,7 @@ Phase 3: Expanded platform for broader real estate investment community
 - **Responsive Design:** Mobile-first approach with breakpoint optimization
 - **Accessibility:** WCAG 2.1 AA compliance standards
 - **Performance:** Optimized loading times and smooth animations
+- **Navigation Design:** Persistent left-side navigation panel with collapsible design, consistent across all screens
 
 ---
 
@@ -528,7 +545,115 @@ The frontend architecture is being consolidated from a micro-apps structure to a
 
 ## 📚 Appendices
 
-**A. Research Summary**
+**A. Global Navigation System Feature Specification**
+
+### Overview
+
+The Global Navigation System ensures consistent and accessible navigation across all application screens. This feature provides users with persistent access to all major application areas, regardless of their current location within the system. The navigation system adapts to user roles and provides contextual access to frequently used features.
+
+### Business Value
+
+**User Benefits:**
+- **Always Accessible:** Navigation available on every screen for seamless movement between features
+- **Consistent Experience:** Uniform navigation structure across all application areas
+- **Role-Based Access:** Navigation items tailored to user permissions and responsibilities
+- **Efficient Workflow:** Quick access to frequently used features reduces navigation time
+- **Mobile Friendly:** Responsive navigation that works across all device types
+
+**Business Impact:**
+- **Improved User Adoption:** Consistent navigation reduces learning curve and increases user confidence
+- **Enhanced Productivity:** Faster access to features reduces time spent navigating between screens
+- **Better User Experience:** Professional, intuitive navigation enhances overall application perception
+- **Reduced Support Requests:** Clear navigation reduces user confusion and support needs
+
+### Technical Implementation
+
+**Navigation Architecture:**
+- **Persistent Layout:** Navigation panel remains visible on all pages
+- **Component-Based:** Reusable navigation components for consistency
+- **State Management:** Navigation state persistence across page refreshes
+- **Responsive Design:** Mobile-first approach with collapsible navigation
+- **Accessibility:** WCAG 2.1 AA compliance for navigation elements
+
+**Navigation Structure:**
+- **Primary Navigation:** Main application areas (Dashboard, Leads, Buyers, Communications, etc.)
+- **Secondary Navigation:** Sub-navigation for feature-specific options
+- **Breadcrumb Navigation:** Hierarchical path display for deep page structures
+- **Quick Actions:** Frequently used actions accessible from navigation
+- **User Menu:** Profile, settings, and logout options
+
+**Role-Based Navigation:**
+- **Admin Users:** Full navigation access including system administration
+- **Acquisition Reps:** Lead management, communications, and dashboard access
+- **Disposition Managers:** Buyer management, deal disposition, and analytics access
+- **Team Members:** Limited navigation based on assigned permissions
+
+### User Experience
+
+**Navigation Interface:**
+- **Persistent Panel:** Navigation always visible on left side of screen
+- **Collapsible Design:** Navigation can be collapsed for more screen space
+- **Visual Hierarchy:** Clear distinction between primary and secondary navigation
+- **Active State:** Current page/section clearly highlighted
+- **Hover Effects:** Interactive feedback for navigation elements
+
+**Mobile Navigation:**
+- **Hamburger Menu:** Collapsible navigation for mobile devices
+- **Touch-Friendly:** Large touch targets for mobile interaction
+- **Gesture Support:** Swipe gestures for navigation actions
+- **Responsive Layout:** Navigation adapts to different screen sizes
+
+**Navigation Features:**
+- **Search Functionality:** Quick search within navigation items
+- **Favorites:** Pin frequently used navigation items
+- **Recent Items:** Quick access to recently visited pages
+- **Keyboard Navigation:** Full keyboard accessibility support
+
+### Success Metrics
+
+**Navigation KPIs:**
+- **Navigation Consistency:** 100% of screens have consistent navigation
+- **User Navigation Success:** 95% of users can navigate to desired features within 3 clicks
+- **Mobile Navigation:** 90% of mobile users successfully use navigation features
+- **Accessibility Compliance:** WCAG 2.1 AA standards met for all navigation elements
+- **User Satisfaction:** 85% user satisfaction with navigation experience
+
+**Business Impact:**
+- **Reduced Training Time:** 30% reduction in time needed to train new users
+- **Improved Efficiency:** 25% faster navigation between application areas
+- **User Adoption:** 90% of users actively use navigation features within first week
+- **Support Reduction:** 40% reduction in navigation-related support requests
+
+### Implementation Timeline
+
+**Phase 1 (Week 1):**
+- Core navigation component structure
+- Basic navigation menu implementation
+- Persistent navigation across all pages
+
+**Phase 2 (Week 2):**
+- Role-based navigation permissions
+- Mobile-responsive navigation design
+- Navigation state persistence
+
+**Phase 3 (Week 3):**
+- Advanced navigation features (search, favorites)
+- Accessibility compliance implementation
+- Performance optimization
+
+### Risk Mitigation
+
+**Technical Risks:**
+- **Performance Impact:** Optimize navigation rendering and state management
+- **Mobile Compatibility:** Comprehensive testing across device types
+- **Accessibility Compliance:** Regular accessibility audits and testing
+
+**Business Risks:**
+- **User Adoption:** Provide clear navigation training and documentation
+- **Feature Discovery:** Ensure all features are easily discoverable through navigation
+- **Consistency Maintenance:** Establish navigation design standards and review process
+
+**B. Research Summary**
 
 **Market Research Findings:**
 - Real estate wholesaling market estimated at $50B annually
@@ -578,6 +703,121 @@ The frontend architecture is being consolidated from a micro-apps structure to a
 - Real Estate Wholesaling Association
 - National Real Estate Investors Association
 - Real Estate Technology Trends Reports
+
+---
+
+## 📥📤 Lead Import/Export Feature Specification
+
+### Overview
+
+The lead import/export feature provides comprehensive data management capabilities for bulk lead operations. This feature enables users to import leads from external sources (CSV files), export existing lead data, and perform bulk operations on multiple leads simultaneously. The system includes validation, error handling, and activity tracking to ensure data integrity and provide transparency.
+
+### Business Value
+
+**User Benefits:**
+- **Bulk Data Management:** Import hundreds of leads at once from external sources
+- **Data Portability:** Export lead data for backup, analysis, or migration
+- **Efficiency:** Perform bulk operations (update, delete, assign) on multiple leads
+- **Data Quality:** Validation and duplicate detection ensure clean data import
+- **Flexibility:** Customizable field mapping and export options
+- **Transparency:** Activity tracking and detailed error reporting
+
+**Business Impact:**
+- **Reduced Manual Entry:** Bulk import eliminates hours of manual data entry
+- **Data Consistency:** Standardized import templates ensure consistent data format
+- **Operational Efficiency:** Bulk operations save time on repetitive tasks
+- **Data Backup:** Export functionality provides data backup and portability
+- **Quality Assurance:** Validation prevents data corruption and duplicates
+
+### Technical Implementation
+
+**Import Functionality:**
+- **File Upload:** Drag-and-drop or file browser upload for CSV files
+- **File Validation:** Size limits (10MB), format validation, and structure checking
+- **Data Processing:** CSV parsing with field mapping and data transformation
+- **Duplicate Detection:** Phone number and email-based duplicate identification
+- **Error Handling:** Detailed error reporting with row-level feedback
+- **Progress Tracking:** Real-time import progress with status updates
+
+**Export Functionality:**
+- **Field Selection:** Customizable field selection for export
+- **Filtering Options:** Date range, status, and custom filter criteria
+- **Format Support:** CSV export with proper encoding and formatting
+- **Bulk Operations:** Update, delete, assign, and status change operations
+- **Activity Logging:** Complete audit trail of import/export activities
+
+**API Endpoints:**
+- **Import:** POST `/api/leads/import-export/import` - File upload and processing
+- **Export:** GET `/api/leads/import-export/export` - Data export with filters
+- **Validation:** POST `/api/leads/import-export/validate` - File structure validation
+- **Template:** GET `/api/leads/import-export/template` - Download import template
+- **Bulk Operations:** POST `/api/leads/bulk/*` - Various bulk operation endpoints
+
+### User Experience
+
+**Import Interface:**
+- **Drag-and-Drop Upload:** Intuitive file upload with visual feedback
+- **Validation Display:** Real-time validation results with success/warning/error indicators
+- **Progress Tracking:** Visual progress bar with status updates
+- **Error Reporting:** Detailed error list with row numbers and field-specific issues
+- **Field Mapping:** Optional field mapping for non-standard CSV formats
+
+**Export Interface:**
+- **Filter Selection:** Date range, status, and field selection options
+- **Preview:** Sample data preview before export
+- **Format Options:** CSV format with customizable field order
+- **Download Management:** Automatic file download with proper naming
+
+**Activity Tracking:**
+- **Recent Activity:** Display of recent import/export operations
+- **Status Tracking:** Success/failure status with detailed results
+- **Error History:** Persistent error logs for troubleshooting
+- **Performance Metrics:** Import/export speed and success rates
+
+### Success Metrics
+
+**Import/Export KPIs:**
+- **Import Success Rate:** 95%+ successful imports with valid data
+- **Export Accuracy:** 100% data accuracy in exported files
+- **Processing Speed:** Import 1000 leads in under 2 minutes
+- **Error Rate:** Less than 5% error rate on valid CSV files
+- **User Adoption:** 80% of users utilize import/export within 3 months
+
+**Business Impact:**
+- **Time Savings:** 90% reduction in manual data entry time
+- **Data Quality:** 95% reduction in duplicate leads
+- **Operational Efficiency:** 50% faster bulk operations
+- **User Satisfaction:** 85% user satisfaction with import/export features
+
+### Implementation Timeline
+
+**Phase 1 (Weeks 1-2):**
+- Basic CSV import functionality
+- File upload and validation
+- Simple export to CSV
+
+**Phase 2 (Weeks 3-4):**
+- Advanced validation and error handling
+- Field mapping and duplicate detection
+- Activity tracking and logging
+
+**Phase 3 (Weeks 5-6):**
+- Bulk operations implementation
+- Advanced filtering and export options
+- Performance optimization
+
+### Risk Mitigation
+
+**Technical Risks:**
+- **File Size Limits:** Implement proper file size validation and chunked processing
+- **Data Validation:** Comprehensive validation rules and error reporting
+- **Performance:** Optimize database operations for bulk imports
+- **Security:** Validate file content and prevent malicious uploads
+
+**Business Risks:**
+- **Data Quality:** Implement validation rules and duplicate detection
+- **User Training:** Provide clear documentation and import templates
+- **Error Handling:** Comprehensive error reporting and recovery options
 
 ---
 
