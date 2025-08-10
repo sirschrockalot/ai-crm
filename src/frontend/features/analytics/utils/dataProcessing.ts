@@ -7,7 +7,7 @@ export const transformChartData = (rawData: any[]): ChartDataPoint[] => {
   }
 
   return rawData.map((item, index) => ({
-    label: item.label || item.name || `Item ${index + 1}`,
+    name: item.label || item.name || `Item ${index + 1}`,
     value: Number(item.value || item.count || 0),
     color: item.color || undefined,
     metadata: item.metadata || {},
@@ -23,8 +23,8 @@ export const aggregateDataByField = (data: any[], field: string, valueField: str
     return acc;
   }, {} as Record<string, number>);
 
-  return Object.entries(aggregated).map(([label, value]) => ({
-    label,
+  return Object.entries(aggregated).map(([name, value]) => ({
+    name,
     value,
   }));
 };
@@ -53,7 +53,7 @@ export const formatPercentage = (value: number): string => {
 export const processTimeSeriesData = (data: any[], timeField: string, valueField: string) => {
   return data
     .map(item => ({
-      label: new Date(item[timeField]).toLocaleDateString(),
+      name: new Date(item[timeField]).toLocaleDateString(),
       value: Number(item[valueField] || 0),
       timestamp: new Date(item[timeField]).getTime(),
     }))
@@ -69,7 +69,7 @@ export const processFunnelData = (data: any[]): ChartDataPoint[] => {
   const total = data.reduce((sum, item) => sum + Number(item.value || 0), 0);
   
   return data.map((item, index) => ({
-    label: item.label || `Step ${index + 1}`,
+    name: item.label || `Step ${index + 1}`,
     value: Number(item.value || 0),
     percentage: calculatePercentage(Number(item.value || 0), total),
     metadata: {
@@ -85,17 +85,14 @@ export const processPerformanceMetrics = (data: AnalyticsMetrics): AnalyticsMetr
 
   return {
     ...data,
-    metrics: data.metrics?.map(metric => ({
-      ...metric,
-      formattedValue: formatNumber(metric.value),
-      trend: metric.trend || 'neutral',
-      changePercentage: metric.change ? formatPercentage(metric.change) : undefined,
-    })),
-    trends: data.trends?.map(trend => ({
-      ...trend,
-      formattedValue: formatNumber(trend.value),
-      formattedChange: trend.change ? formatPercentage(trend.change) : undefined,
-    })),
+    totalLeads: data.totalLeads,
+    totalBuyers: data.totalBuyers,
+    conversionRate: data.conversionRate,
+    averageLeadValue: data.averageLeadValue,
+    totalPipelineValue: data.totalPipelineValue,
+    activeBuyers: data.activeBuyers,
+    monthlyGrowth: data.monthlyGrowth,
+    averageResponseTime: data.averageResponseTime,
   };
 };
 

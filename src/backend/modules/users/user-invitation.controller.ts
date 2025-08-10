@@ -69,7 +69,7 @@ export class UserInvitationController {
     return {
       message: 'Invitation sent successfully',
       invitation: {
-        id: invitation._id,
+        id: invitation._id?.toString(),
         email: invitation.email,
         status: invitation.status,
         expiresAt: invitation.expiresAt,
@@ -94,11 +94,11 @@ export class UserInvitationController {
     description: 'Insufficient permissions',
   })
   async getInvitations(
+    @CurrentUser('sub') currentUserId: string,
     @Query('status') status?: InvitationStatus,
     @Query('email') email?: string,
     @Query('page', new ParseIntPipe({ optional: true })) page = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 20,
-    @CurrentUser('sub') currentUserId: string,
   ) {
     const filters: any = {};
     if (status) filters.status = status;
@@ -185,6 +185,19 @@ export class UserInvitationController {
     return {
       message: 'Invitation resent successfully',
     };
+  }
+
+  /**
+   * Extract client IP address from request
+   */
+  private getClientIp(request: Request): string {
+    return (
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+      (request.headers['x-real-ip'] as string) ||
+      request.connection.remoteAddress ||
+      request.socket.remoteAddress ||
+      'unknown'
+    );
   }
 }
 

@@ -232,8 +232,8 @@ export const PerformanceOptimization: React.FC<PerformanceOptimizationProps> = (
   // Virtual rendering viewport
   const [viewport, setViewport] = useState({ x: 0, y: 0, zoom: 1 });
 
-  const handleViewportChange = useCallback((newViewport: typeof viewport) => {
-    setViewport(newViewport);
+  const handleViewportChange = useCallback((zoom: number, pan: { x: number; y: number }) => {
+    setViewport({ x: pan.x, y: pan.y, zoom });
   }, []);
 
   return (

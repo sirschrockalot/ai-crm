@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, VStack, HStack, Heading, Text, Badge, useColorModeValue } from '@chakra-ui/react';
-import { Draggable } from 'react-beautiful-dnd';
 import { PipelineCard } from './PipelineCard';
 import { PipelineLead, PipelineStage as PipelineStageType } from './PipelineBoard';
 
@@ -81,37 +80,13 @@ export const PipelineStage: React.FC<PipelineStageProps> = ({
             </Box>
           ) : (
             stage.leads.map((lead, index) => (
-              isDragEnabled ? (
-                <Draggable key={lead.id} draggableId={lead.id} index={index}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      style={{
-                        ...provided.draggableProps.style,
-                        opacity: snapshot.isDragging ? 0.8 : 1,
-                        transform: snapshot.isDragging ? provided.draggableProps.style?.transform : 'none',
-                      }}
-                    >
-                      <PipelineCard
-                        lead={lead}
-                        stageId={stage.id}
-                        onMove={onLeadMove}
-                        onClick={onLeadClick}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ) : (
-                <PipelineCard
-                  key={lead.id}
-                  lead={lead}
-                  stageId={stage.id}
-                  onMove={onLeadMove}
-                  onClick={onLeadClick}
-                />
-              )
+              <PipelineCard
+                key={lead.id}
+                lead={lead}
+                stageId={stage.id}
+                onMove={onLeadMove}
+                onClick={onLeadClick}
+              />
             ))
           )}
         </VStack>

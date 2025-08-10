@@ -136,7 +136,7 @@ export class Tenant {
   @Prop()
   phone?: string;
 
-  @Prop()
+  @Prop({ type: Object })
   address?: {
     street: string;
     city: string;
@@ -145,7 +145,7 @@ export class Tenant {
     country: string;
   };
 
-  @Prop()
+  @Prop({ type: Object })
   billingInfo?: {
     companyName: string;
     email: string;
@@ -160,7 +160,7 @@ export class Tenant {
     taxId?: string;
   };
 
-  @Prop()
+  @Prop({ type: Object })
   subscriptionInfo?: {
     planId: string;
     subscriptionId: string;
@@ -170,7 +170,7 @@ export class Tenant {
     cancelAtPeriodEnd: boolean;
   };
 
-  @Prop()
+  @Prop({ type: Object })
   usageStats?: {
     totalUsers: number;
     totalLeads: number;
@@ -178,7 +178,7 @@ export class Tenant {
     lastUpdated: Date;
   };
 
-  @Prop()
+  @Prop({ type: Object })
   auditLog?: {
     lastLogin: Date;
     lastActivity: Date;

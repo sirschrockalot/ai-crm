@@ -9,7 +9,7 @@ interface RouteGuardProps {
   redirectTo?: string;
 }
 
-const RouteGuard: React.FC<RouteGuardProps> = ({
+const AuthGuard: React.FC<RouteGuardProps> = ({
   children,
   requiredRoles = [],
   redirectTo = '/auth/login',
@@ -56,4 +56,4 @@ const RouteGuard: React.FC<RouteGuardProps> = ({
   return <>{children}</>;
 };
 
-export default RouteGuard;
+export default AuthGuard;

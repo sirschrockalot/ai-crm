@@ -11,6 +11,7 @@ import {
   useDisclosure,
   Collapse,
   IconButton,
+  Icon,
 } from '@chakra-ui/react';
 import { FiFilter, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { FilterPanelProps, AnalyticsFilters } from '../types/analytics';

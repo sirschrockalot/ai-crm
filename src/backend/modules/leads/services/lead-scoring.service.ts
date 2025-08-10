@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Lead, LeadDocument, LeadStatus, LeadSource, LeadPriority } from '../schemas/lead.schema';
+import { ScoringCategory, ScoringAlgorithm, UpdateFrequency } from '../dto/scoring.dto';
 
 export interface ScoringFactor {
   name: string;
@@ -9,7 +10,7 @@ export interface ScoringFactor {
   minValue: number;
   maxValue: number;
   description: string;
-  category: 'demographic' | 'behavioral' | 'financial' | 'engagement' | 'source';
+  category: ScoringCategory;
 }
 
 export interface ScoringResult {
@@ -28,13 +29,13 @@ export interface FactorScore {
   weight: number;
   weightedScore: number;
   explanation: string;
-  category: string;
+  category: ScoringCategory;
 }
 
 export interface ScoringConfiguration {
   factors: ScoringFactor[];
-  algorithm: 'weighted' | 'ml' | 'hybrid';
-  updateFrequency: 'realtime' | 'daily' | 'weekly';
+  algorithm: ScoringAlgorithm;
+  updateFrequency: UpdateFrequency;
   minScore: number;
   maxScore: number;
   thresholds: {
@@ -68,7 +69,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Match between lead preferences and available properties',
-          category: 'demographic',
+          category: ScoringCategory.DEMOGRAPHIC,
         },
         {
           name: 'location_preference',
@@ -76,7 +77,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Location preference strength and specificity',
-          category: 'demographic',
+          category: ScoringCategory.DEMOGRAPHIC,
         },
         {
           name: 'budget_alignment',
@@ -84,7 +85,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Alignment between budget and property prices',
-          category: 'financial',
+          category: ScoringCategory.FINANCIAL,
         },
         {
           name: 'financial_qualification',
@@ -92,7 +93,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Financial qualification strength',
-          category: 'financial',
+          category: ScoringCategory.FINANCIAL,
         },
         {
           name: 'engagement_level',
@@ -100,7 +101,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Level of engagement with communications',
-          category: 'engagement',
+          category: ScoringCategory.ENGAGEMENT,
         },
         {
           name: 'source_quality',
@@ -108,7 +109,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Quality of lead source',
-          category: 'source',
+          category: ScoringCategory.SOURCE,
         },
         {
           name: 'urgency_indicator',
@@ -116,7 +117,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Indicators of urgency to buy/sell',
-          category: 'behavioral',
+          category: ScoringCategory.BEHAVIORAL,
         },
         {
           name: 'communication_responsiveness',
@@ -124,7 +125,7 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Response time and quality to communications',
-          category: 'engagement',
+          category: ScoringCategory.ENGAGEMENT,
         },
         {
           name: 'market_knowledge',
@@ -132,11 +133,11 @@ export class LeadScoringService {
           minValue: 0,
           maxValue: 100,
           description: 'Knowledge of real estate market',
-          category: 'behavioral',
+          category: ScoringCategory.BEHAVIORAL,
         },
       ],
-      algorithm: 'weighted',
-      updateFrequency: 'realtime',
+      algorithm: ScoringAlgorithm.WEIGHTED,
+      updateFrequency: UpdateFrequency.REALTIME,
       minScore: 0,
       maxScore: 100,
       thresholds: {

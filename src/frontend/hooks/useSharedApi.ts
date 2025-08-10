@@ -3,7 +3,7 @@ import { apiService, ApiResponse, ApiError } from '../services/apiService';
 import { loadingService } from '../services/loadingService';
 import { useAuth } from './useAuth';
 import { useLocalStorage } from './useLocalStorage';
-import { useDebounce } from './useDebounce';
+import { useDebouncedCallback } from './useDebounce';
 import { withErrorHandling, formatErrorForUser } from '../utils/error';
 
 export interface UseSharedApiOptions {
@@ -24,6 +24,10 @@ export interface UseSharedApiReturn<T> {
   clearCache: () => void;
 }
 
+// Development mode authentication bypass
+const isDevelopmentMode = process.env.NODE_ENV === 'development';
+const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+
 export function useSharedApi<T = any>(
   options: UseSharedApiOptions = {}
 ): UseSharedApiReturn<T> {
@@ -42,35 +46,26 @@ export function useSharedApi<T = any>(
   const [error, setError] = useState<string | null>(null);
 
   // Local storage for caching
-  const { getItem: getCachedData, setItem: setCachedData } = useLocalStorage(
-    cacheKey || 'shared_api_cache'
-  );
-
-  // Debounced execute function
-  const debouncedExecute = useDebounce(
-    useCallback(async (config?: any) => {
-      return await execute(config);
-    }, []),
-    debounceMs
+  const [cachedData, setCachedData] = useLocalStorage<string | null>(
+    cacheKey || 'shared_api_cache',
+    null
   );
 
   const execute = useCallback(
     withErrorHandling(async (config?: any) => {
-      if (!isAuthenticated) {
+      // Skip authentication check in development mode
+      if (!bypassAuth && !isAuthenticated) {
         throw new Error('Authentication required');
       }
 
       // Try to load cached data first
-      if (enableCache && !config) {
-        const cached = getCachedData();
-        if (cached) {
-          try {
-            const parsed = JSON.parse(cached);
-            setData(parsed);
-            return parsed;
-          } catch (error) {
-            console.warn('Failed to parse cached data:', error);
-          }
+      if (enableCache && !config && cachedData) {
+        try {
+          const parsed = JSON.parse(cachedData);
+          setData(parsed);
+          return parsed;
+        } catch (error) {
+          console.warn('Failed to parse cached data:', error);
         }
       }
 
@@ -116,8 +111,11 @@ export function useSharedApi<T = any>(
       }
       throw error;
     }),
-    [isAuthenticated, enableCache, cacheKey, loadingId, getCachedData, setCachedData]
+    [isAuthenticated, enableCache, cacheKey, loadingId, cachedData, setCachedData]
   );
+
+  // Debounced execute function (only if debounceMs > 0)
+  const debouncedExecute = useDebouncedCallback(execute, debounceMs);
 
   const reset = useCallback(() => {
     setData(null);
@@ -134,7 +132,7 @@ export function useSharedApi<T = any>(
 
   // Auto-execute if enabled
   useEffect(() => {
-    if (autoExecute && isAuthenticated) {
+    if (autoExecute && (bypassAuth || isAuthenticated)) {
       execute();
     }
   }, [autoExecute, isAuthenticated, execute, ...dependencies]);

@@ -615,8 +615,12 @@ export class LeadValidationService {
     qualityMetrics: DataQualityMetrics;
     recommendations: string[];
   }> {
-    // Validate the data
-    const validationResult = await this.validateCreateLead(leadData as CreateLeadDto);
+    // Validate the data - ensure proper type conversion
+    const createLeadData = {
+      ...leadData,
+      assignedTo: typeof leadData.assignedTo === 'object' ? leadData.assignedTo.toString() : leadData.assignedTo,
+    } as CreateLeadDto;
+    const validationResult = await this.validateCreateLead(createLeadData);
 
     // Detect duplicates
     const duplicateResult = await this.detectDuplicates(leadData, tenantId);

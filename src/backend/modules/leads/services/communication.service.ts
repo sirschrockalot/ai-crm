@@ -43,8 +43,8 @@ export interface CommunicationResult {
 }
 
 export interface CommunicationLog {
-  id: string;
-  leadId?: string;
+  _id?: string;
+  leadId?: string | Types.ObjectId;
   userId: string;
   tenantId: string;
   type: 'sms' | 'voice' | 'email';
@@ -74,7 +74,7 @@ export class CommunicationService {
     const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
     const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
 
-    if (accountSid && authToken) {
+    if (accountSid && authToken && accountSid !== 'your-twilio-account-sid' && authToken !== 'your-twilio-auth-token') {
       this.twilioClient = twilio(accountSid, authToken);
     } else {
       this.logger.warn('Twilio credentials not configured. Communication features will be disabled.');

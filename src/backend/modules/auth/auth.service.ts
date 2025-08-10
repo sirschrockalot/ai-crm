@@ -81,7 +81,7 @@ export class AuthService {
       
       // Create JWT payload from user data
       return {
-        sub: user._id?.toString() || '',
+        sub: (user as any)._id?.toString() || '',
         email: user.email,
         tenantId: user.tenantId?.toString(),
         roles: user.roles,

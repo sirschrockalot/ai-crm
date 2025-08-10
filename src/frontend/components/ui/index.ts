@@ -11,6 +11,8 @@ export { default as Input } from './Input';
 export { default as Loading } from './Loading';
 export { default as Modal } from './Modal';
 export { default as Table } from './Table';
+export { default as DevModeIndicator } from './DevModeIndicator';
+export { default as ErrorDisplay } from './ErrorDisplay';
 
 // Export Breadcrumb component
 export * from './Breadcrumb';

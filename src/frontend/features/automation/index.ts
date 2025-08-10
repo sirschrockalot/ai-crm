@@ -25,8 +25,9 @@ export { automationService } from './services/automationService';
 export * from './types/automation';
 
 // Enhanced Automation Components (Epic 4 Migration)
-export { default as EnhancedWorkflowBuilder } from './components/WorkflowBuilder';
-export { default as EnhancedWorkflowList } from './components/WorkflowList';
-export { default as EnhancedAutomationStats } from './components/AutomationStats';
-export { default as EnhancedTriggerConfigurator } from './components/TriggerConfigurator';
-export { default as EnhancedActionConfigurator } from './components/ActionConfigurator'; 
+export { WorkflowBuilder as EnhancedWorkflowBuilder } from './components/WorkflowBuilder';
+export { WorkflowList as EnhancedWorkflowList } from './components/WorkflowList';
+export { AutomationStats as EnhancedAutomationStats } from './components/AutomationStats';
+export { mockAutomationService } from './services/mockAutomationService';
+export { TriggerConfigurator as EnhancedTriggerConfigurator } from './components/TriggerConfigurator';
+export { ActionConfigurator as EnhancedActionConfigurator } from './components/ActionConfigurator'; 

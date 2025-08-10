@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Session, SessionDocument } from './schemas/session.schema';
+import { Session, SessionDocument, SessionModel } from './schemas/session.schema';
 import { CreateSessionDto, UpdateSessionDto, SessionQueryDto, SessionResponseDto, TerminateSessionDto, SessionSecurityDto, SessionAnalyticsDto } from './dto/session.dto';
 import { DeviceFingerprintingService } from '../security/device-fingerprinting.service';
 import { LocationTrackingService } from '../security/location-tracking.service';
@@ -16,7 +16,7 @@ export class SessionsService {
   private readonly redis: Redis.Redis;
 
   constructor(
-    @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
+    @InjectModel(Session.name) private sessionModel: SessionModel,
     private readonly deviceFingerprintingService: DeviceFingerprintingService,
     private readonly locationTrackingService: LocationTrackingService,
     private readonly securityEventsService: SecurityEventsService,
@@ -234,7 +234,7 @@ export class SessionsService {
    */
   async terminateSession(terminateSessionDto: TerminateSessionDto): Promise<SessionResponseDto> {
     try {
-      const session = await this.sessionModel.findById(terminateSessionDto.sessionId).exec();
+      const session = await this.sessionModel.findById(terminateSessionDto.sessionId.toString()).exec();
       if (!session) {
         throw new NotFoundException('Session not found');
       }
@@ -287,7 +287,7 @@ export class SessionsService {
    */
   async addSecurityFlag(sessionSecurityDto: SessionSecurityDto): Promise<SessionResponseDto> {
     try {
-      const session = await this.sessionModel.findById(sessionSecurityDto.sessionId).exec();
+      const session = await this.sessionModel.findById(sessionSecurityDto.sessionId.toString()).exec();
       if (!session) {
         throw new NotFoundException('Session not found');
       }
@@ -331,7 +331,7 @@ export class SessionsService {
    */
   async removeSecurityFlag(sessionSecurityDto: SessionSecurityDto): Promise<SessionResponseDto> {
     try {
-      const session = await this.sessionModel.findById(sessionSecurityDto.sessionId).exec();
+      const session = await this.sessionModel.findById(sessionSecurityDto.sessionId.toString()).exec();
       if (!session) {
         throw new NotFoundException('Session not found');
       }

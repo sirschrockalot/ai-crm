@@ -1,4 +1,32 @@
-import { EventEmitter } from 'events';
+// Use EventEmitter from events module or create a simple one for browser
+let EventEmitter: any;
+if (typeof window === 'undefined') {
+  // Node.js environment
+  EventEmitter = require('events');
+} else {
+  // Browser environment - create a simple EventEmitter
+  class SimpleEventEmitter {
+    private events: { [key: string]: Function[] } = {};
+
+    on(event: string, listener: Function) {
+      if (!this.events[event]) {
+        this.events[event] = [];
+      }
+      this.events[event].push(listener);
+    }
+
+    off(event: string, listener: Function) {
+      if (!this.events[event]) return;
+      this.events[event] = this.events[event].filter(l => l !== listener);
+    }
+
+    emit(event: string, ...args: any[]) {
+      if (!this.events[event]) return;
+      this.events[event].forEach(listener => listener(...args));
+    }
+  }
+  EventEmitter = SimpleEventEmitter;
+}
 
 export interface LoadingState {
   id: string;

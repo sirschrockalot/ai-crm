@@ -55,10 +55,14 @@ export const AutomationStats: React.FC<AutomationStatsProps> = ({
 
   // Get metric cards
   const getMetricCards = () => {
+    if (!stats) {
+      return [];
+    }
+    
     const cards = [
       {
         title: 'Total Workflows',
-        value: formatNumber(stats.totalWorkflows),
+        value: formatNumber(stats.totalWorkflows || 0),
         change: '+12%',
         changeType: 'positive',
         icon: '📊',
@@ -66,7 +70,7 @@ export const AutomationStats: React.FC<AutomationStatsProps> = ({
       },
       {
         title: 'Active Workflows',
-        value: formatNumber(stats.activeWorkflows),
+        value: formatNumber(stats.activeWorkflows || 0),
         change: '+5%',
         changeType: 'positive',
         icon: '⚡',
@@ -74,7 +78,7 @@ export const AutomationStats: React.FC<AutomationStatsProps> = ({
       },
       {
         title: 'Executions Today',
-        value: formatNumber(stats.executionsToday),
+        value: formatNumber(stats.executionsToday || 0),
         change: '+8%',
         changeType: 'positive',
         icon: '📈',
@@ -82,7 +86,7 @@ export const AutomationStats: React.FC<AutomationStatsProps> = ({
       },
       {
         title: 'Success Rate',
-        value: formatPercentage(stats.successRate),
+        value: formatPercentage(stats.successRate || 0),
         change: '+2%',
         changeType: 'positive',
         icon: '✅',
@@ -90,7 +94,7 @@ export const AutomationStats: React.FC<AutomationStatsProps> = ({
       },
       {
         title: 'Avg Execution Time',
-        value: formatTime(stats.averageExecutionTime),
+        value: formatTime(stats.averageExecutionTime || 0),
         change: '-15%',
         changeType: 'negative',
         icon: '⏱️',
@@ -103,23 +107,45 @@ export const AutomationStats: React.FC<AutomationStatsProps> = ({
 
   // Get top triggers chart data
   const getTopTriggersData = () => {
+    if (!stats || !stats.topTriggers) {
+      return [];
+    }
+    
     return stats.topTriggers.map((trigger, index) => ({
       name: trigger.type,
       value: trigger.count,
-      percentage: (trigger.count / stats.executionsToday) * 100,
+      percentage: (trigger.count / (stats.executionsToday || 1)) * 100,
       color: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'][index % 5],
     }));
   };
 
   // Get top actions chart data
   const getTopActionsData = () => {
+    if (!stats || !stats.topActions) {
+      return [];
+    }
+    
     return stats.topActions.map((action, index) => ({
       name: action.type,
       value: action.count,
-      percentage: (action.count / stats.executionsToday) * 100,
+      percentage: (action.count / (stats.executionsToday || 1)) * 100,
       color: ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'][index % 5],
     }));
   };
+
+  // Show loading state if stats are not available
+  if (!stats) {
+    return (
+      <div className={`automation-stats ${className}`}>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading automation statistics...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`automation-stats ${className}`}>

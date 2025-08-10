@@ -31,12 +31,12 @@ import {
   PhoneIcon, 
   PhoneIcon as PhoneIncomingIcon,
   PhoneIcon as PhoneOutgoingIcon,
-  PlayIcon,
-  PauseIcon,
   DownloadIcon,
   EditIcon,
   CalendarIcon,
   TimeIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
 } from '@chakra-ui/icons';
 import { communicationService, CommunicationLog } from '../../../services/communicationService';
 import { formatPhoneNumber } from '../../../utils/phone';
@@ -99,8 +99,8 @@ const CallLog: React.FC<CallLogProps> = ({
           phoneNumber: comm.to,
           direction: comm.direction,
           duration: 0, // This would come from call analytics
-          status: comm.status === 'delivered' ? 'completed' : 
-                 comm.status === 'failed' ? 'failed' : 'missed',
+          status: (comm.status === 'delivered' ? 'completed' : 
+                 comm.status === 'failed' ? 'failed' : 'missed') as 'completed' | 'missed' | 'failed' | 'busy' | 'no-answer',
           timestamp: new Date(comm.createdAt),
           cost: comm.cost,
         }))
@@ -368,7 +368,7 @@ const CallLog: React.FC<CallLogProps> = ({
                     {call.recordingUrl && (
                       <IconButton
                         aria-label="Play recording"
-                        icon={playingRecording === call.recordingUrl ? <PauseIcon /> : <PlayIcon />}
+                        icon={playingRecording === call.recordingUrl ? <ChevronDownIcon /> : <ChevronRightIcon />}
                         size="sm"
                         variant="outline"
                         onClick={() => handlePlayRecording(call.recordingUrl!)}

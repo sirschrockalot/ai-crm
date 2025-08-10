@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { MFA, MFADocument } from './schemas/mfa.schema';
+import { MFA, MFADocument, MFAModel } from './schemas/mfa.schema';
 import { 
   CreateMFADto, 
   UpdateMFADto, 
@@ -30,7 +30,7 @@ export class MFAService {
   private readonly logger = new Logger(MFAService.name);
 
   constructor(
-    @InjectModel(MFA.name) private mfaModel: Model<MFADocument>,
+    @InjectModel(MFA.name) private mfaModel: MFAModel,
     private readonly totpService: TOTPService,
     private readonly securityEventsService: SecurityEventsService,
     private readonly eventEmitter: EventEmitter2,

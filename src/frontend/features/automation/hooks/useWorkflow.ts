@@ -70,8 +70,8 @@ export const useWorkflow = (workflowId?: string) => {
   }, []);
 
   // Update workflow
-  const updateWorkflow = useCallback(async (updates: Partial<Workflow>) => {
-    if (!workflow) return;
+  const updateWorkflow = useCallback(async (updates: Partial<Workflow>): Promise<Workflow | undefined> => {
+    if (!workflow) return undefined;
     
     setLoading(true);
     setError(null);
@@ -92,8 +92,8 @@ export const useWorkflow = (workflowId?: string) => {
   }, [workflow]);
 
   // Save workflow
-  const saveWorkflow = useCallback(async () => {
-    if (!workflow) return;
+  const saveWorkflow = useCallback(async (): Promise<Workflow | undefined> => {
+    if (!workflow) return undefined;
     
     setLoading(true);
     setError(null);
@@ -110,8 +110,8 @@ export const useWorkflow = (workflowId?: string) => {
   }, [workflow]);
 
   // Execute workflow
-  const executeWorkflow = useCallback(async (parameters?: Record<string, any>) => {
-    if (!workflow) return;
+  const executeWorkflow = useCallback(async (parameters?: Record<string, any>): Promise<WorkflowExecution | undefined> => {
+    if (!workflow) return undefined;
     
     setLoading(true);
     setError(null);
@@ -130,7 +130,7 @@ export const useWorkflow = (workflowId?: string) => {
   // Validate workflow
   const validateWorkflow = useCallback(async (workflowData?: Workflow) => {
     const workflowToValidate = workflowData || workflow;
-    if (!workflowToValidate) return;
+    if (!workflowToValidate) return undefined;
 
     setIsValidating(true);
     setError(null);
@@ -153,7 +153,7 @@ export const useWorkflow = (workflowId?: string) => {
 
   // Test workflow
   const testWorkflow = useCallback(async (testData?: Record<string, any>) => {
-    if (!workflow) return;
+    if (!workflow) return undefined;
     
     setLoading(true);
     setError(null);
@@ -282,7 +282,7 @@ export const useWorkflow = (workflowId?: string) => {
 
   // Subscribe to real-time execution updates
   useEffect(() => {
-    if (!workflow) return;
+    if (!workflow) return undefined;
 
     const handleExecutionUpdate = (execution: WorkflowExecution) => {
       setExecutions(prev => {

@@ -1,7 +1,25 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, Types, Model } from 'mongoose';
 
-export type MFADocument = MFA & Document;
+export interface MFAModel extends Model<MFADocument> {
+  findByUser(userId: Types.ObjectId, tenantId: Types.ObjectId): Promise<MFADocument | null>;
+  findEnabledByUser(userId: Types.ObjectId, tenantId: Types.ObjectId): Promise<MFADocument | null>;
+  getStatistics(tenantId: Types.ObjectId): Promise<any[]>;
+  cleanupExpiredLocks(): Promise<any>;
+}
+
+export type MFADocument = MFA & Document & {
+  status: string;
+  remainingBackupCodes: string[];
+  enable(): Promise<MFADocument>;
+  disable(): Promise<MFADocument>;
+  recordFailedAttempt(ipAddress: string, userAgent: string): Promise<MFADocument>;
+  verify(ipAddress: string, userAgent: string): Promise<MFADocument>;
+  useBackupCode(code: string, ipAddress: string, userAgent: string): Promise<MFADocument>;
+  addSecurityFlag(flag: string): Promise<MFADocument>;
+  removeSecurityFlag(flag: string): Promise<MFADocument>;
+  regenerateBackupCodes(): Promise<MFADocument>;
+};
 
 @Schema({ timestamps: true })
 export class MFA {
@@ -255,6 +273,94 @@ MFASchema.methods.addSecurityFlag = function(flag: string) {
 MFASchema.methods.removeSecurityFlag = function(flag: string) {
   this.securityFlags = this.securityFlags.filter(f => f !== flag);
   return this.save();
+};
+
+// Method to enable MFA
+MFASchema.methods.enable = function() {
+  this.isEnabled = true;
+  this.activityLog.push({
+    action: 'mfa_enabled',
+    timestamp: new Date(),
+    ipAddress: 'unknown',
+    userAgent: 'unknown',
+    outcome: 'success',
+    details: { reason: 'manual_enable' },
+  });
+  return this.save();
+};
+
+// Method to disable MFA
+MFASchema.methods.disable = function() {
+  this.isEnabled = false;
+  this.activityLog.push({
+    action: 'mfa_disabled',
+    timestamp: new Date(),
+    ipAddress: 'unknown',
+    userAgent: 'unknown',
+    outcome: 'success',
+    details: { reason: 'manual_disable' },
+  });
+  return this.save();
+};
+
+// Method to record failed attempt
+MFASchema.methods.recordFailedAttempt = function(ipAddress: string, userAgent: string) {
+  this.failedAttempts += 1;
+  this.lastUsedAt = new Date();
+  
+  this.activityLog.push({
+    action: 'mfa_failed_attempt',
+    timestamp: new Date(),
+    ipAddress,
+    userAgent,
+    outcome: 'failure',
+    details: { failedAttempts: this.failedAttempts },
+  });
+  
+  return this.save();
+};
+
+// Method to verify MFA
+MFASchema.methods.verify = function(ipAddress: string, userAgent: string) {
+  this.isVerified = true;
+  this.verifiedAt = new Date();
+  this.lastUsedAt = new Date();
+  this.failedAttempts = 0;
+  
+  this.activityLog.push({
+    action: 'mfa_verified',
+    timestamp: new Date(),
+    ipAddress,
+    userAgent,
+    outcome: 'success',
+    details: { verificationMethod: 'totp' },
+  });
+  
+  return this.save();
+};
+
+// Method to use backup code
+MFASchema.methods.useBackupCode = function(code: string, ipAddress: string, userAgent: string) {
+  if (this.backupCodes.includes(code) && !this.usedBackupCodes.includes(code)) {
+    this.usedBackupCodes.push(code);
+    this.lastUsedAt = new Date();
+    this.failedAttempts = 0;
+    
+    this.activityLog.push({
+      action: 'mfa_backup_code_used',
+      timestamp: new Date(),
+      ipAddress,
+      userAgent,
+      outcome: 'success',
+      details: { 
+        backupCode: code.substring(0, 4) + '****',
+        remainingCodes: this.backupCodes.length - this.usedBackupCodes.length,
+      },
+    });
+    
+    return this.save();
+  }
+  throw new Error('Invalid or already used backup code');
 };
 
 // Static method to find MFA by user

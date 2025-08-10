@@ -190,7 +190,7 @@ export class FeatureFlagsService {
    * Create a new feature flag
    */
   async createFeatureFlag(
-    flagData: Omit<FeatureFlag, 'id' | 'createdAt' | 'updatedAt'>,
+    flagData: Omit<FeatureFlag, 'id' | 'createdAt' | 'updatedAt' | 'createdBy' | 'updatedBy'>,
     createdBy: string
   ): Promise<FeatureFlag> {
     const flag: FeatureFlag = {

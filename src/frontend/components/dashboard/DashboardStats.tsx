@@ -43,6 +43,8 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'white');
+  const statBgColor = useColorModeValue('gray.50', 'gray.700');
+  const statBorderColor = useColorModeValue('gray.200', 'gray.600');
   const gridColumns = useBreakpointValue({ base: 1, md: 2, lg: 3, xl: 4 });
 
   const handleRefresh = () => {
@@ -141,7 +143,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
       },
     };
 
-    return configs[variant]?.[key] || { label: key, format: formatNumber, icon: '📊' };
+    return (configs as any)[variant]?.[key] || { label: key, format: formatNumber, icon: '📊' };
   };
 
   if (loading) {
@@ -200,9 +202,9 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
                 <Box
                   p={4}
                   borderRadius="md"
-                  bg={useColorModeValue('gray.50', 'gray.700')}
+                  bg={statBgColor}
                   border="1px"
-                  borderColor={useColorModeValue('gray.200', 'gray.600')}
+                  borderColor={statBorderColor}
                   _hover={{
                     transform: 'translateY(-2px)',
                     shadow: 'md',

@@ -4,7 +4,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class PasswordResetThrottleGuard extends ThrottlerGuard {
-  protected getTracker(req: Request): string {
+  protected async getTracker(req: Request): Promise<string> {
     // Use email as the tracker for forgot password requests
     if (req.body?.email) {
       return `password-reset-${req.body.email.toLowerCase()}`;
@@ -29,7 +29,7 @@ export class PasswordResetThrottleGuard extends ThrottlerGuard {
     const resetLimit = isForgotPassword ? 3 : 5; // 3 requests per hour for forgot password
     const resetTtl = isForgotPassword ? 3600 : 3600; // 1 hour TTL
     
-    const { totalHits, timeToExpire } = await this.storageService.increment(key, resetTtl);
+    const { totalHits, timeToExpire } = await this.storageService.increment(await key, resetTtl);
     
     if (totalHits > resetLimit) {
       throw new HttpException(

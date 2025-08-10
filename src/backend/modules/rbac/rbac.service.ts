@@ -246,7 +246,7 @@ export class RbacService {
       ],
     }).populate('roleId').exec();
 
-    return userRoles.map(ur => ur.roleId as Role);
+    return userRoles.map(ur => ur.roleId as unknown as Role);
   }
 
   /**
@@ -364,7 +364,7 @@ export class RbacService {
    * Validate permissions
    */
   private async validatePermissions(permissions: string[]): Promise<void> {
-    const validPermissions = Object.values(PERMISSIONS);
+    const validPermissions = Object.values(PERMISSIONS) as string[];
     const invalidPermissions = permissions.filter(p => !validPermissions.includes(p));
     
     if (invalidPermissions.length > 0) {

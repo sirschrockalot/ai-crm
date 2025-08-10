@@ -177,6 +177,8 @@ export interface Offer {
 
 @Schema({ timestamps: true })
 export class Lead {
+  _id?: Types.ObjectId;
+
   @Prop({ required: true })
   leadId: string; // UUID
 
@@ -191,6 +193,9 @@ export class Lead {
 
   @Prop({ required: true, enum: LeadPriority, default: LeadPriority.MEDIUM })
   priority: LeadPriority;
+
+  @Prop({ type: Types.ObjectId, ref: 'Stage' })
+  stageId?: Types.ObjectId;
 
   @Prop({ required: true, type: Object })
   contactInfo: ContactInfo;
@@ -291,7 +296,7 @@ export class Lead {
   @Prop()
   operatingSystem?: string;
 
-  @Prop()
+  @Prop({ type: Object })
   location?: {
     city: string;
     state: string;
@@ -306,21 +311,21 @@ export class Lead {
   @Prop()
   pagesViewed?: string[];
 
-  @Prop()
+  @Prop({ type: [Object] })
   formSubmissions?: {
     formName: string;
     submittedAt: Date;
     data: any;
   }[];
 
-  @Prop()
+  @Prop({ type: [Object] })
   emailOpens?: {
     emailId: string;
     openedAt: Date;
     ipAddress?: string;
   }[];
 
-  @Prop()
+  @Prop({ type: [Object] })
   emailClicks?: {
     emailId: string;
     linkUrl: string;
@@ -328,14 +333,14 @@ export class Lead {
     ipAddress?: string;
   }[];
 
-  @Prop()
+  @Prop({ type: [Object] })
   smsResponses?: {
     messageId: string;
     response: string;
     timestamp: Date;
   }[];
 
-  @Prop()
+  @Prop({ type: [Object] })
   socialMediaEngagement?: {
     platform: string;
     action: string;
@@ -343,7 +348,7 @@ export class Lead {
     metadata?: any;
   }[];
 
-  @Prop()
+  @Prop({ type: Object })
   customFields?: Record<string, any>;
 
   @Prop()

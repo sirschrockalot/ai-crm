@@ -1,1 +1,1 @@
-export { default } from './RouteGuard';
+export { default as AuthGuard } from './RouteGuard';

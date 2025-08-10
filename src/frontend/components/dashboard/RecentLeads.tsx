@@ -62,7 +62,7 @@ export const RecentLeads: React.FC<RecentLeadsProps> = ({
       'Lost': 'red',
       'Follow-up': 'yellow',
     };
-    return statusColors[status] || 'gray';
+    return (statusColors as any)[status] || 'gray';
   };
 
   const getPriorityColor = (priority: string) => {
@@ -71,7 +71,7 @@ export const RecentLeads: React.FC<RecentLeadsProps> = ({
       'medium': 'orange',
       'low': 'green',
     };
-    return priorityColors[priority] || 'gray';
+    return (priorityColors as any)[priority] || 'gray';
   };
 
   const formatCurrency = (value: number) => {

@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: settings-config
+  namespace: dealcycle-crm
+  labels:
+    app: dealcycle-crm
+    component: settings
+    environment: ${ENVIRONMENT}
+data:
+  # Application settings configuration
+  app-settings.json: |
+    {
+      "features": {
+        "aiEnabled": ${AI_FEATURES_ENABLED},
+        "automationEnabled": ${AUTOMATION_ENABLED},
+        "analyticsEnabled": ${ANALYTICS_ENABLED},
+        "communicationsEnabled": ${COMMUNICATIONS_ENABLED}
+      },
+      "security": {
+        "mfaRequired": ${MFA_REQUIRED},
+        "sessionTimeout": ${SESSION_TIMEOUT},
+        "passwordPolicy": {
+          "minLength": ${PASSWORD_MIN_LENGTH},
+          "requireUppercase": ${PASSWORD_REQUIRE_UPPERCASE},
+          "requireLowercase": ${PASSWORD_REQUIRE_LOWERCASE},
+          "requireNumbers": ${PASSWORD_REQUIRE_NUMBERS},
+          "requireSpecialChars": ${PASSWORD_REQUIRE_SPECIAL}
+        }
+      },
+      "notifications": {
+        "defaultEmail": ${DEFAULT_EMAIL_NOTIFICATIONS},
+        "defaultPush": ${DEFAULT_PUSH_NOTIFICATIONS},
+        "defaultSMS": ${DEFAULT_SMS_NOTIFICATIONS}
+      },
+      "ui": {
+        "defaultTheme": "${DEFAULT_THEME}",
+        "defaultLanguage": "${DEFAULT_LANGUAGE}",
+        "defaultTimezone": "${DEFAULT_TIMEZONE}"
+      }
+    }
+  
+  # Feature flags configuration
+  feature-flags.json: |
+    {
+      "ai-features": ${AI_FEATURES_ENABLED},
+      "automation-features": ${AUTOMATION_ENABLED},
+      "debug-mode": ${DEBUG_MODE},
+      "beta-features": ${BETA_FEATURES},
+      "advanced-analytics": ${ADVANCED_ANALYTICS}
+    }
+  
+  # Environment-specific overrides
+  environment-overrides.json: |
+    {
+      "staging": {
+        "debug-mode": true,
+        "beta-features": true,
+        "log-level": "debug"
+      },
+      "production": {
+        "debug-mode": false,
+        "beta-features": false,
+        "log-level": "info"
+      }
+    }

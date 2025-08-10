@@ -7,6 +7,7 @@ import { createReadStream, createWriteStream } from 'fs';
 import { Readable } from 'stream';
 import { Lead } from '../schemas/lead.schema';
 import { LeadValidationService } from './lead-validation.service';
+import { CreateLeadDto } from '../dto/lead.dto';
 
 export interface ImportResult {
   success: boolean;
@@ -93,7 +94,7 @@ export class LeadImportExportService {
       for (const record of records) {
         try {
           const processedRecord = this.processImportRecord(record, options.fieldMapping);
-          const validationResult = await this.leadValidationService.validateCreateLead(processedRecord);
+          const validationResult = await this.leadValidationService.validateCreateLead(processedRecord as unknown as CreateLeadDto);
 
           if (!validationResult.isValid) {
             errors.push({
@@ -234,6 +235,11 @@ export class LeadImportExportService {
         processed[key] = this.normalizeFieldValue(key, value);
       }
     });
+
+    // Ensure required fields are present
+    if (!processed.source) {
+      processed.source = 'IMPORT'; // Default source for imported leads
+    }
 
     return processed;
   }

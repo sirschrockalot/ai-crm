@@ -13,6 +13,9 @@ export enum InvitationStatus {
 
 @Schema({ timestamps: true })
 export class UserInvitation {
+  @Prop({ type: Types.ObjectId, auto: true })
+  _id: Types.ObjectId;
+
   @Prop({ required: true })
   email: string;
 
@@ -53,6 +56,10 @@ export class UserInvitation {
     referrer?: string;
     [key: string]: any;
   };
+
+  // Virtual properties
+  isExpired?: boolean;
+  isValid?: boolean;
 }
 
 export const UserInvitationSchema = SchemaFactory.createForClass(UserInvitation);

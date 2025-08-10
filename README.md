@@ -55,8 +55,8 @@ A modern, AI-powered CRM platform for real estate wholesalers, built with Next.j
 
 4. **Start development environment**
    ```bash
-   # Start all services with Docker
-   npm run docker:up
+   # Quick start - everything in one command
+   ./scripts/dev.sh
    
    # Or start individual services
    npm run dev:backend
@@ -93,6 +93,9 @@ dealcycle-crm/
 
 ### Root Commands
 ```bash
+./scripts/dev.sh         # Start complete development environment
+./scripts/dev.sh --stop  # Stop all development services
+./scripts/test-dev.sh    # Test if development environment is working
 npm run dev              # Start backend + frontend
 npm run test             # Run all tests
 npm run lint             # Lint all code
@@ -148,6 +151,42 @@ npm run test:coverage
 # Watch mode
 npm run test:watch
 ```
+
+## 🚀 Development Environment
+
+### Quick Start
+The easiest way to get started with development is using our automated setup script:
+
+```bash
+# Start the complete development environment
+./scripts/dev.sh
+
+# Test if everything is working
+./scripts/test-dev.sh
+
+# Stop all services
+./scripts/dev.sh --stop
+```
+
+This will automatically:
+- ✅ Check prerequisites (Node.js, Docker)
+- ✅ Set up environment files
+- ✅ Install all dependencies
+- ✅ Start core services (MongoDB, Redis, Meilisearch)
+- ✅ Start backend in development mode
+- ✅ Start frontend in development mode
+- ✅ Show status and useful URLs
+
+### Access Points
+Once running, you can access:
+- **Frontend**: http://localhost:3001
+- **Backend API**: http://localhost:3000
+- **API Health**: http://localhost:3000/health
+- **MongoDB**: mongodb://localhost:27017
+- **Redis**: redis://localhost:6379
+- **Search**: http://localhost:7700
+
+For detailed development setup instructions, see [README-DEV.md](README-DEV.md).
 
 ## 🐳 Docker Development
 

@@ -2,19 +2,40 @@ import { useState, useEffect, useCallback } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // Get from local storage then parse stored json or return initialValue
-  const [storedValue, setStoredValue] = useState<T>(() => {
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+  const [isClient, setIsClient] = useState(false);
+
+  // Initialize on client side only
+  useEffect(() => {
+    setIsClient(true);
+    
     if (typeof window === 'undefined') {
-      return initialValue;
+      return;
     }
 
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      
+      // Handle null, undefined, or empty string
+      if (!item || item === 'null' || item === 'undefined' || item === '') {
+        setStoredValue(initialValue);
+        return;
+      }
+      
+      // Try to parse the JSON
+      const parsed = JSON.parse(item);
+      setStoredValue(parsed);
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
+      // Remove the invalid value from localStorage
+      try {
+        window.localStorage.removeItem(key);
+      } catch (removeError) {
+        console.error(`Error removing invalid localStorage key "${key}":`, removeError);
+      }
+      setStoredValue(initialValue);
     }
-  });
+  }, [key, initialValue]);
 
   // Return a wrapped version of useState's setter function that persists the new value to localStorage
   const setValue = useCallback((value: T | ((val: T) => T)) => {
@@ -25,7 +46,12 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
       // Save to local storage
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        // Don't store null, undefined, or empty values
+        if (valueToStore === null || valueToStore === undefined) {
+          window.localStorage.removeItem(key);
+        } else {
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        }
       }
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
@@ -46,23 +72,31 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 
   // Sync with localStorage changes from other tabs/windows
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || !isClient) {
       return undefined;
     }
 
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key && e.newValue !== null) {
         try {
-          setStoredValue(JSON.parse(e.newValue));
+          // Handle null, undefined, or empty string
+          if (!e.newValue || e.newValue === 'null' || e.newValue === 'undefined' || e.newValue === '') {
+            setStoredValue(initialValue);
+            return;
+          }
+          
+          const parsed = JSON.parse(e.newValue);
+          setStoredValue(parsed);
         } catch (error) {
           console.error(`Error parsing localStorage value for key "${key}":`, error);
+          setStoredValue(initialValue);
         }
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [key]);
+  }, [key, initialValue, isClient]);
 
   return [storedValue, setValue, removeValue] as const;
 }
@@ -76,9 +110,22 @@ export const localStorageUtils = {
 
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
+      
+      // Handle null, undefined, or empty string
+      if (!item || item === 'null' || item === 'undefined' || item === '') {
+        return defaultValue;
+      }
+      
+      const parsed = JSON.parse(item);
+      return parsed;
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
+      // Remove the invalid value from localStorage
+      try {
+        window.localStorage.removeItem(key);
+      } catch (removeError) {
+        console.error(`Error removing invalid localStorage key "${key}":`, removeError);
+      }
       return defaultValue;
     }
   },
@@ -89,7 +136,12 @@ export const localStorageUtils = {
     }
 
     try {
-      window.localStorage.setItem(key, JSON.stringify(value));
+      // Don't store null, undefined, or empty values
+      if (value === null || value === undefined) {
+        window.localStorage.removeItem(key);
+      } else {
+        window.localStorage.setItem(key, JSON.stringify(value));
+      }
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
@@ -124,7 +176,8 @@ export const localStorageUtils = {
       return false;
     }
 
-    return window.localStorage.getItem(key) !== null;
+    const item = window.localStorage.getItem(key);
+    return item !== null && item !== 'null' && item !== 'undefined' && item !== '';
   },
 
   keys: (): string[] => {

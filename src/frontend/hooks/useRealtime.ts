@@ -33,13 +33,23 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
   } = options;
 
   const { isAuthenticated } = useAuth();
+  const [isClient, setIsClient] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
-  const [connection, setConnection] = useState<RealtimeConnection>(realtimeService.getConnectionStatus());
+  const [connection, setConnection] = useState<RealtimeConnection>({
+    id: '',
+    status: 'disconnected',
+  });
   const [lastMessage, setLastMessage] = useState<RealtimeMessage | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const subscriptionRefs = useRef<Map<string, string>>(new Map());
+
+  // Initialize client-side state
+  useEffect(() => {
+    setIsClient(true);
+    setConnection(realtimeService.getConnectionStatus());
+  }, []);
 
   // Connection event handlers
   const handleConnected = useCallback(() => {
@@ -79,8 +89,10 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
     onMessage?.(message);
   }, [onMessage]);
 
-  // Subscribe to real-time events
+  // Subscribe to real-time events (only on client side)
   useEffect(() => {
+    if (!isClient) return;
+
     realtimeService.on('connected', handleConnected);
     realtimeService.on('disconnected', handleDisconnected);
     realtimeService.on('reconnecting', handleReconnecting);
@@ -98,27 +110,31 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
       realtimeService.off('error', handleError);
       realtimeService.off('message', handleMessage);
     };
-  }, [handleConnected, handleDisconnected, handleReconnecting, handlePollingStarted, handlePollingStopped, handleError, handleMessage]);
+  }, [isClient, handleConnected, handleDisconnected, handleReconnecting, handlePollingStarted, handlePollingStopped, handleError, handleMessage]);
 
-  // Auto-connect when authenticated
+  // Auto-connect when authenticated (only on client side)
   useEffect(() => {
-    if (autoConnect && isAuthenticated && !isConnected) {
+    if (isClient && autoConnect && isAuthenticated && !isConnected) {
       connect().catch(console.error);
     }
-  }, [autoConnect, isAuthenticated, isConnected]);
+  }, [isClient, autoConnect, isAuthenticated, isConnected]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      // Unsubscribe from all channels
-      for (const [key, subscriptionId] of subscriptionRefs.current) {
-        realtimeService.unsubscribe(subscriptionId);
+      if (isClient) {
+        // Unsubscribe from all channels
+        for (const [key, subscriptionId] of subscriptionRefs.current) {
+          realtimeService.unsubscribe(subscriptionId);
+        }
+        subscriptionRefs.current.clear();
       }
-      subscriptionRefs.current.clear();
     };
-  }, []);
+  }, [isClient]);
 
   const connect = useCallback(async () => {
+    if (!isClient) return;
+    
     try {
       setError(null);
       await realtimeService.connect();
@@ -127,19 +143,28 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
       setError(error.message);
       throw error;
     }
-  }, []);
+  }, [isClient]);
 
   const disconnect = useCallback(() => {
-    realtimeService.disconnect();
-  }, []);
+    if (isClient) {
+      realtimeService.disconnect();
+    }
+  }, [isClient]);
 
   const subscribe = useCallback((channel: string, handler: (message: RealtimeMessage) => void): string => {
+    if (!isClient) {
+      console.warn('Cannot subscribe to real-time channel: not in browser environment');
+      return '';
+    }
+    
     const subscriptionId = realtimeService.subscribe(channel, handler);
     subscriptionRefs.current.set(channel, subscriptionId);
     return subscriptionId;
-  }, []);
+  }, [isClient]);
 
   const unsubscribe = useCallback((subscriptionId: string) => {
+    if (!isClient) return;
+    
     realtimeService.unsubscribe(subscriptionId);
     
     // Remove from refs
@@ -149,11 +174,13 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
         break;
       }
     }
-  }, []);
+  }, [isClient]);
 
   const send = useCallback((message: RealtimeMessage) => {
-    realtimeService.send(message);
-  }, []);
+    if (isClient) {
+      realtimeService.send(message);
+    }
+  }, [isClient]);
 
   return {
     isConnected,

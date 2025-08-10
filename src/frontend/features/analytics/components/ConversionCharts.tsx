@@ -31,12 +31,12 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
     loading,
     error,
     isAuthenticated,
-    fetchConversionData,
+    fetchAnalyticsData,
     updateFilters,
   } = useAnalytics();
 
   const [selectedSegment, setSelectedSegment] = useState<string>('all');
-  const [chartType, setChartType] = useState<'funnel' | 'pie' | 'bar'>('funnel');
+  const [chartType, setChartType] = useState<'bar' | 'pie' | 'line'>('bar');
   const [filters, setFilters] = useState<AnalyticsFilters>({
     timeRange: timeRange as '7d' | '30d' | '90d' | '1y',
   });
@@ -55,8 +55,8 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
     }
 
     // Fetch conversion data on mount
-    fetchConversionData(filters);
-  }, [fetchConversionData, filters, isAuthenticated, toast]);
+    fetchAnalyticsData(filters);
+  }, [fetchAnalyticsData, filters, isAuthenticated, toast]);
 
   // Handle segment selection
   const handleSegmentClick = (segment: string) => {
@@ -66,8 +66,8 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
 
   // Handle chart type change
   const handleChartTypeChange = (type: string) => {
-    if (type === 'funnel' || type === 'pie' || type === 'bar') {
-      setChartType(type);
+    if (type === 'bar' || type === 'pie' || type === 'line') {
+      setChartType(type as 'bar' | 'pie' | 'line');
     }
   };
 
@@ -135,7 +135,7 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
 
   const getChartData = (): ChartDataPoint[] => {
     switch (chartType) {
-      case 'funnel':
+      case 'line':
         return funnelData;
       case 'pie':
         return conversionRateData;
@@ -148,7 +148,7 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
 
   const getChartTitle = (): string => {
     switch (chartType) {
-      case 'funnel':
+      case 'line':
         return 'Conversion Funnel';
       case 'pie':
         return 'Conversion Rate by Source';
@@ -161,7 +161,7 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
 
   const getYAxisLabel = (): string => {
     switch (chartType) {
-      case 'funnel':
+      case 'line':
         return 'Number of Leads';
       case 'pie':
         return 'Conversion Rate (%)';
@@ -189,9 +189,9 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
               onChange={(e) => handleChartTypeChange(e.target.value)}
               maxW="120px"
             >
-              <option value="funnel">Funnel</option>
-              <option value="pie">Pie</option>
               <option value="bar">Bar</option>
+              <option value="pie">Pie</option>
+              <option value="line">Line</option>
             </Select>
           </HStack>
         </HStack>
@@ -206,15 +206,10 @@ export const ConversionCharts: React.FC<ConversionChartsProps> = ({
               <Chart
                 type={chartType}
                 data={getChartData()}
-                options={{
-                  title: getChartTitle(),
-                  xAxisLabel: chartType === 'bar' ? 'Month' : 'Stage',
-                  yAxisLabel: getYAxisLabel(),
-                  showGrid: chartType === 'bar',
-                  showLegend: chartType === 'pie',
-                  animate: true,
-                  colors: chartType === 'pie' ? ['#3182CE', '#38A169', '#D69E2E', '#E53E3E', '#805AD5'] : ['#3182CE'],
-                }}
+                title={getChartTitle()}
+                showGrid={chartType === 'bar'}
+                showLegend={chartType === 'pie'}
+                colors={chartType === 'pie' ? ['#3182CE', '#38A169', '#D69E2E', '#E53E3E', '#805AD5'] : ['#3182CE']}
               />
             )}
           </VStack>

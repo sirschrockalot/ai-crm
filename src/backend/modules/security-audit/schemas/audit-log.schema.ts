@@ -196,6 +196,10 @@ export class AuditLog {
     retentionPeriod?: number; // Retention period in days
     dataCategories?: string[]; // Categories of data involved
   };
+
+  // Methods (optional for TypeScript interface)
+  calculateRetentionDate?: () => Date;
+  calculateRiskScore?: () => { score: number; factors: string[]; threshold: number };
 }
 
 export const AuditLogSchema = SchemaFactory.createForClass(AuditLog);

@@ -16,9 +16,11 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, UserSearchDto, UpdateUserStatusDto, UpdateUserRolesDto, UserActivitySearchDto, ActivityExportDto } from './dto/user.dto';
+import { ActivityType } from './schemas/user-activity.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserId, CurrentTenantId } from '../auth/decorators/auth.decorator';
 import { JwtPayload } from '../auth/auth.service';
+import { Types } from 'mongoose';
 
 @ApiTags('Users')
 @Controller('users')
@@ -37,7 +39,7 @@ export class UsersController {
     @Body() createUserDto: CreateUserDto,
     @CurrentUser() currentUser: JwtPayload,
   ) {
-    const user = await this.usersService.createUser(createUserDto, currentUser.sub);
+    const user = await this.usersService.createUser(createUserDto, new Types.ObjectId(currentUser.sub));
     
     return {
       success: true,
@@ -69,7 +71,7 @@ export class UsersController {
     @Query() searchDto: UserSearchDto,
     @CurrentTenantId() tenantId: string,
   ) {
-    const { users, total } = await this.usersService.searchUsers(searchDto, tenantId);
+    const { users, total } = await this.usersService.searchUsers(searchDto, new Types.ObjectId(tenantId));
     
     return {
       success: true,
@@ -109,7 +111,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUserId() userId: string,
   ) {
-    const user = await this.usersService.updateUser(userId, updateUserDto, userId);
+    const user = await this.usersService.updateUser(userId, updateUserDto, new Types.ObjectId(userId));
     
     return {
       success: true,
@@ -141,7 +143,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUserId() userId: string,
   ) {
-    const user = await this.usersService.updateUser(userId, updateUserDto, userId);
+    const user = await this.usersService.updateUser(userId, updateUserDto, new Types.ObjectId(userId));
     
     return {
       success: true,
@@ -161,7 +163,7 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @CurrentUserId() currentUserId: string,
   ) {
-    const user = await this.usersService.updateUser(userId, updateUserDto, currentUserId);
+    const user = await this.usersService.updateUser(userId, updateUserDto, new Types.ObjectId(currentUserId));
     
     return {
       success: true,
@@ -183,7 +185,7 @@ export class UsersController {
       userId,
       updateStatusDto.status,
       updateStatusDto.reason,
-      currentUserId,
+      new Types.ObjectId(currentUserId),
     );
     
     return {
@@ -206,7 +208,7 @@ export class UsersController {
       userId,
       updateRolesDto.roles,
       updateRolesDto.reason,
-      currentUserId,
+      new Types.ObjectId(currentUserId),
     );
     
     return {
@@ -256,8 +258,8 @@ export class UsersController {
     // Get only profile-related activities
     const { activities, total } = await this.usersService.getUserActivity(userId, page, limit);
     const profileActivities = activities.filter(activity => 
-      activity.type === 'PROFILE_UPDATE' || 
-      activity.type === 'ACCOUNT_CREATION'
+      activity.type === ActivityType.PROFILE_UPDATE || 
+      activity.type === ActivityType.ACCOUNT_CREATION
     );
     
     return {
@@ -313,7 +315,7 @@ export class UsersController {
     @Body('reason') reason?: string,
     @CurrentUserId() currentUserId?: string,
   ) {
-    await this.usersService.deleteUser(userId, reason, currentUserId);
+    await this.usersService.deleteUser(userId, reason, new Types.ObjectId(currentUserId));
     
     return {
       success: true,
@@ -325,7 +327,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get active users count' })
   @ApiResponse({ status: 200, description: 'Active users count retrieved successfully' })
   async getActiveUsersCount(@CurrentTenantId() tenantId: string) {
-    const count = await this.usersService.getActiveUsersCount(tenantId);
+    const count = await this.usersService.getActiveUsersCount(new Types.ObjectId(tenantId));
     
     return {
       success: true,
@@ -341,7 +343,7 @@ export class UsersController {
     @Param('role') role: string,
     @CurrentTenantId() tenantId: string,
   ) {
-    const users = await this.usersService.getUsersByRole(role as any, tenantId);
+    const users = await this.usersService.getUsersByRole(role as any, new Types.ObjectId(tenantId));
     
     return {
       success: true,
@@ -387,7 +389,9 @@ export class UsersController {
   ) {
     const { activities, total } = await this.usersService.searchUserActivity({
       ...searchDto,
-      tenantId,
+      tenantId: new Types.ObjectId(tenantId),
+      type: searchDto.type as ActivityType,
+      severity: searchDto.severity as any,
       startDate: searchDto.startDate ? new Date(searchDto.startDate) : undefined,
       endDate: searchDto.endDate ? new Date(searchDto.endDate) : undefined,
     });
@@ -410,12 +414,12 @@ export class UsersController {
   @Get('activity/statistics')
   @ApiOperation({ summary: 'Get activity statistics for dashboard' })
   @ApiResponse({ status: 200, description: 'Activity statistics retrieved successfully' })
-  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Number of days to analyze', default: 30 })
+  @ApiQuery({ name: 'days', required: false, type: Number, description: 'Number of days to analyze' })
   async getActivityStatistics(
     @CurrentTenantId() tenantId: string,
     @Query('days', new ParseIntPipe({ optional: true })) days = 30,
   ) {
-    const statistics = await this.usersService.getActivityStatistics(tenantId, days);
+    const statistics = await this.usersService.getActivityStatistics(new Types.ObjectId(tenantId), days);
     
     return {
       success: true,
@@ -433,7 +437,7 @@ export class UsersController {
   ) {
     const data = await this.usersService.exportActivityLogs(
       exportDto.userId,
-      tenantId,
+      new Types.ObjectId(tenantId),
       exportDto.startDate ? new Date(exportDto.startDate) : undefined,
       exportDto.endDate ? new Date(exportDto.endDate) : undefined,
       exportDto.format || 'json'
@@ -452,7 +456,7 @@ export class UsersController {
   @Post('activity/cleanup')
   @ApiOperation({ summary: 'Clean up old activity logs based on retention policy' })
   @ApiResponse({ status: 200, description: 'Activity logs cleaned up successfully' })
-  @ApiQuery({ name: 'retentionDays', required: false, type: Number, description: 'Days to retain logs', default: 90 })
+  @ApiQuery({ name: 'retentionDays', required: false, type: Number, description: 'Days to retain logs' })
   async cleanupActivityLogs(
     @Query('retentionDays', new ParseIntPipe({ optional: true })) retentionDays = 90,
   ) {
@@ -468,7 +472,7 @@ export class UsersController {
   @Post('status-history/cleanup')
   @ApiOperation({ summary: 'Clean up old status history based on retention policy' })
   @ApiResponse({ status: 200, description: 'Status history cleaned up successfully' })
-  @ApiQuery({ name: 'retentionDays', required: false, type: Number, description: 'Days to retain history', default: 365 })
+  @ApiQuery({ name: 'retentionDays', required: false, type: Number, description: 'Days to retain history' })
   async cleanupStatusHistory(
     @Query('retentionDays', new ParseIntPipe({ optional: true })) retentionDays = 365,
   ) {

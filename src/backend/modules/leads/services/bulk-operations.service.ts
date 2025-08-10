@@ -49,6 +49,7 @@ export interface BulkOperationLog {
   completedAt?: Date;
   undoOperationId?: string;
   originalData?: Record<string, any>[];
+  canUndo?: boolean;
 }
 
 @Injectable()
@@ -670,7 +671,8 @@ export class BulkOperationsService {
     leads.forEach(lead => {
       leadStatuses[lead.status] = (leadStatuses[lead.status] || 0) + 1;
       if (lead.stageId) {
-        leadStages[lead.stageId] = (leadStages[lead.stageId] || 0) + 1;
+        const stageIdStr = lead.stageId?.toString() || 'unknown';
+        leadStages[stageIdStr] = (leadStages[stageIdStr] || 0) + 1;
       }
     });
 

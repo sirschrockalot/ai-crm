@@ -55,6 +55,10 @@ export class AdvancedPermission {
 
   @Prop({ type: Types.ObjectId, ref: 'User' })
   updatedBy?: Types.ObjectId;
+
+  // Virtual properties
+  fullPermission?: string;
+  scopedPermission?: string;
 }
 
 export const AdvancedPermissionSchema = SchemaFactory.createForClass(AdvancedPermission);

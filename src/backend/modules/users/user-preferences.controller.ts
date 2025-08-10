@@ -11,6 +11,7 @@ import {
   HttpStatus,
   ParseIntPipe,
 } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { UserPreferencesService } from './services/user-preferences.service';
@@ -61,7 +62,7 @@ export class UserPreferencesController {
     @CurrentUser('sub') userId: string,
     @Body() updateDto: UpdateUserPreferencesDto,
   ) {
-    return this.userPreferencesService.updateUserPreferences(userId, updateDto, userId);
+    return this.userPreferencesService.updateUserPreferences(userId, updateDto, new Types.ObjectId(userId));
   }
 
   @Post('preferences/reset')
@@ -76,7 +77,7 @@ export class UserPreferencesController {
     description: 'User not found',
   })
   async resetMyPreferences(@CurrentUser('sub') userId: string) {
-    return this.userPreferencesService.resetUserPreferences(userId, userId);
+    return this.userPreferencesService.resetUserPreferences(userId, new Types.ObjectId(userId));
   }
 
   @Get('preferences/history')
@@ -142,7 +143,7 @@ export class UserPreferencesController {
     @Body() updateDto: UpdateUserPreferencesDto,
     @CurrentUser('sub') performedBy: string,
   ) {
-    return this.userPreferencesService.updateUserPreferences(userId, updateDto, performedBy);
+    return this.userPreferencesService.updateUserPreferences(userId, updateDto, new Types.ObjectId(performedBy));
   }
 
   @Post(':userId/preferences/reset')
@@ -166,7 +167,7 @@ export class UserPreferencesController {
     @Param('userId') userId: string,
     @CurrentUser('sub') performedBy: string,
   ) {
-    return this.userPreferencesService.resetUserPreferences(userId, performedBy);
+    return this.userPreferencesService.resetUserPreferences(userId, new Types.ObjectId(performedBy));
   }
 
   @Get(':userId/preferences/history')

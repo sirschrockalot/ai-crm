@@ -16,7 +16,7 @@ export const WorkflowNode: React.FC<NodeProps> = memo(({ data, selected }) => {
 
   // Get node styling based on type
   const getNodeStyle = () => {
-    const baseStyle = {
+    const baseStyle: React.CSSProperties = {
       padding: '12px',
       borderRadius: '8px',
       border: '2px solid',

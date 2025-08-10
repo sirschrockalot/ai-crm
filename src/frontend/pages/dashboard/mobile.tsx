@@ -145,7 +145,7 @@ const MobileDashboardPage: React.FC = () => {
           <Box bg="white" p={4} borderRadius="lg" shadow="sm">
             <HStack justify="space-between" mb={4}>
               <Text fontSize="lg" fontWeight="semibold">
-                Today's Activity
+                Today&apos;s Activity
               </Text>
               <Text fontSize="sm" color="gray.500">Summary</Text>
             </HStack>

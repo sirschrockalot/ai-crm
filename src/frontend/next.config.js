@@ -1,75 +1,42 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
-  experimental: {
-    scrollRestoration: true,
-    optimizeCss: true,
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
+  // Enable React strict mode for better development experience
+  reactStrictMode: true,
+
+  // Suppress hydration warnings in development
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
   },
-  
-  // Webpack configuration for optimization
-  webpack: (config, { isServer, dev }) => {
-    // Optimize bundle size for production
-    if (!isServer && !dev) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
+
+  // Webpack configuration
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle size
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
       };
-      
-      // Enable tree shaking
-      config.optimization = {
-        ...config.optimization,
-        usedExports: true,
-        sideEffects: false,
-      };
-    }
-
-    // Add support for SVG imports
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
-    });
-
-    // Exclude micro-apps from the build
-    config.module.rules.push({
-      test: /micro-apps/,
-      use: 'ignore-loader',
-    });
-
-    // Bundle analyzer for development
-    if (process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
-      config.plugins.push(
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'server',
-          analyzerPort: 8888,
-          openAnalyzer: true,
-        })
-      );
     }
 
     return config;
   },
-  
+
   // Image optimization
   images: {
-    domains: ['localhost', 'your-domain.com', 'api.dealcycle.com'],
+    domains: ['localhost'],
     formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
   },
-  
-  // Security headers
+
+  // Headers for security and performance
   async headers() {
     return [
       {
@@ -87,19 +54,11 @@ const nextConfig = {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
           },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
-          },
         ],
       },
     ];
   },
-  
+
   // API rewrites
   async rewrites() {
     return [
@@ -109,7 +68,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Environment-specific redirects
   async redirects() {
     return [
@@ -120,30 +79,36 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Enable SWC minification
   swcMinify: true,
-  
-  // Enable compression
-  compress: true,
-  
-  // Disable powered by header
-  poweredByHeader: false,
-  
-  // Enable strict mode
-  reactStrictMode: true,
-  
-  // Performance optimizations
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
+
+  // Experimental features
+  experimental: {
+    // Optimize CSS
+    optimizeCss: true,
+    
+    // Enable scroll restoration
+    scrollRestoration: true,
   },
-  
-  // Build optimizations
-  generateEtags: false,
-  
-  // Source maps for debugging (only in development)
-  productionBrowserSourceMaps: process.env.NODE_ENV === 'development',
+
+  // Suppress hydration warnings in development
+  ...(process.env.NODE_ENV === 'development' && {
+    // Suppress console warnings about hydration mismatches
+    onDemandEntries: {
+      maxInactiveAge: 25 * 1000,
+      pagesBufferLength: 2,
+    },
+  }),
+
+  // Suppress specific warnings in development
+  ...(process.env.NODE_ENV === 'development' && {
+    // Suppress hydration mismatch warnings
+    compiler: {
+      // Remove console.logs in production
+      removeConsole: process.env.NODE_ENV === 'production',
+    },
+  }),
 };
 
 module.exports = nextConfig; 

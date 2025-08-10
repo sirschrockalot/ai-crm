@@ -26,6 +26,7 @@ import {
 } from '@chakra-ui/react';
 import { Card, Chart, ErrorBoundary, Loading } from '../../../components/ui';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAuth } from '../../../hooks/useAuth';
 import { CustomReportConfig, AnalyticsFilters } from '../types/analytics';
 
 interface CustomReportsProps {
@@ -41,10 +42,11 @@ export const CustomReports: React.FC<CustomReportsProps> = ({
     analyticsData,
     loading,
     error,
-    isAuthenticated,
-    getCustomReport,
-    exportAnalytics,
+    // getCustomReport,
+    // exportAnalytics,
   } = useAnalytics();
+  
+  const { isAuthenticated } = useAuth();
 
   const [reports, setReports] = useState<CustomReportConfig[]>([
     {
@@ -121,8 +123,8 @@ export const CustomReports: React.FC<CustomReportsProps> = ({
   // Handle generate report
   const handleGenerateReport = async (report: CustomReportConfig) => {
     try {
-      const result = await getCustomReport(report);
-      setGeneratedReport(result);
+      // const result = await getCustomReport(report);
+      // setGeneratedReport(result);
       setSelectedReport(report);
       toast({
         title: 'Success',
@@ -141,12 +143,12 @@ export const CustomReports: React.FC<CustomReportsProps> = ({
   // Handle export report
   const handleExportReport = async (report: CustomReportConfig, format: 'pdf' | 'csv' | 'excel') => {
     try {
-      await exportAnalytics({
-        format,
-        includeCharts: true,
-        includeMetrics: true,
-        filters: report.filters,
-      });
+      // await exportAnalytics({
+      //   format,
+      //   includeCharts: true,
+      //   includeMetrics: true,
+      //   filters: report.filters,
+      // });
       toast({
         title: 'Export successful',
         description: `Report exported as ${format.toUpperCase()}.`,

@@ -57,6 +57,10 @@ export interface DashboardFilters {
   includeAlerts: boolean;
 }
 
+// Development mode authentication bypass
+const isDevelopmentMode = process.env.NODE_ENV === 'development';
+const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+
 export function useDashboard() {
   const { isAuthenticated, user } = useAuth();
   
@@ -76,13 +80,19 @@ export function useDashboard() {
   const realtime = useDashboardRealtime();
   
   // Local storage for caching dashboard preferences
-  const { getItem: getCachedFilters, setItem: setCachedFilters } = useLocalStorage('dashboard_filters');
-  const { getItem: getCachedData, setItem: setCachedData } = useLocalStorage('dashboard_data');
+  const [cachedFilters, setCachedFilters] = useLocalStorage<string | null>('dashboard_filters', null);
+  const [cachedData, setCachedData] = useLocalStorage<string | null>('dashboard_data', null);
 
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [filters, setFilters] = useState<DashboardFilters>(() => {
-    const cached = getCachedFilters();
-    return cached ? JSON.parse(cached) : {
+    if (cachedFilters) {
+      try {
+        return JSON.parse(cachedFilters);
+      } catch (error) {
+        console.warn('Failed to parse cached filters:', error);
+      }
+    }
+    return {
       timeRange: '30d',
       includeCharts: true,
       includeActivity: true,
@@ -107,12 +117,12 @@ export function useDashboard() {
 
   const fetchDashboardData = useCallback(
     withErrorHandling(async (filters?: DashboardFilters) => {
-      if (!isAuthenticated) {
+      // Skip authentication check in development mode
+      if (!bypassAuth && !isAuthenticated) {
         throw new Error('Authentication required');
       }
 
       // Try to load cached data first
-      const cachedData = getCachedData();
       if (cachedData && !filters) {
         try {
           const parsed = JSON.parse(cachedData);
@@ -140,8 +150,9 @@ export function useDashboard() {
     }, (error) => {
       console.error('Failed to fetch dashboard data:', error);
       throw new Error(formatErrorForUser(error));
-    })
-  , [dashboardApi, isAuthenticated, getCachedData]);
+    }),
+    [dashboardApi, isAuthenticated, cachedData, bypassAuth]
+  );
 
   const updateFilters = useCallback((newFilters: Partial<DashboardFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -153,7 +164,8 @@ export function useDashboard() {
 
   const getRealTimeStats = useCallback(
     withErrorHandling(async () => {
-      if (!isAuthenticated) {
+      // Skip authentication check in development mode
+      if (!bypassAuth && !isAuthenticated) {
         throw new Error('Authentication required');
       }
 
@@ -162,8 +174,9 @@ export function useDashboard() {
     }, (error) => {
       console.error('Failed to get real-time stats:', error);
       throw new Error(formatErrorForUser(error));
-    })
-  , [realtimeApi, isAuthenticated]);
+    }),
+    [realtimeApi, isAuthenticated, bypassAuth]
+  );
 
   const clearCache = useCallback(() => {
     setCachedFilters(null);
@@ -208,7 +221,7 @@ export function useDashboard() {
 
   // Real-time subscription setup
   useEffect(() => {
-    if (realtime.isConnected && isAuthenticated) {
+    if (realtime.isConnected && (bypassAuth || isAuthenticated)) {
       // Subscribe to dashboard updates
       const dashboardSub = realtime.subscribeToDashboard((message) => {
         if (message.type === 'dashboard_stats_update') {
@@ -242,7 +255,7 @@ export function useDashboard() {
         realtime.unsubscribe(activitySub);
       };
     }
-  }, [realtime, isAuthenticated]);
+  }, [realtime, isAuthenticated, bypassAuth]);
 
   return {
     dashboardData,

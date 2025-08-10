@@ -93,7 +93,7 @@ UserPreferencesSchema.set('toObject', { virtuals: true });
 UserPreferencesSchema.pre('save', function(next) {
   if (this.isModified('preferences')) {
     const changes = this.getChanges();
-    if (changes.length > 0) {
+    if (changes && Array.isArray(changes) && changes.length > 0) {
       this.changeHistory.push(...changes);
     }
   }

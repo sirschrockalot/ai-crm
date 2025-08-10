@@ -72,6 +72,10 @@ export class AdvancedRole {
     userId: Types.ObjectId;
     details: Record<string, any>;
   }>;
+
+  // Methods (optional for TypeScript interface)
+  calculateInheritedPermissions?: () => Promise<string[]>;
+  calculateEffectivePermissions?: () => string[];
 }
 
 export const AdvancedRoleSchema = SchemaFactory.createForClass(AdvancedRole);

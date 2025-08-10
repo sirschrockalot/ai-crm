@@ -34,7 +34,6 @@ export const TeamPerformance: React.FC<TeamPerformanceProps> = ({
     loading,
     error,
     isAuthenticated,
-    fetchTeamPerformance,
     updateFilters,
   } = useAnalytics();
 
@@ -57,8 +56,8 @@ export const TeamPerformance: React.FC<TeamPerformanceProps> = ({
     }
 
     // Fetch team performance data on mount
-    fetchTeamPerformance(filters);
-  }, [fetchTeamPerformance, filters, isAuthenticated, toast]);
+    // fetchTeamPerformance(filters);
+  }, [filters, isAuthenticated, toast]);
 
   // Handle member selection
   const handleMemberSelect = (memberId: string) => {
@@ -267,14 +266,9 @@ export const TeamPerformance: React.FC<TeamPerformanceProps> = ({
                 <Chart
                   type="bar"
                   data={performanceChartData}
-                  options={{
-                    title: 'Conversion Rate by Team Member',
-                    xAxisLabel: 'Team Member',
-                    yAxisLabel: 'Conversion Rate (%)',
-                    showGrid: true,
-                    animate: true,
-                    colors: ['#3182CE'],
-                  }}
+                  title="Conversion Rate by Team Member"
+                  showGrid={true}
+                  colors={['#3182CE']}
                 />
               )}
             </VStack>
@@ -289,14 +283,9 @@ export const TeamPerformance: React.FC<TeamPerformanceProps> = ({
                 <Chart
                   type="bar"
                   data={revenueChartData}
-                  options={{
-                    title: 'Revenue by Team Member',
-                    xAxisLabel: 'Team Member',
-                    yAxisLabel: 'Revenue (Millions $)',
-                    showGrid: true,
-                    animate: true,
-                    colors: ['#38A169'],
-                  }}
+                  title="Revenue by Team Member"
+                  showGrid={true}
+                  colors={['#38A169']}
                 />
               )}
             </VStack>

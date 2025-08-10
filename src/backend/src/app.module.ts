@@ -1,25 +1,36 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtModule } from '@nestjs/jwt';
 
 import { AuthModule } from '../modules/auth/auth.module';
 import { UsersModule } from '../modules/users/users.module';
 import { RbacModule } from '../modules/rbac/rbac.module';
 import { TenantsModule } from '../modules/tenants/tenants.module';
 import { LeadsModule } from '../modules/leads/leads.module';
+import { SettingsModule } from '../modules/settings/settings.module';
+import { TimeTrackingModule } from '../modules/time-tracking/time-tracking.module';
 import { TenantIsolationMiddleware } from '../common/middleware/tenant-isolation.middleware';
 import { SecurityLoggingMiddleware } from '../common/middleware/security-logging.middleware';
+import { HealthController } from './health.controller';
 import testModeConfig from '../config/test-mode.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '../../.env',
       load: [testModeConfig],
     }),
     MongooseModule.forRootAsync({
       useFactory: () => ({
-        uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/dealcycle',
+        uri: process.env.MONGODB_URI || 'mongodb://mongo:27017/dealcycle',
+      }),
+    }),
+    JwtModule.registerAsync({
+      useFactory: () => ({
+        secret: process.env.JWT_SECRET || 'your-secret-key',
+        signOptions: { expiresIn: '24h' },
       }),
     }),
     AuthModule,
@@ -27,7 +38,10 @@ import testModeConfig from '../config/test-mode.config';
     RbacModule,
     TenantsModule,
     LeadsModule,
+    SettingsModule,
+    TimeTrackingModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

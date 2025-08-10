@@ -13,7 +13,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import {
-  FiBarChart3,
+  FiBarChart,
   FiTrendingUp,
   FiUsers,
   FiFileText,
@@ -38,7 +38,7 @@ const analyticsNavItems: AnalyticsNavItem[] = [
     id: 'overview',
     title: 'Analytics Overview',
     description: 'Main dashboard with key metrics and insights',
-    icon: FiBarChart3,
+    icon: FiBarChart,
     href: '/analytics',
     color: 'blue',
   },

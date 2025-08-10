@@ -275,7 +275,6 @@ const BuyerList: React.FC<BuyerListProps> = ({
         sortable={sortable}
         pagination={pagination}
         pageSize={pageSize}
-        loading={loading}
       />
     </VStack>
   );

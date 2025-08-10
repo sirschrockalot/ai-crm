@@ -119,7 +119,7 @@ export const LeadList: React.FC<LeadListProps> = ({
       if (searchTerm) {
         // In a real implementation, this would update the API filters
         // For now, we'll just update local state
-        setFilters(prev => ({ ...prev, search: searchTerm }));
+        setFilters((prev: any) => ({ ...prev, search: searchTerm }));
       }
     }, 300);
 
@@ -266,7 +266,7 @@ export const LeadList: React.FC<LeadListProps> = ({
 
   // Update filters
   const updateFilters = (newFilters: Partial<typeof filters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev: any) => ({ ...prev, ...newFilters }));
   };
 
   // Reset filters
@@ -279,8 +279,8 @@ export const LeadList: React.FC<LeadListProps> = ({
   const filteredLeads = leads.filter(lead => {
     if (filters.status && lead.status !== filters.status) return false;
     if (filters.propertyType && lead.propertyType !== filters.propertyType) return false;
-    if (filters.minValue && lead.estimatedValue < filters.minValue) return false;
-    if (filters.maxValue && lead.estimatedValue > filters.maxValue) return false;
+    if (filters.minValue && lead.estimatedValue < Number(filters.minValue)) return false;
+    if (filters.maxValue && lead.estimatedValue > Number(filters.maxValue)) return false;
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       return (
@@ -344,9 +344,9 @@ export const LeadList: React.FC<LeadListProps> = ({
           isChecked={selectedLeads.includes(lead.id)}
           onChange={(e) => {
             if (e.target.checked) {
-              setSelectedLeads(prev => [...prev, lead.id]);
+              setSelectedLeads([...selectedLeads, lead.id]);
             } else {
-              setSelectedLeads(prev => prev.filter(id => id !== lead.id));
+              setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
             }
           }}
         />

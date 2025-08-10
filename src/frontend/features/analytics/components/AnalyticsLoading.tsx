@@ -11,7 +11,7 @@ import {
   Progress,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FiBarChart3, FiTrendingUp, FiUsers, FiPieChart } from 'react-icons/fi';
+import { FiBarChart, FiTrendingUp, FiUsers, FiPieChart } from 'react-icons/fi';
 
 interface AnalyticsLoadingProps {
   variant?: 'spinner' | 'skeleton' | 'progress';
@@ -119,7 +119,7 @@ export const AnalyticsLoading: React.FC<AnalyticsLoadingProps> = ({
                   transform="translate(-50%, -50%)"
                   color="gray.400"
                 >
-                  <FiBarChart3 size={48} />
+                  <FiBarChart size={48} />
                 </Box>
               </Box>
             </VStack>
@@ -253,7 +253,7 @@ export const AnalyticsMetricsLoading: React.FC<{ count?: number }> = ({ count = 
 );
 
 export const AnalyticsChartLoading: React.FC<{ type?: 'bar' | 'pie' | 'line' }> = ({ type = 'bar' }) => {
-  const IconComponent = type === 'pie' ? FiPieChart : type === 'line' ? FiTrendingUp : FiBarChart3;
+  const IconComponent = type === 'pie' ? FiPieChart : type === 'line' ? FiTrendingUp : FiBarChart;
   
   return (
     <Box

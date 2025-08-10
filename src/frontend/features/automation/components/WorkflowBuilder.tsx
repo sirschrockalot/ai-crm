@@ -16,6 +16,7 @@ import ReactFlow, {
   Panel,
   MiniMap,
   ReactFlowProvider,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -113,8 +114,8 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
         onDelete: () => handleNodeDelete(node.id),
         onConnect: (targetId: string) => handleNodeConnect(node.id, targetId),
       },
-      sourcePosition: node.sourcePosition,
-      targetPosition: node.targetPosition,
+      sourcePosition: node.sourcePosition as Position,
+      targetPosition: node.targetPosition as Position,
     }));
   }, [workflow]);
 
@@ -124,7 +125,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
-      type: edge.type || 'default',
+      type: (edge.type || 'default') as 'default' | 'step' | 'smoothstep',
       animated: edge.animated,
       style: edge.style,
     }));
@@ -243,7 +244,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
           id: edge.id,
           source: edge.source,
           target: edge.target,
-          type: edge.type || 'default',
+          type: (edge.type || 'default') as 'default' | 'step' | 'smoothstep',
           animated: edge.animated,
           style: edge.style,
         })),

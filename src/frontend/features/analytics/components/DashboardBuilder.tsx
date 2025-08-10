@@ -22,7 +22,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { FiPlus, FiGrid, FiSave, FiShare2, FiDownload } from 'react-icons/fi';
-import { Card, DashboardWidget } from '../../../components/ui';
+import { Card } from '../../../components/ui';
 import { ChartDataPoint } from '../types/analytics';
 
 interface DashboardWidget {
@@ -227,16 +227,25 @@ export const DashboardBuilder: React.FC<DashboardBuilderProps> = ({
       {/* Widget Grid */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
         {widgets.map((widget) => (
-          <DashboardWidget
-            key={widget.id}
-            id={widget.id}
-            title={widget.title}
-            type={widget.type}
-            data={widget.data}
-            config={widget.config}
-            onEdit={handleEditWidget}
-            onDelete={handleDeleteWidget}
-          />
+          <Card key={widget.id}>
+            <VStack align="stretch" spacing={3}>
+              <HStack justify="space-between">
+                <Heading size="md">{widget.title}</Heading>
+                <HStack spacing={2}>
+                  <Button size="sm" variant="ghost" onClick={() => handleEditWidget(widget.id)}>
+                    Edit
+                  </Button>
+                  <Button size="sm" variant="ghost" colorScheme="red" onClick={() => handleDeleteWidget(widget.id)}>
+                    Delete
+                  </Button>
+                </HStack>
+              </HStack>
+              <Text color="gray.600">Type: {widget.type}</Text>
+              {widget.data && (
+                <Text fontSize="sm">Data available</Text>
+              )}
+            </VStack>
+          </Card>
         ))}
       </SimpleGrid>
 

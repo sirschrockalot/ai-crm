@@ -16,7 +16,7 @@ export const WorkflowComponents: React.FC<WorkflowComponentsProps> = ({
 
   // Get unique categories
   const categories = useMemo(() => {
-    const cats = [...new Set(components.map(c => c.category))];
+    const cats = Array.from(new Set(components.map(c => c.category)));
     return ['all', ...cats];
   }, [components]);
 

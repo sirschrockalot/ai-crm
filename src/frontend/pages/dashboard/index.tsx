@@ -1,5 +1,28 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { VStack, HStack, Box, Text, useColorModeValue, useToast } from '@chakra-ui/react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { 
+  VStack, 
+  HStack, 
+  Box, 
+  Text, 
+  useColorModeValue, 
+  useToast,
+  SimpleGrid,
+  Button,
+  Heading,
+  Icon,
+  useBreakpointValue,
+} from '@chakra-ui/react';
+import { useRouter } from 'next/router';
+import { 
+  FiBarChart, 
+  FiTrendingUp, 
+  FiUsers, 
+  FiHome, 
+  FiSmartphone,
+  FiDollarSign,
+  FiTarget,
+  FiActivity,
+} from 'react-icons/fi';
 import { DashboardLayout } from '../../components/dashboard';
 import { ErrorBoundary, Loading } from '../../components/ui';
 import { 
@@ -8,7 +31,76 @@ import {
 } from '../../components/dashboard';
 import { useDashboard } from '../../hooks/useDashboard';
 
+// Dashboard selection interface
+interface DashboardOption {
+  id: string;
+  title: string;
+  description: string;
+  icon: any;
+  href: string;
+  color: string;
+  features: string[];
+}
+
+const dashboardOptions: DashboardOption[] = [
+  {
+    id: 'overview',
+    title: 'Overview Dashboard',
+    description: 'General business metrics and insights',
+    icon: FiBarChart,
+    href: '/dashboard',
+    color: 'blue',
+    features: ['Key Performance Indicators', 'Business Overview', 'General Analytics'],
+  },
+  {
+    id: 'executive',
+    title: 'Executive Dashboard',
+    description: 'High-level business metrics and strategic insights',
+    icon: FiTrendingUp,
+    href: '/dashboard/executive',
+    color: 'green',
+    features: ['Executive KPIs', 'Strategic Metrics', 'Business Performance'],
+  },
+  {
+    id: 'acquisitions',
+    title: 'Acquisitions Dashboard',
+    description: 'Lead management and acquisition metrics',
+    icon: FiTarget,
+    href: '/dashboard/acquisitions',
+    color: 'purple',
+    features: ['Lead Pipeline', 'Conversion Tracking', 'Acquisition Metrics'],
+  },
+  {
+    id: 'disposition',
+    title: 'Dispositions Dashboard',
+    description: 'Buyer management and deal disposition tracking',
+    icon: FiDollarSign,
+    href: '/dashboard/disposition',
+    color: 'orange',
+    features: ['Buyer Management', 'Deal Pipeline', 'Revenue Tracking'],
+  },
+  {
+    id: 'team-member',
+    title: 'Team Member Dashboard',
+    description: 'Individual performance and task tracking',
+    icon: FiUsers,
+    href: '/dashboard/team-member',
+    color: 'teal',
+    features: ['Personal Metrics', 'Task Management', 'Performance Tracking'],
+  },
+  {
+    id: 'mobile',
+    title: 'Mobile Dashboard',
+    description: 'Field operations and mobile team metrics',
+    icon: FiSmartphone,
+    href: '/dashboard/mobile',
+    color: 'pink',
+    features: ['Field Operations', 'Mobile Metrics', 'Location Tracking'],
+  },
+];
+
 const DashboardPage: React.FC = () => {
+  const router = useRouter();
   const {
     dashboardData,
     loading,
@@ -23,9 +115,29 @@ const DashboardPage: React.FC = () => {
   const toast = useToast();
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const textColor = useColorModeValue('gray.800', 'white');
+  const cardBg = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const hasFetchedData = useRef(false);
+  const [isClient, setIsClient] = useState(false);
+  const [showOverview, setShowOverview] = useState(false);
 
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  // Initialize with null to prevent hydration mismatch
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [realtimeEnabled, setRealtimeEnabled] = useState(false);
+
+  // Initialize client-side state
+  useEffect(() => {
+    setIsClient(true);
+    setLastUpdated(new Date());
+  }, []);
+
+  // Check if user wants to see overview or dashboard selection
+  useEffect(() => {
+    const showOverviewParam = router.query.showOverview;
+    if (showOverviewParam === 'true') {
+      setShowOverview(true);
+    }
+  }, [router.query]);
 
   // Mock data for demonstration
   const mockStats = {
@@ -93,136 +205,180 @@ const DashboardPage: React.FC = () => {
         title: 'Refresh Failed',
         description: 'Failed to refresh dashboard data',
         status: 'error',
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
     }
   }, [refreshDashboard, toast]);
 
-  const handleChartInteraction = useCallback((chartType: string, data: any) => {
-    toast({
-      title: 'Chart Interaction',
-      description: `Clicked on ${chartType} chart`,
-      status: 'info',
-      duration: 2000,
-    });
-  }, [toast]);
+  const handleDashboardSelect = (dashboard: DashboardOption) => {
+    router.push(dashboard.href);
+  };
 
-  const handleChartExport = useCallback((chartType: string, format: 'png' | 'svg' | 'pdf') => {
-    toast({
-      title: 'Chart Export',
-      description: `${chartType} chart exported as ${format.toUpperCase()}`,
-      status: 'success',
-      duration: 3000,
-    });
-  }, [toast]);
+  const handleShowOverview = () => {
+    setShowOverview(true);
+    router.push('/dashboard?showOverview=true', undefined, { shallow: true });
+  };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchDashboardData();
-      setLastUpdated(new Date());
-    }
-  }, [isAuthenticated, fetchDashboardData]);
+  const handleShowSelection = () => {
+    setShowOverview(false);
+    router.push('/dashboard', undefined, { shallow: true });
+  };
 
-  // Handle real-time updates
-  useEffect(() => {
-    if (realtime.isConnected) {
-      setRealtimeEnabled(true);
-      setLastUpdated(new Date());
-    } else {
-      setRealtimeEnabled(false);
-    }
-  }, [realtime.isConnected]);
-
-  // Handle real-time errors
-  useEffect(() => {
-    if (realtime.error) {
-      toast({
-        title: 'Real-time Connection Error',
-        description: realtime.error,
-        status: 'warning',
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  }, [realtime.error, toast]);
-
-  if (loading && !dashboardData) {
+  // If user wants to see overview, show the original dashboard content
+  if (showOverview) {
     return (
-      <Box minH="100vh" bg={bgColor}>
-        <VStack spacing={8} align="center" justify="center" minH="400px">
-          <Loading size="lg" />
-          <Text color={textColor}>Loading dashboard...</Text>
-        </VStack>
-      </Box>
-    );
-  }
+      <DashboardLayout
+        loading={loading}
+        error={error}
+        isAuthenticated={isAuthenticated}
+        loadingMessage="Loading dashboard..."
+      >
+        <VStack spacing={8} align="stretch">
+          {/* Header with toggle */}
+          <HStack justify="space-between" align="center">
+            <Box>
+              <Heading size="lg" color={textColor} mb={2}>
+                Dashboard Overview
+              </Heading>
+              <Text color="gray.600" fontSize="lg">
+                Business performance metrics and insights
+              </Text>
+            </Box>
+            <Button
+              leftIcon={<Icon as={FiBarChart} />}
+              onClick={handleShowSelection}
+              variant="outline"
+              colorScheme="blue"
+            >
+              Choose Dashboard
+            </Button>
+          </HStack>
 
-  if (error) {
-    return (
-      <Box minH="100vh" bg={bgColor}>
-        <VStack spacing={4} align="center" justify="center" minH="400px">
-          <Text color="red.500" fontSize="lg" fontWeight="semibold">
-            Dashboard Error
-          </Text>
-          <Text color={textColor} textAlign="center">
-            {error}
-          </Text>
-        </VStack>
-      </Box>
-    );
-  }
-
-  return (
-    <ErrorBoundary>
-      <Box minH="100vh" bg={bgColor}>
-        <DashboardLayout
-          loading={loading}
-          error={error}
-          isAuthenticated={isAuthenticated}
-          loadingMessage="Loading dashboard..."
-        >
-          {/* Dashboard Overview */}
-          <DashboardOverview
-            stats={mockStats}
-            loading={loading}
-            onRefresh={handleRefresh}
-            lastUpdated={lastUpdated}
-            realtimeEnabled={realtimeEnabled}
-          />
-
-          {/* Dashboard Charts */}
+          {/* Original dashboard content */}
+          <DashboardOverview stats={mockStats} />
           <DashboardCharts
             leadPipelineData={mockLeadPipelineData}
             monthlyGrowthData={mockMonthlyGrowthData}
             conversionTrendData={mockConversionTrendData}
             revenueData={mockRevenueData}
-            loading={loading}
-            onChartInteraction={handleChartInteraction}
-            onExportChart={handleChartExport}
           />
+        </VStack>
+      </DashboardLayout>
+    );
+  }
 
-          {/* Real-time Status Indicator */}
-          {realtimeEnabled && (
+  // Dashboard selection interface
+  return (
+    <DashboardLayout
+      loading={loading}
+      error={error}
+      isAuthenticated={isAuthenticated}
+      loadingMessage="Loading dashboard selection..."
+    >
+      <VStack spacing={8} align="stretch">
+        {/* Header */}
+        <Box textAlign="center">
+          <Heading size="lg" color={textColor} mb={4}>
+            Choose Your Dashboard
+          </Heading>
+          <Text color="gray.600" fontSize="lg" maxW="2xl" mx="auto">
+            Select the dashboard that best fits your role and responsibilities. Each dashboard provides specialized metrics and insights tailored to specific business functions.
+          </Text>
+        </Box>
+
+        {/* Dashboard Selection Grid */}
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+          {dashboardOptions.map((dashboard) => (
             <Box
-              position="fixed"
-              bottom={4}
-              right={4}
-              bg="green.500"
-              color="white"
-              px={3}
-              py={2}
-              borderRadius="full"
-              fontSize="sm"
-              fontWeight="medium"
-              zIndex={1000}
+              key={dashboard.id}
+              bg={cardBg}
+              p={6}
+              borderRadius="lg"
+              border="1px"
+              borderColor={borderColor}
+              shadow="sm"
+              _hover={{
+                shadow: 'md',
+                transform: 'translateY(-2px)',
+                transition: 'all 0.2s',
+              }}
+              cursor="pointer"
+              onClick={() => handleDashboardSelect(dashboard)}
             >
-              Live Updates
+              <VStack spacing={4} align="stretch">
+                {/* Icon and Title */}
+                <HStack spacing={3}>
+                  <Box
+                    p={3}
+                    borderRadius="lg"
+                    bg={`${dashboard.color}.100`}
+                    color={`${dashboard.color}.600`}
+                  >
+                    <Icon as={dashboard.icon} boxSize={6} />
+                  </Box>
+                  <VStack align="start" spacing={1}>
+                    <Heading size="md" color={textColor}>
+                      {dashboard.title}
+                    </Heading>
+                    <Text fontSize="sm" color="gray.500">
+                      {dashboard.description}
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                {/* Features */}
+                <VStack align="start" spacing={2}>
+                  <Text fontSize="sm" fontWeight="medium" color="gray.700">
+                    Key Features:
+                  </Text>
+                  {dashboard.features.map((feature, index) => (
+                    <Text key={index} fontSize="sm" color="gray.600">
+                      • {feature}
+                    </Text>
+                  ))}
+                </VStack>
+
+                {/* Action Button */}
+                <Button
+                  colorScheme={dashboard.color}
+                  variant="outline"
+                  size="sm"
+                  w="full"
+                  mt={2}
+                >
+                  Open Dashboard
+                </Button>
+              </VStack>
             </Box>
-          )}
-        </DashboardLayout>
-      </Box>
-    </ErrorBoundary>
+          ))}
+        </SimpleGrid>
+
+        {/* Quick Overview Option */}
+        <Box
+          bg={cardBg}
+          p={6}
+          borderRadius="lg"
+          border="1px"
+          borderColor={borderColor}
+          textAlign="center"
+        >
+          <VStack spacing={4}>
+            <Text fontSize="lg" color="gray.600">
+              Want to see a general overview instead?
+            </Text>
+            <Button
+              leftIcon={<Icon as={FiBarChart} />}
+              onClick={handleShowOverview}
+              colorScheme="blue"
+              variant="outline"
+            >
+              Show Overview Dashboard
+            </Button>
+          </VStack>
+        </Box>
+      </VStack>
+    </DashboardLayout>
   );
 };
 

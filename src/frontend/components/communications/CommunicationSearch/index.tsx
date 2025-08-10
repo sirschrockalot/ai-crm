@@ -27,12 +27,11 @@ import {
 } from '@chakra-ui/react';
 import { 
   SearchIcon,
-  FilterIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   CalendarIcon,
   TimeIcon,
-  ClearIcon,
+  CloseIcon,
 } from '@chakra-ui/icons';
 import { communicationService, CommunicationLog } from '../../../services/communicationService';
 import { formatPhoneNumber } from '../../../utils/phone';
@@ -473,7 +472,7 @@ const CommunicationSearch: React.FC<CommunicationSearchProps> = ({
 
                 <HStack spacing={3} w="full">
                   <Button
-                    leftIcon={<ClearIcon />}
+                    leftIcon={<CloseIcon />}
                     variant="outline"
                     size="sm"
                     onClick={clearFilters}

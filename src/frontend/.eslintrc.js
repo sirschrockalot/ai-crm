@@ -15,6 +15,7 @@ module.exports = {
     'no-console': 'warn',
     'no-debugger': 'error',
     'react-hooks/exhaustive-deps': 'warn',
+    'import/no-anonymous-default-export': 'off',
   },
   overrides: [
     {

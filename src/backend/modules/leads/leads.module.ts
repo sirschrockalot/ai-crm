@@ -18,6 +18,7 @@ import { CommunicationLog, CommunicationLogSchema } from './schemas/communicatio
 import { LeadValidationService } from './services/lead-validation.service';
 import { LeadScoringService } from './services/lead-scoring.service';
 import { LeadQueueService } from './services/lead-queue.service';
+import { QueueService } from './services/queue.service';
 import { LeadImportExportService } from './services/lead-import-export.service';
 import { BulkOperationsService } from './services/bulk-operations.service';
 import { CommunicationService } from './services/communication.service';
@@ -45,6 +46,7 @@ import { CommunicationTrackingService } from './services/communication-tracking.
     LeadValidationService,
     LeadScoringService,
     LeadQueueService,
+    QueueService,
     LeadImportExportService,
     BulkOperationsService,
     CommunicationService,
@@ -55,6 +57,7 @@ import { CommunicationTrackingService } from './services/communication-tracking.
     LeadValidationService,
     LeadScoringService,
     LeadQueueService,
+    QueueService,
     LeadImportExportService,
     BulkOperationsService,
     CommunicationService,

@@ -29,9 +29,9 @@ import {
   ChatIcon,
   PhoneIcon,
   EmailIcon,
-  ReplyIcon,
-  ForwardIcon,
-  MoreIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
   CheckIcon,
   TimeIcon,
   WarningIcon,
@@ -119,7 +119,7 @@ const CommunicationThread: React.FC<CommunicationThreadProps> = ({
         sender: comm.from,
         recipient: comm.to,
         threadId: comm.id, // In a real implementation, this would be a thread identifier
-        replies: [],
+        replies: [] as ThreadMessage[],
         metadata: {
           cost: comm.cost,
         },
@@ -167,7 +167,7 @@ const CommunicationThread: React.FC<CommunicationThreadProps> = ({
         recipient: selectedMessage.sender,
         threadId: selectedMessage.threadId,
         parentId: selectedMessage.id,
-        replies: [],
+        replies: [] as ThreadMessage[],
       };
 
       setMessages(prev => [...prev, replyMessage]);
@@ -184,7 +184,7 @@ const CommunicationThread: React.FC<CommunicationThreadProps> = ({
         to: replyMessage.recipient,
         from: replyMessage.sender,
         content: replyMessage.content,
-        status: replyMessage.status,
+        status: replyMessage.status === 'read' ? 'delivered' : replyMessage.status,
         createdAt: replyMessage.timestamp,
         updatedAt: replyMessage.timestamp,
       }, replyText);
@@ -220,7 +220,7 @@ const CommunicationThread: React.FC<CommunicationThreadProps> = ({
       to: message.recipient,
       from: message.sender,
       content: message.content,
-      status: message.status,
+      status: message.status === 'read' ? 'delivered' : message.status,
       createdAt: message.timestamp,
       updatedAt: message.timestamp,
     });
@@ -361,7 +361,7 @@ const CommunicationThread: React.FC<CommunicationThreadProps> = ({
                         </Text>
                         <IconButton
                           aria-label="Reply"
-                          icon={<ReplyIcon />}
+                          icon={<ChevronRightIcon />}
                           size="xs"
                           variant="ghost"
                           onClick={() => {
@@ -371,14 +371,14 @@ const CommunicationThread: React.FC<CommunicationThreadProps> = ({
                         />
                         <IconButton
                           aria-label="Forward"
-                          icon={<ForwardIcon />}
+                          icon={<ChevronUpIcon />}
                           size="xs"
                           variant="ghost"
                           onClick={() => handleForward(message)}
                         />
                         <IconButton
                           aria-label="More options"
-                          icon={<MoreIcon />}
+                          icon={<ChevronDownIcon />}
                           size="xs"
                           variant="ghost"
                         />

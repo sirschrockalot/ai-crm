@@ -81,6 +81,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'white');
   const hoverBg = useColorModeValue('gray.50', 'gray.700');
+  const unreadBg = useColorModeValue('blue.50', 'blue.900');
 
   const [filters, setFilters] = useState<NotificationFilters>({});
   const [showRead, setShowRead] = useState(true);
@@ -93,7 +94,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       success: <CheckCircleIcon />,
       system: <SettingsIcon />,
     };
-    return icons[type] || <InfoIcon />;
+    return (icons as any)[type] || <InfoIcon />;
   };
 
   const getNotificationColor = (type: string) => {
@@ -104,7 +105,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       success: 'green',
       system: 'gray',
     };
-    return colors[type] || 'blue';
+    return (colors as any)[type] || 'blue';
   };
 
   const getPriorityColor = (priority: string) => {
@@ -114,7 +115,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       high: 'orange',
       urgent: 'red',
     };
-    return priorityColors[priority] || 'gray';
+    return (priorityColors as any)[priority] || 'gray';
   };
 
   const getCategoryColor = (category: string) => {
@@ -125,7 +126,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       system: 'gray',
       communication: 'purple',
     };
-    return categoryColors[category] || 'gray';
+    return (categoryColors as any)[category] || 'gray';
   };
 
   const formatTime = (timestamp: string) => {
@@ -368,7 +369,7 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                   cursor="pointer"
                   transition="background-color 0.2s"
                   onClick={() => handleNotificationClick(notification)}
-                  bg={notification.read ? 'transparent' : useColorModeValue('blue.50', 'blue.900')}
+                  bg={notification.read ? 'transparent' : unreadBg}
                 >
                   <VStack spacing={3} align="stretch">
                     {/* Notification Header */}

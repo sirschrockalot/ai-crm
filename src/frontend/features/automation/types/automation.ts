@@ -1,6 +1,8 @@
 // Automation Types
 // Comprehensive type definitions for automation components and workflows
 
+import { Position } from 'reactflow';
+
 export interface WorkflowNode {
   id: string;
   type: 'trigger' | 'action' | 'condition' | 'delay' | 'integration';
@@ -11,8 +13,8 @@ export interface WorkflowNode {
     isValid: boolean;
     error?: string;
   };
-  sourcePosition?: 'top' | 'bottom' | 'left' | 'right';
-  targetPosition?: 'top' | 'bottom' | 'left' | 'right';
+  sourcePosition?: Position;
+  targetPosition?: Position;
 }
 
 export interface WorkflowEdge {
@@ -176,6 +178,7 @@ export interface AutomationFilters {
   status?: 'active' | 'inactive' | 'all';
   category?: string;
   author?: string;
+  timeRange?: 'today' | 'week' | 'month' | 'year';
   dateRange?: {
     start: Date;
     end: Date;

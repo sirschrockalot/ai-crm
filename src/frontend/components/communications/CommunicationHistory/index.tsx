@@ -5,6 +5,8 @@ import {
   HStack,
   Text,
   Input,
+  InputGroup,
+  InputLeftElement,
   Select,
   Button,
   Badge,
@@ -18,7 +20,7 @@ import {
   Alert,
   AlertIcon,
 } from '@chakra-ui/react';
-import { SearchIcon, FilterIcon, DownloadIcon } from '@chakra-ui/icons';
+import { SearchIcon, DownloadIcon } from '@chakra-ui/icons';
 import { communicationService, CommunicationLog } from '../../../services/communicationService';
 import { formatPhoneNumber } from '../../../utils/phone';
 
@@ -225,12 +227,16 @@ const CommunicationHistory: React.FC<CommunicationHistoryProps> = ({
             <VStack spacing={4}>
               {showSearch && (
                 <HStack w="full">
-                  <Input
-                    placeholder="Search communications..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    leftIcon={<SearchIcon />}
-                  />
+                  <InputGroup>
+                    <InputLeftElement>
+                      <SearchIcon />
+                    </InputLeftElement>
+                    <Input
+                      placeholder="Search communications..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </InputGroup>
                   <IconButton
                     aria-label="Export communications"
                     icon={<DownloadIcon />}

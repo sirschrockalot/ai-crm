@@ -1,0 +1,439 @@
+name: Configuration Deployment Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      configuration_type:
+        description: 'Type of configuration to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - infrastructure
+          - application
+          - settings
+      force_deploy:
+        description: 'Force deployment (bypass some checks)'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches: [main, develop]
+    paths:
+      - 'infrastructure/**'
+      - 'src/frontend/env.*'
+      - '.github/workflows/configuration-deployment.yml'
+
+env:
+  TERRAFORM_VERSION: '1.5.0'
+  KUBECTL_VERSION: '1.28.0'
+
+jobs:
+  # Configuration Validation
+  validate-configuration:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    outputs:
+      config-valid: ${{ steps.validation.outputs.valid }}
+      config-hash: ${{ steps.hash.outputs.hash }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          
+      - name: Validate Infrastructure Configuration
+        run: |
+          cd infrastructure/terraform
+          terraform init
+          terraform validate
+          
+      - name: Validate Environment Files
+        run: |
+          # Check environment file syntax
+          for env_file in src/frontend/env.*; do
+            if [ -f "$env_file" ]; then
+              echo "Validating $env_file..."
+              # Basic validation - check for required variables
+              if ! grep -q "NEXT_PUBLIC_APP_NAME" "$env_file"; then
+                echo "❌ Missing NEXT_PUBLIC_APP_NAME in $env_file"
+                exit 1
+              fi
+              if ! grep -q "NEXT_PUBLIC_API_URL" "$env_file"; then
+                echo "❌ Missing NEXT_PUBLIC_API_URL in $env_file"
+                exit 1
+              fi
+              echo "✅ $env_file validation passed"
+            fi
+          done
+          
+      - name: Generate Configuration Hash
+        id: hash
+        run: |
+          # Generate hash of all configuration files
+          find infrastructure/ src/frontend/env.* -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1 > config_hash.txt
+          echo "hash=$(cat config_hash.txt)" >> $GITHUB_OUTPUT
+          
+      - name: Set Validation Output
+        id: validation
+        run: |
+          echo "valid=true" >> $GITHUB_OUTPUT
+
+  # Security and Compliance Check
+  security-check:
+    name: Security and Compliance Check
+    runs-on: ubuntu-latest
+    needs: validate-configuration
+    if: needs.validate-configuration.outputs.config-valid == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Security Scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          
+      - name: Check for Secrets in Code
+        run: |
+          # Check for hardcoded secrets
+          if grep -r "password\|secret\|key\|token" --include="*.tf" --include="*.tfvars" --include="env.*" infrastructure/ src/frontend/ | grep -v "example\|template\|placeholder"; then
+            echo "❌ Potential secrets found in configuration files"
+            exit 1
+          fi
+          echo "✅ No hardcoded secrets found"
+          
+      - name: Validate Security Policies
+        run: |
+          # Check security configurations
+          cd infrastructure/terraform
+          terraform plan -var-file="environments/${{ github.event.inputs.environment || 'staging' }}.tfvars" -out=tfplan
+          
+          # Validate security settings
+          if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+            # Production security requirements
+            if ! grep -q "enable_cloud_armor = true" tfplan; then
+              echo "❌ Cloud Armor must be enabled in production"
+              exit 1
+            fi
+            if ! grep -q "enable_binary_authorization = true" tfplan; then
+              echo "❌ Binary Authorization must be enabled in production"
+              exit 1
+            fi
+          fi
+          echo "✅ Security policies validated"
+
+  # Infrastructure Deployment
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    needs: [validate-configuration, security-check]
+    if: |
+      needs.validate-configuration.outputs.config-valid == 'true' &&
+      (github.event.inputs.configuration_type == 'all' || github.event.inputs.configuration_type == 'infrastructure')
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          
+      - name: Deploy Infrastructure
+        run: |
+          cd infrastructure/terraform
+          
+          # Initialize Terraform
+          terraform init
+          
+          # Plan deployment
+          terraform plan -var-file="environments/${{ github.event.inputs.environment || 'staging' }}.tfvars" -out=tfplan
+          
+          # Apply changes
+          terraform apply tfplan
+          
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials dealcycle-${{ github.event.inputs.environment || 'staging' }}-cluster \
+            --region us-central1 \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+            
+      - name: Wait for Infrastructure
+        run: |
+          # Wait for cluster to be ready
+          kubectl wait --for=condition=ready nodes --all --timeout=600s
+          
+      - name: Deploy Base Kubernetes Resources
+        run: |
+          kubectl apply -f infrastructure/kubernetes/namespaces/
+          kubectl apply -f infrastructure/kubernetes/configmaps/
+          kubectl apply -f infrastructure/kubernetes/secrets/
+
+  # Application Configuration Deployment
+  deploy-application-config:
+    name: Deploy Application Configuration
+    runs-on: ubuntu-latest
+    needs: [validate-configuration, security-check]
+    if: |
+      needs.validate-configuration.outputs.config-valid == 'true' &&
+      (github.event.inputs.configuration_type == 'all' || github.event.inputs.configuration_type == 'application')
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials dealcycle-${{ github.event.inputs.environment || 'staging' }}-cluster \
+            --region us-central1 \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+            
+      - name: Deploy Application Configuration
+        run: |
+          # Deploy environment-specific configuration
+          kubectl create configmap app-config \
+            --from-file=env.${{ github.event.inputs.environment || 'staging' }}=src/frontend/env.${{ github.event.inputs.environment || 'staging' }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+            
+      - name: Deploy Application Resources
+        run: |
+          kubectl apply -f infrastructure/kubernetes/deployments/
+          kubectl apply -f infrastructure/kubernetes/services/
+          kubectl apply -f infrastructure/kubernetes/ingress/
+          
+      - name: Wait for Application Deployment
+        run: |
+          kubectl rollout status deployment/dealcycle-frontend -n dealcycle-crm --timeout=300s
+          kubectl rollout status deployment/dealcycle-backend -n dealcycle-crm --timeout=300s
+
+  # Settings Configuration Deployment
+  deploy-settings-config:
+    name: Deploy Settings Configuration
+    runs-on: ubuntu-latest
+    needs: [validate-configuration, security-check]
+    if: |
+      needs.validate-configuration.outputs.config-valid == 'true' &&
+      (github.event.inputs.configuration_type == 'all' || github.event.inputs.configuration_type == 'settings')
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials dealcycle-${{ github.event.inputs.environment || 'staging' }}-cluster \
+            --region us-central1 \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+            
+      - name: Deploy Settings Configuration
+        run: |
+          # Deploy settings-specific configuration
+          kubectl create configmap settings-config \
+            --from-file=settings.json=src/frontend/config/settings.${{ github.event.inputs.environment || 'staging' }}.json \
+            --dry-run=client -o yaml | kubectl apply -f -
+            
+      - name: Update Feature Flags
+        run: |
+          # Update feature flags based on environment
+          kubectl patch configmap feature-flags -n dealcycle-crm --patch-file=- <<EOF
+          data:
+            ai-features: "${{ github.event.inputs.environment == 'production' && 'true' || 'true' }}"
+            automation-features: "${{ github.event.inputs.environment == 'production' && 'true' || 'true' }}"
+            debug-mode: "${{ github.event.inputs.environment == 'production' && 'false' || 'true' }}"
+          EOF
+
+  # Post-Deployment Validation
+  post-deployment-validation:
+    name: Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure, deploy-application-config, deploy-settings-config]
+    if: |
+      needs.deploy-infrastructure.result == 'success' &&
+      needs.deploy-application-config.result == 'success' &&
+      needs.deploy-settings-config.result == 'success'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials dealcycle-${{ github.event.inputs.environment || 'staging' }}-cluster \
+            --region us-central1 \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+            
+      - name: Run Health Checks
+        run: |
+          # Check application health
+          kubectl get pods -n dealcycle-crm
+          
+          # Check service endpoints
+          kubectl get services -n dealcycle-crm
+          
+          # Check ingress configuration
+          kubectl get ingress -n dealcycle-crm
+          
+      - name: Run Smoke Tests
+        run: |
+          # Basic connectivity tests
+          kubectl run test-pod --image=curlimages/curl --rm -it --restart=Never -- \
+            curl -f http://dealcycle-frontend.dealcycle-crm.svc.cluster.local:3001/health
+            
+      - name: Validate Configuration
+        run: |
+          # Verify configuration was applied correctly
+          kubectl get configmap app-config -n dealcycle-crm -o yaml
+          kubectl get configmap settings-config -n dealcycle-crm -o yaml
+
+  # Rollback Preparation
+  prepare-rollback:
+    name: Prepare Rollback
+    runs-on: ubuntu-latest
+    needs: [deploy-infrastructure, deploy-application-config, deploy-settings-config]
+    if: always()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Google Cloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          
+      - name: Configure kubectl
+        run: |
+          gcloud container clusters get-credentials dealcycle-${{ github.event.inputs.environment || 'staging' }}-cluster \
+            --region us-central1 \
+            --project ${{ secrets.GCP_PROJECT_ID }}
+            
+      - name: Create Rollback Snapshot
+        if: needs.deploy-infrastructure.result == 'success'
+        run: |
+          # Create snapshot of current state for potential rollback
+          kubectl get all -n dealcycle-crm -o yaml > rollback-snapshot-${{ github.run_id }}.yaml
+          
+          # Upload rollback snapshot as artifact
+          echo "rollback-snapshot-${{ github.run_id }}.yaml" > rollback-files.txt
+          
+      - name: Upload Rollback Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-snapshot-${{ github.run_id }}
+          path: rollback-snapshot-${{ github.run_id }}.yaml
+          retention-days: 30
+
+  # Deployment Summary
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [post-deployment-validation, prepare-rollback]
+    if: always()
+    
+    steps:
+      - name: Generate Deployment Report
+        run: |
+          cat > deployment-report.md << EOF
+          # Configuration Deployment Report
+          
+          **Deployment ID:** ${{ github.run_id }}
+          **Environment:** ${{ github.event.inputs.environment || 'staging' }}
+          **Configuration Type:** ${{ github.event.inputs.configuration_type || 'all' }}
+          **Timestamp:** $(date -u)
+          
+          ## Deployment Status
+          
+          ### Infrastructure Deployment
+          - Status: ${{ needs.deploy-infrastructure.result || 'skipped' }}
+          - Rollback Available: ${{ needs.prepare-rollback.result == 'success' && 'Yes' || 'No' }}
+          
+          ### Application Configuration
+          - Status: ${{ needs.deploy-application-config.result || 'skipped' }}
+          
+          ### Settings Configuration
+          - Status: ${{ needs.deploy-settings-config.result || 'skipped' }}
+          
+          ### Post-Deployment Validation
+          - Status: ${{ needs.post-deployment-validation.result || 'skipped' }}
+          
+          ## Configuration Hash
+          - Hash: ${{ needs.validate-configuration.outputs.config-hash }}
+          
+          ## Rollback Information
+          - Rollback Snapshot: rollback-snapshot-${{ github.run_id }}.yaml
+          - Rollback Instructions: See infrastructure/terraform/rollback.md
+          
+          ## Next Steps
+          1. Monitor application health
+          2. Verify configuration changes
+          3. Run integration tests
+          4. Update documentation if needed
+          EOF
+          
+      - name: Upload Deployment Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-report-${{ github.run_id }}
+          path: deployment-report.md
+          retention-days: 90
+          
+      - name: Notify Deployment Status
+        if: always()
+        run: |
+          if [ "${{ needs.post-deployment-validation.result }}" = "success" ]; then
+            echo "✅ Configuration deployment completed successfully!"
+          else
+            echo "❌ Configuration deployment failed or was skipped"
+            exit 1
+          fi

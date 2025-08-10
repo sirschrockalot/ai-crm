@@ -19,14 +19,11 @@ import {
 } from '@chakra-ui/react';
 import {
   SearchIcon,
-  FilterIcon,
   TimeIcon,
-  UserIcon,
   PhoneIcon,
   EmailIcon,
   EditIcon,
   CheckIcon,
-  CloseIcon,
   ExternalLinkIcon,
 } from '@chakra-ui/icons';
 
@@ -82,13 +79,13 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   const getActivityIcon = (type: string) => {
     const icons = {
-      lead: <UserIcon />,
+              lead: <EditIcon />,
       deal: <CheckIcon />,
       task: <EditIcon />,
       communication: <PhoneIcon />,
       system: <TimeIcon />,
     };
-    return icons[type] || <TimeIcon />;
+    return (icons as any)[type] || <TimeIcon />;
   };
 
   const getActivityColor = (type: string) => {
@@ -99,7 +96,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
       communication: 'purple',
       system: 'gray',
     };
-    return colors[type] || 'gray';
+    return (colors as any)[type] || 'gray';
   };
 
   const getStatusColor = (status?: string) => {
@@ -108,7 +105,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
       pending: 'yellow',
       failed: 'red',
     };
-    return statusColors[status] || 'gray';
+    return (statusColors as any)[status] || 'gray';
   };
 
   const getPriorityColor = (priority?: string) => {
@@ -117,7 +114,7 @@ export const ActivityFeed: React.FC<ActivityFeedProps> = ({
       medium: 'orange',
       low: 'green',
     };
-    return priorityColors[priority] || 'gray';
+    return (priorityColors as any)[priority] || 'gray';
   };
 
   const formatTime = (timestamp: string) => {

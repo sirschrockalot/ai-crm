@@ -1,7 +1,23 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, Types, Model } from 'mongoose';
 
-export type SessionDocument = Session & Document;
+export interface SessionModel extends Model<SessionDocument> {
+  findActiveByUser(userId: Types.ObjectId, tenantId: Types.ObjectId): Promise<SessionDocument[]>;
+  findByDeviceFingerprint(fingerprint: string, tenantId: Types.ObjectId): Promise<SessionDocument[]>;
+  findByIpAddress(ipAddress: string, tenantId: Types.ObjectId): Promise<SessionDocument[]>;
+  cleanupExpired(): Promise<any>;
+  getStatistics(tenantId: Types.ObjectId): Promise<any[]>;
+}
+
+export type SessionDocument = Session & Document & {
+  duration: number;
+  age: number;
+  status: string;
+  updateActivity(ipAddress: string, userAgent: string): Promise<SessionDocument>;
+  terminate(terminatedBy: Types.ObjectId, reason: string): Promise<SessionDocument>;
+  addSecurityFlag(flag: string): Promise<SessionDocument>;
+  removeSecurityFlag(flag: string): Promise<SessionDocument>;
+};
 
 @Schema({ timestamps: true })
 export class Session {
@@ -98,6 +114,64 @@ SessionSchema.index({ 'deviceInfo.fingerprint': 1 });
 SessionSchema.index({ userId: 1, tenantId: 1, isActive: 1 });
 SessionSchema.index({ tenantId: 1, createdAt: -1 });
 SessionSchema.index({ userId: 1, lastActivity: -1 });
+
+// Virtual for session duration
+SessionSchema.virtual('duration').get(function() {
+  return this.terminatedAt ? 
+    this.terminatedAt.getTime() - this.createdAt.getTime() : 
+    Date.now() - this.createdAt.getTime();
+});
+
+// Virtual for session age
+SessionSchema.virtual('age').get(function() {
+  return Date.now() - this.createdAt.getTime();
+});
+
+// Virtual for session status
+SessionSchema.virtual('status').get(function() {
+  if (!this.isActive) return 'terminated';
+  if (this.expiresAt < new Date()) return 'expired';
+  return 'active';
+});
+
+// Method to update activity
+SessionSchema.methods.updateActivity = function(ipAddress: string, userAgent: string) {
+  this.lastActivity = new Date();
+  this.ipAddress = ipAddress;
+  this.userAgent = userAgent;
+  
+  this.activityLog.push({
+    action: 'activity_update',
+    resource: 'session',
+    timestamp: new Date(),
+    ipAddress,
+    userAgent,
+    outcome: 'success',
+    details: { type: 'activity_update' },
+  });
+  
+  return this.save();
+};
+
+// Method to terminate session
+SessionSchema.methods.terminate = function(terminatedBy: Types.ObjectId, reason: string) {
+  this.isActive = false;
+  this.terminatedBy = terminatedBy;
+  this.terminatedAt = new Date();
+  this.terminationReason = reason;
+  
+  this.activityLog.push({
+    action: 'session_terminated',
+    resource: 'session',
+    timestamp: new Date(),
+    ipAddress: this.ipAddress,
+    userAgent: this.userAgent,
+    outcome: 'success',
+    details: { reason, terminatedBy: terminatedBy.toString() },
+  });
+  
+  return this.save();
+};
 
 // Text search index for security analysis
 SessionSchema.index({

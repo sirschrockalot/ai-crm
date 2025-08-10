@@ -1,0 +1,45 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 20
+      name: "Sustained load"
+    - duration: 60
+      arrivalRate: 50
+      name: "Peak load"
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+
+scenarios:
+  - name: "API Health Check"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+
+  - name: "User Authentication"
+    weight: 40
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "test@example.com"
+            password: "password123"
+          expect:
+            - statusCode: [200, 401]
+
+  - name: "Get Leads"
+    weight: 30
+    flow:
+      - get:
+          url: "/api/leads"
+          headers:
+            Authorization: "Bearer {{ $randomString() }}"
+          expect:
+            - statusCode: [200, 401]

@@ -217,7 +217,6 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
           onNodeClick={onNodeClick}
           onEdgeClick={onEdgeClick}
           onMove={onMove}
-          onZoom={onZoom}
           nodeTypes={nodeTypes}
           fitView
           className="bg-gray-50"

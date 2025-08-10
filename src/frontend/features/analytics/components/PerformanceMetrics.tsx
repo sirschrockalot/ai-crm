@@ -248,14 +248,9 @@ export const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({
                 <Chart
                   type={chartType}
                   data={getChartData(metric)}
-                  options={{
-                    title: getChartTitle(metric),
-                    xAxisLabel: 'Month',
-                    yAxisLabel: getYAxisLabel(metric),
-                    showGrid: true,
-                    animate: true,
-                    colors: ['#3182CE'],
-                  }}
+                  title={getChartTitle(metric)}
+                  showGrid={true}
+                  colors={['#3182CE']}
                 />
               )}
             </VStack>

@@ -85,20 +85,11 @@ export class SecurityLoggingMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const startTime = Date.now();
 
-    // Capture original end method
-    const originalEnd = res.end;
-
-    // Override end method to capture response data
-    res.end = function(chunk?: any, encoding?: any) {
-      const endTime = Date.now();
-      const duration = endTime - startTime;
-
-      // Log security event
+    // Simple logging without overriding res.end
+    res.on('finish', () => {
+      const duration = Date.now() - startTime;
       this.logSecurityEvent(req, res, duration);
-
-      // Call original end method
-      originalEnd.call(this, chunk, encoding);
-    }.bind(this);
+    });
 
     next();
   }

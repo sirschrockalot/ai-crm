@@ -24,16 +24,13 @@ export function useAnalytics() {
   const toast = useToast();
 
   // Local storage for caching analytics preferences
-  const { getItem: getCachedFilters, setItem: setCachedFilters } = useLocalStorage('analytics_filters');
-  const { getItem: getCachedData, setItem: setCachedData } = useLocalStorage('analytics_data');
+  const [cachedFilters, setCachedFilters] = useLocalStorage<AnalyticsFilters>('analytics_filters', { timeRange: '30d' });
+  const [cachedData, setCachedData] = useLocalStorage<AnalyticsData | null>('analytics_data', null);
 
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<AnalyticsFilters>(() => {
-    const cached = getCachedFilters();
-    return cached ? JSON.parse(cached) : { timeRange: '30d' };
-  });
+  const [filters, setFilters] = useState<AnalyticsFilters>(cachedFilters);
 
   // Real-time update interval
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -52,13 +49,13 @@ export function useAnalytics() {
 
   // Cache filters when they change
   useEffect(() => {
-    setCachedFilters(JSON.stringify(filters));
+    setCachedFilters(filters);
   }, [filters, setCachedFilters]);
 
   // Cache analytics data when it changes
   useEffect(() => {
     if (analyticsData) {
-      setCachedData(JSON.stringify(analyticsData));
+      setCachedData(analyticsData);
     }
   }, [analyticsData, setCachedData]);
 
@@ -80,14 +77,8 @@ export function useAnalytics() {
 
       try {
         // Try to load cached data first for better UX
-        const cachedData = getCachedData();
         if (cachedData && !filters) {
-          try {
-            const parsed = JSON.parse(cachedData);
-            setAnalyticsData(parsed);
-          } catch (error) {
-            console.warn('Failed to parse cached analytics data:', error);
-          }
+          setAnalyticsData(cachedData);
         }
 
         const params = new URLSearchParams();
@@ -124,7 +115,7 @@ export function useAnalytics() {
       console.error('Failed to fetch analytics data:', error);
       throw new Error(formatErrorForUser(error));
     })
-  , [analyticsApi, isAuthenticated, getAuthHeaders, getCachedData, toast]);
+  , [analyticsApi, isAuthenticated, getAuthHeaders, cachedData, toast]);
 
   const fetchPerformanceMetrics = useCallback(
     withErrorHandling(async (filters?: AnalyticsFilters) => {

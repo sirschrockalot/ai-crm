@@ -141,13 +141,6 @@ export const memoize = <T extends (...args: any[]) => any>(
 
 // Bundle size optimization
 export const optimizeBundle = {
-  // Split large components
-  splitComponent: (component: React.ComponentType, chunkName?: string) => {
-    return React.lazy(() => 
-      import(/* webpackChunkName: "[request]" */ `../components/${component.name}`)
-    );
-  },
-
   // Preload critical components
   preloadComponent: (componentPath: string) => {
     const link = document.createElement('link');

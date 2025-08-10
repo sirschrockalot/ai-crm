@@ -56,7 +56,7 @@ export class UsersService {
       performedBy,
       metadata: {
         email: savedUser.email,
-        role: savedUser.role,
+        roles: savedUser.roles,
       },
     });
 
@@ -120,7 +120,7 @@ export class UsersService {
         // Update existing user with Google ID
         user.googleId = googleUser.id;
         user.picture = googleUser.picture;
-        await user.save();
+        await (user as any).save();
       } else {
         // Create new user
         user = await this.createUserFromOAuth(googleUser, tenantId);
@@ -131,7 +131,7 @@ export class UsersService {
     user.lastLoginAt = new Date();
     user.lastActiveAt = new Date();
     user.status = UserStatus.ACTIVE;
-    await user.save();
+    await (user as any).save();
 
     // Log login activity
     await this.logUserActivity({
@@ -752,7 +752,7 @@ export class UsersService {
     // Log search analytics
     await this.logSearchAnalytics({
       searchTerm: search,
-      filters: { status, role, company, position, tags },
+      filters: { status, role: role as UserRole },
       resultsCount: users.length,
       totalCount: total,
       page,

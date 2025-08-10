@@ -51,7 +51,7 @@ export const useWorkflowExecution = (workflowId?: string, executionId?: string) 
 
   // Execute workflow
   const executeWorkflow = useCallback(async (parameters?: Record<string, any>) => {
-    if (!workflowId) return;
+    if (!workflowId) return undefined;
     
     setLoading(true);
     setError(null);

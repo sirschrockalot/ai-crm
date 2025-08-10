@@ -88,7 +88,7 @@ export const WorkflowInteractions: React.FC<WorkflowInteractionsProps> = ({
       id: `edge-${Date.now()}`,
       source: sourceId,
       target: targetId,
-      type: connectionType || 'default',
+      type: (connectionType as 'default' | 'step' | 'smoothstep') || 'default',
     };
 
     const updatedWorkflow = {
@@ -159,7 +159,7 @@ export const WorkflowInteractions: React.FC<WorkflowInteractionsProps> = ({
   // Test workflow
   const handleTestWorkflow = useCallback(async (testData?: Record<string, any>) => {
     try {
-      const testResult = await testWorkflow(workflow, testData);
+      const testResult = await testWorkflow(testData);
       
       if (testResult.success) {
         console.log('Workflow test successful:', testResult.results);
@@ -172,7 +172,7 @@ export const WorkflowInteractions: React.FC<WorkflowInteractionsProps> = ({
       console.error('Workflow test error:', error);
       throw error;
     }
-  }, [workflow, testWorkflow]);
+  }, [testWorkflow]);
 
   // Execute workflow
   const handleExecuteWorkflow = useCallback(async (parameters?: Record<string, any>) => {

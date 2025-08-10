@@ -11,13 +11,15 @@ const customJestConfig = {
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapping: {
     // Handle module aliases (this will be automatically configured for you based on your tsconfig.json paths)
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@/components/(.*)$': '<rootDir>/src/components/$1',
-    '^@/pages/(.*)$': '<rootDir>/src/pages/$1',
-    '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
-    '^@/services/(.*)$': '<rootDir>/src/services/$1',
-    '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
-    '^@/types/(.*)$': '<rootDir>/src/types/$1',
+    '^@/(.*)$': '<rootDir>/$1',
+    '^@/components/(.*)$': '<rootDir>/components/$1',
+    '^@/pages/(.*)$': '<rootDir>/pages/$1',
+    '^@/hooks/(.*)$': '<rootDir>/hooks/$1',
+    '^@/services/(.*)$': '<rootDir>/services/$1',
+    '^@/utils/(.*)$': '<rootDir>/utils/$1',
+    '^@/types/(.*)$': '<rootDir>/types/$1',
+    // Add support for CSS modules
+    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   collectCoverageFrom: [
     '**/*.{js,jsx,ts,tsx}',
@@ -54,14 +56,8 @@ const customJestConfig = {
   testEnvironmentOptions: {
     url: 'http://localhost',
   },
-  // Add custom matchers
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   // Add test utilities
   moduleDirectories: ['node_modules', '<rootDir>/'],
-  // Add support for CSS modules
-  moduleNameMapping: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
-  },
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

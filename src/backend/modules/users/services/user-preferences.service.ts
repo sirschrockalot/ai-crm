@@ -25,7 +25,7 @@ export class UserPreferencesService {
 
     if (!preferences) {
       // Create default preferences if they don't exist
-      preferences = await this.createDefaultPreferences(userId);
+      preferences = await this.createDefaultPreferences(userId) as any;
     }
 
     return preferences;
@@ -48,7 +48,7 @@ export class UserPreferencesService {
     // Get current preferences or create default ones
     let preferences = await this.userPreferencesModel.findOne({ userId }).exec();
     if (!preferences) {
-      preferences = await this.createDefaultPreferences(userId);
+      preferences = await this.createDefaultPreferences(userId) as any;
     }
 
     // Validate the update
@@ -201,7 +201,7 @@ export class UserPreferencesService {
   /**
    * Get default preferences
    */
-  private getDefaultPreferences(): UserPreferencesDto['preferences'] {
+  private getDefaultPreferences(): UserPreferencesDto {
     return {
       emailNotifications: {
         marketing: true,
@@ -232,7 +232,7 @@ export class UserPreferencesService {
   /**
    * Validate preferences update
    */
-  private validatePreferencesUpdate(preferences: Partial<UserPreferencesDto['preferences']>): void {
+  private validatePreferencesUpdate(preferences: Partial<UserPreferencesDto>): void {
     if (preferences.emailNotifications) {
       const { frequency } = preferences.emailNotifications;
       if (frequency && !['daily', 'weekly', 'monthly', 'never'].includes(frequency)) {

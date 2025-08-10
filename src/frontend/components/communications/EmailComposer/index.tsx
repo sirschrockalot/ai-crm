@@ -31,14 +31,14 @@ import {
 import { 
   EmailIcon,
   AttachmentIcon,
-  SendIcon,
-  SaveIcon,
-  TemplateIcon,
-  BoldIcon,
-  ItalicIcon,
-  UnderlineIcon,
-  ListIcon,
-  LinkIcon,
+  ChevronRightIcon,
+  DownloadIcon,
+  EditIcon,
+  CheckIcon,
+  TimeIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ExternalLinkIcon,
 } from '@chakra-ui/icons';
 
 interface EmailComposerProps {
@@ -260,7 +260,7 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
               <Text fontSize="lg" fontWeight="semibold">Compose Email</Text>
               <HStack spacing={2}>
                 <Button
-                  leftIcon={<SaveIcon />}
+                  leftIcon={<DownloadIcon />}
                   variant="outline"
                   size="sm"
                   onClick={saveDraft}
@@ -270,7 +270,7 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
                   Save Draft
                 </Button>
                 <Button
-                  leftIcon={<TemplateIcon />}
+                  leftIcon={<EditIcon />}
                   variant="outline"
                   size="sm"
                   onClick={onOpen}
@@ -348,32 +348,32 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
                 <HStack spacing={1} p={2} bg="gray.50" borderRadius="md">
                   <IconButton
                     aria-label="Bold"
-                    icon={<BoldIcon />}
+                    icon={<CheckIcon />}
                     size="sm"
                     variant="ghost"
                   />
                   <IconButton
                     aria-label="Italic"
-                    icon={<ItalicIcon />}
+                    icon={<TimeIcon />}
                     size="sm"
                     variant="ghost"
                   />
                   <IconButton
                     aria-label="Underline"
-                    icon={<UnderlineIcon />}
+                    icon={<ChevronDownIcon />}
                     size="sm"
                     variant="ghost"
                   />
                   <Divider orientation="vertical" />
                   <IconButton
                     aria-label="Bullet List"
-                    icon={<ListIcon />}
+                    icon={<ChevronUpIcon />}
                     size="sm"
                     variant="ghost"
                   />
                   <IconButton
                     aria-label="Insert Link"
-                    icon={<LinkIcon />}
+                    icon={<ExternalLinkIcon />}
                     size="sm"
                     variant="ghost"
                   />
@@ -450,7 +450,7 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
                 Clear
               </Button>
               <Button
-                leftIcon={<SendIcon />}
+                leftIcon={<ChevronRightIcon />}
                 colorScheme="blue"
                 onClick={sendEmail}
                 isLoading={sending}

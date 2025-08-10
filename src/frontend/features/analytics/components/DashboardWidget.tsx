@@ -10,7 +10,7 @@ import {
   Collapse,
 } from '@chakra-ui/react';
 import { FiMoreVertical, FiMaximize2, FiMinimize2, FiSettings } from 'react-icons/fi';
-import { Card, Chart, MetricCard } from '../../../components/ui';
+import { Card, Chart } from '../../../components/ui';
 import { ChartDataPoint } from '../types/analytics';
 
 interface DashboardWidgetProps {
@@ -19,7 +19,7 @@ interface DashboardWidgetProps {
   type: 'metric' | 'chart' | 'table' | 'heatmap' | 'progress';
   data?: any;
   config?: {
-    chartType?: 'line' | 'bar' | 'pie' | 'doughnut' | 'area';
+    chartType?: 'line' | 'bar' | 'pie';
     metricValue?: string | number;
     metricChange?: number;
     metricTrend?: 'up' | 'down' | 'neutral';
@@ -52,13 +52,17 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
     switch (type) {
       case 'metric':
         return (
-          <MetricCard
-            title={title}
-            value={config.metricValue || '0'}
-            change={config.metricChange}
-            trend={config.metricTrend}
-            format="number"
-          />
+          <VStack align="stretch" spacing={2}>
+            <Heading size="md">{title}</Heading>
+            <Text fontSize="2xl" fontWeight="bold">
+              {config.metricValue || '0'}
+            </Text>
+            {config.metricChange && (
+              <Text fontSize="sm" color={config.metricTrend === 'up' ? 'green.500' : 'red.500'}>
+                {config.metricChange > 0 ? '+' : ''}{config.metricChange}%
+              </Text>
+            )}
+          </VStack>
         );
 
       case 'chart':
@@ -66,12 +70,10 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
           <Chart
             type={config.chartType || 'line'}
             data={data || []}
-            options={{
-              title,
-              showLegend: config.showLegend,
-              showGrid: config.showGrid,
-              animate: config.animate,
-            }}
+            title={title}
+            showLegend={config.showLegend}
+            showGrid={config.showGrid}
+            colors={['#3182ce', '#38a169', '#d69e2e']}
           />
         );
 

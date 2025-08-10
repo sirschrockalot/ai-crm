@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "next build",
+    "build": "next build --debug",
     "start": "next start -p 3001",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -50,6 +50,7 @@
     "react-table": "^7.8.0",
     "react-virtualized-auto-sizer": "^1.0.0",
     "react-window": "^1.8.8",
+    "reactflow": "^11.11.4",
     "recharts": "^2.8.0",
     "swr": "^2.2.4",
     "zod": "^3.22.0",

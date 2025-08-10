@@ -2,6 +2,23 @@ import { IsString, IsEnum, IsOptional, IsObject, IsArray, IsNumber, IsBoolean, I
 import { Type } from 'class-transformer';
 import { TenantStatus, TenantPlan, TenantSettings } from '../schemas/tenant.schema';
 
+export class AddressDto {
+  @IsString()
+  street: string;
+
+  @IsString()
+  city: string;
+
+  @IsString()
+  state: string;
+
+  @IsString()
+  zipCode: string;
+
+  @IsString()
+  country: string;
+}
+
 export class TenantFeaturesDto {
   @IsBoolean()
   aiLeadScoring: boolean;
@@ -171,23 +188,6 @@ export class CreateTenantDto {
   @Type(() => AddressDto)
   @IsOptional()
   address?: AddressDto;
-}
-
-export class AddressDto {
-  @IsString()
-  street: string;
-
-  @IsString()
-  city: string;
-
-  @IsString()
-  state: string;
-
-  @IsString()
-  zipCode: string;
-
-  @IsString()
-  country: string;
 }
 
 export class UpdateTenantDto {

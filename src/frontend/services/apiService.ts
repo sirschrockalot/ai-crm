@@ -37,7 +37,7 @@ class ApiService {
 
   constructor(config: ApiServiceConfig = {}) {
     this.config = {
-      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
       timeout: 10000,
       enableCache: true,
       cacheTimeout: 5 * 60 * 1000, // 5 minutes
@@ -256,6 +256,17 @@ class ApiService {
       size: this.cache.size,
       keys: Array.from(this.cache.keys()),
     };
+  }
+
+  // Health check method
+  public async healthCheck(): Promise<boolean> {
+    try {
+      await this.get('/api/health');
+      return true;
+    } catch (error) {
+      console.warn('API health check failed:', error);
+      return false;
+    }
   }
 }
 
