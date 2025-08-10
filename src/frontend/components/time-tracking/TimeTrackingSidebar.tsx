@@ -13,10 +13,30 @@ import {
   Tooltip,
 } from '@chakra-ui/react';
 import { CheckIcon, CloseIcon, ViewIcon } from '@chakra-ui/icons';
+// Define interfaces that match the actual data structure being used
+interface TimeEntryData {
+  _id: string;
+  project?: {
+    name: string;
+  };
+  duration: number;
+  description: string;
+  startTime: string | Date | null | undefined;
+  status: string;
+}
+
+interface ApprovalData {
+  _id: string;
+  user?: {
+    name: string;
+  };
+  totalHours: number;
+  weekStartDate: string | Date;
+}
 
 interface TimeTrackingSidebarProps {
-  recentEntries: any[];
-  pendingApprovals: any[];
+  recentEntries: TimeEntryData[];
+  pendingApprovals: ApprovalData[];
   onRefresh: () => void;
 }
 
@@ -28,12 +48,29 @@ export const TimeTrackingSidebar: React.FC<TimeTrackingSidebarProps> = ({
   const cardBg = useColorModeValue('white', 'gray.700');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
 
-  const formatDuration = (duration: number) => {
+  const formatDuration = (duration: number | undefined | null) => {
+    if (duration === null || duration === undefined) return '0.00h';
     return `${duration.toFixed(2)}h`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const formatDate = (dateInput: string | Date | null | undefined) => {
+    // Handle null/undefined cases
+    if (dateInput === null || dateInput === undefined) {
+      return 'No Date';
+    }
+    
+    let date: Date;
+    
+    if (typeof dateInput === 'string') {
+      date = new Date(dateInput);
+      // Check if the parsed date is valid
+      if (isNaN(date.getTime())) {
+        return 'Invalid Date';
+      }
+    } else {
+      date = dateInput;
+    }
+    
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
