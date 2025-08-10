@@ -6,10 +6,11 @@ import { Card, Button, Badge, Table, Modal } from '../../components/ui';
 import { BuyerForm } from '../../components/forms';
 import { useBuyers } from '../../hooks/services/useBuyers';
 import { Buyer, BuyerType } from '../../types';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 
-const BuyersPage: React.FC = () => {
+const BuyersPageContent: React.FC = () => {
   const router = useRouter();
-  const { buyers, loading, error, fetchBuyers, createBuyer, updateBuyer, deleteBuyer, toggleBuyerStatus } = useBuyers();
+  const { buyers, loading, error, useMockData, fetchBuyers, createBuyer, updateBuyer, deleteBuyer, toggleBuyerStatus } = useBuyers();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedBuyer, setSelectedBuyer] = useState<Buyer | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -98,6 +99,11 @@ const BuyersPage: React.FC = () => {
   };
 
   const filteredBuyers = buyers.filter(buyer => {
+    // Add null checks to prevent runtime errors
+    if (!buyer || !buyer.companyName || !buyer.contactName || !buyer.email || !buyer.phone) {
+      return false;
+    }
+    
     const matchesSearch = 
       buyer.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       buyer.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -146,29 +152,29 @@ const BuyersPage: React.FC = () => {
     {
       key: 'companyName',
       header: 'Company',
-      accessor: (buyer: Buyer) => buyer.companyName,
+      accessor: (buyer: Buyer) => buyer?.companyName || 'N/A',
     },
     {
       key: 'contactName',
       header: 'Contact',
-      accessor: (buyer: Buyer) => buyer.contactName,
+      accessor: (buyer: Buyer) => buyer?.contactName || 'N/A',
     },
     {
       key: 'email',
       header: 'Email',
-      accessor: (buyer: Buyer) => buyer.email,
+      accessor: (buyer: Buyer) => buyer?.email || 'N/A',
     },
     {
       key: 'phone',
       header: 'Phone',
-      accessor: (buyer: Buyer) => buyer.phone,
+      accessor: (buyer: Buyer) => buyer?.phone || 'N/A',
     },
     {
       key: 'buyerType',
       header: 'Type',
       accessor: (buyer: Buyer) => (
-        <Badge colorScheme={getBuyerTypeColor(buyer.buyerType)}>
-          {buyer.buyerType}
+        <Badge size="sm" colorScheme={getBuyerTypeColor(buyer?.buyerType || 'individual')}>
+          {buyer?.buyerType || 'N/A'}
         </Badge>
       ),
     },
@@ -176,8 +182,8 @@ const BuyersPage: React.FC = () => {
       key: 'investmentRange',
       header: 'Investment Range',
       accessor: (buyer: Buyer) => (
-        <Badge colorScheme={getInvestmentRangeColor(buyer.investmentRange)}>
-          {formatInvestmentRange(buyer.investmentRange)}
+        <Badge size="sm" colorScheme={getInvestmentRangeColor(buyer?.investmentRange || '0-50k')}>
+          {formatInvestmentRange(buyer?.investmentRange || '0-50k')}
         </Badge>
       ),
     },
@@ -185,8 +191,8 @@ const BuyersPage: React.FC = () => {
       key: 'isActive',
       header: 'Status',
       accessor: (buyer: Buyer) => (
-        <Badge colorScheme={buyer.isActive ? 'green' : 'red'}>
-          {buyer.isActive ? 'Active' : 'Inactive'}
+        <Badge size="sm" colorScheme={buyer?.isActive ? 'green' : 'red'}>
+          {buyer?.isActive ? 'Active' : 'Inactive'}
         </Badge>
       ),
     },
@@ -198,31 +204,39 @@ const BuyersPage: React.FC = () => {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => router.push(`/buyers/${buyer.id}`)}
+            colorScheme="blue"
+            onClick={() => router.push(`/buyers/${buyer?.id || ''}`)}
+            isDisabled={!buyer?.id}
           >
             View
           </Button>
           <Button
             size="sm"
             variant="outline"
+            colorScheme="blue"
             onClick={() => {
               setSelectedBuyer(buyer);
               onOpen();
             }}
+            isDisabled={!buyer}
           >
             Edit
           </Button>
           <Button
             size="sm"
-            variant={buyer.isActive ? 'danger' : 'primary'}
-            onClick={() => handleToggleStatus(buyer.id)}
+            variant={buyer?.isActive ? 'danger' : 'primary'}
+            colorScheme={buyer?.isActive ? 'red' : 'blue'}
+            onClick={() => buyer?.id && handleToggleStatus(buyer.id)}
+            isDisabled={!buyer?.id}
           >
-            {buyer.isActive ? 'Deactivate' : 'Activate'}
+            {buyer?.isActive ? 'Deactivate' : 'Activate'}
           </Button>
           <Button
             size="sm"
             variant="danger"
-            onClick={() => handleDeleteBuyer(buyer.id)}
+            colorScheme="red"
+            onClick={() => buyer?.id && handleDeleteBuyer(buyer.id)}
+            isDisabled={!buyer?.id}
           >
             Delete
           </Button>
@@ -243,15 +257,20 @@ const BuyersPage: React.FC = () => {
               <VStack align="start" spacing={2}>
                 <Heading size="lg">Buyers Management</Heading>
                 <Text color="gray.600">Manage your buyer database and preferences</Text>
+                {useMockData && (
+                  <Badge colorScheme="yellow" size="sm">
+                    Using Mock Data (API Unavailable)
+                  </Badge>
+                )}
               </VStack>
               <HStack spacing={3}>
-                <Button variant="outline" onClick={() => router.push('/buyers/analytics')}>
+                <Button variant="outline" colorScheme="blue" onClick={() => router.push('/buyers/analytics')}>
                   Analytics
                 </Button>
-                <Button variant="outline" onClick={() => router.push('/buyers/matching')}>
+                <Button variant="outline" colorScheme="blue" onClick={() => router.push('/buyers/matching')}>
                   Matching
                 </Button>
-                <Button variant="primary" onClick={onOpen}>
+                <Button variant="primary" colorScheme="blue" onClick={onOpen}>
                   Add New Buyer
                 </Button>
               </HStack>
@@ -300,11 +319,17 @@ const BuyersPage: React.FC = () => {
                     <option value="500k+">$500K+</option>
                   </select>
                   <select
-                    value={activeFilter === 'all' ? 'all' : activeFilter.toString()}
-                    onChange={(e) => setActiveFilter(e.target.value === 'all' ? 'all' : e.target.value === 'true')}
+                    value={activeFilter === 'all' ? 'all' : activeFilter ? 'true' : 'false'}
+                    onChange={(e) => {
+                      if (e.target.value === 'all') {
+                        setActiveFilter('all');
+                      } else {
+                        setActiveFilter(e.target.value === 'true');
+                      }
+                    }}
                     style={{ padding: '8px', borderRadius: '4px', border: '1px solid #e2e8f0' }}
                   >
-                    <option value="all">All Statuses</option>
+                    <option value="all">All Status</option>
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
                   </select>
@@ -316,30 +341,30 @@ const BuyersPage: React.FC = () => {
             <HStack spacing={4}>
               <Card>
                 <Text fontSize="sm" color="gray.600">Total Buyers</Text>
-                <Text fontSize="2xl" fontWeight="bold">{buyers.length}</Text>
+                <Text fontSize="2xl" fontWeight="bold">{buyers?.length || 0}</Text>
               </Card>
               <Card>
                 <Text fontSize="sm" color="gray.600">Active Buyers</Text>
                 <Text fontSize="2xl" fontWeight="bold">
-                  {buyers.filter(b => b.isActive).length}
+                  {buyers?.filter(b => b?.isActive).length || 0}
                 </Text>
               </Card>
               <Card>
                 <Text fontSize="sm" color="gray.600">Individual</Text>
                 <Text fontSize="2xl" fontWeight="bold">
-                  {buyers.filter(b => b.buyerType === 'individual').length}
+                  {buyers?.filter(b => b?.buyerType === 'individual').length || 0}
                 </Text>
               </Card>
               <Card>
                 <Text fontSize="sm" color="gray.600">Companies</Text>
                 <Text fontSize="2xl" fontWeight="bold">
-                  {buyers.filter(b => b.buyerType === 'company').length}
+                  {buyers?.filter(b => b?.buyerType === 'company').length || 0}
                 </Text>
               </Card>
               <Card>
                 <Text fontSize="sm" color="gray.600">Investors</Text>
                 <Text fontSize="2xl" fontWeight="bold">
-                  {buyers.filter(b => b.buyerType === 'investor').length}
+                  {buyers?.filter(b => b?.buyerType === 'investor').length || 0}
                 </Text>
               </Card>
             </HStack>
@@ -378,6 +403,14 @@ const BuyersPage: React.FC = () => {
         />
       </Modal>
     </Box>
+  );
+};
+
+const BuyersPage: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <BuyersPageContent />
+    </ErrorBoundary>
   );
 };
 

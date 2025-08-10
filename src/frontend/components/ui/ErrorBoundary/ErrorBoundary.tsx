@@ -1,16 +1,15 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, VStack, Heading, Text, Button, useToast } from '@chakra-ui/react';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface State {
   hasError: boolean;
   error?: Error;
-  errorInfo?: React.ErrorInfo;
+  errorInfo?: ErrorInfo;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -23,99 +22,46 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({
-      error,
-      errorInfo,
-    });
-
-    // Call the onError callback if provided
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
-
-    // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
-    }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.setState({ error, errorInfo });
   }
 
-  handleRetry = () => {
+  handleReset = () => {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-  };
-
-  handleReportError = () => {
-    // In a real application, this would send the error to an error reporting service
-    console.error('Error reported:', this.state.error, this.state.errorInfo);
   };
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error UI
       return (
-        <Box
-          p={8}
-          textAlign="center"
-          bg="red.50"
-          border="1px"
-          borderColor="red.200"
-          borderRadius="md"
-          maxW="md"
-          mx="auto"
-          mt={8}
-        >
+        <Box p={8} textAlign="center">
           <VStack spacing={4}>
-            <Heading size="md" color="red.600">
+            <Heading size="lg" color="red.500">
               Something went wrong
             </Heading>
-            <Text color="gray.600" fontSize="sm">
-              We encountered an unexpected error. Please try again or contact support if the problem persists.
+            <Text color="gray.600">
+              We encountered an unexpected error. Please try refreshing the page.
             </Text>
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <Box
-                p={4}
-                bg="gray.100"
-                borderRadius="md"
-                fontSize="xs"
-                fontFamily="mono"
-                textAlign="left"
-                maxH="200px"
-                overflow="auto"
-              >
-                <Text fontWeight="bold" mb={2}>
-                  Error Details (Development):
+              <Box p={4} bg="gray.100" borderRadius="md" textAlign="left" maxW="600px">
+                <Text fontWeight="bold" mb={2}>Error Details:</Text>
+                <Text fontSize="sm" fontFamily="mono" color="red.600">
+                  {this.state.error.toString()}
                 </Text>
-                <Text>{this.state.error.message}</Text>
                 {this.state.errorInfo && (
-                  <Text mt={2} fontSize="xs">
+                  <Text fontSize="sm" fontFamily="mono" color="gray.600" mt={2}>
                     {this.state.errorInfo.componentStack}
                   </Text>
                 )}
               </Box>
             )}
-            <VStack spacing={2} w="full">
-              <Button
-                colorScheme="blue"
-                onClick={this.handleRetry}
-                size="sm"
-                w="full"
-              >
-                Try Again
-              </Button>
-              <Button
-                variant="outline"
-                onClick={this.handleReportError}
-                size="sm"
-                w="full"
-              >
-                Report Error
-              </Button>
-            </VStack>
+            <Button colorScheme="blue" onClick={this.handleReset}>
+              Try Again
+            </Button>
           </VStack>
         </Box>
       );
@@ -128,24 +74,22 @@ export class ErrorBoundary extends Component<Props, State> {
 // Hook for functional components to use error boundary
 export const useErrorBoundary = () => {
   const toast = useToast();
-
-  const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
+  
+  const handleError = (error: Error, errorInfo?: any) => {
+    console.error('Error caught by useErrorBoundary:', error, errorInfo);
     toast({
       title: 'An error occurred',
-      description: error.message,
+      description: error.message || 'Something went wrong',
       status: 'error',
       duration: 5000,
       isClosable: true,
     });
-
-    // Log error for debugging
-    console.error('Error caught by useErrorBoundary:', error, errorInfo);
   };
 
   return { handleError };
 };
 
-// Higher-order component to wrap components with error boundary
+// HOC to wrap components with error boundary
 export const withErrorBoundary = <P extends object>(
   Component: React.ComponentType<P>,
   fallback?: ReactNode
@@ -157,6 +101,5 @@ export const withErrorBoundary = <P extends object>(
   );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-
   return WrappedComponent;
 }; 
