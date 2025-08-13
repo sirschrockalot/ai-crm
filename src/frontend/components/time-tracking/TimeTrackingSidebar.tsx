@@ -254,14 +254,7 @@ export const TimeTrackingSidebar: React.FC<TimeTrackingSidebarProps> = ({
           Quick Actions
         </Heading>
         <VStack spacing={3} align="stretch">
-          <Button
-            size="sm"
-            colorScheme="blue"
-            variant="outline"
-            onClick={onRefresh}
-          >
-            Start Timer
-          </Button>
+
           <Button
             size="sm"
             colorScheme="green"

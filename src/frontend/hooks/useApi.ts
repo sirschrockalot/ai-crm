@@ -55,8 +55,10 @@ export function useApi<T = any>(options: UseApiOptions = {}): UseApiReturn<T> {
             'Content-Type': 'application/json',
             ...options.headers,
           },
-          ...config,
+          method: config.method || 'GET',
           url: finalUrl,
+          data: config.data,
+          params: config.params,
         });
 
         setState({

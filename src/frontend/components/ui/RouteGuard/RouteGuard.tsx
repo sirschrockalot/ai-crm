@@ -25,7 +25,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
     const checkAuth = async () => {
       try {
         // Mock authentication check - in real app, this would call your auth service
-        const token = localStorage.getItem('authToken');
+        const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
         
         if (!requireAuth) {
           setIsAuthorized(true);

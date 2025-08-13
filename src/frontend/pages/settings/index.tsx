@@ -18,12 +18,12 @@ import {
   FiShield, 
   FiSettings, 
   FiUsers, 
-  FiBarChart3, 
+  FiBarChart as FiBarChart3, 
   FiSmartphone,
   FiDatabase,
-  FiWorkflow,
+  FiGitBranch as FiWorkflow,
   FiCode,
-  FiBuilding
+  FiHome as FiBuilding
 } from 'react-icons/fi';
 
 const settingsSections = [

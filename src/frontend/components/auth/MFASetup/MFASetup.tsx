@@ -62,7 +62,7 @@ const MFASetup: React.FC<MFASetupProps> = ({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('auth_token') : ''}`,
           },
         });
 
@@ -98,7 +98,7 @@ const MFASetup: React.FC<MFASetupProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('auth_token') : ''}`,
         },
         body: JSON.stringify({
           code: data.verificationCode,

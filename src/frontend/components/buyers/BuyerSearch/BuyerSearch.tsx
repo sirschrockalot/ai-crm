@@ -42,9 +42,11 @@ const BuyerSearch: React.FC<BuyerSearchProps> = ({
 
   // Load search history from localStorage
   useEffect(() => {
-    const savedHistory = localStorage.getItem('buyerSearchHistory');
-    if (savedHistory) {
-      setSearchHistory(JSON.parse(savedHistory));
+    if (typeof window !== 'undefined') {
+      const savedHistory = localStorage.getItem('buyerSearchHistory');
+      if (savedHistory) {
+        setSearchHistory(JSON.parse(savedHistory));
+      }
     }
   }, []);
 
@@ -72,7 +74,9 @@ const BuyerSearch: React.FC<BuyerSearchProps> = ({
     // Add to search history
     const newHistory = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0, 10);
     setSearchHistory(newHistory);
-    localStorage.setItem('buyerSearchHistory', JSON.stringify(newHistory));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('buyerSearchHistory', JSON.stringify(newHistory));
+    }
 
     onSearch(searchQuery, searchFilters);
     setIsOpen(false);

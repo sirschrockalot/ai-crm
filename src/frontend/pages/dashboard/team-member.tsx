@@ -75,7 +75,6 @@ const TeamMemberDashboardPage: React.FC = () => {
   };
 
   const quickActions = [
-    { name: 'Start Timer', action: 'start-timer', icon: 'play' },
     { name: 'Add Task', action: 'add-task', icon: 'plus' },
     { name: 'Log Activity', action: 'log-activity', icon: 'edit' },
     { name: 'View Goals', action: 'view-goals', icon: 'target' },

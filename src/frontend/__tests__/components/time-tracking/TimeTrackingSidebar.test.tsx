@@ -65,7 +65,6 @@ describe('TimeTrackingSidebar', () => {
         onRefresh={mockOnRefresh}
       />
     );
-    expect(screen.getByText(/Start Timer/i)).toBeInTheDocument();
     expect(screen.getByText(/Add Entry/i)).toBeInTheDocument();
   });
 });

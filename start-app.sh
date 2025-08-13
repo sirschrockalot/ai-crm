@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "🚀 Starting AI CRM Application..."
-echo "=================================="
+echo "🚀 Starting AI CRM Frontend Application..."
+echo "=========================================="
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -39,29 +39,6 @@ start_services() {
     print_success "Services started"
 }
 
-# Start backend
-start_backend() {
-    print_status "Starting backend..."
-    cd src/backend
-    
-    # Try to start with npm
-    if npm run start:dev > /dev/null 2>&1 & then
-        BACKEND_PID=$!
-        print_success "Backend started (PID: $BACKEND_PID)"
-    else
-        print_warning "Failed to start backend with npm, trying alternative method..."
-        # Try with npx
-        if npx nest start --watch > /dev/null 2>&1 & then
-            BACKEND_PID=$!
-            print_success "Backend started with npx (PID: $BACKEND_PID)"
-        else
-            print_warning "Failed to start backend. Please check the backend directory."
-        fi
-    fi
-    
-    cd ../..
-}
-
 # Start frontend
 start_frontend() {
     print_status "Starting frontend..."
@@ -92,13 +69,6 @@ check_services() {
     # Wait a bit for services to start
     sleep 10
     
-    # Check backend
-    if curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
-        print_success "Backend is running on http://localhost:3000"
-    else
-        print_warning "Backend is not responding on http://localhost:3000"
-    fi
-    
     # Check frontend
     if curl -f http://localhost:3001 > /dev/null 2>&1; then
         print_success "Frontend is running on http://localhost:3001"
@@ -109,7 +79,7 @@ check_services() {
 
 # Main execution
 main() {
-    echo "🚀 Starting AI CRM Application..."
+    echo "🚀 Starting AI CRM Frontend Application..."
     
     # Check prerequisites
     check_docker
@@ -118,7 +88,6 @@ main() {
     start_services
     
     # Start applications
-    start_backend
     start_frontend
     
     # Check if everything is running
@@ -127,7 +96,6 @@ main() {
     echo ""
     echo "🎉 Application startup completed!"
     echo "📱 Frontend: http://localhost:3001"
-    echo "🔧 Backend API: http://localhost:3000"
     echo ""
     echo "Press Ctrl+C to stop all services"
     
@@ -141,10 +109,6 @@ cleanup() {
     print_status "Stopping services..."
     
     # Kill background processes
-    if [ ! -z "$BACKEND_PID" ]; then
-        kill $BACKEND_PID 2>/dev/null
-    fi
-    
     if [ ! -z "$FRONTEND_PID" ]; then
         kill $FRONTEND_PID 2>/dev/null
     fi

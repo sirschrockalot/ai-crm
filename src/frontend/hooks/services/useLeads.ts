@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useApi } from '../useApi';
 import { useAuth } from '../useAuth';
+import { mockLeads, mockLeadAnalytics, mockLeadStatuses, mockPropertyTypes, mockCities, mockStates, mockLeadSources, mockCompanies, mockLeadScores, mockEstimatedValues, mockAssignedUsers, mockLeadStages, mockLeadActivities, mockLeadNotes, mockLeadTasks, mockLeadDocuments, mockLeadHistory } from '../../services/mockDataService';
 
 export interface Lead {
   id: string;
@@ -39,8 +40,8 @@ export interface UpdateLeadData extends Partial<CreateLeadData> {
 }
 
 export interface LeadsFilters {
-  status?: Lead['status'];
-  propertyType?: Lead['propertyType'];
+  status?: Lead['status'] | '';
+  propertyType?: Lead['propertyType'] | '';
   city?: string;
   state?: string;
   minValue?: number;
@@ -77,7 +78,7 @@ export function useLeads() {
   const singleLeadApi = useApi<Lead>();
   const bulkApi = useApi<BulkOperationResult>();
   const statsApi = useApi<BulkOperationStats>();
-  const [leads, setLeads] = useState<Lead[]>([]);
+  const [leads, setLeads] = useState<Lead[]>(mockLeads);
   const [currentLead, setCurrentLead] = useState<Lead | null>(null);
   const [bulkOperation, setBulkOperation] = useState<BulkOperationResult | null>(null);
 
@@ -92,234 +93,342 @@ export function useLeads() {
       throw new Error('Authentication required');
     }
 
-    const params = new URLSearchParams();
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    let filteredLeads = [...mockLeads];
+
     if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
-          params.append(key, value.toString());
-        }
-      });
+      if (filters.status) {
+        filteredLeads = filteredLeads.filter(lead => lead.status === filters.status);
+      }
+      if (filters.propertyType) {
+        filteredLeads = filteredLeads.filter(lead => lead.propertyType === filters.propertyType);
+      }
+      if (filters.city) {
+        filteredLeads = filteredLeads.filter(lead => lead.city.toLowerCase().includes(filters.city!.toLowerCase()));
+      }
+      if (filters.state) {
+        filteredLeads = filteredLeads.filter(lead => lead.state === filters.state);
+      }
+      if (filters.minValue) {
+        filteredLeads = filteredLeads.filter(lead => lead.estimatedValue >= filters.minValue!);
+      }
+      if (filters.maxValue) {
+        filteredLeads = filteredLeads.filter(lead => lead.estimatedValue <= filters.maxValue!);
+      }
     }
 
-    const response = await api.execute({
-      method: 'GET',
-      url: `/api/leads${params.toString() ? `?${params.toString()}` : ''}`,
-      headers: getAuthHeaders(),
-    });
+    setLeads(filteredLeads);
+    return filteredLeads;
+  }, [isAuthenticated]);
 
-    setLeads(response);
-    return response;
-  }, [api, isAuthenticated, getAuthHeaders]);
-
-  const fetchLead = useCallback(async (id: string) => {
+  const createLead = useCallback(async (leadData: CreateLeadData) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const response = await singleLeadApi.execute({
-      method: 'GET',
-      url: `/api/leads/${id}`,
-      headers: getAuthHeaders(),
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    setCurrentLead(response);
-    return response;
-  }, [singleLeadApi, isAuthenticated, getAuthHeaders]);
+    const newLead: Lead = {
+      id: `lead-${Date.now()}`,
+      ...leadData,
+      status: 'new',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-  const createLead = useCallback(async (data: CreateLeadData) => {
+    setLeads(prev => [...prev, newLead]);
+    return newLead;
+  }, [isAuthenticated]);
+
+  const updateLead = useCallback(async (leadId: string, updateData: UpdateLeadData) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const response = await singleLeadApi.execute({
-      method: 'POST',
-      url: '/api/leads',
-      data,
-      headers: getAuthHeaders(),
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    setLeads(prev => [...prev, response]);
-    return response;
-  }, [singleLeadApi, isAuthenticated, getAuthHeaders]);
+    setLeads(prev => prev.map(lead => 
+      lead.id === leadId 
+        ? { ...lead, ...updateData, updatedAt: new Date() }
+        : lead
+    ));
 
-  const updateLead = useCallback(async (id: string, data: UpdateLeadData) => {
+    const updatedLead = leads.find(lead => lead.id === leadId);
+    if (updatedLead) {
+      setCurrentLead({ ...updatedLead, ...updateData, updatedAt: new Date() });
+    }
+
+    return updatedLead;
+  }, [isAuthenticated, leads]);
+
+  const deleteLead = useCallback(async (leadId: string) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const response = await singleLeadApi.execute({
-      method: 'PUT',
-      url: `/api/leads/${id}`,
-      data,
-      headers: getAuthHeaders(),
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 600));
 
-    setLeads(prev => prev.map(lead => lead.id === id ? response : lead));
-    if (currentLead?.id === id) {
-      setCurrentLead(response);
-    }
-    return response;
-  }, [singleLeadApi, currentLead, isAuthenticated, getAuthHeaders]);
-
-  const deleteLead = useCallback(async (id: string) => {
-    if (!isAuthenticated) {
-      throw new Error('Authentication required');
-    }
-
-    await singleLeadApi.execute({
-      method: 'DELETE',
-      url: `/api/leads/${id}`,
-      headers: getAuthHeaders(),
-    });
-
-    setLeads(prev => prev.filter(lead => lead.id !== id));
-    if (currentLead?.id === id) {
+    setLeads(prev => prev.filter(lead => lead.id !== leadId));
+    if (currentLead?.id === leadId) {
       setCurrentLead(null);
     }
-  }, [singleLeadApi, currentLead, isAuthenticated, getAuthHeaders]);
 
-  const updateLeadStatus = useCallback(async (id: string, status: Lead['status']) => {
-    return updateLead(id, { status });
-  }, [updateLead]);
+    return { success: true };
+  }, [isAuthenticated, currentLead]);
 
-  const bulkUpdateLeads = useCallback(async (leadIds: string[], updates: Partial<Lead>) => {
+  const bulkUpdateLeads = useCallback(async (leadIds: string[], updateData: Record<string, any>) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const response = await bulkApi.execute({
-      method: 'POST',
-      url: '/api/leads/bulk-update',
-      data: {
-        leadIds,
-        operation: 'update',
-        data: updates,
-      },
-      headers: getAuthHeaders(),
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
 
-    setBulkOperation(response);
-    return response;
-  }, [bulkApi, isAuthenticated, getAuthHeaders]);
+    setLeads(prev => prev.map(lead => 
+      leadIds.includes(lead.id) 
+        ? { ...lead, ...updateData, updatedAt: new Date() }
+        : lead
+    ));
+
+    return { success: true, updatedCount: leadIds.length };
+  }, [isAuthenticated]);
 
   const bulkDeleteLeads = useCallback(async (leadIds: string[]) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const response = await bulkApi.execute({
-      method: 'POST',
-      url: '/api/leads/bulk-delete',
-      data: {
-        leadIds,
-        operation: 'delete',
-      },
-      headers: getAuthHeaders(),
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1200));
 
-    setBulkOperation(response);
-    return response;
-  }, [bulkApi, isAuthenticated, getAuthHeaders]);
+    setLeads(prev => prev.filter(lead => !leadIds.includes(lead.id)));
+    if (currentLead && leadIds.includes(currentLead.id)) {
+      setCurrentLead(null);
+    }
 
-  const importLeads = useCallback(async (file: File): Promise<{ imported: number; failed: number }> => {
+    return { success: true, deletedCount: leadIds.length };
+  }, [isAuthenticated, currentLead]);
+
+  const importLeads = useCallback(async (file: File) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const response = await api.execute({
-      method: 'POST',
-      url: '/api/leads/import',
-      data: formData,
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'multipart/form-data',
+    // Mock import - in real app, this would parse the file
+    const mockImportedLeads: Lead[] = [
+      {
+        id: `imported-${Date.now()}-1`,
+        firstName: 'Imported',
+        lastName: 'Lead 1',
+        email: 'imported1@example.com',
+        phone: '(555) 999-0001',
+        address: '123 Imported Street',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        propertyType: 'single_family',
+        estimatedValue: 400000,
+        status: 'new',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
-    });
+      {
+        id: `imported-${Date.now()}-2`,
+        firstName: 'Imported',
+        lastName: 'Lead 2',
+        email: 'imported2@example.com',
+        phone: '(555) 999-0002',
+        address: '456 Imported Avenue',
+        city: 'Dallas',
+        state: 'TX',
+        zipCode: '75201',
+        propertyType: 'multi_family',
+        estimatedValue: 600000,
+        status: 'new',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ];
 
-    // Refresh leads after import
-    await fetchLeads();
-    return response as { imported: number; failed: number };
-  }, [api, isAuthenticated, getAuthHeaders, fetchLeads]);
+    setLeads(prev => [...prev, ...mockImportedLeads]);
+    return { success: true, importedCount: mockImportedLeads.length };
+  }, [isAuthenticated]);
 
   const exportLeads = useCallback(async (filters?: LeadsFilters) => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const params = new URLSearchParams();
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
-          params.append(key, value.toString());
-        }
-      });
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const response = await api.execute({
-      method: 'GET',
-      url: `/api/leads/export${params.toString() ? `?${params.toString()}` : ''}`,
-      headers: {
-        ...getAuthHeaders(),
-        'Accept': 'application/octet-stream',
-      },
-    });
+    // Mock export - in real app, this would generate a CSV/Excel file
+    const exportData = leads.map(lead => ({
+      'First Name': lead.firstName,
+      'Last Name': lead.lastName,
+      'Email': lead.email,
+      'Phone': lead.phone,
+      'Address': lead.address,
+      'City': lead.city,
+      'State': lead.state,
+      'Zip Code': lead.zipCode,
+      'Property Type': lead.propertyType,
+      'Estimated Value': lead.estimatedValue,
+      'Status': lead.status,
+      'Created At': lead.createdAt.toISOString(),
+    }));
 
-    return response;
-  }, [api, isAuthenticated, getAuthHeaders]);
+    // Create and download CSV
+    const csvContent = [
+      Object.keys(exportData[0]).join(','),
+      ...exportData.map(row => Object.values(row).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `leads-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    return { success: true, exportedCount: exportData.length };
+  }, [isAuthenticated, leads]);
 
   const getLeadStats = useCallback(async () => {
     if (!isAuthenticated) {
       throw new Error('Authentication required');
     }
 
-    const response = await statsApi.execute({
-      method: 'GET',
-      url: '/api/leads/stats',
-      headers: getAuthHeaders(),
-    });
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-    return response;
-  }, [statsApi, isAuthenticated, getAuthHeaders]);
+    return mockLeadAnalytics;
+  }, [isAuthenticated]);
+
+  const getLeadById = useCallback(async (leadId: string) => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const lead = leads.find(l => l.id === leadId);
+    if (lead) {
+      setCurrentLead(lead);
+    }
+    return lead;
+  }, [isAuthenticated, leads]);
+
+  const getLeadActivities = useCallback(async (leadId: string) => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    return mockLeadActivities.filter(activity => activity.leadId === leadId);
+  }, [isAuthenticated]);
+
+  const getLeadNotes = useCallback(async (leadId: string) => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    return mockLeadNotes.filter(note => note.leadId === leadId);
+  }, [isAuthenticated]);
+
+  const getLeadTasks = useCallback(async (leadId: string) => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    return mockLeadTasks.filter(task => task.leadId === leadId);
+  }, [isAuthenticated]);
+
+  const getLeadDocuments = useCallback(async (leadId: string) => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    return mockLeadDocuments.filter(doc => doc.leadId === leadId);
+  }, [isAuthenticated]);
+
+  const getLeadHistory = useCallback(async (leadId: string) => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    return mockLeadHistory.filter(history => history.leadId === leadId);
+  }, [isAuthenticated]);
+
+  const getFilterOptions = useCallback(async () => {
+    if (!isAuthenticated) {
+      throw new Error('Authentication required');
+    }
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    return {
+      statuses: mockLeadStatuses,
+      propertyTypes: mockPropertyTypes,
+      cities: mockCities,
+      states: mockStates,
+      sources: mockLeadSources,
+      companies: mockCompanies,
+      scores: mockLeadScores,
+      values: mockEstimatedValues,
+      assignedUsers: mockAssignedUsers,
+      stages: mockLeadStages,
+    };
+  }, [isAuthenticated]);
 
   return {
-    // Data
     leads,
-    currentLead,
-    bulkOperation,
-    
-    // Loading states from shared API hooks
-    loading: api.loading || singleLeadApi.loading || bulkApi.loading || statsApi.loading,
-    error: api.error || singleLeadApi.error || bulkApi.error || statsApi.error,
-    
-    // Authentication state
+    loading: false, // Mock data doesn't have loading state
+    error: null as string | null, // Mock data doesn't have error state
     isAuthenticated,
     user,
-    
-    // Actions
+    currentLead,
+    bulkOperation,
     fetchLeads,
-    fetchLead,
     createLead,
     updateLead,
     deleteLead,
-    updateLeadStatus,
     bulkUpdateLeads,
     bulkDeleteLeads,
     importLeads,
     exportLeads,
     getLeadStats,
-    
-    // Reset functions
-    reset: () => {
-      api.reset();
-      singleLeadApi.reset();
-      bulkApi.reset();
-      statsApi.reset();
-      setLeads([]);
-      setCurrentLead(null);
-      setBulkOperation(null);
-    },
+    getLeadById,
+    getLeadActivities,
+    getLeadNotes,
+    getLeadTasks,
+    getLeadDocuments,
+    getLeadHistory,
+    getFilterOptions,
   };
 } 

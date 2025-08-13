@@ -78,6 +78,10 @@ const NewLeadPage: React.FC = () => {
     setHasUnsavedChanges(hasChanges);
   };
 
+  const handleLeadFormCancel = () => {
+    router.push('/leads');
+  };
+
   // Show authentication error
   if (!isAuthenticated) {
     return (

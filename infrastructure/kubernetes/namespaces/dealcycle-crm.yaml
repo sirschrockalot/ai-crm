@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: dealcycle-crm
-  labels:
-    name: dealcycle-crm
-    environment: production
-    project: dealcycle-crm
-    managed-by: terraform 

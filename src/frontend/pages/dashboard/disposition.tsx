@@ -1,827 +1,474 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  useColorModeValue,
-  Container,
-  Grid,
-  GridItem,
-  useToast,
-  Spinner,
-  Center,
-  Button,
-  IconButton,
-  Tooltip,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  MenuDivider,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  FormControl,
-  FormLabel,
-  Switch,
-  Select,
-  Input,
-  Badge,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
-  Divider,
-} from '@chakra-ui/react';
-import { useRouter } from 'next/router';
-import { FaCog, FaDownload, FaRedo, FaSave, FaEye, FaEyeSlash, FaFilter } from 'react-icons/fa';
-
-// Import all disposition dashboard components
-import {
-  PriorityAlerts,
-  DealPipeline,
-  BuyerManagement,
-  DispositionAnalytics,
-  QuickActions,
-  getDefaultDispositionActions,
-} from '../../components/dashboard';
-
-// Import types
-import type {
-  PriorityAlert,
-  Deal,
-  Buyer,
-  Communication,
-  DispositionMetrics,
-  QuickAction,
-} from '../../components/dashboard';
-
-// Import hooks for real-time updates and dashboard management
-import { useDashboard } from '../../hooks/useDashboard';
-import { useAnalytics } from '../../hooks/useAnalytics';
-
-// Dashboard personalization interface
-interface DashboardPreferences {
-  showPriorityAlerts: boolean;
-  showDealPipeline: boolean;
-  showBuyerManagement: boolean;
-  showAnalytics: boolean;
-  showQuickActions: boolean;
-  layout: 'default' | 'compact' | 'detailed';
-  refreshInterval: number;
-  autoRefresh: boolean;
-}
-
-// Enhanced mock data for development
-const mockPriorityAlerts: PriorityAlert[] = [
-  {
-    id: '1',
-    title: 'Inspection Period Ending',
-    count: 3,
-    details: '3 deals have inspection periods ending within 24 hours',
-    urgency: 'urgent',
-    type: 'inspection',
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '2',
-    title: 'Closing Deadlines',
-    count: 2,
-    details: '2 deals are closing within the next 3 days',
-    urgency: 'warning',
-    type: 'closing',
-    expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '3',
-    title: 'Follow-up Required',
-    count: 5,
-    details: '5 buyers require follow-up communication',
-    urgency: 'info',
-    type: 'followup',
-  },
-];
-
-const mockDeals: Deal[] = [
-  {
-    id: '1',
-    address: '123 Main St, Anytown, USA',
-    status: 'new-contract',
-    priority: 'high',
-    buyer: 'John Smith',
-    price: 250000,
-    profit: 45000,
-    inspectionEnds: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    closingDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-    lastUpdated: new Date(),
-    assignedTo: 'Agent 1',
-  },
-  {
-    id: '2',
-    address: '456 Oak Ave, Somewhere, USA',
-    status: 'active-disposition',
-    priority: 'medium',
-    buyer: 'Jane Doe',
-    price: 320000,
-    profit: 52000,
-    inspectionEnds: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-    closingDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
-    lastUpdated: new Date(),
-    assignedTo: 'Agent 2',
-  },
-  {
-    id: '3',
-    address: '789 Pine Rd, Elsewhere, USA',
-    status: 'closing',
-    priority: 'high',
-    buyer: 'Bob Johnson',
-    price: 180000,
-    profit: 28000,
-    closingDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    lastUpdated: new Date(),
-    assignedTo: 'Agent 1',
-  },
-  {
-    id: '4',
-    address: '321 Elm St, Nowhere, USA',
-    status: 'assigned',
-    priority: 'low',
-    buyer: 'Alice Brown',
-    price: 450000,
-    profit: 75000,
-    inspectionEnds: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-    closingDate: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000),
-    lastUpdated: new Date(),
-    assignedTo: 'Agent 3',
-  },
-];
-
-const mockBuyers: Buyer[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john.smith@email.com',
-    phone: '(555) 123-4567',
-    status: 'active',
-    priority: 'high',
-    location: 'Anytown, USA',
-    budget: { min: 200000, max: 300000 },
-    preferredAreas: ['Anytown', 'Somewhere'],
-    lastContact: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    totalDeals: 3,
-    successfulDeals: 2,
-    averageDealSize: 250000,
-    tags: ['Cash Buyer', 'Quick Close'],
-  },
-  {
-    id: '2',
-    name: 'Jane Doe',
-    email: 'jane.doe@email.com',
-    phone: '(555) 234-5678',
-    status: 'qualified',
-    priority: 'medium',
-    location: 'Somewhere, USA',
-    budget: { min: 300000, max: 500000 },
-    preferredAreas: ['Somewhere', 'Elsewhere'],
-    lastContact: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    totalDeals: 2,
-    successfulDeals: 1,
-    averageDealSize: 320000,
-    tags: ['First Time', 'Financing'],
-  },
-  {
-    id: '3',
-    name: 'Bob Johnson',
-    email: 'bob.johnson@email.com',
-    phone: '(555) 345-6789',
-    status: 'active',
-    priority: 'high',
-    location: 'Elsewhere, USA',
-    budget: { min: 150000, max: 250000 },
-    preferredAreas: ['Elsewhere', 'Nowhere'],
-    lastContact: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    totalDeals: 5,
-    successfulDeals: 4,
-    averageDealSize: 180000,
-    tags: ['Investor', 'Cash Buyer'],
-  },
-];
-
-const mockCommunications: Communication[] = [
-  {
-    id: '1',
-    type: 'call',
-    direction: 'outbound',
-    date: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    summary: 'Called buyer to discuss inspection results',
-    outcome: 'positive',
-    nextAction: 'Schedule closing',
-    nextActionDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-  },
-  {
-    id: '2',
-    type: 'email',
-    direction: 'inbound',
-    date: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    summary: 'Buyer sent inspection report',
-    outcome: 'neutral',
-    nextAction: 'Review inspection report',
-  },
-  {
-    id: '3',
-    type: 'meeting',
-    direction: 'outbound',
-    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    summary: 'Property walkthrough with buyer',
-    outcome: 'positive',
-    nextAction: 'Prepare offer',
-  },
-];
-
-const mockMetrics: DispositionMetrics = {
-  totalDeals: 24,
-  activeDeals: 18,
-  closedDeals: 5,
-  cancelledDeals: 1,
-  totalValue: 5200000,
-  averageDealSize: 216667,
-  averageDaysToClose: 28.5,
-  successRate: 83.3,
-  profitMargin: 18.2,
-  buyerSatisfaction: 92.5,
-  monthlyTrends: [
-    { month: 'Jan', deals: 3, value: 650000, profit: 120000 },
-    { month: 'Feb', deals: 4, value: 850000, profit: 150000 },
-    { month: 'Mar', deals: 5, value: 1100000, profit: 200000 },
-    { month: 'Apr', deals: 6, value: 1300000, profit: 240000 },
-    { month: 'May', deals: 4, value: 900000, profit: 160000 },
-    { month: 'Jun', deals: 2, value: 400000, profit: 70000 },
-  ],
-  statusBreakdown: [
-    { status: 'New Contract', count: 8, percentage: 33.3 },
-    { status: 'Active Disposition', count: 6, percentage: 25.0 },
-    { status: 'Assigned', count: 3, percentage: 12.5 },
-    { status: 'Closing', count: 2, percentage: 8.3 },
-    { status: 'Closed', count: 5, percentage: 20.8 },
-  ],
-  priorityBreakdown: [
-    { priority: 'High', count: 10, percentage: 41.7 },
-    { priority: 'Medium', count: 12, percentage: 50.0 },
-    { priority: 'Low', count: 2, percentage: 8.3 },
-  ],
-  topPerformers: [
-    { name: 'Agent 1', deals: 8, value: 1800000, successRate: 87.5 },
-    { name: 'Agent 2', deals: 6, value: 1400000, successRate: 83.3 },
-    { name: 'Agent 3', deals: 4, value: 900000, successRate: 75.0 },
-  ],
-};
+import React from 'react';
+import { Box, Text, Heading, SimpleGrid, Card, CardBody, HStack, VStack, Button, Badge, Icon, Grid } from '@chakra-ui/react';
+import { DashboardLayout } from '../../components/dashboard';
+import { 
+  FaHandshake, 
+  FaExclamationTriangle, 
+  FaCalendarAlt, 
+  FaPhone, 
+  FaFileContract, 
+  FaCheckCircle,
+  FaUsers,
+  FaSearch,
+  FaFilter,
+  FaPlus
+} from 'react-icons/fa';
 
 const DispositionDashboard: React.FC = () => {
-  const router = useRouter();
-  const toast = useToast();
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
-  const textColor = useColorModeValue('gray.800', 'white');
-
-  // Dashboard state
-  const [loading, setLoading] = useState(false);
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
-  const [refreshCount, setRefreshCount] = useState(0);
-
-  // Dashboard personalization
-  const [preferences, setPreferences] = useState<DashboardPreferences>(() => {
-    const saved = localStorage.getItem('disposition-dashboard-preferences');
-    return saved ? JSON.parse(saved) : {
-      showPriorityAlerts: true,
-      showDealPipeline: true,
-      showBuyerManagement: true,
-      showAnalytics: true,
-      showQuickActions: true,
-      layout: 'default',
-      refreshInterval: 30000, // 30 seconds
-      autoRefresh: true,
-    };
-  });
-
-  // Modal states
-  const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure();
-  const { isOpen: isExportOpen, onOpen: onExportOpen, onClose: onExportClose } = useDisclosure();
-
-  // Export options
-  const [exportFormat, setExportFormat] = useState<'pdf' | 'excel' | 'csv'>('excel');
-  const [exportTimeRange, setExportTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-
-  // Hooks for real-time updates and analytics
-  const { refreshDashboard, getRealTimeStats } = useDashboard();
-  const { exportAnalytics } = useAnalytics();
-
-  // Save preferences to localStorage
-  useEffect(() => {
-    localStorage.setItem('disposition-dashboard-preferences', JSON.stringify(preferences));
-  }, [preferences]);
-
-  // Auto-refresh functionality
-  useEffect(() => {
-    if (!preferences.autoRefresh) return undefined;
-
-    const interval = setInterval(() => {
-      handleRefresh();
-    }, preferences.refreshInterval);
-
-    return () => clearInterval(interval);
-  }, [preferences.autoRefresh, preferences.refreshInterval]);
-
-  // Handle component interactions
-  const handleAlertClick = useCallback((alert: PriorityAlert) => {
-    toast({
-      title: 'Alert Details',
-      description: alert.details,
-      status: 'info',
-      duration: 3000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  const handleDealClick = useCallback((deal: Deal) => {
-    router.push(`/deals/${deal.id}`);
-  }, [router]);
-
-  const handleStatusChange = useCallback((dealId: string, status: Deal['status']) => {
-    toast({
-      title: 'Status Updated',
-      description: `Deal status changed to ${status}`,
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  const handleAssignDeal = useCallback((dealId: string, userId: string) => {
-    toast({
-      title: 'Deal Assigned',
-      description: 'Deal has been assigned successfully',
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  const handleBuyerClick = useCallback((buyer: Buyer) => {
-    router.push(`/buyers/${buyer.id}`);
-  }, [router]);
-
-  const handleAddBuyer = useCallback(() => {
-    router.push('/buyers/new');
-  }, [router]);
-
-  const handleContactBuyer = useCallback((buyer: Buyer, method: 'call' | 'email') => {
-    toast({
-      title: 'Contact Initiated',
-      description: `${method === 'call' ? 'Calling' : 'Emailing'} ${buyer.name}`,
-      status: 'info',
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  const handleUpdateBuyerStatus = useCallback((buyerId: string, status: Buyer['status']) => {
-    toast({
-      title: 'Status Updated',
-      description: `Buyer status changed to ${status}`,
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  const handleTimeRangeChange = useCallback((range: '7d' | '30d' | '90d' | '1y') => {
-    setTimeRange(range);
-    toast({
-      title: 'Time Range Updated',
-      description: `Showing data for ${range}`,
-      status: 'info',
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  const handleActionClick = useCallback((action: QuickAction) => {
-    toast({
-      title: 'Action Executed',
-      description: action.title,
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-    });
-  }, [toast]);
-
-  // Enhanced refresh functionality
-  const handleRefresh = useCallback(async () => {
-    setLoading(true);
-    try {
-      await refreshDashboard();
-      setLastRefresh(new Date());
-      setRefreshCount(prev => prev + 1);
-      toast({
-        title: 'Dashboard Refreshed',
-        description: 'Latest data has been loaded',
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-      });
-    } catch (error) {
-      toast({
-        title: 'Refresh Failed',
-        description: 'Failed to refresh dashboard data',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [refreshDashboard, toast]);
-
-  // Export functionality
-  const handleExport = useCallback(async () => {
-    try {
-      const exportOptions = {
-        format: exportFormat,
-        timeRange: exportTimeRange,
-        includeCharts: true,
-        includeData: true,
-        includeMetrics: true,
-      };
-
-      const result = await exportAnalytics(exportOptions);
-      
-      // Create download link
-      const blob = new Blob([result], { type: getMimeType(exportFormat) });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `disposition-dashboard-${exportTimeRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      toast({
-        title: 'Export Successful',
-        description: `Dashboard data exported as ${exportFormat.toUpperCase()}`,
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
-
-      onExportClose();
-    } catch (error) {
-      toast({
-        title: 'Export Failed',
-        description: 'Failed to export dashboard data',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  }, [exportAnalytics, exportFormat, exportTimeRange, toast, onExportClose]);
-
-  // Helper function for MIME types
-  const getMimeType = (format: string) => {
-    switch (format) {
-      case 'pdf': return 'application/pdf';
-      case 'excel': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-      case 'csv': return 'text/csv';
-      default: return 'text/plain';
-    }
-  };
-
-  // Update preferences
-  const updatePreference = useCallback((key: keyof DashboardPreferences, value: any) => {
-    setPreferences(prev => ({ ...prev, [key]: value }));
-  }, []);
-
-  // Loading state
-  if (loading && refreshCount === 0) {
-    return (
-      <Center minH="100vh">
-        <VStack spacing={4}>
-          <Spinner size="xl" color="blue.500" />
-          <Text>Loading disposition dashboard...</Text>
-        </VStack>
-      </Center>
-    );
-  }
-
   return (
-    <Box bg={bgColor} minH="100vh" py={8}>
-      <Container maxW="container.xl">
-        <VStack spacing={8} align="stretch">
-          {/* Enhanced Page Header with Controls */}
-          <Box>
-            <HStack justify="space-between" align="center" mb={4}>
-              <Box>
-                <Heading size="lg" color={textColor} mb={2}>
-                  Dispositions Dashboard
-                </Heading>
-                <Text color="gray.600" fontSize="lg">
-                  Manage deals, track buyers, and monitor disposition performance
-                </Text>
-              </Box>
-              
-              {/* Dashboard Controls */}
-              <HStack spacing={3}>
-                <Tooltip label="Refresh Dashboard">
-                  <IconButton
-                    aria-label="Refresh dashboard"
-                    icon={<FaRedo />}
-                    onClick={handleRefresh}
-                    isLoading={loading}
-                    colorScheme="blue"
-                    variant="ghost"
-                  />
-                </Tooltip>
-                
-                <Tooltip label="Export Data">
-                  <IconButton
-                    aria-label="Export dashboard data"
-                    icon={<FaDownload />}
-                    onClick={onExportOpen}
-                    colorScheme="green"
-                    variant="ghost"
-                  />
-                </Tooltip>
-                
-                <Tooltip label="Dashboard Settings">
-                  <IconButton
-                    aria-label="Dashboard settings"
-                    icon={<FaCog />}
-                    onClick={onSettingsOpen}
-                    colorScheme="purple"
-                    variant="ghost"
-                  />
-                </Tooltip>
-              </HStack>
+    <DashboardLayout>
+      {/* Page Header */}
+      <Box mb={8}>
+        <HStack spacing={3} mb={2}>
+          <Icon as={FaHandshake} color="purple.500" boxSize={6} />
+          <Heading size="lg" color="gray.800">Disposition Dashboard</Heading>
+        </HStack>
+        <Text fontSize="lg" color="gray.600">
+          Manage deals, connect with buyers, and close transactions
+        </Text>
+      </Box>
+
+      {/* Priority Alerts Section */}
+      <Card bg="white" shadow="md" mb={8}>
+        <CardBody p={6}>
+          <HStack justify="space-between" mb={6}>
+            <HStack spacing={3}>
+              <Icon as={FaExclamationTriangle} color="red.500" boxSize={5} />
+              <Heading size="md" color="gray.800">Priority Alerts</Heading>
             </HStack>
+            <Text fontSize="sm" color="gray.500">December 18, 2024</Text>
+          </HStack>
+          
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+            {/* Urgent Alert */}
+            <Card bg="red.50" border="1px" borderColor="red.200" cursor="pointer" _hover={{ bg: 'red.100' }}>
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaExclamationTriangle} color="white" boxSize={6} bg="red.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Inspection Period Ending</Text>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">3 deals</Text>
+                    <Text fontSize="sm" color="gray.600">123 Oak St - expires today</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
 
-            {/* Status Bar */}
-            <HStack justify="space-between" align="center" p={3} bg="white" borderRadius="md" shadow="sm">
-              <HStack spacing={4}>
-                <Badge colorScheme="blue" variant="subtle">
-                  Last Updated: {lastRefresh.toLocaleTimeString()}
-                </Badge>
-                <Badge colorScheme="green" variant="subtle">
-                  Auto-refresh: {preferences.autoRefresh ? 'ON' : 'OFF'}
-                </Badge>
-                <Badge colorScheme="purple" variant="subtle">
-                  Layout: {preferences.layout}
-                </Badge>
-              </HStack>
-              
-              <Text fontSize="sm" color="gray.500">
-                Refresh Count: {refreshCount}
-              </Text>
+            {/* Warning Alert */}
+            <Card bg="gray.50" border="1px" borderColor="gray.200" cursor="pointer" _hover={{ bg: 'gray.100' }}>
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaCalendarAlt} color="white" boxSize={6} bg="blue.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Closing This Week</Text>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">2 deals</Text>
+                    <Text fontSize="sm" color="gray.600">456 Pine Ave - Friday</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+
+            {/* Info Alert */}
+            <Card bg="gray.50" border="1px" borderColor="gray.200" cursor="pointer" _hover={{ bg: 'gray.100' }}>
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaPhone} color="white" boxSize={6} bg="blue.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Buyer Follow-ups</Text>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">8 calls</Text>
+                    <Text fontSize="sm" color="gray.600">High interest buyers</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+        </CardBody>
+      </Card>
+
+      {/* Quick Actions Section */}
+      <Card bg="white" shadow="md" mb={8}>
+        <CardBody p={6}>
+          <HStack spacing={3} mb={6}>
+            <Icon as={FaHandshake} color="purple.500" boxSize={5} />
+            <Heading size="md" color="gray.800">Quick Actions</Heading>
+          </HStack>
+          
+          <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
+            <Card bg="gray.50" border="1px" borderColor="gray.200" cursor="pointer" _hover={{ bg: 'gray.100', borderColor: 'purple.500', transform: 'translateY(-2px)' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaFileContract} color="white" boxSize={7} bg="purple.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Get Next Deal</Text>
+                    <Text fontSize="sm" color="gray.600">Start working on next priority deal</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+
+            <Card bg="gray.50" border="1px" borderColor="gray.200" cursor="pointer" _hover={{ bg: 'gray.100', borderColor: 'purple.500', transform: 'translateY(-2px)' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaPhone} color="white" boxSize={7} bg="purple.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Call Buyers</Text>
+                    <Text fontSize="sm" color="gray.600">Contact interested buyers</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+
+            <Card bg="gray.50" border="1px" borderColor="gray.200" cursor="pointer" _hover={{ bg: 'gray.100', borderColor: 'purple.500', transform: 'translateY(-2px)' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaHandshake} color="white" boxSize={7} bg="purple.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Assign Deal</Text>
+                    <Text fontSize="sm" color="gray.600">Match buyer to property</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+
+            <Card bg="gray.50" border="1px" borderColor="gray.200" cursor="pointer" _hover={{ bg: 'gray.100', borderColor: 'purple.500', transform: 'translateY(-2px)' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaCheckCircle} color="white" boxSize={7} bg="purple.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1} flex={1}>
+                    <Text fontWeight="600" color="gray.800">Schedule Closing</Text>
+                    <Text fontSize="sm" color="gray.600">Set up deal closing</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+        </CardBody>
+      </Card>
+
+      {/* Deal Pipeline Section */}
+      <Card bg="white" shadow="md" mb={8}>
+        <CardBody p={6}>
+          <HStack justify="space-between" mb={6} flexWrap="wrap" gap={4}>
+            <HStack spacing={3}>
+              <Icon as={FaFileContract} color="purple.500" boxSize={5} />
+              <Heading size="md" color="gray.800">Deal Pipeline</Heading>
             </HStack>
-          </Box>
-
-          {/* Priority Alerts - Conditional Display */}
-          {preferences.showPriorityAlerts && (
-            <PriorityAlerts
-              alerts={mockPriorityAlerts}
-              onAlertClick={handleAlertClick}
-            />
-          )}
-
-          {/* Main Dashboard Grid */}
-          <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
-            {/* Left Column - Main Content */}
-            <GridItem>
-              <VStack spacing={8} align="stretch">
-                {/* Deal Pipeline - Conditional Display */}
-                {preferences.showDealPipeline && (
-                  <DealPipeline
-                    deals={mockDeals}
-                    onDealClick={handleDealClick}
-                    onStatusChange={handleStatusChange}
-                    onAssignDeal={handleAssignDeal}
-                  />
-                )}
-
-                {/* Buyer Management - Conditional Display */}
-                {preferences.showBuyerManagement && (
-                  <BuyerManagement
-                    buyers={mockBuyers}
-                    communications={mockCommunications}
-                    onBuyerClick={handleBuyerClick}
-                    onAddBuyer={handleAddBuyer}
-                    onContactBuyer={handleContactBuyer}
-                    onUpdateBuyerStatus={handleUpdateBuyerStatus}
-                  />
-                )}
-              </VStack>
-            </GridItem>
-
-            {/* Right Column - Sidebar */}
-            <GridItem>
-              <VStack spacing={8} align="stretch">
-                {/* Quick Actions - Conditional Display */}
-                {preferences.showQuickActions && (
-                  <QuickActions
-                    actions={getDefaultDispositionActions()}
-                    onActionClick={handleActionClick}
-                  />
-                )}
-
-                {/* Disposition Analytics - Conditional Display */}
-                {preferences.showAnalytics && (
-                  <DispositionAnalytics
-                    metrics={mockMetrics}
-                    timeRange={timeRange}
-                    onTimeRangeChange={handleTimeRangeChange}
-                  />
-                )}
-              </VStack>
-            </GridItem>
-          </Grid>
-        </VStack>
-      </Container>
-
-      {/* Dashboard Settings Modal */}
-      <Modal isOpen={isSettingsOpen} onClose={onSettingsClose} size="lg">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Dashboard Settings</ModalHeader>
-          <ModalBody>
-            <VStack spacing={6} align="stretch">
-              {/* Display Options */}
-              <Box>
-                <Heading size="sm" mb={4}>Display Options</Heading>
-                <VStack spacing={3} align="stretch">
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="showPriorityAlerts" mb="0">
-                      Show Priority Alerts
-                    </FormLabel>
-                    <Switch
-                      id="showPriorityAlerts"
-                      isChecked={preferences.showPriorityAlerts}
-                      onChange={(e) => updatePreference('showPriorityAlerts', e.target.checked)}
-                    />
-                  </FormControl>
-                  
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="showDealPipeline" mb="0">
-                      Show Deal Pipeline
-                    </FormLabel>
-                    <Switch
-                      id="showDealPipeline"
-                      isChecked={preferences.showDealPipeline}
-                      onChange={(e) => updatePreference('showDealPipeline', e.target.checked)}
-                    />
-                  </FormControl>
-                  
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="showBuyerManagement" mb="0">
-                      Show Buyer Management
-                    </FormLabel>
-                    <Switch
-                      id="showBuyerManagement"
-                      isChecked={preferences.showBuyerManagement}
-                      onChange={(e) => updatePreference('showBuyerManagement', e.target.checked)}
-                    />
-                  </FormControl>
-                  
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="showAnalytics" mb="0">
-                      Show Analytics
-                    </FormLabel>
-                    <Switch
-                      id="showAnalytics"
-                      isChecked={preferences.showAnalytics}
-                      onChange={(e) => updatePreference('showAnalytics', e.target.checked)}
-                    />
-                  </FormControl>
-                  
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="showQuickActions" mb="0">
-                      Show Quick Actions
-                    </FormLabel>
-                    <Switch
-                      id="showQuickActions"
-                      isChecked={preferences.showQuickActions}
-                      onChange={(e) => updatePreference('showQuickActions', e.target.checked)}
-                    />
-                  </FormControl>
+            
+            <HStack spacing={2} flexWrap="wrap">
+              <Button size="sm" variant="outline" leftIcon={<Icon as={FaFilter} />}>
+                All Statuses
+              </Button>
+              <Button size="sm" variant="outline" leftIcon={<Icon as={FaFilter} />}>
+                All Priorities
+              </Button>
+              <Button size="sm" variant="outline" leftIcon={<Icon as={FaSearch} />}>
+                Search deals...
+              </Button>
+            </HStack>
+          </HStack>
+          
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            {/* Deal Card 1 */}
+            <Card border="1px" borderColor="gray.200" _hover={{ borderColor: 'purple.500', shadow: 'md' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack justify="space-between" mb={3} p={2} bg="red.50" borderRadius="md" border="1px" borderColor="red.200">
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="600" color="gray.800">123 Oak St, Austin</Text>
+                    <Badge colorScheme="blue" variant="solid">New Contract</Badge>
+                  </VStack>
+                  <Badge colorScheme="red" variant="solid">HIGH</Badge>
+                </HStack>
+                
+                <VStack align="start" spacing={2} mb={4}>
+                  <Text fontSize="sm" color="gray.600">$450k ARV • 3 bed, 2 bath • 1,800 sq ft</Text>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Badge variant="subtle" colorScheme="gray">Contract: 12/15/2024</Badge>
+                    <Badge variant="subtle" colorScheme="red">Inspection: 12/20/2024</Badge>
+                    <Badge variant="subtle" colorScheme="blue">Closing: 01/15/2025</Badge>
+                  </HStack>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Text fontSize="sm" color="gray.600">Acquisition: $320k</Text>
+                    <Text fontSize="sm" color="gray.600">Listing: $450k</Text>
+                    <Text fontSize="sm" fontWeight="600" color="green.500">Profit: $122k</Text>
+                  </HStack>
                 </VStack>
-              </Box>
+                
+                <HStack spacing={2}>
+                  <Button size="sm" colorScheme="purple">View</Button>
+                  <Button size="sm" variant="outline">Call</Button>
+                  <Button size="sm" variant="outline">Assign</Button>
+                </HStack>
+              </CardBody>
+            </Card>
 
-              <Divider />
-
-              {/* Layout and Refresh Options */}
-              <Box>
-                <Heading size="sm" mb={4}>Layout & Refresh</Heading>
-                <VStack spacing={4} align="stretch">
-                  <FormControl>
-                    <FormLabel>Layout Style</FormLabel>
-                    <Select
-                      value={preferences.layout}
-                      onChange={(e) => updatePreference('layout', e.target.value)}
-                    >
-                      <option value="default">Default</option>
-                      <option value="compact">Compact</option>
-                      <option value="detailed">Detailed</option>
-                    </Select>
-                  </FormControl>
-                  
-                  <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="autoRefresh" mb="0">
-                      Auto-refresh
-                    </FormLabel>
-                    <Switch
-                      id="autoRefresh"
-                      isChecked={preferences.autoRefresh}
-                      onChange={(e) => updatePreference('autoRefresh', e.target.checked)}
-                    />
-                  </FormControl>
-                  
-                  {preferences.autoRefresh && (
-                    <FormControl>
-                      <FormLabel>Refresh Interval (seconds)</FormLabel>
-                      <Select
-                        value={preferences.refreshInterval / 1000}
-                        onChange={(e) => updatePreference('refreshInterval', parseInt(e.target.value) * 1000)}
-                      >
-                        <option value={15}>15 seconds</option>
-                        <option value={30}>30 seconds</option>
-                        <option value={60}>1 minute</option>
-                        <option value={300}>5 minutes</option>
-                      </Select>
-                    </FormControl>
-                  )}
+            {/* Deal Card 2 */}
+            <Card border="1px" borderColor="gray.200" _hover={{ borderColor: 'purple.500', shadow: 'md' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack justify="space-between" mb={3} p={2} bg="orange.50" borderRadius="md" border="1px" borderColor="orange.200">
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="600" color="gray.800">456 Pine Ave, Dallas</Text>
+                    <Badge colorScheme="orange" variant="solid">Active Disposition</Badge>
+                  </VStack>
+                  <Badge colorScheme="orange" variant="solid">MEDIUM</Badge>
+                </HStack>
+                
+                <VStack align="start" spacing={2} mb={4}>
+                  <Text fontSize="sm" color="gray.600">$380k ARV • 2 bed, 1 bath • 1,200 sq ft</Text>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Badge variant="subtle" colorScheme="gray">Contract: 12/14/2024</Badge>
+                    <Badge variant="subtle" colorScheme="orange">Inspection: 12/19/2024</Badge>
+                    <Badge variant="subtle" colorScheme="blue">Closing: 01/10/2025</Badge>
+                  </HStack>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Text fontSize="sm" color="gray.600">Acquisition: $280k</Text>
+                    <Text fontSize="sm" color="gray.600">Listing: $380k</Text>
+                    <Text fontSize="sm" fontWeight="600" color="green.500">Profit: $94k</Text>
+                  </HStack>
                 </VStack>
-              </Box>
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onSettingsClose}>
-              Cancel
-            </Button>
-            <Button colorScheme="blue" onClick={onSettingsClose}>
-              Save Settings
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                
+                <HStack spacing={2}>
+                  <Button size="sm" colorScheme="purple">View</Button>
+                  <Button size="sm" variant="outline">Call</Button>
+                  <Button size="sm" variant="outline">Assign</Button>
+                </HStack>
+              </CardBody>
+            </Card>
 
-      {/* Export Modal */}
-      <Modal isOpen={isExportOpen} onClose={onExportClose} size="md">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Export Dashboard Data</ModalHeader>
-          <ModalBody>
-            <VStack spacing={4} align="stretch">
-              <FormControl>
-                <FormLabel>Export Format</FormLabel>
-                <Select
-                  value={exportFormat}
-                  onChange={(e) => setExportFormat(e.target.value as 'pdf' | 'excel' | 'csv')}
-                >
-                  <option value="excel">Excel (.xlsx)</option>
-                  <option value="csv">CSV (.csv)</option>
-                  <option value="pdf">PDF (.pdf)</option>
-                </Select>
-              </FormControl>
-              
-              <FormControl>
-                <FormLabel>Time Range</FormLabel>
-                <Select
-                  value={exportTimeRange}
-                  onChange={(e) => setExportTimeRange(e.target.value as '7d' | '30d' | '90d' | '1y')}
-                >
-                  <option value="7d">Last 7 days</option>
-                  <option value="30d">Last 30 days</option>
-                  <option value="90d">Last 90 days</option>
-                  <option value="1y">Last year</option>
-                </Select>
-              </FormControl>
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onExportClose}>
-              Cancel
+            {/* Deal Card 3 */}
+            <Card border="1px" borderColor="gray.200" _hover={{ borderColor: 'purple.500', shadow: 'md' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack justify="space-between" mb={3} p={2} bg="purple.50" borderRadius="md" border="1px" borderColor="purple.200">
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="600" color="gray.800">789 Elm Dr, Houston</Text>
+                    <Badge colorScheme="green" variant="solid">Assigned</Badge>
+                  </VStack>
+                  <Badge colorScheme="red" variant="solid">HIGH</Badge>
+                </HStack>
+                
+                <VStack align="start" spacing={2} mb={4}>
+                  <Text fontSize="sm" color="gray.600">$520k ARV • 4 bed, 2.5 bath • 2,100 sq ft</Text>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Badge variant="subtle" colorScheme="gray">Contract: 12/13/2024</Badge>
+                    <Badge variant="subtle" colorScheme="green">Inspection: 12/18/2024</Badge>
+                    <Badge variant="subtle" colorScheme="blue">Closing: 01/05/2025</Badge>
+                  </HStack>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Text fontSize="sm" color="gray.600">Acquisition: $380k</Text>
+                    <Text fontSize="sm" color="gray.600">Listing: $520k</Text>
+                    <Text fontSize="sm" fontWeight="600" color="green.500">Profit: $130k</Text>
+                  </HStack>
+                  <Text fontSize="sm" color="purple.600" fontWeight="500">Assigned to: David Chen</Text>
+                </VStack>
+                
+                <HStack spacing={2}>
+                  <Button size="sm" colorScheme="purple">View</Button>
+                  <Button size="sm" variant="outline">Call</Button>
+                  <Button size="sm" variant="outline">Schedule</Button>
+                </HStack>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+        </CardBody>
+      </Card>
+
+      {/* Buyer Management Section */}
+      <Card bg="white" shadow="md" mb={8}>
+        <CardBody p={6}>
+          <HStack justify="space-between" mb={6}>
+            <HStack spacing={3}>
+              <Icon as={FaUsers} color="purple.500" boxSize={5} />
+              <Heading size="md" color="gray.800">Buyer Management</Heading>
+            </HStack>
+            <Button size="sm" colorScheme="purple" leftIcon={<Icon as={FaPlus} />}>
+              Add Buyer
             </Button>
-            <Button colorScheme="green" onClick={handleExport} isLoading={loading}>
-              Export Data
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </Box>
+          </HStack>
+          
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+            {/* Buyer Card 1 */}
+            <Card bg="blue.50" border="1px" borderColor="blue.200" _hover={{ bg: 'blue.100' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack justify="space-between" mb={3}>
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="600" color="gray.800">David Chen</Text>
+                    <Text fontSize="sm" color="gray.600">Cash Buyer</Text>
+                  </VStack>
+                  <Badge colorScheme="green" variant="solid">High Interest</Badge>
+                </HStack>
+                
+                <VStack align="start" spacing={2} mb={4}>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Budget:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">$400k - $600k</Text>
+                  </HStack>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Areas:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">Austin, Dallas</Text>
+                  </HStack>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Last Contact:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">2 days ago</Text>
+                  </HStack>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Interested In:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">3 bed, 2 bath</Text>
+                  </HStack>
+                </VStack>
+                
+                <HStack spacing={2}>
+                  <Button size="sm" colorScheme="purple">Call</Button>
+                  <Button size="sm" variant="outline">View Details</Button>
+                </HStack>
+              </CardBody>
+            </Card>
+
+            {/* Buyer Card 2 */}
+            <Card bg="gray.50" border="1px" borderColor="gray.200" _hover={{ bg: 'gray.100' }} transition="all 0.3s">
+              <CardBody p={4}>
+                <HStack justify="space-between" mb={3}>
+                  <VStack align="start" spacing={1}>
+                    <Text fontWeight="600" color="gray.800">Lisa Thompson</Text>
+                    <Text fontSize="sm" color="gray.600">Investor</Text>
+                  </VStack>
+                  <Badge colorScheme="orange" variant="solid">Medium Interest</Badge>
+                </HStack>
+                
+                <VStack align="start" spacing={2} mb={4}>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Budget:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">$300k - $500k</Text>
+                  </HStack>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Areas:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">Houston</Text>
+                  </HStack>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Last Contact:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">1 week ago</Text>
+                  </HStack>
+                  <HStack justify="space-between" w="100%">
+                    <Text fontSize="sm" color="gray.600">Interested In:</Text>
+                    <Text fontSize="sm" fontWeight="500" color="gray.800">Fixer uppers</Text>
+                  </HStack>
+                </VStack>
+                
+                <HStack spacing={2}>
+                  <Button size="sm" colorScheme="purple">Call</Button>
+                  <Button size="sm" variant="outline">View Details</Button>
+                </HStack>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+        </CardBody>
+      </Card>
+
+      {/* Performance Metrics */}
+      <Card bg="white" shadow="md" mb={8}>
+        <CardBody p={6}>
+          <HStack justify="space-between" mb={6}>
+            <HStack spacing={3}>
+              <Icon as={FaHandshake} color="purple.500" boxSize={5} />
+              <Heading size="md" color="gray.800">Today&apos;s Performance</Heading>
+            </HStack>
+            <Button size="sm" colorScheme="purple">View Full Report</Button>
+          </HStack>
+          
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={4}>
+            <Card shadow="sm">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaFileContract} color="white" boxSize={6} bg="purple.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1}>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">16</Text>
+                    <Text fontSize="sm" color="gray.600">Active Deals</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+            
+            <Card shadow="sm">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaPhone} color="white" boxSize={6} bg="green.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1}>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">12</Text>
+                    <Text fontSize="sm" color="gray.600">Buyer Calls</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+            
+            <Card shadow="sm">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaHandshake} color="white" boxSize={6} bg="orange.500" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1}>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">3</Text>
+                    <Text fontSize="sm" color="gray.600">Deals Assigned</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+            
+            <Card shadow="sm">
+              <CardBody p={4}>
+                <HStack spacing={3}>
+                  <Icon as={FaCheckCircle} color="white" boxSize={6} bg="green.600" p={2} borderRadius="md" />
+                  <VStack align="start" spacing={1}>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">2</Text>
+                    <Text fontSize="sm" color="gray.600">Closings This Week</Text>
+                  </VStack>
+                </HStack>
+              </CardBody>
+            </Card>
+          </SimpleGrid>
+        </CardBody>
+      </Card>
+
+      {/* Recent Activity Section */}
+      <Card bg="white" shadow="md">
+        <CardBody p={6}>
+          <HStack justify="space-between" mb={6}>
+            <Heading size="md" color="gray.800">Recent Activity</Heading>
+            <Button size="sm" variant="outline">View All</Button>
+          </HStack>
+          
+          <VStack spacing={4} align="stretch">
+            <HStack spacing={4} p={3} borderBottom="1px" borderColor="gray.100">
+              <Icon as={FaPhone} color="white" boxSize={4} bg="green.500" p={2} borderRadius="md" />
+              <VStack align="start" spacing={1} flex={1}>
+                <Text fontSize="sm" color="gray.800">Called David Chen about 123 Oak St property</Text>
+                <Text fontSize="xs" color="gray.500">30 minutes ago</Text>
+              </VStack>
+            </HStack>
+            
+            <HStack spacing={4} p={3} borderBottom="1px" borderColor="gray.100">
+              <Icon as={FaHandshake} color="white" boxSize={4} bg="purple.500" p={2} borderRadius="md" />
+              <VStack align="start" spacing={1} flex={1}>
+                <Text fontSize="sm" color="gray.800">Assigned 456 Pine Ave to Lisa Thompson</Text>
+                <Text fontSize="xs" color="gray.500">2 hours ago</Text>
+              </VStack>
+            </HStack>
+            
+            <HStack spacing={4} p={3} borderBottom="1px" borderColor="gray.100">
+              <Icon as={FaCheckCircle} color="white" boxSize={4} bg="orange.500" p={2} borderRadius="md" />
+              <VStack align="start" spacing={1} flex={1}>
+                <Text fontSize="sm" color="gray.800">Scheduled closing for 789 Elm St</Text>
+                <Text fontSize="xs" color="gray.500">4 hours ago</Text>
+              </VStack>
+            </HStack>
+            
+            <HStack spacing={4} p={3}>
+              <Icon as={FaFileContract} color="white" boxSize={4} bg="blue.500" p={2} borderRadius="md" />
+              <VStack align="start" spacing={1} flex={1}>
+                <Text fontSize="sm" color="gray.800">New contract received for 321 Maple Rd</Text>
+                <Text fontSize="xs" color="gray.500">1 day ago</Text>
+              </VStack>
+            </HStack>
+          </VStack>
+        </CardBody>
+      </Card>
+    </DashboardLayout>
   );
 };
 

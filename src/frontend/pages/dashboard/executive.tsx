@@ -21,15 +21,15 @@ import {
   Divider,
 } from '@chakra-ui/react';
 import { 
-  RefreshIcon, 
+  RepeatIcon as RefreshIcon, 
   DownloadIcon, 
   SettingsIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  TriangleUpIcon as TrendingUpIcon,
+  TriangleDownIcon as TrendingDownIcon,
   InfoIcon,
 } from '@chakra-ui/icons';
 import { NextPage } from 'next';
-import { Layout } from '../../components/layout/Layout';
+import { DashboardLayout } from '../../components/dashboard';
 import {
   DashboardStats,
   PerformanceCharts,
@@ -410,19 +410,19 @@ const ExecutiveDashboard: NextPage = () => {
 
   if (isLoading) {
     return (
-      <Layout>
+      <DashboardLayout>
         <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
           <VStack spacing={4}>
             <Spinner size="xl" color="blue.500" />
             <Text>Loading Executive Dashboard...</Text>
           </VStack>
         </Box>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Layout>
+    <DashboardLayout>
       <Box bg={bgColor} minH="100vh" py={6}>
         <Container maxW="container.xl">
           {/* Header */}
@@ -517,10 +517,31 @@ const ExecutiveDashboard: NextPage = () => {
             <GridItem>
               <VStack spacing={6} align="stretch">
                 {/* Key Performance Metrics */}
-                <DashboardStats variant="executive" />
+                <DashboardStats 
+                  variant="executive"
+                  stats={{
+                    totalRevenue: 1560000,
+                    totalDeals: 45,
+                    averageDealValue: 34667,
+                    conversionRate: 67.5,
+                    pipelineValue: 2800000,
+                    teamPerformance: 89.2,
+                    leadQuality: 8.7
+                  }}
+                />
                 
                 {/* Performance Charts */}
-                <PerformanceCharts variant="executive" />
+                <PerformanceCharts 
+                  data={[
+                    { name: 'Q1', value: 1250000 },
+                    { name: 'Q2', value: 1380000 },
+                    { name: 'Q3', value: 1420000 },
+                    { name: 'Q4', value: 1560000 }
+                  ]}
+                  type="line"
+                  title="Revenue Trend"
+                  height={300}
+                />
                 
                 {/* Team Performance */}
                 <TeamPerformance
@@ -544,7 +565,41 @@ const ExecutiveDashboard: NextPage = () => {
                 />
                 
                 {/* Activity Feed */}
-                <ActivityFeed variant="executive" />
+                <ActivityFeed 
+                  variant="executive"
+                  activities={[
+                    {
+                      id: '1',
+                      type: 'lead',
+                      title: 'New Lead: 123 Main St',
+                      description: 'High-value property lead added to pipeline',
+                      user: { name: 'Sarah Johnson', role: 'Acquisitions Manager' },
+                      timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+                      status: 'pending',
+                      priority: 'high'
+                    },
+                    {
+                      id: '2',
+                      type: 'deal',
+                      title: 'Deal Closed: Oak Avenue',
+                      description: 'Property sold for $450,000',
+                      user: { name: 'Mike Chen', role: 'Disposition Specialist' },
+                      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                      status: 'completed',
+                      priority: 'high'
+                    },
+                    {
+                      id: '3',
+                      type: 'communication',
+                      title: 'Follow-up Call Scheduled',
+                      description: 'Follow-up call with buyer scheduled for tomorrow',
+                      user: { name: 'Lisa Rodriguez', role: 'Support Coordinator' },
+                      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+                      status: 'pending',
+                      priority: 'medium'
+                    }
+                  ]}
+                />
               </VStack>
             </GridItem>
           </Grid>
@@ -595,7 +650,7 @@ const ExecutiveDashboard: NextPage = () => {
           </Grid>
         </Container>
       </Box>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

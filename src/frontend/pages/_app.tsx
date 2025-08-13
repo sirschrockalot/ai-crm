@@ -5,6 +5,8 @@ import '../styles/globals.css';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { DevModeIndicator } from '../components/ui/DevModeIndicator';
 import { ErrorDisplay } from '../components/ui/ErrorDisplay';
+import { NavigationProvider } from '../contexts/NavigationContext';
+import { AuthProvider } from '../contexts/AuthContext';
 import { useEffect, useState } from 'react';
 
 // Import utilities only on client side to prevent hydration issues
@@ -42,9 +44,13 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ErrorBoundary>
       <ChakraProvider theme={theme}>
-        {isClient && <DevModeIndicator />}
-        <Component {...pageProps} />
-        {isClient && <ErrorDisplay />}
+        <AuthProvider>
+          <NavigationProvider>
+            {isClient && <DevModeIndicator />}
+            <Component {...pageProps} />
+            {isClient && <ErrorDisplay />}
+          </NavigationProvider>
+        </AuthProvider>
       </ChakraProvider>
     </ErrorBoundary>
   );
