@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useApi } from '../useApi';
-import { Buyer } from '../../types';
+import { Buyer, PropertyType } from '../../types';
 
 // Mock data for development/testing when API is not available
 const mockBuyers: Buyer[] = [
@@ -16,7 +16,7 @@ const mockBuyers: Buyer[] = [
     zipCode: '10001',
     buyerType: 'company',
     investmentRange: '100k-250k',
-    preferredPropertyTypes: ['single_family', 'multi_family'],
+    preferredPropertyTypes: ['single_family', 'multi_family'] as PropertyType[],
     notes: 'Interested in residential properties',
     isActive: true,
     createdAt: new Date(),
@@ -34,7 +34,7 @@ const mockBuyers: Buyer[] = [
     zipCode: '90210',
     buyerType: 'individual',
     investmentRange: '50k-100k',
-    preferredPropertyTypes: ['single_family'],
+    preferredPropertyTypes: ['single_family'] as PropertyType[],
     notes: 'First-time buyer',
     isActive: true,
     createdAt: new Date(),
@@ -53,7 +53,7 @@ export interface CreateBuyerData {
   zipCode: string;
   buyerType: 'individual' | 'company' | 'investor';
   investmentRange: '0-50k' | '50k-100k' | '100k-250k' | '250k-500k' | '500k+';
-  preferredPropertyTypes: string[];
+  preferredPropertyTypes: PropertyType[];
   notes?: string;
   isActive?: boolean;
 }
@@ -142,6 +142,7 @@ export function useBuyers() {
         id: Date.now().toString(),
         createdAt: new Date(),
         updatedAt: new Date(),
+        isActive: data.isActive ?? true,
       };
       setBuyers(prev => [...prev, mockBuyer]);
       return mockBuyer;
@@ -164,13 +165,13 @@ export function useBuyers() {
     } catch (error) {
       console.warn('API call failed for updating buyer:', error);
       // Update mock buyer if API fails
-      setBuyers(prev => prev.map(buyer => 
-        buyer.id === id 
-          ? { ...buyer, ...data, updatedAt: new Date() }
+            setBuyers(prev => prev.map(buyer =>
+        buyer.id === id
+          ? { ...buyer, ...data, updatedAt: new Date(), isActive: data.isActive ?? buyer.isActive }
           : buyer
       ));
       if (currentBuyer?.id === id) {
-        setCurrentBuyer(prev => prev ? { ...prev, ...data, updatedAt: new Date() } : null);
+        setCurrentBuyer(prev => prev ? { ...prev, ...data, updatedAt: new Date(), isActive: data.isActive ?? prev.isActive } : null);
       }
       return { id, ...data, updatedAt: new Date() } as Buyer;
     }

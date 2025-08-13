@@ -30,8 +30,8 @@ export { LazyLeadDetail, LazyLeadForm, LazyCommunicationPanel, LazyImportExportP
 export * from './utils/performance';
 
 // Enhanced Lead Management Components (Epic 2 Migration)
-export { default as EnhancedPipelineBoard } from './components/PipelineBoard';
-export { default as EnhancedPipelineCard } from './components/PipelineCard';
-export { default as EnhancedPipelineStage } from './components/PipelineStage';
-export { default as EnhancedLeadDetail } from './components/LeadDetail';
-export { default as EnhancedLeadForm } from './components/LeadForm';
+export { PipelineBoard as EnhancedPipelineBoard } from './components/PipelineBoard';
+export { PipelineCard as EnhancedPipelineCard } from './components/PipelineCard';
+export { PipelineStage as EnhancedPipelineStage } from './components/PipelineStage';
+export { LeadDetail as EnhancedLeadDetail } from './components/LeadDetail';
+export { LeadForm as EnhancedLeadForm } from './components/LeadForm';

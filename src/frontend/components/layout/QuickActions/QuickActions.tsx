@@ -22,7 +22,7 @@ import {
   FiSettings,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface QuickActionsProps {
   user?: any;

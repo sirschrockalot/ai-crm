@@ -17,6 +17,8 @@ export interface Lead {
   source?: string;
   company?: string;
   score?: number;
+  priority?: 'low' | 'medium' | 'high';
+  avatar?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +29,7 @@ export interface PipelineStage {
   order: number;
   color: string;
   leads: Lead[];
+  maxLeads?: number;
 }
 
 export type PropertyType = 'single_family' | 'multi_family' | 'commercial' | 'land';
@@ -69,6 +72,7 @@ export interface LeadFormData {
   notes?: string;
   source?: string;
   company?: string;
+  score?: number;
 }
 
 export interface CommunicationMessage {

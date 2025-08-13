@@ -124,8 +124,8 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       estimatedValue: lead.estimatedValue || 0,
       propertyAddress: lead.propertyAddress || '',
       status: lead.status,
-      priority: lead.priority,
-      assignedAgent: lead.assignedAgent || '',
+      priority: lead.priority || 'medium',
+      assignedTo: lead.assignedTo || '',
       notes: lead.notes || '',
     } : {
       ...defaultValues,
@@ -147,8 +147,8 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         estimatedValue: lead.estimatedValue || 0,
         propertyAddress: lead.propertyAddress || '',
         status: lead.status,
-        priority: lead.priority,
-        assignedAgent: lead.assignedAgent || '',
+        priority: lead.priority || 'medium',
+        assignedTo: lead.assignedTo || '',
         notes: lead.notes || '',
       } : {
         ...defaultValues,
@@ -162,6 +162,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
     try {
       const leadData: Partial<Lead> = {
         ...data,
+        propertyType: data.propertyType as PropertyType,
         createdAt: lead?.createdAt || new Date(),
         updatedAt: new Date(),
       };

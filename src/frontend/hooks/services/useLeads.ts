@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useApi } from '../useApi';
-import { useAuth } from '../useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { mockLeads, mockLeadAnalytics, mockLeadStatuses, mockPropertyTypes, mockCities, mockStates, mockLeadSources, mockCompanies, mockLeadScores, mockEstimatedValues, mockAssignedUsers, mockLeadStages, mockLeadActivities, mockLeadNotes, mockLeadTasks, mockLeadDocuments, mockLeadHistory } from '../../services/mockDataService';
 
 export interface Lead {

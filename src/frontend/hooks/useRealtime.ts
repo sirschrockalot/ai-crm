@@ -91,7 +91,7 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
 
   // Subscribe to real-time events (only on client side)
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient) return undefined;
 
     realtimeService.on('connected', handleConnected);
     realtimeService.on('disconnected', handleDisconnected);
@@ -124,9 +124,9 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
     return () => {
       if (isClient) {
         // Unsubscribe from all channels
-        for (const [key, subscriptionId] of subscriptionRefs.current) {
+        subscriptionRefs.current.forEach((subscriptionId) => {
           realtimeService.unsubscribe(subscriptionId);
-        }
+        });
         subscriptionRefs.current.clear();
       }
     };
@@ -168,12 +168,11 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
     realtimeService.unsubscribe(subscriptionId);
     
     // Remove from refs
-    for (const [key, id] of subscriptionRefs.current) {
+    subscriptionRefs.current.forEach((id, key) => {
       if (id === subscriptionId) {
         subscriptionRefs.current.delete(key);
-        break;
       }
-    }
+    });
   }, [isClient]);
 
   const send = useCallback((message: RealtimeMessage) => {

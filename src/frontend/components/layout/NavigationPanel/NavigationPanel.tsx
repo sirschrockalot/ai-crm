@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react';
 import { HamburgerIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/router';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigation } from '../../../contexts/NavigationContext';
 import { useKeyboardNavigation } from '../../../hooks/useKeyboardNavigation';
 import { useAccessibility, NAVIGATION_ARIA_LABELS, NAVIGATION_ARIA_ROLES } from '../../../hooks/useAccessibility';

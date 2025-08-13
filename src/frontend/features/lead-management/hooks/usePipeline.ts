@@ -78,5 +78,6 @@ export function usePipeline() {
     moveLead,
     updateStage,
     selectLead,
+    refreshPipeline: fetchPipeline,
   };
 }

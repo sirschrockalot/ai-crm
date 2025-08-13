@@ -255,6 +255,7 @@ export function useDashboard() {
         realtime.unsubscribe(activitySub);
       };
     }
+    return undefined;
   }, [realtime, isAuthenticated, bypassAuth]);
 
   return {

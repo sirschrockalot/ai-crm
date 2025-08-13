@@ -104,7 +104,7 @@ export const useKeyboardNavigation = (options: KeyboardNavigationOptions = {}) =
 
   // Register keyboard shortcuts globally
   useEffect(() => {
-    if (!options.shortcuts) return;
+    if (!options.shortcuts) return undefined;
 
     const handleGlobalKeyDown = (event: globalThis.KeyboardEvent) => {
       // Only handle shortcuts when not typing in input fields
@@ -211,8 +211,8 @@ export const useKeyboardNavigation = (options: KeyboardNavigationOptions = {}) =
       }
     };
 
-    document.addEventListener('keydown', handleTabKey);
-    return () => document.removeEventListener('keydown', handleTabKey);
+    document.addEventListener('keydown', handleTabKey as EventListener);
+    return () => document.removeEventListener('keydown', handleTabKey as EventListener);
   }, []);
 
   return {

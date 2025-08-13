@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@chakra-ui/react';
 import { timeTrackingService } from '../services/timeTrackingService';
+
+interface DayEntry {
+  id: string;
+  projectId: string;
+  taskId?: string;
+  hours: number;
+  description: string;
+  date: Date;
+  isBillable: boolean;
+}
 import { 
   TimeEntry, 
   Timesheet, 
@@ -329,7 +339,7 @@ export const useTimeTracking = (): UseTimeTrackingReturn => {
   const startTimer = useCallback(async (projectId: string, taskId?: string): Promise<boolean> => {
     try {
       const data = await timeTrackingService.startTimer(projectId, taskId);
-      setActiveTimer(data);
+      setActiveTimer({ ...data, projectId: data.projectId || 'default' });
       toast({
         title: 'Timer Started',
         description: 'Time tracking timer started successfully',

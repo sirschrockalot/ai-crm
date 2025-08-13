@@ -1078,7 +1078,7 @@ const AcquisitionsDashboard: React.FC = () => {
             {/* Calendar View */}
             <Box>
               <Text fontWeight="600" color="#0F172A" mb={4}>
-                Today's Callbacks
+                Today&apos;s Callbacks
               </Text>
               <Box
                 p={4}

@@ -267,7 +267,9 @@ export const PipelineBoard: React.FC<PipelineBoardProps> = ({
                   <PipelineStageComponent
                     key={stage.id}
                     stage={stage}
-                    onLeadMove={moveLead}
+                    onLeadMove={(leadId: string, fromStageId: string, toStageId: string) => {
+                      moveLead({ leadId, fromStageId, toStageId });
+                    }}
                     onLeadClick={handleLeadClick}
                     onStageUpdate={handleStageUpdate}
                     isDragging={isDragging}

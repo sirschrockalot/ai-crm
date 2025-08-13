@@ -43,11 +43,17 @@ export const PipelineCard: React.FC<PipelineCardProps> = ({
   const subTextColor = useColorModeValue('gray.600', 'gray.400');
   const hoverBg = useColorModeValue('gray.50', 'gray.600');
 
-  const getPriorityColor = (priority: number) => {
-    if (priority >= 8) return 'red';
-    if (priority >= 6) return 'orange';
-    if (priority >= 4) return 'yellow';
-    return 'green';
+  const getPriorityColor = (priority: 'low' | 'medium' | 'high') => {
+    switch (priority) {
+      case 'high':
+        return 'red';
+      case 'medium':
+        return 'orange';
+      case 'low':
+        return 'green';
+      default:
+        return 'gray';
+    }
   };
 
   const getPropertyTypeColor = (propertyType: string) => {
@@ -206,13 +212,15 @@ export const PipelineCard: React.FC<PipelineCardProps> = ({
 
       {/* Priority and Status Badges */}
       <HStack justify="space-between" mb={3}>
-        <Badge
-          colorScheme={getPriorityColor(lead.priority)}
-          size="sm"
-          variant="solid"
-        >
-          P{lead.priority}
-        </Badge>
+        {lead.priority && (
+          <Badge
+            colorScheme={getPriorityColor(lead.priority)}
+            size="sm"
+            variant="solid"
+          >
+            {lead.priority.charAt(0).toUpperCase()}
+          </Badge>
+        )}
         <Badge
           colorScheme={getStatusColor(lead.status)}
           size="sm"
@@ -261,13 +269,13 @@ export const PipelineCard: React.FC<PipelineCardProps> = ({
           </Text>
         </HStack>
         
-        {lead.assignedAgent && (
+        {lead.assignedTo && (
           <HStack spacing={2}>
             <Text fontSize="xs" color={subTextColor}>
               Assigned:
             </Text>
             <Text fontSize="xs" fontWeight="medium" color={textColor}>
-              {lead.assignedAgent}
+              {lead.assignedTo}
             </Text>
           </HStack>
         )}

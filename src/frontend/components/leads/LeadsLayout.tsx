@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, HStack, VStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
 import { NavigationPanel, Header, BreadcrumbNav } from '../layout';
-import { useNavigation } from '../../hooks/useNavigation';
+import { useNavigation } from '../../contexts/NavigationContext';
 
 interface LeadsLayoutProps {
   children: React.ReactNode;

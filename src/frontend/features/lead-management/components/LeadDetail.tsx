@@ -66,11 +66,17 @@ export const LeadDetail: React.FC<LeadDetailProps> = ({
   const textColor = useColorModeValue('gray.800', 'gray.100');
   const subTextColor = useColorModeValue('gray.600', 'gray.400');
 
-  const getPriorityColor = (priority: number) => {
-    if (priority >= 8) return 'red';
-    if (priority >= 6) return 'orange';
-    if (priority >= 4) return 'yellow';
-    return 'green';
+  const getPriorityColor = (priority: 'low' | 'medium' | 'high') => {
+    switch (priority) {
+      case 'high':
+        return 'red';
+      case 'medium':
+        return 'orange';
+      case 'low':
+        return 'green';
+      default:
+        return 'gray';
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -345,11 +351,11 @@ export const LeadDetail: React.FC<LeadDetailProps> = ({
                           </Text>
                         </VStack>
                       </GridItem>
-                      {lead.assignedAgent && (
+                      {lead.assignedTo && (
                         <GridItem colSpan={2}>
                           <VStack align="flex-start" spacing={2}>
-                            <Text fontSize="sm" color={subTextColor}>Assigned Agent</Text>
-                            <Text fontSize="md" color={textColor}>{lead.assignedAgent}</Text>
+                            <Text fontSize="sm" color={subTextColor}>Assigned To</Text>
+                            <Text fontSize="md" color={textColor}>{lead.assignedTo}</Text>
                           </VStack>
                         </GridItem>
                       )}
@@ -378,7 +384,7 @@ export const LeadDetail: React.FC<LeadDetailProps> = ({
 
               {/* Communication Tab */}
               <TabPanel>
-                <CommunicationPanel leadId={lead.id} />
+                <CommunicationPanel lead={lead} isOpen={true} onClose={() => {}} />
               </TabPanel>
 
               {/* Activity Tab */}

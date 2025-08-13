@@ -61,6 +61,7 @@ const leadFormSchema = z.object({
   notes: z.string().default(''),
   source: z.string().default('website'),
   company: z.string().default(''),
+  score: z.number().min(0).max(100).optional(),
 });
 
 type LeadFormData = z.infer<typeof leadFormSchema>;
@@ -93,6 +94,7 @@ const defaultValues: LeadFormData = {
   notes: '',
   source: 'website',
   company: '',
+  score: undefined,
 };
 
 const propertyTypes = [

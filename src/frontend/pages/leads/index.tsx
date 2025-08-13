@@ -53,13 +53,18 @@ import {
   FiMapPin, 
   FiDollarSign, 
   FiHome, 
-  FiTrendingUp 
+  FiTrendingUp, 
+  FiEye
 } from 'react-icons/fi';
 import { useLeads } from '../../hooks/services/useLeads';
 import { Lead, LeadStatus, PropertyType } from '../../types';
+import { useRouter } from 'next/router';
+import { Layout } from '../../components/layout';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 
-const LeadsPage: NextPage = () => {
+const LeadsPageContent: React.FC = () => {
   const toast = useToast();
+  const router = useRouter();
   const {
     leads,
     loading,
@@ -341,6 +346,10 @@ const LeadsPage: NextPage = () => {
     onFormOpen();
   };
 
+  const handleLeadClick = (lead: Lead) => {
+    router.push(`/leads/${lead.id}`);
+  };
+
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
@@ -455,471 +464,487 @@ const LeadsPage: NextPage = () => {
   }
 
   return (
-    <Box minH="100vh" bg="gray.50" p={8}>
-      <Container maxW="container.xl">
-        {/* Header */}
-        <VStack spacing={6} align="stretch">
+    <VStack spacing={6} align="stretch">
+      {/* Header */}
+      <Flex align="center" justify="space-between">
+        <Box>
+          <Heading size="lg" mb={2}>Leads Management</Heading>
+          <Text color="gray.600">Manage and track your property leads</Text>
+        </Box>
+        <HStack spacing={3}>
+          <Button
+            leftIcon={<FiPlus />}
+            colorScheme="blue"
+            onClick={onFormOpen}
+          >
+            Add Lead
+          </Button>
+          <Button
+            leftIcon={<FiUpload />}
+            variant="outline"
+            onClick={() => document.getElementById('file-upload')?.click()}
+          >
+            Import
+          </Button>
+          <Button
+            leftIcon={<FiDownload />}
+            variant="outline"
+            onClick={handleExport}
+          >
+            Export
+          </Button>
+          <Button
+            leftIcon={<FiRefreshCw />}
+            variant="ghost"
+            onClick={loadInitialData}
+          >
+            Refresh
+          </Button>
+        </HStack>
+      </Flex>
+
+      {/* Statistics */}
+      {stats && (
+        <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
+          <Stat>
+            <StatLabel>Total Leads</StatLabel>
+            <StatNumber>{stats.totalLeads}</StatNumber>
+            <StatHelpText>
+              <FiTrendingUp color="green" />
+              +12% from last month
+            </StatHelpText>
+          </Stat>
+          <Stat>
+            <StatLabel>New Leads</StatLabel>
+            <StatNumber color="blue.500">{stats.newLeads}</StatNumber>
+            <StatHelpText>This month</StatHelpText>
+          </Stat>
+          <Stat>
+            <StatLabel>Qualified</StatLabel>
+            <StatNumber color="orange.500">{stats.qualifiedLeads}</StatNumber>
+            <StatHelpText>Ready for proposal</StatHelpText>
+          </Stat>
+          <Stat>
+            <StatLabel>Converted</StatLabel>
+            <StatNumber color="green.500">{stats.convertedLeads}</StatNumber>
+            <StatHelpText>Success rate: {stats.conversionRate}%</StatHelpText>
+          </Stat>
+          <Stat>
+            <StatLabel>Pipeline Value</StatLabel>
+            <StatNumber color="purple.500">{formatCurrency(stats.totalPipelineValue)}</StatNumber>
+            <StatHelpText>Total potential value</StatHelpText>
+          </Stat>
+          <Stat>
+            <StatLabel>Avg Lead Value</StatLabel>
+            <StatNumber color="teal.500">{formatCurrency(stats.averageLeadValue)}</StatNumber>
+            <StatHelpText>Per lead</StatHelpText>
+          </Stat>
+        </SimpleGrid>
+      )}
+
+      {/* Filters and Search */}
+      <Card>
+        <CardHeader>
           <Flex align="center" justify="space-between">
-            <Box>
-              <Heading size="lg" mb={2}>Leads Management</Heading>
-              <Text color="gray.600">Manage and track your property leads</Text>
-            </Box>
-            <HStack spacing={3}>
-              <Button
-                leftIcon={<FiPlus />}
-                colorScheme="blue"
-                onClick={onFormOpen}
-              >
-                Add Lead
-              </Button>
-              <Button
-                leftIcon={<FiUpload />}
-                variant="outline"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                Import
-              </Button>
-              <Button
-                leftIcon={<FiDownload />}
-                variant="outline"
-                onClick={handleExport}
-              >
-                Export
-              </Button>
-              <Button
-                leftIcon={<FiRefreshCw />}
-                variant="ghost"
-                onClick={loadInitialData}
-              >
-                Refresh
-              </Button>
+            <HStack>
+              <FiFilter />
+              <Text fontWeight="semibold">Filters & Search</Text>
             </HStack>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              {showFilters ? 'Hide' : 'Show'} Filters
+            </Button>
           </Flex>
+        </CardHeader>
+        <CardBody>
+          <VStack spacing={4}>
+            {/* Search Bar */}
+            <InputGroup>
+              <InputLeftElement>
+                <FiSearch />
+              </InputLeftElement>
+              <Input
+                placeholder="Search leads by name, email, phone, or address..."
+                value={filters.search}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+            </InputGroup>
 
-          {/* Statistics */}
-          {stats && (
-            <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
-              <Stat>
-                <StatLabel>Total Leads</StatLabel>
-                <StatNumber>{stats.totalLeads}</StatNumber>
-                <StatHelpText>
-                  <FiTrendingUp color="green" />
-                  +12% from last month
-                </StatHelpText>
-              </Stat>
-              <Stat>
-                <StatLabel>New Leads</StatLabel>
-                <StatNumber color="blue.500">{stats.newLeads}</StatNumber>
-                <StatHelpText>This month</StatHelpText>
-              </Stat>
-              <Stat>
-                <StatLabel>Qualified</StatLabel>
-                <StatNumber color="orange.500">{stats.qualifiedLeads}</StatNumber>
-                <StatHelpText>Ready for proposal</StatHelpText>
-              </Stat>
-              <Stat>
-                <StatLabel>Converted</StatLabel>
-                <StatNumber color="green.500">{stats.convertedLeads}</StatNumber>
-                <StatHelpText>Success rate: {stats.conversionRate}%</StatHelpText>
-              </Stat>
-              <Stat>
-                <StatLabel>Pipeline Value</StatLabel>
-                <StatNumber color="purple.500">{formatCurrency(stats.totalPipelineValue)}</StatNumber>
-                <StatHelpText>Total potential value</StatHelpText>
-              </Stat>
-              <Stat>
-                <StatLabel>Avg Lead Value</StatLabel>
-                <StatNumber color="teal.500">{formatCurrency(stats.averageLeadValue)}</StatNumber>
-                <StatHelpText>Per lead</StatHelpText>
-              </Stat>
-            </SimpleGrid>
-          )}
-
-          {/* Filters and Search */}
-          <Card>
-            <CardHeader>
-              <Flex align="center" justify="space-between">
-                <HStack>
-                  <FiFilter />
-                  <Text fontWeight="semibold">Filters & Search</Text>
-                </HStack>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setShowFilters(!showFilters)}
+            {/* Filter Options */}
+            {showFilters && (
+              <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4} w="full">
+                <Select
+                  placeholder="Status"
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
                 >
-                  {showFilters ? 'Hide' : 'Show'} Filters
+                  {filterOptions?.statuses?.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label} ({status.count})
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  placeholder="Property Type"
+                  value={filters.propertyType}
+                  onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+                >
+                  {filterOptions?.propertyTypes?.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label} ({type.count})
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  placeholder="City"
+                  value={filters.city}
+                  onChange={(e) => handleFilterChange('city', e.target.value)}
+                >
+                  {filterOptions?.cities?.map((city) => (
+                    <option key={city.value} value={city.value}>
+                      {city.label} ({city.count})
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  placeholder="State"
+                  value={filters.state}
+                  onChange={(e) => handleFilterChange('state', e.target.value)}
+                >
+                  {filterOptions?.states?.map((state) => (
+                    <option key={state.value} value={state.value}>
+                      {state.label} ({state.count})
+                    </option>
+                  ))}
+                </Select>
+              </SimpleGrid>
+            )}
+
+            {/* Filter Actions */}
+            {showFilters && (
+              <HStack spacing={3} w="full" justify="flex-end">
+                <Button size="sm" variant="ghost" onClick={clearFilters}>
+                  Clear All
                 </Button>
-              </Flex>
-            </CardHeader>
-            <CardBody>
-              <VStack spacing={4}>
-                {/* Search Bar */}
-                <InputGroup>
-                  <InputLeftElement>
-                    <FiSearch />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Search leads by name, email, phone, or address..."
-                    value={filters.search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                  />
-                </InputGroup>
-
-                {/* Filter Options */}
-                {showFilters && (
-                  <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4} w="full">
-                    <Select
-                      placeholder="Status"
-                      value={filters.status}
-                      onChange={(e) => handleFilterChange('status', e.target.value)}
-                    >
-                      {filterOptions?.statuses?.map((status) => (
-                        <option key={status.value} value={status.value}>
-                          {status.label} ({status.count})
-                        </option>
-                      ))}
-                    </Select>
-                    <Select
-                      placeholder="Property Type"
-                      value={filters.propertyType}
-                      onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-                    >
-                      {filterOptions?.propertyTypes?.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label} ({type.count})
-                        </option>
-                      ))}
-                    </Select>
-                    <Select
-                      placeholder="City"
-                      value={filters.city}
-                      onChange={(e) => handleFilterChange('city', e.target.value)}
-                    >
-                      {filterOptions?.cities?.map((city) => (
-                        <option key={city.value} value={city.value}>
-                          {city.label} ({city.count})
-                        </option>
-                      ))}
-                    </Select>
-                    <Select
-                      placeholder="State"
-                      value={filters.state}
-                      onChange={(e) => handleFilterChange('state', e.target.value)}
-                    >
-                      {filterOptions?.states?.map((state) => (
-                        <option key={state.value} value={state.value}>
-                          {state.label} ({state.count})
-                        </option>
-                      ))}
-                    </Select>
-                  </SimpleGrid>
-                )}
-
-                {/* Filter Actions */}
-                {showFilters && (
-                  <HStack spacing={3} w="full" justify="flex-end">
-                    <Button size="sm" variant="ghost" onClick={clearFilters}>
-                      Clear All
-                    </Button>
-                    <Button size="sm" colorScheme="blue" onClick={() => {
-                      const cleanFilters = {
-                        status: filters.status || undefined,
-                        propertyType: filters.propertyType || undefined,
-                        city: filters.city || undefined,
-                        state: filters.state || undefined,
-                      };
-                      fetchLeads(cleanFilters);
-                    }}>
-                      Apply Filters
-                    </Button>
-                  </HStack>
-                )}
-              </VStack>
-            </CardBody>
-          </Card>
-
-          {/* View Mode Toggle and Bulk Actions */}
-          <Flex align="center" justify="space-between">
-            <HStack spacing={2}>
-              <Text fontSize="sm" color="gray.600">View Mode:</Text>
-              <Button
-                size="sm"
-                variant={viewMode === 'list' ? 'solid' : 'ghost'}
-                onClick={() => setViewMode('list')}
-              >
-                <FiList />
-              </Button>
-              <Button
-                size="sm"
-                variant={viewMode === 'grid' ? 'solid' : 'ghost'}
-                onClick={() => setViewMode('grid')}
-              >
-                <FiGrid />
-              </Button>
-            </HStack>
-
-            {/* Bulk Actions */}
-            {selectedLeads.length > 0 && (
-              <HStack spacing={3}>
-                <Text fontSize="sm" color="gray.600">
-                  {selectedLeads.length} lead(s) selected
-                </Text>
-                <Menu>
-                  <MenuButton as={Button} size="sm" variant="outline">
-                    Bulk Actions
-                  </MenuButton>
-                  <MenuList>
-                    <MenuItem onClick={() => handleBulkUpdate('status', { status: 'contacted' })}>
-                      Mark as Contacted
-                    </MenuItem>
-                    <MenuItem onClick={() => handleBulkUpdate('status', { status: 'qualified' })}>
-                      Mark as Qualified
-                    </MenuItem>
-                    <MenuItem onClick={() => handleBulkUpdate('status', { status: 'lost' })}>
-                      Mark as Lost
-                    </MenuItem>
-                    <MenuItem onClick={handleBulkDelete} color="red.500">
-                      Delete Selected
-                    </MenuItem>
-                  </MenuList>
-                </Menu>
+                <Button size="sm" colorScheme="blue" onClick={() => {
+                  const cleanFilters = {
+                    status: filters.status || undefined,
+                    propertyType: filters.propertyType || undefined,
+                    city: filters.city || undefined,
+                    state: filters.state || undefined,
+                  };
+                  fetchLeads(cleanFilters);
+                }}>
+                  Apply Filters
+                </Button>
               </HStack>
             )}
-          </Flex>
+          </VStack>
+        </CardBody>
+      </Card>
 
-          {/* Leads Display */}
-          {viewMode === 'grid' && (
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+      {/* View Mode Toggle and Bulk Actions */}
+      <Flex align="center" justify="space-between">
+        <HStack spacing={2}>
+          <Text fontSize="sm" color="gray.600">View Mode:</Text>
+          <Button
+            size="sm"
+            variant={viewMode === 'list' ? 'solid' : 'ghost'}
+            onClick={() => setViewMode('list')}
+          >
+            <FiList />
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === 'grid' ? 'solid' : 'ghost'}
+            onClick={() => setViewMode('grid')}
+          >
+            <FiGrid />
+          </Button>
+        </HStack>
+
+        {/* Bulk Actions */}
+        {selectedLeads.length > 0 && (
+          <HStack spacing={3}>
+            <Text fontSize="sm" color="gray.600">
+              {selectedLeads.length} lead(s) selected
+            </Text>
+            <Menu>
+              <MenuButton as={Button} size="sm" variant="outline">
+                Bulk Actions
+              </MenuButton>
+              <MenuList>
+                <MenuItem onClick={() => handleBulkUpdate('status', { status: 'contacted' })}>
+                  Mark as Contacted
+                </MenuItem>
+                <MenuItem onClick={() => handleBulkUpdate('status', { status: 'qualified' })}>
+                  Mark as Qualified
+                </MenuItem>
+                <MenuItem onClick={() => handleBulkUpdate('status', { status: 'lost' })}>
+                  Mark as Lost
+                </MenuItem>
+                <MenuItem onClick={handleBulkDelete} color="red.500">
+                  Delete Selected
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </HStack>
+        )}
+      </Flex>
+
+      {/* Leads Display */}
+      {viewMode === 'grid' && (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+          {leads.map((lead) => (
+            <Card key={lead.id} onClick={() => handleLeadClick(lead)} cursor="pointer">
+              <CardHeader pb={2}>
+                <Flex align="center" justify="space-between">
+                  <HStack spacing={3}>
+                    <Checkbox
+                      isChecked={selectedLeads.includes(lead.id)}
+                      onChange={(e) => handleLeadSelection(lead.id, e.target.checked)}
+                    />
+                    <VStack align="start" spacing={1}>
+                      <Text fontWeight="semibold" fontSize="lg">
+                        {lead.firstName} {lead.lastName}
+                      </Text>
+                      <Text fontSize="sm" color="gray.600">
+                        {lead.email}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  <Menu>
+                    <MenuButton
+                      as={IconButton}
+                      icon={<FiMoreVertical />}
+                      variant="ghost"
+                      size="sm"
+                    />
+                    <MenuList>
+                      <MenuItem icon={<FiEye />} onClick={() => handleLeadClick(lead)}>
+                        View Details
+                      </MenuItem>
+                      <MenuItem icon={<FiEdit />} onClick={() => handleEditLead(lead)}>
+                        Edit
+                      </MenuItem>
+                      <MenuItem icon={<FiTrash2 />} onClick={() => handleDeleteLead(lead.id)} color="red.500">
+                        Delete
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </Flex>
+              </CardHeader>
+              <CardBody pt={0}>
+                <VStack align="stretch" spacing={3}>
+                  <HStack justify="space-between">
+                    <HStack>
+                      {getPropertyTypeIcon(lead.propertyType)}
+                      <Text fontSize="sm" color="gray.600">
+                        {lead.propertyType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </Text>
+                    </HStack>
+                    <Badge colorScheme={getStatusColor(lead.status)}>
+                      {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                    </Badge>
+                  </HStack>
+                  
+                  <HStack>
+                    <FiMapPin />
+                    <Text fontSize="sm" noOfLines={2}>
+                      {lead.address}, {lead.city}, {lead.state} {lead.zipCode}
+                    </Text>
+                  </HStack>
+                  
+                  <HStack>
+                    <FiDollarSign />
+                    <Text fontSize="sm" fontWeight="semibold">
+                      {formatCurrency(lead.estimatedValue)}
+                    </Text>
+                  </HStack>
+                  
+                  <HStack>
+                    <FiCalendar />
+                    <Text fontSize="sm" color="gray.600">
+                      Created {formatDate(lead.createdAt)}
+                    </Text>
+                  </HStack>
+                </VStack>
+              </CardBody>
+            </Card>
+          ))}
+        </SimpleGrid>
+      )}
+
+      {viewMode === 'list' && (
+        <Card>
+          <CardBody>
+            <VStack spacing={4} align="stretch">
+              {/* Select All Header */}
+              <Flex align="center" justify="space-between" p={2} bg="gray.50" borderRadius="md">
+                <HStack spacing={3}>
+                  <Checkbox
+                    isChecked={selectedLeads.length === leads.length && leads.length > 0}
+                    isIndeterminate={selectedLeads.length > 0 && selectedLeads.length < leads.length}
+                    onChange={handleSelectAll}
+                  />
+                  <Text fontSize="sm" fontWeight="medium">
+                    Select All ({leads.length} leads)
+                  </Text>
+                </HStack>
+              </Flex>
+
+              {/* Leads List */}
               {leads.map((lead) => (
-                <Card key={lead.id}>
-                  <CardHeader pb={2}>
-                    <Flex align="center" justify="space-between">
-                      <HStack spacing={3}>
-                        <Checkbox
-                          isChecked={selectedLeads.includes(lead.id)}
-                          onChange={(e) => handleLeadSelection(lead.id, e.target.checked)}
-                        />
-                        <VStack align="start" spacing={1}>
+                <Box key={lead.id} p={4} border="1px solid" borderColor="gray.200" borderRadius="md" onClick={() => handleLeadClick(lead)} cursor="pointer">
+                  <Flex align="center" justify="space-between">
+                    <HStack spacing={3} flex={1}>
+                      <Checkbox
+                        isChecked={selectedLeads.includes(lead.id)}
+                        onChange={(e) => handleLeadSelection(lead.id, e.target.checked)}
+                      />
+                      <VStack align="start" spacing={2} flex={1}>
+                        <HStack>
                           <Text fontWeight="semibold" fontSize="lg">
                             {lead.firstName} {lead.lastName}
                           </Text>
-                          <Text fontSize="sm" color="gray.600">
-                            {lead.email}
+                          <Badge colorScheme={getStatusColor(lead.status)}>
+                            {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                          </Badge>
+                        </HStack>
+                        <Text fontSize="sm" color="gray.600">
+                          {lead.email} • {lead.phone}
+                        </Text>
+                        <HStack>
+                          <FiMapPin />
+                          <Text fontSize="sm">
+                            {lead.address}, {lead.city}, {lead.state} {lead.zipCode}
                           </Text>
-                        </VStack>
-                      </HStack>
-                      <Menu>
-                        <MenuButton
-                          as={IconButton}
-                          icon={<FiMoreVertical />}
-                          variant="ghost"
-                          size="sm"
-                        />
-                        <MenuList>
-                          <MenuItem icon={<FiEdit />} onClick={() => handleEditLead(lead)}>
-                            Edit
-                          </MenuItem>
-                          <MenuItem icon={<FiTrash2 />} onClick={() => handleDeleteLead(lead.id)} color="red.500">
-                            Delete
-                          </MenuItem>
-                        </MenuList>
-                      </Menu>
-                    </Flex>
-                  </CardHeader>
-                  <CardBody pt={0}>
-                    <VStack align="stretch" spacing={3}>
-                      <HStack justify="space-between">
+                        </HStack>
                         <HStack>
                           {getPropertyTypeIcon(lead.propertyType)}
                           <Text fontSize="sm" color="gray.600">
                             {lead.propertyType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </Text>
+                          <FiDollarSign />
+                          <Text fontSize="sm" fontWeight="semibold">
+                            {formatCurrency(lead.estimatedValue)}
+                          </Text>
                         </HStack>
-                        <Badge colorScheme={getStatusColor(lead.status)}>
-                          {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-                        </Badge>
-                      </HStack>
-                      
-                      <HStack>
-                        <FiMapPin />
-                        <Text fontSize="sm" noOfLines={2}>
-                          {lead.address}, {lead.city}, {lead.state} {lead.zipCode}
-                        </Text>
-                      </HStack>
-                      
-                      <HStack>
-                        <FiDollarSign />
-                        <Text fontSize="sm" fontWeight="semibold">
-                          {formatCurrency(lead.estimatedValue)}
-                        </Text>
-                      </HStack>
-                      
-                      <HStack>
-                        <FiCalendar />
-                        <Text fontSize="sm" color="gray.600">
-                          Created {formatDate(lead.createdAt)}
-                        </Text>
-                      </HStack>
-                    </VStack>
-                  </CardBody>
-                </Card>
-              ))}
-            </SimpleGrid>
-          )}
-
-          {viewMode === 'list' && (
-            <Card>
-              <CardBody>
-                <VStack spacing={4} align="stretch">
-                  {/* Select All Header */}
-                  <Flex align="center" justify="space-between" p={2} bg="gray.50" borderRadius="md">
-                    <HStack spacing={3}>
-                      <Checkbox
-                        isChecked={selectedLeads.length === leads.length && leads.length > 0}
-                        isIndeterminate={selectedLeads.length > 0 && selectedLeads.length < leads.length}
-                        onChange={handleSelectAll}
+                      </VStack>
+                    </HStack>
+                    <HStack spacing={2}>
+                      <IconButton
+                        icon={<FiEye />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleLeadClick(lead)}
+                        aria-label="View lead details"
                       />
-                      <Text fontSize="sm" fontWeight="medium">
-                        Select All ({leads.length} leads)
-                      </Text>
+                      <IconButton
+                        icon={<FiEdit />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleEditLead(lead)}
+                        aria-label="Edit lead"
+                      />
+                      <IconButton
+                        icon={<FiTrash2 />}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDeleteLead(lead.id)}
+                        aria-label="Delete lead"
+                        color="red.500"
+                      />
                     </HStack>
                   </Flex>
+                </Box>
+              ))}
+            </VStack>
+          </CardBody>
+        </Card>
+      )}
 
-                  {/* Leads List */}
-                  {leads.map((lead) => (
-                    <Box key={lead.id} p={4} border="1px solid" borderColor="gray.200" borderRadius="md">
-                      <Flex align="center" justify="space-between">
-                        <HStack spacing={3} flex={1}>
-                          <Checkbox
-                            isChecked={selectedLeads.includes(lead.id)}
-                            onChange={(e) => handleLeadSelection(lead.id, e.target.checked)}
-                          />
-                          <VStack align="start" spacing={2} flex={1}>
-                            <HStack>
-                              <Text fontWeight="semibold" fontSize="lg">
-                                {lead.firstName} {lead.lastName}
-                              </Text>
-                              <Badge colorScheme={getStatusColor(lead.status)}>
-                                {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-                              </Badge>
-                            </HStack>
-                            <Text fontSize="sm" color="gray.600">
-                              {lead.email} • {lead.phone}
-                            </Text>
-                            <HStack>
-                              <FiMapPin />
-                              <Text fontSize="sm">
-                                {lead.address}, {lead.city}, {lead.state} {lead.zipCode}
-                              </Text>
-                            </HStack>
-                            <HStack>
-                              {getPropertyTypeIcon(lead.propertyType)}
-                              <Text fontSize="sm" color="gray.600">
-                                {lead.propertyType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                              </Text>
-                              <FiDollarSign />
-                              <Text fontSize="sm" fontWeight="semibold">
-                                {formatCurrency(lead.estimatedValue)}
-                              </Text>
-                            </HStack>
-                          </VStack>
-                        </HStack>
-                        <HStack spacing={2}>
-                          <IconButton
-                            icon={<FiEdit />}
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEditLead(lead)}
-                            aria-label="Edit lead"
-                          />
-                          <IconButton
-                            icon={<FiTrash2 />}
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDeleteLead(lead.id)}
-                            aria-label="Delete lead"
-                            color="red.500"
-                          />
-                        </HStack>
-                      </Flex>
-                    </Box>
-                  ))}
-                </VStack>
-              </CardBody>
-            </Card>
-          )}
-        </VStack>
+      {/* Hidden file input for import */}
+      <input
+        id="file-upload"
+        type="file"
+        accept=".csv,.xlsx,.xls"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            handleImport(file);
+          }
+        }}
+      />
 
-        {/* Hidden file input for import */}
-        <input
-          id="file-upload"
-          type="file"
-          accept=".csv,.xlsx,.xls"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              handleImport(file);
-            }
-          }}
-        />
+      {/* Simple Lead Form Modal */}
+      {isFormOpen && (
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="rgba(0, 0, 0, 0.5)"
+          zIndex={1000}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Card maxW="2xl" w="full" mx={4}>
+            <CardHeader>
+              <Heading size="md">
+                {editingLead ? 'Edit Lead' : 'Add New Lead'}
+              </Heading>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={4}>
+                <Text>Lead form would go here...</Text>
+                <HStack spacing={3}>
+                  <Button onClick={onFormClose}>Cancel</Button>
+                  <Button colorScheme="blue" onClick={() => {
+                    // Mock submit
+                    if (editingLead) {
+                      handleUpdateLead(editingLead.id, { status: 'contacted' });
+                    } else {
+                      handleCreateLead({
+                        firstName: 'New',
+                        lastName: 'Lead',
+                        email: 'new@example.com',
+                        phone: '(555) 000-0000',
+                        address: '123 Example St',
+                        city: 'Austin',
+                        state: 'TX',
+                        zipCode: '78701',
+                        propertyType: 'single_family',
+                        estimatedValue: 300000,
+                        notes: 'Sample lead'
+                      });
+                    }
+                  }}>
+                    {editingLead ? 'Update' : 'Create'}
+                  </Button>
+                </HStack>
+              </VStack>
+            </CardBody>
+          </Card>
+        </Box>
+      )}
+    </VStack>
+  );
+};
 
-        {/* Simple Lead Form Modal */}
-        {isFormOpen && (
-          <Box
-            position="fixed"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            bg="rgba(0, 0, 0, 0.5)"
-            zIndex={1000}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Card maxW="2xl" w="full" mx={4}>
-              <CardHeader>
-                <Heading size="md">
-                  {editingLead ? 'Edit Lead' : 'Add New Lead'}
-                </Heading>
-              </CardHeader>
-              <CardBody>
-                <VStack spacing={4}>
-                  <Text>Lead form would go here...</Text>
-                  <HStack spacing={3}>
-                    <Button onClick={onFormClose}>Cancel</Button>
-                    <Button colorScheme="blue" onClick={() => {
-                      // Mock submit
-                      if (editingLead) {
-                        handleUpdateLead(editingLead.id, { status: 'contacted' });
-                      } else {
-                        handleCreateLead({
-                          firstName: 'New',
-                          lastName: 'Lead',
-                          email: 'new@example.com',
-                          phone: '(555) 000-0000',
-                          address: '123 Example St',
-                          city: 'Austin',
-                          state: 'TX',
-                          zipCode: '78701',
-                          propertyType: 'single_family',
-                          estimatedValue: 300000,
-                          notes: 'Sample lead'
-                        });
-                      }
-                    }}>
-                      {editingLead ? 'Update' : 'Create'}
-                    </Button>
-                  </HStack>
-                </VStack>
-              </CardBody>
-            </Card>
-          </Box>
-        )}
-      </Container>
-    </Box>
+const LeadsPage: NextPage = () => {
+  return (
+    <Layout>
+      <ErrorBoundary>
+        <LeadsPageContent />
+      </ErrorBoundary>
+    </Layout>
   );
 };
 

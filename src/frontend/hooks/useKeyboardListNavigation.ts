@@ -10,10 +10,11 @@ export function useKeyboardListNavigation<T>(options: KeyboardListNavigationOpti
   const {
     onKeyDown,
     preventDefault = true,
+    items = [],
     ...listOptions
   } = options;
 
-  const listNavigation = useListNavigation(listOptions);
+  const listNavigation = useListNavigation({ items, ...listOptions });
 
   const handleKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
     const { key, ctrlKey, altKey, shiftKey } = event;
