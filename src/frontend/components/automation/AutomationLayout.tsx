@@ -23,8 +23,8 @@ const AutomationLayout: React.FC<AutomationLayoutProps> = ({
   const navigation = useNavigation();
   
   // Safely destructure with defaults to prevent runtime errors
-  const isCollapsed = navigation?.state?.isCollapsed ?? false;
-  const setCollapsed = navigation?.setCollapsed ?? (() => {});
+  const isCollapsed = false; // Default to expanded
+  const setCollapsed = (() => {}); // No-op function
 
   // Handle navigation collapse toggle
   const handleNavigationToggle = (collapsed: boolean) => {
@@ -40,7 +40,7 @@ const AutomationLayout: React.FC<AutomationLayoutProps> = ({
           {showNavigation && (
             <NavigationPanel
               isCollapsed={isCollapsed}
-              onToggle={handleNavigationToggle}
+              onToggleCollapse={handleNavigationToggle}
             />
           )}
           <Box flex={1} p={{ base: 4, md: 6 }}>
@@ -66,7 +66,7 @@ const AutomationLayout: React.FC<AutomationLayoutProps> = ({
           {showNavigation && (
             <NavigationPanel
               isCollapsed={isCollapsed}
-              onToggle={handleNavigationToggle}
+              onToggleCollapse={handleNavigationToggle}
             />
           )}
           <Box flex={1} p={{ base: 4, md: 6 }}>
@@ -94,7 +94,7 @@ const AutomationLayout: React.FC<AutomationLayoutProps> = ({
           {showNavigation && (
             <NavigationPanel
               isCollapsed={isCollapsed}
-              onToggle={handleNavigationToggle}
+              onToggleCollapse={handleNavigationToggle}
             />
           )}
           <Box flex={1} p={{ base: 4, md: 6 }}>
@@ -119,7 +119,7 @@ const AutomationLayout: React.FC<AutomationLayoutProps> = ({
         {showNavigation && (
           <NavigationPanel
             isCollapsed={isCollapsed}
-            onToggle={handleNavigationToggle}
+            onToggleCollapse={handleNavigationToggle}
           />
         )}
         <Box flex={1} p={{ base: 4, md: 6 }}>

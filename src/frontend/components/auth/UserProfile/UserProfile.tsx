@@ -98,7 +98,7 @@ const UserProfile: React.FC = () => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof ProfileFormData],
+          ...(prev[parent as keyof ProfileFormData] as any),
           [child]: value,
         },
       }));

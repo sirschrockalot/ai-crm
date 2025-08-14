@@ -4,6 +4,7 @@ import { Box, VStack, HStack, Heading, Text, useDisclosure, useToast } from '@ch
 import { Sidebar, Header, Navigation, SearchBar } from '../../components/layout';
 import { Card, Button, Badge, Table, Modal } from '../../components/ui';
 import { BuyerForm } from '../../components/forms';
+import { BuyerImport, BuyerExport } from '../../components/buyers';
 import { useBuyers } from '../../hooks/services/useBuyers';
 import { Buyer, BuyerType } from '../../types';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
@@ -270,6 +271,8 @@ const BuyersPageContent: React.FC = () => {
                 <Button variant="outline" colorScheme="blue" onClick={() => router.push('/buyers/matching')}>
                   Matching
                 </Button>
+                <BuyerImport onImportComplete={fetchBuyers} />
+                <BuyerExport onExportComplete={fetchBuyers} />
                 <Button variant="primary" colorScheme="blue" onClick={onOpen}>
                   Add New Buyer
                 </Button>

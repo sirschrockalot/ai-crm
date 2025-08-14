@@ -41,7 +41,7 @@ const AnalyticsLayout: React.FC<AnalyticsLayoutProps> = ({
           {showNavigation && (
             <NavigationPanel
               isCollapsed={isCollapsed}
-              onToggle={handleNavigationToggle}
+              onToggleCollapse={handleNavigationToggle}
             />
           )}
           <Box flex={1} p={{ base: 4, md: 6 }}>
@@ -67,7 +67,7 @@ const AnalyticsLayout: React.FC<AnalyticsLayoutProps> = ({
           {showNavigation && (
             <NavigationPanel
               isCollapsed={isCollapsed}
-              onToggle={handleNavigationToggle}
+              onToggleCollapse={handleNavigationToggle}
             />
           )}
           <Box flex={1} p={{ base: 4, md: 6 }}>
@@ -95,7 +95,7 @@ const AnalyticsLayout: React.FC<AnalyticsLayoutProps> = ({
           {showNavigation && (
             <NavigationPanel
               isCollapsed={isCollapsed}
-              onToggle={handleNavigationToggle}
+              onToggleCollapse={handleNavigationToggle}
             />
           )}
           <Box flex={1} p={{ base: 4, md: 6 }}>
@@ -120,7 +120,7 @@ const AnalyticsLayout: React.FC<AnalyticsLayoutProps> = ({
         {showNavigation && (
           <NavigationPanel
             isCollapsed={isCollapsed}
-            onToggle={handleNavigationToggle}
+            onToggleCollapse={handleNavigationToggle}
           />
         )}
         <Box flex={1} p={{ base: 4, md: 6 }}>

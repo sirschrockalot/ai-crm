@@ -12,10 +12,10 @@ fi
 # Navigate to project root
 cd "$(dirname "$0")/.."
 
-# Check if lead-import-service directory exists
-if [ ! -d "src/lead-import-service" ]; then
-    echo "Error: lead-import-service directory not found."
-    echo "Please ensure the lead-import-service is properly set up."
+# Check if lead-import-service-repo directory exists
+if [ ! -d "../lead-import-service-repo" ]; then
+    echo "Error: lead-import-service-repo directory not found."
+    echo "Please ensure the lead-import-service-repo is properly set up in the workspace."
     exit 1
 fi
 

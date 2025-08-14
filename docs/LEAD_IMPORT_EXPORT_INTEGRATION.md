@@ -23,6 +23,20 @@ Frontend Components → useLeads Hook → leadService → leadImportExportServic
 - `leadService`: Service layer for lead operations
 - `leadImportExportService`: Dedicated service for import/export operations
 
+### Repository Structure
+The lead-import-service is a **separate microservice repository** located at the workspace level:
+```
+workspace/
+├── ai_crm/                           ← Frontend application
+│   ├── src/frontend/                 ← Frontend source code
+│   ├── docker-compose.lead-import.yml ← Service orchestration
+│   └── scripts/start-lead-import.sh  ← Service startup script
+└── lead-import-service-repo/         ← Backend microservice (separate repo)
+    ├── src/                          ← Service source code
+    ├── Dockerfile                    ← Service containerization
+    └── package.json                  ← Service dependencies
+```
+
 ## Setup
 
 ### 1. Environment Configuration
@@ -43,8 +57,10 @@ Use the provided script to start the lead-import-service:
 ```
 
 This will start:
-- Lead Import Service on port 3003
+- Lead Import Service on port 3003 (from external repository)
 - MongoDB on port 27017
+
+**Note**: The script expects the `lead-import-service-repo` to be located at the same workspace level as the `ai_crm` project.
 
 ### 3. Verify Service is Running
 
@@ -165,6 +181,7 @@ interface ExportRequest {
 1. **Service Not Starting**
    - Check Docker is running
    - Verify ports 3003 and 27017 are available
+   - Ensure `lead-import-service-repo` exists at workspace level
    - Check service logs: `docker-compose -f docker-compose.lead-import.yml logs`
 
 2. **Import Failures**
@@ -192,12 +209,18 @@ NEXT_PUBLIC_ENABLE_DEBUG_MODE=true
 
 ## Development
 
+### Repository Management
+
+- **Frontend Changes**: Make changes in the `ai_crm` repository
+- **Backend Changes**: Make changes in the `lead-import-service-repo` repository
+- **Service Updates**: Update the service in its own repository, then rebuild containers
+
 ### Adding New Features
 
-1. **Backend**: Extend the NestJS service
-2. **Service Layer**: Update `leadImportExportService`
-3. **Hook**: Add methods to `useLeads`
-4. **Component**: Update UI components
+1. **Backend**: Extend the NestJS service in `lead-import-service-repo`
+2. **Service Layer**: Update `leadImportExportService` in `ai_crm`
+3. **Hook**: Add methods to `useLeads` in `ai_crm`
+4. **Component**: Update UI components in `ai_crm`
 
 ### Testing
 

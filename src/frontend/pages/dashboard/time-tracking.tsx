@@ -1,6 +1,8 @@
-import React from 'react';
-import { Box, Text, Heading, SimpleGrid, Card, CardBody, HStack, VStack, Button, Badge, Icon, Grid, Input } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import { Box, Text, Heading, SimpleGrid, Card, CardBody, HStack, VStack, Button, Badge, Icon, Grid, Input, Spinner, Alert, AlertIcon } from '@chakra-ui/react';
 import { DashboardLayout } from '../../components/dashboard';
+import { useTimesheet } from '../../hooks/useTimesheet';
+import { timesheetService } from '../../services/timesheetService';
 import { 
   FaClock, 
   FaCalendarAlt, 
@@ -9,12 +11,76 @@ import {
   FaCheckCircle,
   FaExclamationTriangle,
   FaPlus,
-  FaDownload
+  FaDownload,
+  FaSave,
+  FaPaperPlane
 } from 'react-icons/fa';
 
 const TimeTrackingDashboard: React.FC = () => {
+  // For demo purposes, using a hardcoded user ID
+  // In a real app, this would come from authentication context
+  const userId = 'demo-user-123';
+  
+  const {
+    timesheet,
+    weekDates,
+    totalHours,
+    isLoading,
+    error,
+    saveTimesheet,
+    submitTimesheet,
+    updateHours,
+    getHoursForDay,
+    weekDisplayText,
+    statusColor,
+    canSubmit,
+  } = useTimesheet({ userId });
+
+  const [notes, setNotes] = useState(timesheet?.notes || '');
+
+  const handleSave = async () => {
+    if (!timesheet) return;
+    await saveTimesheet(timesheet.hours, notes);
+  };
+
+  const handleSubmit = async () => {
+    await submitTimesheet();
+  };
+
+  const handleHourChange = (dayIndex: number, value: string) => {
+    const hours = parseFloat(value) || 0;
+    updateHours(dayIndex, hours);
+  };
+
+  const getDayStatus = (dayIndex: number) => {
+    const today = new Date();
+    const dayDate = weekDates.days[dayIndex];
+    const isToday = today.toDateString() === dayDate.toDateString();
+    const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
+    
+    return { isToday, isWeekend };
+  };
+
+  if (isLoading && !timesheet) {
+    return (
+      <DashboardLayout>
+        <Box display="flex" justifyContent="center" alignItems="center" minH="400px">
+          <Spinner size="xl" color="blue.500" />
+        </Box>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
+      {/* Error Alert */}
+      {error && (
+        <Alert status="error" mb={6}>
+          <AlertIcon />
+          {error}
+        </Alert>
+      )}
+
       {/* Page Header */}
       <Box mb={8}>
         <HStack spacing={3} mb={2}>
@@ -33,9 +99,13 @@ const TimeTrackingDashboard: React.FC = () => {
             <HStack spacing={3}>
               <Icon as={FaClock} color="white" boxSize={6} bg="blue.500" p={2} borderRadius="md" />
               <VStack align="start" spacing={1}>
-                <Text fontSize="xl" fontWeight="700" color="gray.800">32.5</Text>
+                <Text fontSize="xl" fontWeight="700" color="gray.800">
+                  {isLoading ? <Spinner size="sm" /> : totalHours.toFixed(1)}
+                </Text>
                 <Text fontSize="sm" color="gray.600">This Week (hrs)</Text>
-                <Text fontSize="xs" color="green.500" fontWeight="500">+2.5 hrs</Text>
+                <Text fontSize="xs" color="green.500" fontWeight="500">
+                  {totalHours > 0 ? `${totalHours.toFixed(1)} hrs` : 'No hours logged'}
+                </Text>
               </VStack>
             </HStack>
           </CardBody>
@@ -46,7 +116,9 @@ const TimeTrackingDashboard: React.FC = () => {
             <HStack spacing={3}>
               <Icon as={FaChartBar} color="white" boxSize={6} bg="green.500" p={2} borderRadius="md" />
               <VStack align="start" spacing={1}>
-                <Text fontSize="xl" fontWeight="700" color="gray.800">28.0</Text>
+                <Text fontSize="xl" fontWeight="700" color="gray.800">
+                  {isLoading ? <Spinner size="sm" /> : (totalHours * 0.86).toFixed(1)}
+                </Text>
                 <Text fontSize="sm" color="gray.600">Billable Hours</Text>
                 <Text fontSize="xs" color="green.500" fontWeight="500">86%</Text>
               </VStack>
@@ -70,11 +142,15 @@ const TimeTrackingDashboard: React.FC = () => {
         <Card bg="white" shadow="md">
           <CardBody p={6}>
             <HStack spacing={3}>
-              <Icon as={FaCheckCircle} color="white" boxSize={6} bg="orange.500" p={2} borderRadius="md" />
+              <Icon as={FaCheckCircle} color="white" boxSize={6} bg={`${statusColor}.500`} p={2} borderRadius="md" />
               <VStack align="start" spacing={1}>
-                <Text fontSize="xl" fontWeight="700" color="gray.800">Draft</Text>
+                <Text fontSize="xl" fontWeight="700" color="gray.800">
+                  {timesheet?.status?.charAt(0).toUpperCase() + timesheet?.status?.slice(1) || 'No Data'}
+                </Text>
                 <Text fontSize="sm" color="gray.600">Timesheet Status</Text>
-                <Text fontSize="xs" color="orange.500" fontWeight="500">Due Friday</Text>
+                <Text fontSize="xs" color={`${statusColor}.500`} fontWeight="500">
+                  {timesheet?.status === 'draft' ? 'Due Friday' : timesheet?.status}
+                </Text>
               </VStack>
             </HStack>
           </CardBody>
@@ -94,8 +170,23 @@ const TimeTrackingDashboard: React.FC = () => {
               </HStack>
               
               <HStack spacing={4} flexWrap="wrap">
-                <Button variant="outline" leftIcon={<Icon as={FaPlus} />}>
-                  Add Entry
+                <Button 
+                  variant="outline" 
+                  leftIcon={<Icon as={FaSave} />}
+                  onClick={handleSave}
+                  isLoading={isLoading}
+                  isDisabled={!timesheet}
+                >
+                  Save Draft
+                </Button>
+                <Button 
+                  colorScheme="blue" 
+                  leftIcon={<Icon as={FaPaperPlane} />}
+                  onClick={handleSubmit}
+                  isLoading={isLoading}
+                  isDisabled={!canSubmit}
+                >
+                  Submit Timesheet
                 </Button>
                 <Button variant="outline" leftIcon={<Icon as={FaDownload} />}>
                   Export Timesheet
@@ -131,10 +222,10 @@ const TimeTrackingDashboard: React.FC = () => {
                 {/* Week selector and status */}
                 <HStack spacing={4}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">
-                    Week of Dec 15, 2024
+                    {weekDisplayText}
                   </Text>
-                  <Badge colorScheme="blue" variant="subtle" px={3} py={1} borderRadius="full">
-                    Draft
+                  <Badge colorScheme={statusColor} variant="subtle" px={3} py={1} borderRadius="full">
+                    {timesheet?.status?.charAt(0).toUpperCase() + timesheet?.status?.slice(1) || 'No Data'}
                   </Badge>
                 </HStack>
               </HStack>
@@ -142,251 +233,94 @@ const TimeTrackingDashboard: React.FC = () => {
               {/* Enhanced day headers */}
               <Box mb={6}>
                 <SimpleGrid columns={7} spacing={3}>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Mon</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 15</Text>
-                  </Box>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Tue</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 16</Text>
-                  </Box>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Wed</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 17</Text>
-                  </Box>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Thu</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 18</Text>
-                  </Box>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Fri</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 19</Text>
-                  </Box>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Sat</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 20</Text>
-                  </Box>
-                  <Box textAlign="center" py={3} px={2}>
-                    <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>Sun</Text>
-                    <Text fontSize="xs" color="gray.500">Dec 21</Text>
-                  </Box>
+                  {weekDates.days.map((day, index) => (
+                    <Box key={index} textAlign="center" py={3} px={2}>
+                      <Text fontSize="sm" fontWeight="700" color="gray.700" mb={1}>
+                        {timesheetService.getDayName(day)}
+                      </Text>
+                      <Text fontSize="xs" color="gray.500">
+                        {timesheetService.formatDate(day)}
+                      </Text>
+                    </Box>
+                  ))}
                 </SimpleGrid>
               </Box>
               
               {/* Enhanced timesheet grid */}
               <SimpleGrid columns={7} spacing={2} minW="100%">
-                {/* Monday */}
-                <Card 
-                  bg="white" 
-                  border="2px" 
-                  borderColor="blue.200" 
-                  minH="140px"
-                  shadow="sm"
-                  _hover={{ shadow: "md", borderColor: "blue.300" }}
-                  transition="all 0.2s"
-                >
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="gray.600" textAlign="center">Monday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="8.0" 
-                        defaultValue="8.0"
-                        textAlign="center"
-                        fontWeight="700"
-                        fontSize="xl"
-                        h="50px"
-                        borderColor="blue.300"
-                        _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px #3182ce" }}
-                      />
-                      <Text fontSize="xs" color="gray.500" textAlign="center">Regular</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                {/* Tuesday */}
-                <Card 
-                  bg="white" 
-                  border="2px" 
-                  borderColor="blue.200" 
-                  minH="140px"
-                  shadow="sm"
-                  _hover={{ shadow: "md", borderColor: "blue.300" }}
-                  transition="all 0.2s"
-                >
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="gray.600" textAlign="center">Tuesday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="8.0" 
-                        defaultValue="7.5"
-                        textAlign="center"
-                        fontWeight="700"
-                        fontSize="xl"
-                        h="50px"
-                        borderColor="blue.300"
-                        _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px #3182ce" }}
-                      />
-                      <Text fontSize="xs" color="gray.500" textAlign="center">Regular</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                {/* Wednesday */}
-                <Card 
-                  bg="white" 
-                  border="2px" 
-                  borderColor="blue.200" 
-                  minH="140px"
-                  shadow="sm"
-                  _hover={{ shadow: "md", borderColor: "blue.300" }}
-                  transition="all 0.2s"
-                >
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="gray.600" textAlign="center">Wednesday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="8.0" 
-                        defaultValue="8.5"
-                        textAlign="center"
-                        fontWeight="700"
-                        fontSize="xl"
-                        h="50px"
-                        borderColor="blue.300"
-                        _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px #3182ce" }}
-                      />
-                      <Text fontSize="xs" color="gray.500" textAlign="center">Regular</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                {/* Thursday */}
-                <Card 
-                  bg="white" 
-                  border="2px" 
-                  borderColor="blue.200" 
-                  minH="140px"
-                  shadow="sm"
-                  _hover={{ shadow: "md", borderColor: "blue.300" }}
-                  transition="all 0.2s"
-                >
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="gray.600" textAlign="center">Thursday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="8.0" 
-                        defaultValue="6.5"
-                        textAlign="center"
-                        fontWeight="700"
-                        fontSize="xl"
-                        h="50px"
-                        borderColor="blue.300"
-                        _focus={{ borderColor: "blue.500", boxShadow: "0 0 0 1px #3182ce" }}
-                      />
-                      <Text fontSize="xs" color="gray.500" textAlign="center">Regular</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                {/* Friday - Highlighted as current day */}
-                <Card 
-                  bg="blue.50" 
-                  border="2px" 
-                  borderColor="blue.400" 
-                  minH="140px"
-                  shadow="md"
-                  _hover={{ shadow: "lg", borderColor: "blue.500" }}
-                  transition="all 0.2s"
-                  position="relative"
-                >
-                  <Box
-                    position="absolute"
-                    top={-2}
-                    right={-2}
-                    bg="blue.500"
-                    color="white"
-                    fontSize="xs"
-                    fontWeight="700"
-                    px={2}
-                    py={1}
-                    borderRadius="full"
-                  >
-                    Today
-                  </Box>
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="blue.700" textAlign="center">Friday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="8.0" 
-                        defaultValue="2.0"
-                        textAlign="center"
-                        fontWeight="700"
-                        fontSize="xl"
-                        h="50px"
-                        borderColor="blue.400"
-                        bg="white"
-                        _focus={{ borderColor: "blue.600", boxShadow: "0 0 0 1px #2563eb" }}
-                      />
-                      <Text fontSize="xs" color="blue.600" textAlign="center">In Progress</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                {/* Saturday */}
-                <Card 
-                  bg="gray.50" 
-                  border="2px" 
-                  borderColor="gray.200" 
-                  minH="140px"
-                  shadow="sm"
-                  opacity={0.7}
-                >
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="gray.500" textAlign="center">Saturday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="0.0" 
-                        isDisabled
-                        textAlign="center"
-                        bg="gray.100"
-                        borderColor="gray.300"
-                        h="50px"
-                      />
-                      <Text fontSize="xs" color="gray.400" textAlign="center">Weekend</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
-
-                {/* Sunday */}
-                <Card 
-                  bg="gray.50" 
-                  border="2px" 
-                  borderColor="gray.200" 
-                  minH="140px"
-                  shadow="sm"
-                  opacity={0.7}
-                >
-                  <CardBody p={3}>
-                    <VStack spacing={2} align="stretch" justify="center" h="full">
-                      <Text fontSize="xs" fontWeight="600" color="gray.500" textAlign="center">Sunday</Text>
-                      <Input 
-                        size="lg" 
-                        placeholder="0.0" 
-                        isDisabled
-                        textAlign="center"
-                        bg="gray.100"
-                        borderColor="gray.300"
-                        h="50px"
-                      />
-                      <Text fontSize="xs" color="gray.400" textAlign="center">Weekend</Text>
-                    </VStack>
-                  </CardBody>
-                </Card>
+                {weekDates.days.map((day, index) => {
+                  const { isToday, isWeekend } = getDayStatus(index);
+                  const hours = getHoursForDay(index);
+                  const dayName = timesheetService.getDayName(day);
+                  
+                  return (
+                    <Card 
+                      key={index}
+                      bg={isToday ? "blue.50" : isWeekend ? "gray.50" : "white"}
+                      border="2px" 
+                      borderColor={isToday ? "blue.400" : isWeekend ? "gray.200" : "blue.200"}
+                      minH="140px"
+                      shadow={isToday ? "md" : "sm"}
+                      _hover={{ shadow: isToday ? "lg" : "md", borderColor: isToday ? "blue.500" : "blue.300" }}
+                      transition="all 0.2s"
+                      position="relative"
+                      opacity={isWeekend ? 0.7 : 1}
+                    >
+                      {isToday && (
+                        <Box
+                          position="absolute"
+                          top={-2}
+                          right={-2}
+                          bg="blue.500"
+                          color="white"
+                          fontSize="xs"
+                          fontWeight="700"
+                          px={2}
+                          py={1}
+                          borderRadius="full"
+                        >
+                          Today
+                        </Box>
+                      )}
+                      <CardBody p={3}>
+                        <VStack spacing={2} align="stretch" justify="center" h="full">
+                          <Text 
+                            fontSize="xs" 
+                            fontWeight="600" 
+                            color={isToday ? "blue.700" : isWeekend ? "gray.500" : "gray.600"} 
+                            textAlign="center"
+                          >
+                            {dayName}
+                          </Text>
+                          <Input 
+                            size="lg" 
+                            placeholder="0.0" 
+                            value={hours || ''}
+                            onChange={(e) => handleHourChange(index, e.target.value)}
+                            textAlign="center"
+                            fontWeight="700"
+                            fontSize="xl"
+                            h="50px"
+                            borderColor={isToday ? "blue.400" : isWeekend ? "gray.300" : "blue.300"}
+                            bg={isToday ? "white" : isWeekend ? "gray.100" : "white"}
+                            _focus={{ 
+                              borderColor: isToday ? "blue.600" : "blue.500", 
+                              boxShadow: isToday ? "0 0 0 1px #2563eb" : "0 0 0 1px #3182ce" 
+                            }}
+                            isDisabled={isWeekend}
+                          />
+                          <Text 
+                            fontSize="xs" 
+                            color={isToday ? "blue.600" : isWeekend ? "gray.400" : "gray.500"} 
+                            textAlign="center"
+                          >
+                            {isWeekend ? 'Weekend' : hours > 0 ? 'Regular' : 'No hours'}
+                          </Text>
+                        </VStack>
+                      </CardBody>
+                    </Card>
+                  );
+                })}
               </SimpleGrid>
 
                              {/* Weekly summary footer */}
@@ -398,15 +332,21 @@ const TimeTrackingDashboard: React.FC = () => {
                    </VStack>
                    <HStack spacing={6}>
                      <VStack align="center" spacing={1}>
-                       <Text fontSize="lg" fontWeight="700" color="blue.600">32.5</Text>
+                       <Text fontSize="lg" fontWeight="700" color="blue.600">
+                         {totalHours.toFixed(1)}
+                       </Text>
                        <Text fontSize="xs" color="gray.500">Hours</Text>
                      </VStack>
                      <VStack align="center" spacing={1}>
-                       <Text fontSize="lg" fontWeight="700" color="green.600">6.5</Text>
+                       <Text fontSize="lg" fontWeight="700" color="green.600">
+                         {totalHours > 0 ? (totalHours / 5).toFixed(1) : '0.0'}
+                       </Text>
                        <Text fontSize="xs" color="gray.500">Avg/Day</Text>
                      </VStack>
                      <VStack align="center" spacing={1}>
-                       <Text fontSize="lg" fontWeight="700" color="orange.600">0.0</Text>
+                       <Text fontSize="lg" fontWeight="700" color="orange.600">
+                         {totalHours > 40 ? (totalHours - 40).toFixed(1) : '0.0'}
+                       </Text>
                        <Text fontSize="xs" color="gray.500">Overtime</Text>
                      </VStack>
                    </HStack>
