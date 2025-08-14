@@ -56,7 +56,7 @@ import {
   FiTrendingUp, 
   FiEye
 } from 'react-icons/fi';
-import { useLeads } from '../../hooks/services/useLeads';
+import { useLeads } from '../../features/lead-management/hooks/useLeads';
 import { Lead, LeadStatus, PropertyType } from '../../types';
 import { useRouter } from 'next/router';
 import { Layout } from '../../components/layout';
@@ -153,6 +153,7 @@ const LeadsPageContent: React.FC = () => {
     propertyType: PropertyType;
     estimatedValue: number;
     notes?: string;
+    status: LeadStatus;
   }) => {
     try {
       await createLead(leadData);
@@ -304,7 +305,7 @@ const LeadsPageContent: React.FC = () => {
       const result = await importLeads(file);
       toast({
         title: 'Import completed',
-        description: `${result.importedCount} leads have been imported`,
+        description: `${result.imported} leads have been imported`,
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -322,10 +323,21 @@ const LeadsPageContent: React.FC = () => {
 
   const handleExport = async () => {
     try {
-      const result = await exportLeads(filters);
+      const blob = await exportLeads(filters);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `leads-export-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
       toast({
         title: 'Export completed',
-        description: `${result.exportedCount} leads have been exported`,
+        description: 'Lead data has been exported successfully',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -922,7 +934,8 @@ const LeadsPageContent: React.FC = () => {
                         zipCode: '78701',
                         propertyType: 'single_family',
                         estimatedValue: 300000,
-                        notes: 'Sample lead'
+                        notes: 'Sample lead',
+                        status: 'new'
                       });
                     }
                   }}>

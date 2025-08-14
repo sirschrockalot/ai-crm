@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -21,31 +21,71 @@ import {
   useToast,
   IconButton,
   Tooltip,
+  FormControl,
+  FormLabel,
+  Checkbox,
+  Select,
+  Input,
+  Textarea,
+  Badge,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
 } from '@chakra-ui/react';
-import { FiUpload, FiDownload, FiFile, FiX, FiCheck } from 'react-icons/fi';
+import { FiUpload, FiDownload, FiFile, FiX, FiCheck, FiSettings, FiAlertTriangle } from 'react-icons/fi';
+import { useLeads } from '../hooks/useLeads';
+import { ImportOptions, ValidationResult } from '../services/leadImportExportService';
 
 interface LeadImportExportProps {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (file: File) => Promise<{ imported: number; failed: number }>;
-  onExport: () => Promise<void>;
+  onImportComplete?: () => void;
 }
 
 export const LeadImportExport: React.FC<LeadImportExportProps> = ({
   isOpen,
   onClose,
-  onImport,
-  onExport,
+  onImportComplete,
 }) => {
+  const {
+    importLeads,
+    exportLeads,
+    validateImportFile,
+    downloadImportTemplate,
+    importProgress,
+    exportProgress,
+    resetImportProgress,
+    resetExportProgress,
+    error,
+  } = useLeads();
+
   const [importFile, setImportFile] = useState<File | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [importProgress, setImportProgress] = useState(0);
-  const [importResult, setImportResult] = useState<{ imported: number; failed: number } | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [importOptions, setImportOptions] = useState<ImportOptions>({
+    updateExisting: false,
+    skipDuplicates: true,
+    batchSize: 100,
+    defaultSource: 'import',
+    defaultStatus: 'new',
+    defaultPriority: 'medium',
+    defaultTags: [],
+  });
+  const [exportFormat, setExportFormat] = useState<'csv' | 'xlsx' | 'json'>('csv');
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Reset progress when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      resetImportProgress();
+      resetExportProgress();
+    }
+  }, [isOpen, resetImportProgress, resetExportProgress]);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
@@ -79,49 +119,66 @@ export const LeadImportExport: React.FC<LeadImportExportProps> = ({
       }
 
       setImportFile(file);
-      setImportResult(null);
+      setValidationResult(null);
+
+      // Validate file structure
+      try {
+        const validation = await validateImportFile(file);
+        setValidationResult(validation);
+        
+        if (validation.validation.invalidRows > 0) {
+          toast({
+            title: 'File Validation Warning',
+            description: `${validation.validation.invalidRows} rows have validation issues`,
+            status: 'warning',
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: 'Validation Failed',
+          description: 'Failed to validate file structure',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     }
   };
 
   const handleImport = async () => {
     if (!importFile) return;
 
-    setImporting(true);
-    setImportProgress(0);
-
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setImportProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      const result = await onImport(importFile);
+      const result = await importLeads(importFile, importOptions);
       
-      clearInterval(progressInterval);
-      setImportProgress(100);
-      setImportResult(result);
-
-      toast({
-        title: 'Import Complete',
-        description: `Successfully imported ${result.imported} leads${result.failed > 0 ? `, ${result.failed} failed` : ''}`,
-        status: result.failed > 0 ? 'warning' : 'success',
-        duration: 5000,
-        isClosable: true,
-      });
-
-      // Reset after a delay
-      setTimeout(() => {
-        setImportFile(null);
-        setImportProgress(0);
-        setImportResult(null);
-      }, 3000);
-
+      if (result.success) {
+        toast({
+          title: 'Import Complete',
+          description: `Successfully imported ${result.imported} leads`,
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        
+        onImportComplete?.();
+        
+        // Reset after a delay
+        setTimeout(() => {
+          setImportFile(null);
+          setValidationResult(null);
+          resetImportProgress();
+        }, 3000);
+      } else {
+        toast({
+          title: 'Import Completed with Errors',
+          description: `${result.imported} leads imported, ${result.errors.length} errors`,
+          status: 'warning',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     } catch (error) {
       toast({
         title: 'Import Failed',
@@ -130,16 +187,23 @@ export const LeadImportExport: React.FC<LeadImportExportProps> = ({
         duration: 5000,
         isClosable: true,
       });
-    } finally {
-      setImporting(false);
     }
   };
 
   const handleExport = async () => {
-    setExporting(true);
-    
     try {
-      await onExport();
+      const blob = await exportLeads(undefined, exportFormat);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `leads-export-${new Date().toISOString().split('T')[0]}.${exportFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
       toast({
         title: 'Export Complete',
         description: 'Lead data has been exported successfully',
@@ -155,38 +219,43 @@ export const LeadImportExport: React.FC<LeadImportExportProps> = ({
         duration: 5000,
         isClosable: true,
       });
-    } finally {
-      setExporting(false);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await downloadImportTemplate(exportFormat);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `lead-import-template.${exportFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: 'Template Download Failed',
+        description: 'Failed to download import template',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
   const clearFile = () => {
     setImportFile(null);
-    setImportResult(null);
+    setValidationResult(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
 
-  const downloadTemplate = () => {
-    // Create a CSV template
-    const template = `firstName,lastName,email,phone,address,city,state,zipCode,propertyType,estimatedValue,notes
-John,Doe,john.doe@example.com,555-0123,123 Main St,Anytown,CA,90210,single_family,500000,Interested in selling
-Jane,Smith,jane.smith@example.com,555-0124,456 Oak Ave,Somewhere,NY,10001,multi_family,750000,Looking for quick sale`;
-
-    const blob = new Blob([template], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'lead-import-template.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
+  const canImport = importFile && importProgress.status === 'idle' && !validationResult?.validation.invalidRows;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl">
+    <Modal isOpen={isOpen} onClose={onClose} size="2xl">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Import/Export Leads</ModalHeader>
@@ -225,7 +294,7 @@ Jane,Smith,jane.smith@example.com,555-0124,456 Oak Ave,Somewhere,NY,10001,multi_
                     variant="link"
                     colorScheme="blue"
                     size="sm"
-                    onClick={downloadTemplate}
+                    onClick={handleDownloadTemplate}
                   >
                     Download Import Template
                   </Button>
@@ -259,28 +328,152 @@ Jane,Smith,jane.smith@example.com,555-0124,456 Oak Ave,Somewhere,NY,10001,multi_
                     </HStack>
                   </Box>
 
-                  {importing && (
+                  {/* Validation Results */}
+                  {validationResult && (
+                    <Box w="full">
+                      <HStack spacing={2} mb={2}>
+                        <Text fontSize="sm" fontWeight="medium">File Validation:</Text>
+                        <Badge colorScheme={validationResult.validation.invalidRows > 0 ? 'yellow' : 'green'}>
+                          {validationResult.validation.validRows} valid, {validationResult.validation.invalidRows} invalid
+                        </Badge>
+                      </HStack>
+                      
+                      {validationResult.validation.errors.length > 0 && (
+                        <Accordion allowToggle>
+                          <AccordionItem>
+                            <AccordionButton>
+                              <Box as="span" flex='1' textAlign='left'>
+                                <FiAlertTriangle style={{ display: 'inline', marginRight: '8px' }} />
+                                View Validation Errors ({validationResult.validation.errors.length})
+                              </Box>
+                              <AccordionIcon />
+                            </AccordionButton>
+                            <AccordionPanel pb={4}>
+                              <VStack align="stretch" spacing={2}>
+                                {validationResult.validation.errors.slice(0, 10).map((error, index) => (
+                                  <Text key={index} fontSize="sm" color="red.600">
+                                    Row {error.row}: {error.message}
+                                  </Text>
+                                ))}
+                                {validationResult.validation.errors.length > 10 && (
+                                  <Text fontSize="sm" color="gray.500">
+                                    ... and {validationResult.validation.errors.length - 10} more errors
+                                  </Text>
+                                )}
+                              </VStack>
+                            </AccordionPanel>
+                          </AccordionItem>
+                        </Accordion>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Import Progress */}
+                  {importProgress.status !== 'idle' && (
                     <VStack spacing={2} w="full">
-                      <Text fontSize="sm">Importing leads...</Text>
-                      <Progress value={importProgress} w="full" colorScheme="blue" />
+                      <Text fontSize="sm">{importProgress.message}</Text>
+                      <Progress 
+                        value={importProgress.percentage} 
+                        w="full" 
+                        colorScheme={importProgress.status === 'failed' ? 'red' : 'blue'} 
+                      />
                       <Text fontSize="sm" color="gray.500">
-                        {importProgress}% complete
+                        {importProgress.currentStep} ({importProgress.currentStepNumber}/{importProgress.totalSteps})
                       </Text>
                     </VStack>
                   )}
 
-                  {importResult && (
-                    <Alert status={importResult.failed > 0 ? 'warning' : 'success'}>
-                      <AlertIcon />
-                      <Box>
-                        <AlertTitle>Import Complete</AlertTitle>
-                        <AlertDescription>
-                          Successfully imported {importResult.imported} leads
-                          {importResult.failed > 0 && `, ${importResult.failed} failed`}
-                        </AlertDescription>
-                      </Box>
-                    </Alert>
-                  )}
+                  {/* Import Options */}
+                  <Accordion allowToggle w="full">
+                    <AccordionItem>
+                      <AccordionButton>
+                        <Box as="span" flex='1' textAlign='left'>
+                          <FiSettings style={{ display: 'inline', marginRight: '8px' }} />
+                          Import Options
+                        </Box>
+                        <AccordionIcon />
+                      </AccordionButton>
+                      <AccordionPanel pb={4}>
+                        <VStack spacing={4} align="stretch">
+                          <HStack spacing={4}>
+                            <FormControl>
+                              <FormLabel fontSize="sm">Update Existing</FormLabel>
+                              <Checkbox
+                                isChecked={importOptions.updateExisting}
+                                onChange={(e) => setImportOptions(prev => ({ ...prev, updateExisting: e.target.checked }))}
+                              >
+                                Update existing leads
+                              </Checkbox>
+                            </FormControl>
+                            
+                            <FormControl>
+                              <FormLabel fontSize="sm">Skip Duplicates</FormLabel>
+                              <Checkbox
+                                isChecked={importOptions.skipDuplicates}
+                                onChange={(e) => setImportOptions(prev => ({ ...prev, skipDuplicates: e.target.checked }))}
+                              >
+                                Skip duplicate leads
+                              </Checkbox>
+                            </FormControl>
+                          </HStack>
+                          
+                          <HStack spacing={4}>
+                            <FormControl>
+                              <FormLabel fontSize="sm">Default Status</FormLabel>
+                              <Select
+                                value={importOptions.defaultStatus}
+                                onChange={(e) => setImportOptions(prev => ({ ...prev, defaultStatus: e.target.value }))}
+                                size="sm"
+                              >
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="qualified">Qualified</option>
+                                <option value="converted">Converted</option>
+                                <option value="lost">Lost</option>
+                              </Select>
+                            </FormControl>
+                            
+                            <FormControl>
+                              <FormLabel fontSize="sm">Default Priority</FormLabel>
+                              <Select
+                                value={importOptions.defaultPriority}
+                                onChange={(e) => setImportOptions(prev => ({ ...prev, defaultPriority: e.target.value }))}
+                                size="sm"
+                              >
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                              </Select>
+                            </FormControl>
+                          </HStack>
+                          
+                          <FormControl>
+                            <FormLabel fontSize="sm">Default Source</FormLabel>
+                            <Input
+                              value={importOptions.defaultSource}
+                              onChange={(e) => setImportOptions(prev => ({ ...prev, defaultSource: e.target.value }))}
+                              size="sm"
+                              placeholder="e.g., import, website, referral"
+                            />
+                          </FormControl>
+                          
+                          <FormControl>
+                            <FormLabel fontSize="sm">Default Tags</FormLabel>
+                            <Input
+                              value={importOptions.defaultTags?.join(', ') || ''}
+                              onChange={(e) => setImportOptions(prev => ({ 
+                                ...prev, 
+                                defaultTags: e.target.value.split(',').map(tag => tag.trim()).filter(Boolean)
+                              }))}
+                              size="sm"
+                              placeholder="tag1, tag2, tag3"
+                            />
+                          </FormControl>
+                        </VStack>
+                      </AccordionPanel>
+                    </AccordionItem>
+                  </Accordion>
                 </VStack>
               )}
 
@@ -303,31 +496,56 @@ Jane,Smith,jane.smith@example.com,555-0124,456 Oak Ave,Somewhere,NY,10001,multi_
               
               <VStack spacing={4} align="stretch">
                 <Text fontSize="sm" color="gray.600">
-                  Export all leads or filtered results to CSV format
+                  Export all leads to your preferred format
                 </Text>
                 
-                <HStack spacing={3}>
+                <HStack spacing={4}>
+                  <FormControl>
+                    <FormLabel fontSize="sm">Export Format</FormLabel>
+                    <Select
+                      value={exportFormat}
+                      onChange={(e) => setExportFormat(e.target.value as 'csv' | 'xlsx' | 'json')}
+                      size="sm"
+                    >
+                      <option value="csv">CSV</option>
+                      <option value="xlsx">Excel</option>
+                      <option value="json">JSON</option>
+                    </Select>
+                  </FormControl>
+                  
                   <Button
                     leftIcon={<FiDownload />}
                     colorScheme="blue"
                     onClick={handleExport}
-                    isLoading={exporting}
+                    isLoading={exportProgress.status === 'processing'}
                     loadingText="Exporting..."
                   >
-                    Export All Leads
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={handleExport}
-                    isLoading={exporting}
-                    loadingText="Exporting..."
-                  >
-                    Export Filtered Results
+                    Export Leads
                   </Button>
                 </HStack>
+
+                {/* Export Progress */}
+                {exportProgress.status !== 'idle' && (
+                  <VStack spacing={2} w="full">
+                    <Text fontSize="sm">{exportProgress.message}</Text>
+                    <Progress 
+                      value={exportProgress.percentage} 
+                      w="full" 
+                      colorScheme={exportProgress.status === 'failed' ? 'red' : 'blue'} 
+                    />
+                  </VStack>
+                )}
               </VStack>
             </Box>
+
+            {/* Error Display */}
+            {error && (
+              <Alert status="error">
+                <AlertIcon />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
           </VStack>
         </ModalBody>
 
@@ -336,11 +554,11 @@ Jane,Smith,jane.smith@example.com,555-0124,456 Oak Ave,Somewhere,NY,10001,multi_
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            {importFile && !importing && (
+            {canImport && (
               <Button
                 colorScheme="blue"
                 onClick={handleImport}
-                isLoading={importing}
+                isLoading={importProgress.status === 'processing'}
                 loadingText="Importing..."
               >
                 Import Leads
