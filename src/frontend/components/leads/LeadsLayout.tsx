@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, HStack, VStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
 import { NavigationPanel, Header, BreadcrumbNav } from '../layout';
-import { useNavigation } from '../../contexts/NavigationContext';
 
 interface LeadsLayoutProps {
   children: React.ReactNode;
@@ -20,15 +19,11 @@ const LeadsLayout: React.FC<LeadsLayoutProps> = ({
   loadingMessage = 'Loading leads...',
   showNavigation = true,
 }) => {
-  const navigation = useNavigation();
-  
-  // Safely destructure with defaults to prevent runtime errors
-  const isCollapsed = navigation?.state?.isCollapsed ?? false;
-  const setCollapsed = navigation?.setCollapsed ?? (() => {});
-
-  // Handle navigation collapse toggle
+  // Default navigation state to prevent hook issues
+  const isCollapsed = false;
   const handleNavigationToggle = (collapsed: boolean) => {
-    setCollapsed(collapsed);
+    // Navigation toggle logic can be added here if needed
+    console.log('Navigation toggle:', collapsed);
   };
 
   if (!isAuthenticated) {

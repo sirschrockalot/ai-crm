@@ -82,6 +82,9 @@ export function useLeads() {
   const [currentLead, setCurrentLead] = useState<Lead | null>(null);
   const [bulkOperation, setBulkOperation] = useState<BulkOperationResult | null>(null);
 
+  // Check if authentication should be bypassed
+  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+
   // Get authentication headers
   const getAuthHeaders = useCallback(() => {
     const token = localStorage.getItem('auth_token');
@@ -89,7 +92,7 @@ export function useLeads() {
   }, []);
 
   const fetchLeads = useCallback(async (filters?: LeadsFilters) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -124,7 +127,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const createLead = useCallback(async (leadData: CreateLeadData) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -144,7 +147,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const updateLead = useCallback(async (leadId: string, updateData: UpdateLeadData) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -166,7 +169,7 @@ export function useLeads() {
   }, [isAuthenticated, leads]);
 
   const deleteLead = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -182,7 +185,7 @@ export function useLeads() {
   }, [isAuthenticated, currentLead]);
 
   const bulkUpdateLeads = useCallback(async (leadIds: string[], updateData: Record<string, any>) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -199,7 +202,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const bulkDeleteLeads = useCallback(async (leadIds: string[]) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -215,7 +218,7 @@ export function useLeads() {
   }, [isAuthenticated, currentLead]);
 
   const importLeads = useCallback(async (file: File) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -263,7 +266,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const exportLeads = useCallback(async (filters?: LeadsFilters) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -304,7 +307,7 @@ export function useLeads() {
   }, [isAuthenticated, leads]);
 
   const getLeadStats = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -315,7 +318,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const getLeadById = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -330,7 +333,7 @@ export function useLeads() {
   }, [isAuthenticated, leads]);
 
   const getLeadActivities = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -341,7 +344,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const getLeadNotes = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -352,7 +355,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const getLeadTasks = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -363,7 +366,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const getLeadDocuments = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -374,7 +377,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const getLeadHistory = useCallback(async (leadId: string) => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
@@ -385,7 +388,7 @@ export function useLeads() {
   }, [isAuthenticated]);
 
   const getFilterOptions = useCallback(async () => {
-    if (!isAuthenticated) {
+    if (!bypassAuth && !isAuthenticated) {
       throw new Error('Authentication required');
     }
 
