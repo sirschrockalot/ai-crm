@@ -134,6 +134,32 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
       ],
     },
     {
+      id: 'transactions',
+      label: 'Transactions',
+      href: '/transactions',
+      icon: FiFileText,
+      description: 'Under-contract deals and closing coordination',
+      permissions: ['transactions:read'],
+      children: [
+        {
+          id: 'transactions-board',
+          label: 'Status Board',
+          href: '/transactions/board',
+          icon: FiBarChart,
+          description: 'Kanban board for managing contract status',
+          permissions: ['transactions:read'],
+        },
+        {
+          id: 'transactions-new',
+          label: 'Add New',
+          href: '/transactions/new',
+          icon: FiPlus,
+          description: 'Create a new under-contract property',
+          permissions: ['transactions:create'],
+        },
+      ],
+    },
+    {
       id: 'leads',
       label: 'Leads',
       href: '/leads',

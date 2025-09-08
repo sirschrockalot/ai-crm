@@ -1,0 +1,4 @@
+first_name,last_name,email,phone,city,state,zip_code,property_type,estimated_value,status,source,notes
+John,Smith,john.smith@email.com,(555) 123-4567,Austin,TX,78701,single_family,350000,new,Website,Interested in Austin area
+Jane,Doe,jane.doe@email.com,(555) 234-5678,Dallas,TX,75201,multi_family,500000,contacted,Referral,Looking for investment properties
+Mike,Johnson,mike.johnson@email.com,(555) 345-6789,Houston,TX,77001,single_family,280000,new,Social Media,First-time buyer

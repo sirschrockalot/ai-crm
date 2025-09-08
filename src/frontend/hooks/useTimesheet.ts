@@ -66,14 +66,14 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
   }, [userId, toast]);
 
   // Save timesheet
-  const saveTimesheet = useCallback(async (hours: number[], notes?: string) => {
+  const saveTimesheet = useCallback(async (hours: number[], notes?: string, dayNotes?: string[]) => {
     if (!userId) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const data = await timesheetService.saveCurrentWeekTimesheet(userId, hours, notes);
+      const data = await timesheetService.saveCurrentWeekTimesheet(userId, hours, notes, dayNotes);
       setTimesheet(data);
       toast({
         title: 'Success',

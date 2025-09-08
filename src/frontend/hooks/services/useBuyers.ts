@@ -69,13 +69,25 @@ export interface BuyersFilters {
 }
 
 export function useBuyers() {
-  const api = useApi<Buyer[]>();
-  const singleBuyerApi = useApi<Buyer>();
-  const [buyers, setBuyers] = useState<Buyer[]>([]);
+  // Check if authentication should be bypassed
+  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+  
+  // Only use API hooks if not in test mode
+  const api = bypassAuth ? null : useApi<Buyer[]>();
+  const singleBuyerApi = bypassAuth ? null : useApi<Buyer>();
+  
+  const [buyers, setBuyers] = useState<Buyer[]>(mockBuyers);
   const [currentBuyer, setCurrentBuyer] = useState<Buyer | null>(null);
-  const [useMockData, setUseMockData] = useState(false);
+  const [useMockData, setUseMockData] = useState(true);
 
   const fetchBuyers = useCallback(async (filters?: BuyersFilters) => {
+    // In test mode, always use mock data
+    if (bypassAuth || !api) {
+      setBuyers(mockBuyers);
+      setUseMockData(true);
+      return mockBuyers;
+    }
+
     try {
       const params = new URLSearchParams();
       if (filters) {
@@ -101,9 +113,19 @@ export function useBuyers() {
       setUseMockData(true);
       return mockBuyers;
     }
-  }, [api]);
+  }, [api, bypassAuth]);
 
   const fetchBuyer = useCallback(async (id: string) => {
+    // In test mode, use mock data
+    if (bypassAuth || !singleBuyerApi) {
+      const mockBuyer = mockBuyers.find(b => b.id === id);
+      if (mockBuyer) {
+        setCurrentBuyer(mockBuyer);
+        return mockBuyer;
+      }
+      throw new Error('Buyer not found');
+    }
+
     try {
       const response = await singleBuyerApi.execute({
         method: 'GET',
@@ -122,9 +144,22 @@ export function useBuyers() {
       }
       throw error;
     }
-  }, [singleBuyerApi]);
+  }, [singleBuyerApi, bypassAuth]);
 
   const createBuyer = useCallback(async (data: CreateBuyerData) => {
+    // In test mode, create mock buyer
+    if (bypassAuth || !singleBuyerApi) {
+      const mockBuyer: Buyer = {
+        ...data,
+        id: Date.now().toString(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isActive: data.isActive ?? true,
+      };
+      setBuyers(prev => [...prev, mockBuyer]);
+      return mockBuyer;
+    }
+
     try {
       const response = await singleBuyerApi.execute({
         method: 'POST',
@@ -147,9 +182,22 @@ export function useBuyers() {
       setBuyers(prev => [...prev, mockBuyer]);
       return mockBuyer;
     }
-  }, [singleBuyerApi]);
+  }, [singleBuyerApi, bypassAuth]);
 
   const updateBuyer = useCallback(async (id: string, data: UpdateBuyerData) => {
+    // In test mode, update mock buyer
+    if (bypassAuth || !singleBuyerApi) {
+      setBuyers(prev => prev.map(buyer =>
+        buyer.id === id
+          ? { ...buyer, ...data, updatedAt: new Date(), isActive: data.isActive ?? buyer.isActive }
+          : buyer
+      ));
+      if (currentBuyer?.id === id) {
+        setCurrentBuyer(prev => prev ? { ...prev, ...data, updatedAt: new Date(), isActive: data.isActive ?? prev.isActive } : null);
+      }
+      return { id, ...data, updatedAt: new Date() } as Buyer;
+    }
+
     try {
       const response = await singleBuyerApi.execute({
         method: 'PUT',
@@ -165,7 +213,7 @@ export function useBuyers() {
     } catch (error) {
       console.warn('API call failed for updating buyer:', error);
       // Update mock buyer if API fails
-            setBuyers(prev => prev.map(buyer =>
+      setBuyers(prev => prev.map(buyer =>
         buyer.id === id
           ? { ...buyer, ...data, updatedAt: new Date(), isActive: data.isActive ?? buyer.isActive }
           : buyer
@@ -175,9 +223,18 @@ export function useBuyers() {
       }
       return { id, ...data, updatedAt: new Date() } as Buyer;
     }
-  }, [singleBuyerApi, currentBuyer]);
+  }, [singleBuyerApi, currentBuyer, bypassAuth]);
 
   const deleteBuyer = useCallback(async (id: string) => {
+    // In test mode, remove from mock data
+    if (bypassAuth || !singleBuyerApi) {
+      setBuyers(prev => prev.filter(buyer => buyer.id !== id));
+      if (currentBuyer?.id === id) {
+        setCurrentBuyer(null);
+      }
+      return;
+    }
+
     try {
       await singleBuyerApi.execute({
         method: 'DELETE',
@@ -196,7 +253,7 @@ export function useBuyers() {
         setCurrentBuyer(null);
       }
     }
-  }, [singleBuyerApi, currentBuyer]);
+  }, [singleBuyerApi, currentBuyer, bypassAuth]);
 
   const toggleBuyerStatus = useCallback(async (id: string) => {
     const buyer = buyers.find(b => b.id === id);
@@ -208,8 +265,8 @@ export function useBuyers() {
   return {
     buyers,
     currentBuyer,
-    loading: api.loading || singleBuyerApi.loading,
-    error: api.error || singleBuyerApi.error,
+    loading: bypassAuth ? false : (api?.loading || singleBuyerApi?.loading || false),
+    error: bypassAuth ? null : (api?.error || singleBuyerApi?.error || null),
     useMockData,
     fetchBuyers,
     fetchBuyer,
@@ -218,8 +275,10 @@ export function useBuyers() {
     deleteBuyer,
     toggleBuyerStatus,
     reset: () => {
-      api.reset();
-      singleBuyerApi.reset();
+      if (!bypassAuth) {
+        api?.reset();
+        singleBuyerApi?.reset();
+      }
       setUseMockData(false);
     },
   };

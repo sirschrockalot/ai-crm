@@ -1,0 +1,226 @@
+{
+  "version": "1.0",
+  "description": "Lead import field mapping configuration for Presidential Digs CRM",
+  "mappings": {
+    "firstName": {
+      "csvColumns": ["first_name", "firstName", "firstname", "fname"],
+      "required": true,
+      "type": "string",
+      "description": "Lead's first name",
+      "example": "John",
+      "validation": {
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-zA-Z\\s\\-']+$"
+      }
+    },
+    "lastName": {
+      "csvColumns": ["last_name", "lastName", "lastname", "lname"],
+      "required": true,
+      "type": "string",
+      "description": "Lead's last name",
+      "example": "Smith",
+      "validation": {
+        "minLength": 1,
+        "maxLength": 50,
+        "pattern": "^[a-zA-Z\\s\\-']+$"
+      }
+    },
+    "email": {
+      "csvColumns": ["email", "email_address", "emailAddress"],
+      "required": true,
+      "type": "string",
+      "description": "Valid email address",
+      "example": "john.smith@email.com",
+      "validation": {
+        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      }
+    },
+    "phone": {
+      "csvColumns": ["phone", "phone_number", "phoneNumber", "telephone", "mobile"],
+      "required": true,
+      "type": "string",
+      "description": "Phone number in any format",
+      "example": "(555) 123-4567",
+      "validation": {
+        "minLength": 10,
+        "pattern": "^[\\d\\s\\-\\(\\)\\+\\.]+$"
+      }
+    },
+    "city": {
+      "csvColumns": ["city", "town", "municipality"],
+      "required": true,
+      "type": "string",
+      "description": "City name",
+      "example": "Austin",
+      "validation": {
+        "minLength": 1,
+        "maxLength": 100
+      }
+    },
+    "state": {
+      "csvColumns": ["state", "province", "region"],
+      "required": true,
+      "type": "string",
+      "description": "State abbreviation or full name",
+      "example": "TX",
+      "validation": {
+        "minLength": 2,
+        "maxLength": 50
+      }
+    },
+    "zipCode": {
+      "csvColumns": ["zip_code", "zipCode", "zip", "postal_code", "postalCode"],
+      "required": true,
+      "type": "string",
+      "description": "ZIP/postal code",
+      "example": "78701",
+      "validation": {
+        "pattern": "^\\d{5}(-\\d{4})?$"
+      }
+    },
+    "propertyType": {
+      "csvColumns": ["property_type", "propertyType", "type", "property_category"],
+      "required": true,
+      "type": "string",
+      "description": "Type of property",
+      "example": "single_family",
+      "validation": {
+        "enum": ["single_family", "multi_family", "commercial", "land"]
+      }
+    },
+    "estimatedValue": {
+      "csvColumns": ["estimated_value", "estimatedValue", "value", "price", "estimated_price"],
+      "required": true,
+      "type": "number",
+      "description": "Property value in USD",
+      "example": 350000,
+      "validation": {
+        "min": 0,
+        "max": 10000000
+      }
+    },
+    "address": {
+      "csvColumns": ["address", "street_address", "streetAddress", "property_address", "propertyAddress"],
+      "required": false,
+      "type": "string",
+      "description": "Property address",
+      "example": "123 Main Street",
+      "validation": {
+        "maxLength": 200
+      }
+    },
+    "propertyAddress": {
+      "csvColumns": ["property_address", "propertyAddress", "alt_address", "altAddress"],
+      "required": false,
+      "type": "string",
+      "description": "Alternative property address",
+      "example": "456 Oak Avenue",
+      "validation": {
+        "maxLength": 200
+      }
+    },
+    "status": {
+      "csvColumns": ["status", "lead_status", "leadStatus", "stage"],
+      "required": false,
+      "type": "string",
+      "description": "Lead status",
+      "example": "new",
+      "default": "new",
+      "validation": {
+        "enum": ["new", "contacted", "qualified", "converted", "lost"]
+      }
+    },
+    "assignedTo": {
+      "csvColumns": ["assigned_to", "assignedTo", "assigned_user", "assignedUser", "owner"],
+      "required": false,
+      "type": "string",
+      "description": "User ID or email of assigned user",
+      "example": "user-1",
+      "validation": {
+        "maxLength": 100
+      }
+    },
+    "source": {
+      "csvColumns": ["source", "lead_source", "leadSource", "origin"],
+      "required": false,
+      "type": "string",
+      "description": "Lead source",
+      "example": "Website",
+      "default": "Import",
+      "validation": {
+        "maxLength": 100
+      }
+    },
+    "company": {
+      "csvColumns": ["company", "company_name", "companyName", "organization"],
+      "required": false,
+      "type": "string",
+      "description": "Company name",
+      "example": "Smith Real Estate",
+      "validation": {
+        "maxLength": 200
+      }
+    },
+    "score": {
+      "csvColumns": ["score", "lead_score", "leadScore", "rating"],
+      "required": false,
+      "type": "number",
+      "description": "Lead score (0-100)",
+      "example": 85,
+      "default": 50,
+      "validation": {
+        "min": 0,
+        "max": 100
+      }
+    },
+    "notes": {
+      "csvColumns": ["notes", "comments", "description", "remarks"],
+      "required": false,
+      "type": "string",
+      "description": "Additional notes",
+      "example": "Interested in Austin area",
+      "validation": {
+        "maxLength": 1000
+      }
+    }
+  },
+  "defaultValues": {
+    "status": "new",
+    "source": "Import",
+    "score": 50,
+    "propertyType": "single_family",
+    "estimatedValue": 0
+  },
+  "validationRules": {
+    "email": {
+      "required": true,
+      "unique": true,
+      "format": "email"
+    },
+    "phone": {
+      "required": true,
+      "format": "phone"
+    },
+    "estimatedValue": {
+      "required": true,
+      "type": "number",
+      "min": 0
+    }
+  },
+  "importOptions": {
+    "duplicateHandling": {
+      "skipDuplicates": true,
+      "updateExisting": false,
+      "createNew": false
+    },
+    "validation": {
+      "strictMode": true,
+      "allowPartialData": false,
+      "maxErrors": 10
+    },
+    "batchSize": 100,
+    "maxFileSize": "10MB",
+    "supportedFormats": ["csv"]
+  }
+}

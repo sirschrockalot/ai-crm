@@ -34,6 +34,8 @@ import {
   FaChartLine,
 } from 'react-icons/fa';
 import { useRouter } from 'next/router';
+import { leadQueueService } from '../../services/leadQueueService';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Types for the acquisitions dashboard
 interface KPIMetric {
@@ -100,6 +102,7 @@ interface StatusUpdate {
 const AcquisitionsDashboard: React.FC = () => {
   const router = useRouter();
   const toast = useToast();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [currentLead, setCurrentLead] = useState<WorkflowLead | null>(null);
 
@@ -366,27 +369,42 @@ const AcquisitionsDashboard: React.FC = () => {
   const handleGetNextLead = async () => {
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Set current user for lead assignment
+      if (user?.id) {
+        leadQueueService.setCurrentUser(user.id);
+      }
       
-      // Get next available lead
-      const nextLead = workflowLeads.find(lead => lead.status === 'New');
-      if (nextLead) {
-        setCurrentLead(nextLead);
+      const result = await leadQueueService.getNextLead();
+      
+      if (result.lead) {
+        // Convert Lead to WorkflowLead for compatibility
+        const workflowLead: WorkflowLead = {
+          id: result.lead.id,
+          name: `${result.lead.firstName} ${result.lead.lastName}`,
+          status: result.lead.status,
+          property: result.lead.propertyAddress || result.lead.address,
+          priority: 'high',
+          phone: result.lead.phone,
+          email: result.lead.email,
+          source: result.lead.source,
+          notes: result.lead.notes,
+        };
+        
+        setCurrentLead(workflowLead);
         toast({
           title: 'Lead Retrieved',
-          description: `Next lead: ${nextLead.name} - ${nextLead.property}`,
+          description: result.message,
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
         
         // Navigate to lead detail
-        router.push(`/leads/${nextLead.id}`);
+        router.push(`/leads/${result.lead.id}`);
       } else {
         toast({
           title: 'No Leads Available',
-          description: 'All leads have been processed',
+          description: result.message,
           status: 'info',
           duration: 3000,
           isClosable: true,

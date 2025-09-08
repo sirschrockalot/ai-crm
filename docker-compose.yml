@@ -41,6 +41,50 @@ services:
     depends_on:
       - auth-service
 
+  # Buyers Service
+  buyers-service:
+    build:
+      context: ./Buyers-Service
+      dockerfile: Dockerfile
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/presidential_digs_crm
+    env_file:
+      - ./Buyers-Service/env.development
+    volumes:
+      - ./Buyers-Service:/app
+      - /app/node_modules
+    networks:
+      - dealcycle-network
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  # Transactions Service
+  transactions-service:
+    build:
+      context: ./Transactions-Service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/presidential_digs_crm
+      - FRONTEND_URL=http://localhost:3000
+    env_file:
+      - ./Transactions-Service/env.development
+    volumes:
+      - ./Transactions-Service:/app
+      - /app/node_modules
+      - ./Transactions-Service/uploads:/app/uploads
+    networks:
+      - dealcycle-network
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
   # MongoDB Database (for future use if needed)
   mongo:
     image: mongo:6.0

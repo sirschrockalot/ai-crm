@@ -1,6 +1,9 @@
-import React from 'react';
-import { Box, Text, Heading, SimpleGrid, Card, CardBody, HStack, VStack, Button, Badge, Icon, Grid } from '@chakra-ui/react';
+import React, { useState, useEffect } from 'react';
+import { Box, Text, Heading, SimpleGrid, Card, CardBody, HStack, VStack, Button, Badge, Icon, Grid, useToast } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import { DashboardLayout } from '../../components/dashboard';
+import { leadQueueService, LeadQueueStats } from '../../services/leadQueueService';
+import { useAuth } from '../../contexts/AuthContext';
 import { 
   FaCalendarAlt, 
   FaPhone, 
@@ -18,6 +21,76 @@ import {
 } from 'react-icons/fa';
 
 const AcquisitionsDashboard: React.FC = () => {
+  const router = useRouter();
+  const toast = useToast();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [queueStats, setQueueStats] = useState<LeadQueueStats>({
+    totalLeads: 0,
+    newLeads: 0,
+    callbackLeads: 0,
+    followUpLeads: 0,
+    avgCallTime: 0,
+    todayGoal: 0,
+    callsMade: 0,
+  });
+
+  useEffect(() => {
+    // Set current user for lead assignment
+    if (user?.id) {
+      leadQueueService.setCurrentUser(user.id);
+    }
+    
+    // Load initial queue stats
+    loadQueueStats();
+  }, [user]);
+
+  const loadQueueStats = () => {
+    const stats = leadQueueService.getQueueStats();
+    setQueueStats(stats);
+  };
+
+  const handleGetNextLead = async () => {
+    setLoading(true);
+    try {
+      const result = await leadQueueService.getNextLead();
+      
+      if (result.lead) {
+        // Update stats
+        setQueueStats(result.stats);
+        
+        toast({
+          title: 'Lead Retrieved',
+          description: result.message,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Navigate to lead detail page
+        router.push(`/leads/${result.lead.id}`);
+      } else {
+        toast({
+          title: 'No Leads Available',
+          description: result.message,
+          status: 'info',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to get next lead',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       {/* Page Header */}
@@ -45,8 +118,8 @@ const AcquisitionsDashboard: React.FC = () => {
                 <Icon as={FaPhone} boxSize={5} />
                 <Text fontWeight="semibold" fontSize="lg">Scheduled Callbacks</Text>
               </HStack>
-              <Text fontSize="2xl" fontWeight="bold">5 calls</Text>
-              <Text fontSize="sm" opacity={0.9}>Next: John Smith at 10:30 AM</Text>
+              <Text fontSize="2xl" fontWeight="bold">{queueStats.callbackLeads} calls</Text>
+              <Text fontSize="sm" opacity={0.9}>Scheduled callbacks pending</Text>
             </VStack>
           </CardBody>
         </Card>
@@ -59,7 +132,7 @@ const AcquisitionsDashboard: React.FC = () => {
                 <Icon as={FaClock} boxSize={5} />
                 <Text fontWeight="semibold" fontSize="lg">Follow-up Leads</Text>
               </HStack>
-              <Text fontSize="2xl" fontWeight="bold">12 leads</Text>
+              <Text fontSize="2xl" fontWeight="bold">{queueStats.followUpLeads} leads</Text>
               <Text fontSize="sm" opacity={0.9}>Last contacted 2+ days ago</Text>
             </VStack>
           </CardBody>
@@ -73,7 +146,7 @@ const AcquisitionsDashboard: React.FC = () => {
                 <Icon as={FaUserPlus} boxSize={5} />
                 <Text fontWeight="semibold" fontSize="lg">New Leads</Text>
               </HStack>
-              <Text fontSize="2xl" fontWeight="bold">8 leads</Text>
+              <Text fontSize="2xl" fontWeight="bold">{queueStats.newLeads} leads</Text>
               <Text fontSize="sm" opacity={0.9}>Added in last 24 hours</Text>
             </VStack>
           </CardBody>
@@ -101,6 +174,9 @@ const AcquisitionsDashboard: React.FC = () => {
               py={4}
               fontSize="lg"
               fontWeight="semibold"
+              onClick={handleGetNextLead}
+              isLoading={loading}
+              loadingText="Getting Lead..."
             >
               Get Next Lead
             </Button>
@@ -109,15 +185,15 @@ const AcquisitionsDashboard: React.FC = () => {
             <HStack spacing={8} mt={4}>
               <HStack spacing={2}>
                 <Icon as={FaUsers} color="gray.500" boxSize={4} />
-                <Text fontSize="sm" color="gray.600">12 leads in your queue</Text>
+                <Text fontSize="sm" color="gray.600">{queueStats.totalLeads} leads in your queue</Text>
               </HStack>
               <HStack spacing={2}>
                 <Icon as={FaClock} color="gray.500" boxSize={4} />
-                <Text fontSize="sm" color="gray.600">Avg call time: 4.2 minutes</Text>
+                <Text fontSize="sm" color="gray.600">Avg call time: {queueStats.avgCallTime} minutes</Text>
               </HStack>
               <HStack spacing={2}>
                 <Icon as={FaCrosshairs} color="gray.500" boxSize={4} />
-                <Text fontSize="sm" color="gray.600">Today&apos;s goal: 25 calls</Text>
+                <Text fontSize="sm" color="gray.600">Today&apos;s goal: {queueStats.todayGoal} calls</Text>
               </HStack>
             </HStack>
           </VStack>
@@ -236,7 +312,7 @@ const AcquisitionsDashboard: React.FC = () => {
                 <HStack spacing={3}>
                   <Icon as={FaPhone} color="white" boxSize={6} bg="blue.500" p={2} borderRadius="md" />
                   <VStack align="start" spacing={1}>
-                    <Text fontSize="xl" fontWeight="700" color="gray.800">23</Text>
+                    <Text fontSize="xl" fontWeight="700" color="gray.800">{queueStats.callsMade}</Text>
                     <Text fontSize="sm" color="gray.600">Calls Made</Text>
                   </VStack>
                 </HStack>

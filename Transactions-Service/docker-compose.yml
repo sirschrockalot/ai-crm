@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  transactions-service:
+    build: .
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/presidential-digs-crm
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

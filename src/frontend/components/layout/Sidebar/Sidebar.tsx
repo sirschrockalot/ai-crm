@@ -60,6 +60,12 @@ const navItems = [
     icon: FiActivity,
     description: 'Workflow automation'
   },
+  {
+    label: 'Transactions',
+    href: '/transactions',
+    icon: FiDollarSign,
+    description: 'Under-contract deals & closings'
+  },
 ];
 
 const Sidebar: React.FC = () => {
