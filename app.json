@@ -1,0 +1,46 @@
+{
+  "name": "Presidential Digs CRM",
+  "description": "Real Estate CRM Application with Transaction Management",
+  "repository": "https://github.com/sirschrockalot/ai-crm",
+  "logo": "https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=PD",
+  "keywords": ["real-estate", "crm", "transactions", "react", "nextjs"],
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node.js environment",
+      "value": "production"
+    },
+    "NEXT_PUBLIC_BYPASS_AUTH": {
+      "description": "Bypass authentication for demo purposes",
+      "value": "true"
+    },
+    "NEXT_PUBLIC_TRANSACTIONS_API_URL": {
+      "description": "Transactions service API URL",
+      "value": "https://your-transactions-service.herokuapp.com/api/v1"
+    },
+    "NEXT_PUBLIC_BUYERS_API_URL": {
+      "description": "Buyers service API URL", 
+      "value": "https://your-buyers-service.herokuapp.com/api/v1"
+    },
+    "NEXT_PUBLIC_AUTH_API_URL": {
+      "description": "Auth service API URL",
+      "value": "https://your-auth-service.herokuapp.com/api/v1"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ]
+}

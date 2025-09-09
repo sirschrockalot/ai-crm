@@ -1,0 +1,19 @@
+# Heroku Environment Variables Configuration
+# Copy this file and set these variables in your Heroku app settings
+
+# Application Environment
+NODE_ENV=production
+
+# Authentication Bypass (for demo purposes)
+NEXT_PUBLIC_BYPASS_AUTH=true
+
+# Service URLs (update these with your actual Heroku app URLs)
+NEXT_PUBLIC_TRANSACTIONS_API_URL=https://your-transactions-service.herokuapp.com/api/v1
+NEXT_PUBLIC_BUYERS_API_URL=https://your-buyers-service.herokuapp.com/api/v1
+NEXT_PUBLIC_AUTH_API_URL=https://your-auth-service.herokuapp.com/api/v1
+
+# Database (if using Heroku Postgres)
+DATABASE_URL=postgresql://username:password@hostname:port/database
+
+# Optional: Custom domain
+NEXT_PUBLIC_APP_URL=https://your-crm-app.herokuapp.com
