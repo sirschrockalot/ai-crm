@@ -65,7 +65,7 @@ services:
   # Transactions Service
   transactions-service:
     build:
-      context: ./Transactions-Service
+      context: ../transactions-service
       dockerfile: Dockerfile
     ports:
       - "3003:3003"
@@ -74,11 +74,11 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/presidential_digs_crm
       - FRONTEND_URL=http://localhost:3000
     env_file:
-      - ./Transactions-Service/env.development
+      - ../transactions-service/env.development
     volumes:
-      - ./Transactions-Service:/app
+      - ../transactions-service:/app
       - /app/node_modules
-      - ./Transactions-Service/uploads:/app/uploads
+      - ../transactions-service/uploads:/app/uploads
     networks:
       - dealcycle-network
     depends_on:
