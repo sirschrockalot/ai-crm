@@ -810,7 +810,7 @@ const TransactionDetailPage: React.FC = () => {
                         </HStack>
                         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
                           <Box>
-                            <Text fontWeight="semibold" fontSize="sm" color="gray.600">Seller's Name</Text>
+                            <Text fontWeight="semibold" fontSize="sm" color="gray.600">Seller&apos;s Name</Text>
                             <Text>{transaction.sellerName || '-'}</Text>
                           </Box>
                           <Box>

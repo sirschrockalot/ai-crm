@@ -71,7 +71,7 @@ const TransactionsListPage: React.FC = () => {
                     {items.length === 0 && (
                       <Tr>
                         <Td colSpan={6}>
-                          <Text color="gray.600">No transactions yet. Click "Add New" to create one.</Text>
+                          <Text color="gray.600">No transactions yet. Click &quot;Add New&quot; to create one.</Text>
                         </Td>
                       </Tr>
                     )}

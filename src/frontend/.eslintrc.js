@@ -16,6 +16,7 @@ module.exports = {
     'no-debugger': 'error',
     'react-hooks/exhaustive-deps': 'warn',
     'import/no-anonymous-default-export': 'off',
+    'react/no-unescaped-entities': 'off',
   },
   overrides: [
     {
