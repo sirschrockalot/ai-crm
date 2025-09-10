@@ -1,0 +1,28 @@
+{
+  "name": "DealCycle CRM",
+  "description": "A modern, AI-powered CRM platform for real estate wholesalers",
+  "repository": "https://github.com/sirschrockalot/ai-crm",
+  "logo": "https://via.placeholder.com/150x150/4A90E2/FFFFFF?text=DC",
+  "keywords": ["crm", "real-estate", "wholesaling", "nextjs", "typescript"],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Node.js environment",
+      "value": "production"
+    },
+    "NEXT_PUBLIC_BYPASS_AUTH": {
+      "description": "Enable authentication bypass for testing",
+      "value": "true"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  }
+}
