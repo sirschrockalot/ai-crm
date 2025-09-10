@@ -85,11 +85,11 @@ export const BuyerExport: React.FC<BuyerExportProps> = ({ onExportComplete, onCl
   ];
 
   const updateFilters = (key: string, value: any) => {
-    const newFilters = { ...exportOptions.filters };
+    const newFilters = { ...exportOptions.filters } as any;
     if (value === '' || value === undefined) {
-      delete newFilters[key as keyof typeof newFilters];
+      delete newFilters[key];
     } else {
-      newFilters[key as keyof typeof newFilters] = value;
+      newFilters[key] = value;
     }
     
     const newOptions = { ...exportOptions, filters: newFilters };
