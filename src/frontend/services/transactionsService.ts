@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL || 'http://localhost:3003/api/v1';
+const JWT_TOKEN = process.env.NEXT_PUBLIC_JWT_TOKEN;
 
 export interface TransactionProperty {
   id: string;
@@ -190,6 +191,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
   const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
+      ...(JWT_TOKEN && { 'Authorization': `Bearer ${JWT_TOKEN}` }),
       ...options.headers,
     },
     ...options,
@@ -309,6 +311,9 @@ export const transactionsService = {
       
       const response = await fetch(`${API_BASE_URL}/transactions/${id}/documents`, {
         method: 'POST',
+        headers: {
+          ...(JWT_TOKEN && { 'Authorization': `Bearer ${JWT_TOKEN}` }),
+        },
         body: formData,
       });
 
