@@ -23,8 +23,8 @@ const BuyersLayout: React.FC<BuyersLayoutProps> = ({
   const navigation = useNavigation();
   
   // Safely destructure with defaults to prevent runtime errors
-  const isCollapsed = navigation?.state?.isCollapsed ?? false;
-  const setCollapsed = navigation?.setCollapsed ?? (() => {});
+  const isCollapsed = false; // Default to expanded
+  const setCollapsed = ((_collapsed: boolean) => {}); // No-op function
 
   // Handle navigation collapse toggle
   const handleNavigationToggle = (collapsed: boolean) => {
