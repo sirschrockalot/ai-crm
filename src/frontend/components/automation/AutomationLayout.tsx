@@ -24,7 +24,7 @@ const AutomationLayout: React.FC<AutomationLayoutProps> = ({
   
   // Safely destructure with defaults to prevent runtime errors
   const isCollapsed = false; // Default to expanded
-  const setCollapsed = (() => {}); // No-op function
+  const setCollapsed = ((_collapsed: boolean) => {}); // No-op function
 
   // Handle navigation collapse toggle
   const handleNavigationToggle = (collapsed: boolean) => {
