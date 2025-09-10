@@ -26,10 +26,7 @@ const BuyersLayout: React.FC<BuyersLayoutProps> = ({
   const isCollapsed = false; // Default to expanded
   const setCollapsed = ((_collapsed: boolean) => {}); // No-op function
 
-  // Handle navigation collapse toggle
-  const handleNavigationToggle = (collapsed: boolean) => {
-    setCollapsed(collapsed);
-  };
+  // Handle navigation collapse toggle - removed since NavigationPanel doesn't support onToggle
 
   // Show loading state
   if (loading) {
