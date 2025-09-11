@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Box, HStack, VStack, Heading, Text, Button, Card, FormControl, FormLabel, Input, Select, Textarea, useToast, SimpleGrid } from '@chakra-ui/react';
 import { Sidebar, Header, Navigation } from '../../components/layout';
@@ -26,37 +26,57 @@ const NewTransactionPage: React.FC = () => {
     notes: '',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submissionRef = useRef(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
+    // Prevent duplicate submissions using both state and ref
+    if (isSubmitting || submissionRef.current) {
+      return;
+    }
+
     // Minimal required fields validation matching screenshots
     if (!form.transactionType || !form.address || !form.city || !form.state || !form.contractDate || !form.notes) {
       toast({ title: 'Missing required fields', status: 'error', duration: 4000 });
       return;
     }
-    const record = await transactionsService.create({
-      address: form.address,
-      city: form.city,
-      state: form.state,
-      zip: form.zip,
-      propertyType: form.propertyType,
-      transactionType: form.transactionType,
-      ...(form.loanType && { loanType: form.loanType }),
-      clientAccount: form.clientAccount,
-      preliminarySearch: form.preliminarySearch as any,
-      jointVenture: form.jointVenture as any,
-      sellerName: form.sellerName,
-      seller2Name: form.seller2Name,
-      acquisitionsAgent: form.acquisitionsAgent,
-      contractDate: new Date(form.contractDate).toISOString(),
-      notes: form.notes,
-      documents: [],
-    });
-    toast({ title: 'Transaction created', status: 'success' });
-    router.push(`/transactions`);
+
+    setIsSubmitting(true);
+    submissionRef.current = true;
+    
+    try {
+      const record = await transactionsService.create({
+        address: form.address,
+        city: form.city,
+        state: form.state,
+        zip: form.zip,
+        propertyType: form.propertyType,
+        transactionType: form.transactionType,
+        ...(form.loanType && { loanType: form.loanType }),
+        clientAccount: form.clientAccount,
+        preliminarySearch: form.preliminarySearch as any,
+        jointVenture: form.jointVenture as any,
+        sellerName: form.sellerName,
+        seller2Name: form.seller2Name,
+        acquisitionsAgent: form.acquisitionsAgent,
+        contractDate: new Date(form.contractDate).toISOString(),
+        notes: form.notes,
+        documents: [],
+      });
+      toast({ title: 'Transaction created', status: 'success' });
+      router.push(`/transactions`);
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      toast({ title: 'Error creating transaction', status: 'error', duration: 4000 });
+    } finally {
+      setIsSubmitting(false);
+      submissionRef.current = false;
+    }
   };
 
   return (
@@ -184,8 +204,16 @@ const NewTransactionPage: React.FC = () => {
             </Card>
 
             <HStack justify="flex-end">
-              <Button variant="ghost" onClick={() => router.push('/transactions')}>Cancel</Button>
-              <Button colorScheme="blue" onClick={handleSubmit}>Save</Button>
+              <Button variant="ghost" onClick={() => router.push('/transactions')} isDisabled={isSubmitting}>Cancel</Button>
+              <Button 
+                colorScheme="blue" 
+                onClick={handleSubmit}
+                isLoading={isSubmitting}
+                loadingText="Saving..."
+                isDisabled={isSubmitting}
+              >
+                Save
+              </Button>
             </HStack>
           </VStack>
         </Box>

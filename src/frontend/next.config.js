@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable React strict mode for better development experience
+  // Note: This can cause components to render twice in development, which is why we use both state and ref for submission tracking
   reactStrictMode: true,
 
   // Suppress hydration warnings in development
