@@ -180,21 +180,150 @@ class ConfigService {
 // Export singleton instance
 export const configService = new ConfigService();
 
-// Export individual getters for convenience
-export const getConfig = () => configService.getConfig();
-export const getApiConfig = () => configService.getApiConfig();
-export const getWebSocketConfig = () => configService.getWebSocketConfig();
-export const getMicroservicesConfig = () => configService.getMicroservicesConfig();
-export const getServiceConfig = (service: keyof MicroservicesConfig) => configService.getServiceConfig(service);
-export const getAuthServiceConfig = () => configService.getAuthServiceConfig();
-export const getLeadsServiceConfig = () => configService.getLeadsServiceConfig();
-export const getTransactionsServiceConfig = () => configService.getTransactionsServiceConfig();
-export const getTimesheetServiceConfig = () => configService.getTimesheetServiceConfig();
-export const getLeadImportServiceConfig = () => configService.getLeadImportServiceConfig();
-export const isDevelopment = () => configService.isDevelopment();
-export const isProduction = () => configService.isProduction();
-export const isStaging = () => configService.isStaging();
-export const getEnvironment = () => configService.getEnvironment();
-export const isAuthBypassEnabled = () => configService.isAuthBypassEnabled();
+// Export individual getters for convenience with fallback
+export const getConfig = () => {
+  try {
+    return configService.getConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback config');
+    return getDefaultConfig();
+  }
+};
+
+export const getApiConfig = () => {
+  try {
+    return configService.getApiConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback API config');
+    return getDefaultConfig().api;
+  }
+};
+
+export const getWebSocketConfig = () => {
+  try {
+    return configService.getWebSocketConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback WebSocket config');
+    return { url: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000' };
+  }
+};
+
+export const getMicroservicesConfig = () => {
+  try {
+    return configService.getMicroservicesConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback microservices config');
+    return getDefaultConfig().microservices;
+  }
+};
+
+export const getServiceConfig = (service: keyof MicroservicesConfig) => {
+  try {
+    return configService.getServiceConfig(service);
+  } catch (error) {
+    console.error('ConfigService not available, using fallback service config for', service);
+    return getDefaultConfig().microservices[service];
+  }
+};
+
+export const getAuthServiceConfig = () => {
+  try {
+    return configService.getAuthServiceConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback auth service config');
+    return {
+      url: process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || 'http://localhost:3001',
+      apiUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_API_URL || 'http://localhost:3001/api'
+    };
+  }
+};
+
+export const getLeadsServiceConfig = () => {
+  try {
+    return configService.getLeadsServiceConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback leads service config');
+    return {
+      url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'http://localhost:3002',
+      apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'http://localhost:3002/api'
+    };
+  }
+};
+
+export const getTransactionsServiceConfig = () => {
+  try {
+    return configService.getTransactionsServiceConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback transactions service config');
+    return {
+      url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'http://localhost:3003',
+      apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api'
+    };
+  }
+};
+
+export const getTimesheetServiceConfig = () => {
+  try {
+    return configService.getTimesheetServiceConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback timesheet service config');
+    return {
+      url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3004',
+      apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'http://localhost:3004/api'
+    };
+  }
+};
+
+export const getLeadImportServiceConfig = () => {
+  try {
+    return configService.getLeadImportServiceConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback lead import service config');
+    return {
+      url: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_URL || 'http://localhost:3005',
+      apiUrl: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_API_URL || 'http://localhost:3005/api'
+    };
+  }
+};
+
+export const isDevelopment = () => {
+  try {
+    return configService.isDevelopment();
+  } catch (error) {
+    return process.env.NODE_ENV === 'development';
+  }
+};
+
+export const isProduction = () => {
+  try {
+    return configService.isProduction();
+  } catch (error) {
+    return process.env.NODE_ENV === 'production';
+  }
+};
+
+export const isStaging = () => {
+  try {
+    return configService.isStaging();
+  } catch (error) {
+    return process.env.NODE_ENV === 'staging';
+  }
+};
+
+export const getEnvironment = () => {
+  try {
+    return configService.getEnvironment();
+  } catch (error) {
+    return process.env.NODE_ENV || 'development';
+  }
+};
+
+export const isAuthBypassEnabled = () => {
+  try {
+    return configService.isAuthBypassEnabled();
+  } catch (error) {
+    return process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+  }
+};
 
 export default configService;
