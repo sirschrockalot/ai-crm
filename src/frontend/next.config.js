@@ -60,24 +60,24 @@ const nextConfig = {
     ];
   },
 
-  // API rewrites
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/:path*`,
-      },
-      // Proxy for transactions service to avoid browser CORS
-      ...(process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL
-        ? [
-            {
-              source: '/transactions-api/:path*',
-              destination: `${process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL}/:path*`,
-            },
-          ]
-        : []),
-    ];
-  },
+  // API rewrites - temporarily disabled to fix routing issues
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/:path*`,
+  //     },
+  //     // Proxy for transactions service to avoid browser CORS
+  //     ...(process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL
+  //       ? [
+  //           {
+  //             source: '/transactions-api/:path*',
+  //             destination: `${process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL}/:path*`,
+  //           },
+  //         ]
+  //       : []),
+  //   ];
+  // },
 
   // Environment-specific redirects
   async redirects() {
