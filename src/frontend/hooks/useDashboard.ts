@@ -222,13 +222,11 @@ export function useDashboard() {
   // Check session timeout on mount and periodically
   useEffect(() => {
     if (!bypassAuth && isAuthenticated) {
-      // Check session timeout immediately
-      checkSessionTimeout();
-      
-      // Set up periodic session checks
+      // Don't check immediately to avoid aggressive logout
+      // Only set up periodic session checks
       const interval = setInterval(() => {
         checkSessionTimeout();
-      }, 120000); // Check every 2 minutes to avoid overwhelming the system
+      }, 600000); // Check every 10 minutes to avoid overwhelming the system
 
       return () => clearInterval(interval);
     }

@@ -147,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (state.user) {
         await checkSessionTimeout();
       }
-    }, 300000); // Check every 5 minutes to avoid overwhelming the system
+    }, 900000); // Check every 15 minutes to avoid overwhelming the system
 
     return () => clearInterval(checkInterval);
   }, [state.user]);
@@ -166,21 +166,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      // Use the auth service's session timeout endpoint
       const controller = new AbortController();
-      const response = await fetch('/api/auth/session/timeout', {
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
+      const response = await fetch(`${authServiceUrl}/api/auth/session/timeout`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         signal: controller.signal,
       });
 
       if (response.ok) {
         const data = await response.json();
-        setState(prev => ({
-          ...prev,
-          sessionTimeout: data.timeRemaining,
-          isSessionExpiringSoon: data.isExpiringSoon,
-        }));
+        if (data.valid) {
+          // Session is valid, update state
+          setState(prev => ({
+            ...prev,
+            isAuthenticated: true,
+            sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
+            isSessionExpiringSoon: false,
+          }));
+        } else {
+          // Session is invalid or timed out
+          console.log('Session invalid or timed out:', data.message);
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
+          setState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+            sessionTimeout: null,
+            isSessionExpiringSoon: false,
+          });
+          router.push('/auth/login');
+        }
       } else if (response.status === 401) {
         // Session expired, clear state and redirect
         console.log('Session expired, clearing authentication state');
@@ -196,8 +218,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         router.push('/auth/login');
       } else {
-        // Other errors (like 500), just log but don't logout
-        console.warn('Session timeout check failed with status:', response.status);
+        // Other errors (like 500, 404), just log but don't logout
+        console.warn('Session timeout check failed with status:', response.status, 'but not logging out');
       }
     } catch (error) {
       // Ignore abort errors
@@ -214,26 +236,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const extendSession = useCallback(async () => {
     try {
       const controller = new AbortController();
-      const response = await fetch('/api/auth/session/extend', {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw new Error('No token available');
+      }
+
+      // Use the auth service's session timeout endpoint to extend session
+      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
+      const response = await fetch(`${authServiceUrl}/api/auth/session/timeout`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         signal: controller.signal,
       });
 
       if (response.ok) {
-        setState(prev => ({
-          ...prev,
-          isSessionExpiringSoon: false,
-        }));
+        const data = await response.json();
+        if (data.valid) {
+          setState(prev => ({
+            ...prev,
+            sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
+            isSessionExpiringSoon: false,
+          }));
+          return data;
+        } else {
+          throw new Error(data.message || 'Session is invalid');
+        }
+      } else {
+        throw new Error(`Session extend failed: ${response.status}`);
       }
     } catch (error) {
-      // Ignore abort errors
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
       console.error('Failed to extend session:', error);
+      throw error;
     }
   }, []);
 

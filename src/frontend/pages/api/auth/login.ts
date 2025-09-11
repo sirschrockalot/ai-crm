@@ -34,7 +34,7 @@ export default async function handler(
     }
 
     // Call the auth service
-    const authServiceUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
     const response = await fetch(`${authServiceUrl}/api/auth/login`, {
       method: 'POST',
       headers: {
