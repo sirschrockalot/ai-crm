@@ -60,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sessionTimeout: null,
     isSessionExpiringSoon: false,
   });
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Development mode authentication bypass
   const isDevelopmentMode = process.env.NODE_ENV === 'development';
@@ -67,6 +68,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state
   useEffect(() => {
+    if (isInitialized) {
+      return; // Already initialized, don't run again
+    }
+
     if (bypassAuth) {
       setState({
         user: {
@@ -84,11 +89,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         sessionTimeout: null,
         isSessionExpiringSoon: false,
       });
+      setIsInitialized(true);
       return;
     }
 
     initializeAuth();
-  }, []);
+  }, [isInitialized]);
 
   // Check for existing token on mount
   const initializeAuth = useCallback(async () => {
@@ -166,6 +172,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         setState(prev => ({ ...prev, isLoading: false }));
       }
+      
+      // Mark as initialized regardless of success/failure
+      setIsInitialized(true);
     } catch (error) {
       // Ignore abort errors
       if (error instanceof Error && error.name === 'AbortError') {
@@ -173,13 +182,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       console.error('Auth initialization failed:', error);
       
-      // In bypass mode, don't clear state on network errors
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-      if (bypassAuth) {
-        setState(prev => ({ ...prev, isLoading: false }));
-      } else {
-        setState(prev => ({ ...prev, isLoading: false }));
-      }
+      // Don't clear state on network errors - just log the error and set loading to false
+      // This prevents clearing valid authentication state when the auth service is down
+      setState(prev => ({ ...prev, isLoading: false }));
+      
+      // Mark as initialized even on error
+      setIsInitialized(true);
     }
   }, []);
 
@@ -357,6 +365,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
           isSessionExpiringSoon: false,
         });
+        setIsInitialized(true);
         return;
       }
       
@@ -393,6 +402,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         sessionTimeout: null,
         isSessionExpiringSoon: false,
       });
+
+      // Mark as initialized after successful login
+      setIsInitialized(true);
 
       // Start session monitoring
       startSessionMonitoring();
