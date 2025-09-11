@@ -78,9 +78,11 @@ const LoginPage: NextPage = () => {
         isClosable: true,
       });
       
-      // Use router.push with a small delay to ensure login completes
+      // Use window.location.href instead of router.push to avoid abort errors
       setTimeout(() => {
-        router.push('/dashboard');
+        if (isMountedRef.current) {
+          window.location.href = '/dashboard';
+        }
       }, 100);
     } catch (error) {
       // Only show error if component is still mounted

@@ -374,7 +374,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }));
       throw error;
     }
-  }, [router]);
+  }, [startSessionMonitoring]);
 
   // Login with Google
   const loginWithGoogle = useCallback(async () => {
