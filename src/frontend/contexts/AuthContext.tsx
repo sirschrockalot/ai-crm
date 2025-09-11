@@ -103,9 +103,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       
       if (token && refreshTokenValue) {
-        // Verify token with backend
+        // Verify token with auth service
         const controller = new AbortController();
-        const response = await fetch('/api/auth/me', {
+        const authServiceConfig = getAuthServiceConfig();
+        const response = await fetch(`${authServiceConfig.url}/api/auth/users/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -115,19 +116,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.ok) {
           const userData = await response.json();
           setState({
-            user: userData.data,
+            user: userData,
             isAuthenticated: true,
             isLoading: false,
             error: null,
-            sessionTimeout: null,
+            sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
             isSessionExpiringSoon: false,
           });
           
           // Start session monitoring
           startSessionMonitoring();
         } else {
-          // Token is invalid, try to refresh
-          await refreshToken();
+          // Token is invalid, clear state
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
+          setState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+            sessionTimeout: null,
+            isSessionExpiringSoon: false,
+          });
         }
       } else {
         setState(prev => ({ ...prev, isLoading: false }));
@@ -148,7 +158,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (state.user) {
         await checkSessionTimeout();
       }
-    }, 900000); // Check every 15 minutes to avoid overwhelming the system
+    }, 30 * 60 * 1000); // Check every 30 minutes to reduce aggressive logout
 
     return () => clearInterval(checkInterval);
   }, [state.user]);
@@ -221,6 +231,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         // Other errors (like 500, 404), just log but don't logout
         console.warn('Session timeout check failed with status:', response.status, 'but not logging out');
+        // Don't clear state on network errors, just log the warning
       }
     } catch (error) {
       // Ignore abort errors
@@ -400,18 +411,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Refresh token
   const refreshToken = useCallback(async () => {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
+      const refreshTokenValue = localStorage.getItem('refresh_token');
       
-      if (!refreshToken) {
+      if (!refreshTokenValue) {
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch('/api/auth/refresh', {
+      const authServiceConfig = getAuthServiceConfig();
+      const response = await fetch(`${authServiceConfig.url}/api/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
       });
 
       if (!response.ok) {
