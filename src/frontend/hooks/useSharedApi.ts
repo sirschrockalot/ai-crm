@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { apiService, ApiResponse, ApiError } from '../services/apiService';
 import { loadingService } from '../services/loadingService';
-import { useAuth } from './useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useLocalStorage } from './useLocalStorage';
 import { useDebouncedCallback } from './useDebounce';
 import { withErrorHandling, formatErrorForUser } from '../utils/error';
@@ -26,7 +26,7 @@ export interface UseSharedApiReturn<T> {
 
 // Development mode authentication bypass
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
-const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
 
 export function useSharedApi<T = any>(
   options: UseSharedApiOptions = {}

@@ -145,10 +145,9 @@ const MFASetupPage: NextPage = () => {
           <VStack spacing={6} align="stretch">
             <VStack spacing={4}>
               <Image
-                src="/logo.png"
+                src="/logo.svg"
                 alt="DealCycle CRM"
                 height="60px"
-                fallbackSrc="https://via.placeholder.com/200x60?text=DealCycle+CRM"
               />
               <Box color="green.500" fontSize="4xl">🔒</Box>
               <Heading size="lg" textAlign="center">
@@ -210,10 +209,9 @@ const MFASetupPage: NextPage = () => {
           {/* Header */}
           <VStack spacing={4}>
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DealCycle CRM"
               height="60px"
-              fallbackSrc="https://via.placeholder.com/200x60?text=DealCycle+CRM"
             />
             <Heading size="lg" textAlign="center">
               Set Up Two-Factor Authentication

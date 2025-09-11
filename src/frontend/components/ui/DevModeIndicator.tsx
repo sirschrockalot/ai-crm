@@ -12,7 +12,7 @@ export const DevModeIndicator: React.FC<DevModeIndicatorProps> = ({ show = true 
   useEffect(() => {
     setIsClient(true);
     const isDevelopmentMode = process.env.NODE_ENV === 'development';
-    const bypassAuthValue = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+    const bypassAuthValue = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
     setBypassAuth(bypassAuthValue);
   }, []);
 

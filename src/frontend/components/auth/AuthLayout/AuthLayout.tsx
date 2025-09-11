@@ -29,10 +29,9 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
         {showLogo && (
           <VStack spacing={4}>
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DealCycle CRM"
               height="60px"
-              fallbackSrc="https://via.placeholder.com/200x60?text=DealCycle+CRM"
             />
             {title && (
               <Text fontSize="2xl" fontWeight="bold" textAlign="center">

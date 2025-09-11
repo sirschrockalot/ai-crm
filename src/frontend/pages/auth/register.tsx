@@ -159,10 +159,9 @@ const RegisterPage: NextPage = () => {
           {/* Logo and Header */}
           <VStack spacing={4}>
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DealCycle CRM"
               height="60px"
-              fallbackSrc="https://via.placeholder.com/200x60?text=DealCycle+CRM"
             />
             <Heading size="lg" textAlign="center">
               Create Your Account

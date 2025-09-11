@@ -30,27 +30,11 @@ interface AuthContextType extends AuthState {
 
 // Development mode authentication bypass
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
-const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
 
 export function useAuth(): AuthContextType {
   const [state, setState] = useState<AuthState>(() => {
-    // If bypassing auth in development, start with authenticated state
-    if (bypassAuth) {
-      return {
-        user: {
-          id: 'dev-user-1',
-          email: 'dev@dealcycle.com',
-          firstName: 'Development',
-          lastName: 'User',
-          role: 'admin',
-          tenantId: 'dev-tenant-1',
-        },
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      };
-    }
-    
+    // Always start with unauthenticated state - no bypass
     return {
       user: null,
       isAuthenticated: false,
@@ -59,13 +43,8 @@ export function useAuth(): AuthContextType {
     };
   });
 
-  // Check for existing token on mount (only if not bypassing auth)
+  // Check for existing token on mount
   useEffect(() => {
-    if (bypassAuth) {
-      console.log('🔓 Authentication bypassed for development mode');
-      return;
-    }
-
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('auth_token');
@@ -112,11 +91,6 @@ export function useAuth(): AuthContextType {
   }, []);
 
   const login = useCallback(async (credentials: LoginCredentials) => {
-    if (bypassAuth) {
-      console.log('🔓 Login bypassed for development mode');
-      return;
-    }
-
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
@@ -158,11 +132,6 @@ export function useAuth(): AuthContextType {
   }, []);
 
   const logout = useCallback(async () => {
-    if (bypassAuth) {
-      console.log('🔓 Logout bypassed for development mode');
-      return;
-    }
-
     try {
       const token = localStorage.getItem('auth_token');
       if (token) {

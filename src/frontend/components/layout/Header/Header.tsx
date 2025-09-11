@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Spacer, IconButton, Avatar, Menu, MenuButton, MenuList, MenuItem, useColorMode, useColorModeValue, Badge } from '@chakra-ui/react';
+import { Box, Flex, Heading, Spacer, IconButton, Avatar, Menu, MenuButton, MenuList, MenuItem, useColorMode, useColorModeValue, Badge, Text } from '@chakra-ui/react';
 import { BellIcon, SunIcon, MoonIcon } from '@chakra-ui/icons';
+import { useAuth } from '../../../contexts/AuthContext';
+import { getUserInitials, getDisplayName } from '../../../utils/userUtils';
 
 const Header: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const { user, isAuthenticated } = useAuth();
   const [isClient, setIsClient] = useState(false);
   const bg = useColorModeValue('white', 'gray.900');
 
@@ -35,8 +38,20 @@ const Header: React.FC = () => {
           </MenuList>
         </Menu>
         <Menu>
-          <MenuButton as={Avatar} size="sm" ml={4} name="User" />
+          <MenuButton as={Avatar} size="sm" ml={4} name={getDisplayName(user?.firstName, user?.lastName, user?.email)}>
+            {isAuthenticated && user ? getUserInitials(user.firstName, user.lastName) : 'U'}
+          </MenuButton>
           <MenuList>
+            {isAuthenticated && user && (
+              <Box px={3} py={2} borderBottom="1px solid" borderColor="gray.200">
+                <Text fontSize="sm" fontWeight="bold" color="gray.700">
+                  {getDisplayName(user.firstName, user.lastName, user.email)}
+                </Text>
+                <Text fontSize="xs" color="gray.500">
+                  {user.email}
+                </Text>
+              </Box>
+            )}
             <MenuItem>Profile</MenuItem>
             <MenuItem>Settings</MenuItem>
             <MenuItem>Logout</MenuItem>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/router';
 import { Box, HStack, VStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
 import { NavigationPanel, Header, BreadcrumbNav } from '../index';
-import { useAuth } from '../../../hooks/useAuth';
+import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigation } from '../../../contexts/NavigationContext';
 
 interface MainLayoutProps {
@@ -24,6 +25,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   showBreadcrumbs = false,
 }) => {
   const navigation = useNavigation();
+  const router = useRouter();
+  const { isAuthenticated: authIsAuthenticated, isLoading: authIsLoading } = useAuth();
   
   // Safely destructure with defaults to prevent runtime errors
   const isCollapsed = navigation?.state?.isCollapsed ?? false;
@@ -34,6 +37,17 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Redirect unauthenticated users to login (avoid auth pages and wait for auth to resolve)
+  useEffect(() => {
+    if (authIsLoading) return;
+    if (!authIsAuthenticated) {
+      const onAuthRoute = router.pathname.startsWith('/auth');
+      if (!onAuthRoute) {
+        router.replace('/auth/login');
+      }
+    }
+  }, [authIsAuthenticated, authIsLoading, router]);
 
   // Handle navigation collapse toggle
   const handleNavigationToggle = useCallback((collapsed: boolean) => {
@@ -67,7 +81,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     );
   }
 
-  // Show authentication required state
+  // Show authentication required state (fallback UI; redirect effect will run)
   if (!isAuthenticated) {
     return (
       <Box minH="100vh" bg="gray.50">

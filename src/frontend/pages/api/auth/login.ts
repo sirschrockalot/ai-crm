@@ -12,9 +12,10 @@ interface LoginResponse {
     firstName: string;
     lastName: string;
     role: string;
-    tenantId: string;
+    tenantId?: string;
   };
   token: string;
+  refreshToken?: string;
 }
 
 export default async function handler(
@@ -28,32 +29,46 @@ export default async function handler(
   try {
     const { email, password } = req.body as LoginRequest;
     
-    // Mock validation - accept any valid email/password
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    if (!email.includes('@') || password.length < 3) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    // Call the auth service
+    const authServiceUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    const response = await fetch(`${authServiceUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ identifier: email, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json({ error: errorData.message || 'Login failed' });
     }
 
-    // Return mock user and token
-    const mockUser = {
-      id: '1',
-      email: email,
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin',
-      tenantId: 'tenant-1',
+    const data = await response.json();
+    
+    // Transform the response to match frontend expectations
+    const user = {
+      id: data.user.id || data.user._id,
+      email: data.user.email,
+      firstName: data.user.firstName,
+      lastName: data.user.lastName,
+      role: data.user.role,
+      tenantId: data.user.tenantId,
     };
 
-    const mockToken = 'mock-jwt-token-' + Date.now();
-    
+    const token = data.accessToken || data.token;
+
     return res.status(200).json({
-      user: mockUser,
-      token: mockToken,
+      user,
+      token,
+      refreshToken: data.refreshToken,
     });
   } catch (error) {
+    console.error('Login API error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

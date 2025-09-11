@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { realtimeService, RealtimeMessage, RealtimeConnection } from '../services/realtimeService';
-import { useAuth } from './useAuth';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface UseRealtimeOptions {
   autoConnect?: boolean;

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useSharedApi, useGet, usePost } from './useSharedApi';
 import { useDashboardRealtime } from './useRealtime';
-import { useAuth } from './useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { useLocalStorage } from './useLocalStorage';
 import { useDebounce } from './useDebounce';
 import { withErrorHandling, formatErrorForUser } from '../utils/error';
@@ -59,10 +59,10 @@ export interface DashboardFilters {
 
 // Development mode authentication bypass
 const isDevelopmentMode = process.env.NODE_ENV === 'development';
-const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
 
 export function useDashboard() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, checkSessionTimeout } = useAuth();
   
   // Use shared API hooks
   const dashboardApi = useGet<DashboardData>('/api/dashboard', {
@@ -218,6 +218,21 @@ export function useDashboard() {
     });
     return response;
   }, [dashboardApi]);
+
+  // Check session timeout on mount and periodically
+  useEffect(() => {
+    if (!bypassAuth && isAuthenticated) {
+      // Check session timeout immediately
+      checkSessionTimeout();
+      
+      // Set up periodic session checks
+      const interval = setInterval(() => {
+        checkSessionTimeout();
+      }, 120000); // Check every 2 minutes to avoid overwhelming the system
+
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, checkSessionTimeout, bypassAuth]);
 
   // Real-time subscription setup
   useEffect(() => {

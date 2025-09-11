@@ -112,6 +112,7 @@ const DashboardPage: React.FC = () => {
     realtime,
   } = useDashboard();
 
+
   const toast = useToast();
   const bgColor = useColorModeValue('gray.50', 'gray.900');
   const textColor = useColorModeValue('gray.800', 'white');

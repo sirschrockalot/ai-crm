@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import {
@@ -12,7 +12,7 @@ import {
   Flex,
   Image,
 } from '@chakra-ui/react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
@@ -22,11 +22,19 @@ const LoginPage: NextPage = () => {
   const router = useRouter();
   const { login, isLoading } = useAuth();
   const toast = useToast();
+  const isMountedRef = useRef(true);
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     setCredentials(prev => ({ ...prev, [field]: value }));
@@ -58,24 +66,33 @@ const LoginPage: NextPage = () => {
     if (!validateForm()) {
       return;
     }
-
+    
     try {
       await login(credentials);
+      
+      // Show success toast
       toast({
         title: 'Login successful',
         status: 'success',
         duration: 3000,
         isClosable: true,
       });
-      router.push('/dashboard');
+      
+      // Use router.push with a small delay to ensure login completes
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 100);
     } catch (error) {
-      toast({
-        title: 'Login failed',
-        description: error instanceof Error ? error.message : 'Please check your credentials',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
+      // Only show error if component is still mounted
+      if (isMountedRef.current) {
+        toast({
+          title: 'Login failed',
+          description: error instanceof Error ? error.message : 'Please check your credentials',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
     }
   };
 
@@ -100,10 +117,9 @@ const LoginPage: NextPage = () => {
           {/* Logo and Header */}
           <VStack spacing={4}>
             <Image
-              src="/logo.png"
+              src="/logo.svg"
               alt="DealCycle CRM"
               height="60px"
-              fallbackSrc="https://via.placeholder.com/200x60?text=DealCycle+CRM"
             />
             <Heading size="lg" textAlign="center">
               Welcome to DealCycle CRM

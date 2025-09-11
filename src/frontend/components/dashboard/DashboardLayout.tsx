@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { Box, HStack, VStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
 import { Sidebar, Header, Navigation } from '../layout';
 import { DashboardErrorBoundary, DashboardLoading } from './index';
@@ -20,6 +21,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   loadingMessage = 'Loading...',
   showNavigation = true,
 }) => {
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      // Add a small delay to show the authentication required message briefly
+      const timer = setTimeout(() => {
+        router.push('/auth/login');
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, loading, router]);
+
   if (!isAuthenticated) {
     return (
       <Box minH="100vh" bg="gray.50">
@@ -32,7 +47,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <AlertIcon />
               <AlertTitle>Authentication Required</AlertTitle>
               <AlertDescription>
-                Please log in to access dashboard features.
+                Your session has expired. Redirecting to login page...
               </AlertDescription>
             </Alert>
           </Box>

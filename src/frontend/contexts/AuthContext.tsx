@@ -43,7 +43,7 @@ export interface AuthContextType extends AuthState {
   getUserPermissions: () => string[];
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -62,7 +62,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Development mode authentication bypass
   const isDevelopmentMode = process.env.NODE_ENV === 'development';
-  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true' || isDevelopmentMode;
+  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
 
   // Initialize auth state
   useEffect(() => {
@@ -100,12 +100,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = localStorage.getItem('auth_token');
       const refreshTokenValue = localStorage.getItem('refresh_token');
       
+      
       if (token && refreshTokenValue) {
         // Verify token with backend
-        const response = await fetch('/api/auth/profile', {
+        const controller = new AbortController();
+        const response = await fetch('/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
+          signal: controller.signal,
         });
 
         if (response.ok) {
@@ -129,6 +132,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setState(prev => ({ ...prev, isLoading: false }));
       }
     } catch (error) {
+      // Ignore abort errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error('Auth initialization failed:', error);
       setState(prev => ({ ...prev, isLoading: false }));
     }
@@ -140,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (state.user) {
         await checkSessionTimeout();
       }
-    }, 60000); // Check every minute
+    }, 300000); // Check every 5 minutes to avoid overwhelming the system
 
     return () => clearInterval(checkInterval);
   }, [state.user]);
@@ -148,10 +155,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check session timeout
   const checkSessionTimeout = useCallback(async () => {
     try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        // No token, user is not authenticated
+        setState(prev => ({
+          ...prev,
+          isAuthenticated: false,
+          user: null,
+        }));
+        return;
+      }
+
+      const controller = new AbortController();
       const response = await fetch('/api/auth/session/timeout', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': `Bearer ${token}`,
         },
+        signal: controller.signal,
       });
 
       if (response.ok) {
@@ -161,20 +181,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: data.timeRemaining,
           isSessionExpiringSoon: data.isExpiringSoon,
         }));
+      } else if (response.status === 401) {
+        // Session expired, clear state and redirect
+        console.log('Session expired, clearing authentication state');
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+          sessionTimeout: null,
+          isSessionExpiringSoon: false,
+        });
+        router.push('/auth/login');
+      } else {
+        // Other errors (like 500), just log but don't logout
+        console.warn('Session timeout check failed with status:', response.status);
       }
     } catch (error) {
+      // Ignore abort errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error('Failed to check session timeout:', error);
+      // Don't logout on network errors, just log the error
+      // Only logout if we get a 401 from the auth service
     }
-  }, []);
+  }, [router]);
 
   // Extend session
   const extendSession = useCallback(async () => {
     try {
+      const controller = new AbortController();
       const response = await fetch('/api/auth/session/extend', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
+        signal: controller.signal,
       });
 
       if (response.ok) {
@@ -184,6 +229,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }));
       }
     } catch (error) {
+      // Ignore abort errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       console.error('Failed to extend session:', error);
     }
   }, []);
@@ -193,12 +242,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
+      const controller = new AbortController();
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(credentials),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -225,10 +276,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Start session monitoring
       startSessionMonitoring();
-
-      // Redirect to dashboard
-      router.push('/dashboard');
     } catch (error) {
+      // Ignore abort errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       setState(prev => ({
         ...prev,
         isLoading: false,
