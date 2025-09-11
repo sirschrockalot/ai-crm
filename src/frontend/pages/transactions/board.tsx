@@ -48,7 +48,6 @@ const TransactionStatusBoard: React.FC = () => {
 
   const statusColumns: StatusColumn[] = [
     { id: 'gathering_docs', label: 'Gathering Docs', color: 'red', count: 0 },
-    { id: 'holding_for_funding', label: 'Holding Funding', color: 'green', count: 0 },
     { id: 'gathering_title', label: 'Gathering Title', color: 'blue', count: 0 },
     { id: 'client_help_needed', label: 'Client Help', color: 'gray', count: 0 },
     { id: 'on_hold', label: 'On Hold', color: 'orange', count: 0 },

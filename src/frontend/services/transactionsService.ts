@@ -9,7 +9,7 @@ const JWT_TOKEN = process.env.NEXT_PUBLIC_JWT_TOKEN;
 
 export interface TransactionProperty {
   id: string;
-  status: 'gathering_docs' | 'holding_for_funding' | 'gathering_title' | 'client_help_needed' | 'on_hold' | 'pending_closing' | 'ready_to_close' | 'closed' | 'cancelled';
+  status: 'gathering_docs' | 'gathering_title' | 'client_help_needed' | 'on_hold' | 'pending_closing' | 'ready_to_close' | 'closed' | 'cancelled';
   propertyType?: string;
   transactionType?: string;
   loanType?: string;

@@ -19,7 +19,6 @@ const TransactionsListPage: React.FC = () => {
       case 'pending_closing': return 'purple';
       case 'closed': return 'green';
       case 'cancelled': return 'red';
-      case 'holding_for_funding': return 'orange';
       case 'client_help_needed': return 'red';
       case 'on_hold': return 'gray';
       case 'ready_to_close': return 'green';

@@ -79,6 +79,7 @@ const TransactionDetailPage: React.FC = () => {
   const [editForm, setEditForm] = useState<Partial<TransactionProperty>>({});
   const [newMessage, setNewMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [hideClosedDocs, setHideClosedDocs] = useState(true);
   
   // Seller info modal state
   const { isOpen: isSellerModalOpen, onOpen: onSellerModalOpen, onClose: onSellerModalClose } = useDisclosure();
@@ -430,7 +431,6 @@ const TransactionDetailPage: React.FC = () => {
   const getStatusColor = (status: TransactionProperty['status']) => {
     switch (status) {
       case 'gathering_docs': return 'red';
-      case 'holding_for_funding': return 'green';
       case 'gathering_title': return 'blue';
       case 'client_help_needed': return 'gray';
       case 'on_hold': return 'blue';
@@ -445,7 +445,6 @@ const TransactionDetailPage: React.FC = () => {
   const getStatusLabel = (status: TransactionProperty['status']) => {
     switch (status) {
       case 'gathering_docs': return 'Gathering Documents';
-      case 'holding_for_funding': return 'Holding for Funding';
       case 'gathering_title': return 'Gathering Title';
       case 'client_help_needed': return 'Client Help Needed';
       case 'on_hold': return 'On Hold';
@@ -759,7 +758,6 @@ const TransactionDetailPage: React.FC = () => {
                               onChange={(e) => handleStatusUpdate(e.target.value as TransactionProperty['status'])}
                             >
                               <option value="gathering_docs">Gathering Documents</option>
-                              <option value="holding_for_funding">Holding for Funding</option>
                               <option value="gathering_title">Gathering Title</option>
                               <option value="client_help_needed">Client Help Needed</option>
                               <option value="on_hold">On Hold</option>
@@ -977,6 +975,15 @@ const TransactionDetailPage: React.FC = () => {
                     <HStack justify="space-between">
                       <Heading size="md">Documents</Heading>
                       <HStack spacing={3}>
+                        {transaction.status === 'closed' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setHideClosedDocs(v => !v)}
+                          >
+                            {hideClosedDocs ? 'Show Documents' : 'Hide Documents'}
+                          </Button>
+                        )}
                         <input
                           type="file"
                           ref={fileInputRef}
@@ -997,7 +1004,20 @@ const TransactionDetailPage: React.FC = () => {
 
                     <SimpleGrid columns={{ base: 2, md: 4, lg: 6 }} spacing={4}>
                       {transaction.documents && transaction.documents.length > 0 ? (
-                        transaction.documents.map((doc) => (
+                        transaction.status === 'closed' && hideClosedDocs ? (
+                          <Box
+                            textAlign="center"
+                            py={8}
+                            border="2px dashed"
+                            borderColor="gray.200"
+                            borderRadius="md"
+                          >
+                            <Icon as={FiFileText} boxSize={12} color="gray.300" mb={4} />
+                            <Text color="gray.500">Documents are hidden for closed transactions</Text>
+                            <Text fontSize="sm" color="gray.400">Use "Show Documents" to view</Text>
+                          </Box>
+                        ) : (
+                          transaction.documents.map((doc) => (
                           <Card key={doc.id} size="sm" cursor="pointer" _hover={{ shadow: 'md' }}>
                             <CardBody p={3} textAlign="center">
                               <VStack spacing={2}>
@@ -1034,6 +1054,7 @@ const TransactionDetailPage: React.FC = () => {
                             </CardBody>
                           </Card>
                         ))
+                        )
                       ) : (
                         <Box
                           textAlign="center"
