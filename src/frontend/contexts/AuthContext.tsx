@@ -98,26 +98,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
+      // Check if we're in bypass mode first
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      
+      if (bypassAuth) {
+        // In bypass mode, always set authenticated state without checking tokens
+        setState({
+          user: { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+          sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
+          isSessionExpiringSoon: false,
+        });
+        return;
+      }
+
       const token = localStorage.getItem('auth_token');
       const refreshTokenValue = localStorage.getItem('refresh_token');
       
-      // Check if we're in bypass mode
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-      
       if (token && refreshTokenValue) {
-        if (bypassAuth) {
-          // In bypass mode, just set the user as authenticated without verifying
-          setState({
-            user: { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-            sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
-            isSessionExpiringSoon: false,
-          });
-          return;
-        }
-
         // Verify token with auth service
         const controller = new AbortController();
         const authServiceConfig = getAuthServiceConfig();
@@ -327,6 +327,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = useCallback(async (credentials: LoginCredentials) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
+
+      // Check if we're in bypass mode
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      
+      if (bypassAuth) {
+        // In bypass mode, just set authenticated state without API call
+        setState({
+          user: { id: '1', email: credentials.email, firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+          sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
+          isSessionExpiringSoon: false,
+        });
+        return;
+      }
 
       const controller = new AbortController();
       const response = await fetch('/api/auth/login', {
