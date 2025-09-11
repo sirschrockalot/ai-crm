@@ -101,8 +101,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = localStorage.getItem('auth_token');
       const refreshTokenValue = localStorage.getItem('refresh_token');
       
+      // Check if we're in bypass mode
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
       if (token && refreshTokenValue) {
+        if (bypassAuth) {
+          // In bypass mode, just set the user as authenticated without verifying
+          setState({
+            user: { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+            sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
+            isSessionExpiringSoon: false,
+          });
+          return;
+        }
+
         // Verify token with auth service
         const controller = new AbortController();
         const authServiceConfig = getAuthServiceConfig();
@@ -148,12 +163,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
       console.error('Auth initialization failed:', error);
-      setState(prev => ({ ...prev, isLoading: false }));
+      
+      // In bypass mode, don't clear state on network errors
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      if (bypassAuth) {
+        setState(prev => ({ ...prev, isLoading: false }));
+      } else {
+        setState(prev => ({ ...prev, isLoading: false }));
+      }
     }
   }, []);
 
   // Start session monitoring
   const startSessionMonitoring = useCallback(() => {
+    // Don't start session monitoring in bypass mode
+    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    if (bypassAuth) {
+      return () => {}; // Return empty cleanup function
+    }
+
     const checkInterval = setInterval(async () => {
       if (state.user) {
         await checkSessionTimeout();
@@ -166,6 +194,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check session timeout
   const checkSessionTimeout = useCallback(async () => {
     try {
+      // Don't check session timeout in bypass mode
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      if (bypassAuth) {
+        return;
+      }
+
       const token = localStorage.getItem('auth_token');
       if (!token) {
         // No token, user is not authenticated
