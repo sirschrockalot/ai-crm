@@ -98,8 +98,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // Check if we're in bypass mode first
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      // Check if we're in bypass mode first - HARDCODED FOR TESTING
+      const bypassAuth = true; // process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
       console.log('InitializeAuth: Bypass auth check:', {
         bypassAuth,
@@ -337,8 +337,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      // Check if we're in bypass mode
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      // Check if we're in bypass mode - HARDCODED FOR TESTING
+      const bypassAuth = true; // process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
       console.log('Login: Bypass auth check:', {
         bypassAuth,
