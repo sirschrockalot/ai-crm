@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL || 'http://localhost:3003/api/v1';
+// Use same-origin proxy in browser to avoid CORS; use direct URL on server
+const API_BASE_URL = typeof window === 'undefined'
+  ? (process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL || 'http://localhost:3003/api/v1')
+  : '/transactions-api';
 const JWT_TOKEN = process.env.NEXT_PUBLIC_JWT_TOKEN;
 
 export interface TransactionProperty {
