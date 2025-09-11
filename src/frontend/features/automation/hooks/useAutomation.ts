@@ -514,7 +514,7 @@ export const useAutomation = () => {
         return {
           isValid,
           errors: isValid ? [] : ['Workflow must have at least one node and edge'],
-          warnings: []
+          warnings: [] as string[]
         };
       }
     }, (error) => {
