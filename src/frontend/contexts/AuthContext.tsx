@@ -101,7 +101,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Check if we're in bypass mode first
       const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
+      console.log('InitializeAuth: Bypass auth check:', {
+        bypassAuth,
+        envVar: process.env.NEXT_PUBLIC_BYPASS_AUTH,
+        nodeEnv: process.env.NODE_ENV
+      });
+      
       if (bypassAuth) {
+        console.log('InitializeAuth: Using bypass mode, setting authenticated state');
         // In bypass mode, always set authenticated state without checking tokens
         setState({
           user: { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
@@ -113,6 +120,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         return;
       }
+      
+      console.log('InitializeAuth: Not in bypass mode, checking tokens');
 
       const token = localStorage.getItem('auth_token');
       const refreshTokenValue = localStorage.getItem('refresh_token');
@@ -331,7 +340,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Check if we're in bypass mode
       const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
+      console.log('Login: Bypass auth check:', {
+        bypassAuth,
+        envVar: process.env.NEXT_PUBLIC_BYPASS_AUTH,
+        nodeEnv: process.env.NODE_ENV
+      });
+      
       if (bypassAuth) {
+        console.log('Login: Using bypass mode, skipping API call');
         // In bypass mode, just set authenticated state without API call
         setState({
           user: { id: '1', email: credentials.email, firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
@@ -343,6 +359,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         return;
       }
+      
+      console.log('Login: Not in bypass mode, making API call');
 
       const controller = new AbortController();
       const response = await fetch('/api/auth/login', {
