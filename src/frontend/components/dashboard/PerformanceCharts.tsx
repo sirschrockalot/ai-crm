@@ -6,7 +6,6 @@ import {
   Text,
   Button,
   IconButton,
-  Tooltip,
   useColorModeValue,
   useToast,
   Select,

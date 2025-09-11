@@ -37,7 +37,7 @@ export function useListNavigation<T>({
   onNavigate,
   wrapAround = true,
   autoFocus = false,
-}: ListNavigationOptions<T> = {}): ListNavigationState<T> & ListNavigationActions<T> {
+}: Partial<ListNavigationOptions<T>> = {}): ListNavigationState<T> & ListNavigationActions<T> {
   const [state, setState] = useState<ListNavigationState<T>>({
     currentIndex: Math.max(0, Math.min(initialIndex, items.length - 1)),
     isNavigating: false,

@@ -339,7 +339,7 @@ export const useTimeTracking = (): UseTimeTrackingReturn => {
   const startTimer = useCallback(async (projectId: string, taskId?: string): Promise<boolean> => {
     try {
       const data = await timeTrackingService.startTimer(projectId, taskId);
-      setActiveTimer({ ...data, projectId: data.projectId || 'default' });
+      setActiveTimer({ ...data, projectId: projectId });
       toast({
         title: 'Timer Started',
         description: 'Time tracking timer started successfully',

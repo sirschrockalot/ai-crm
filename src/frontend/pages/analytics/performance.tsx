@@ -50,7 +50,6 @@ const PerformanceAnalyticsPage: React.FC = () => {
             <Navigation />
             <PerformanceMetrics
               timeRange={timeRange}
-              onTimeRangeChange={handleTimeRangeChange}
               onMetricSelect={handleMetricSelect}
             />
           </Box>

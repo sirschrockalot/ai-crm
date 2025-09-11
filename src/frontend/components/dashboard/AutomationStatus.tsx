@@ -8,16 +8,10 @@ import {
   Button,
   Badge,
   IconButton,
-  Tooltip,
   useColorModeValue,
   Progress,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
 } from '@chakra-ui/react';
-import { SettingsIcon, ViewIcon, ExternalLinkIcon } from '@chakra-ui/icons';
+import { SettingsIcon, ViewIcon } from '@chakra-ui/icons';
 
 interface AutomationSystem {
   id: string;

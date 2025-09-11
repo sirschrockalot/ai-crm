@@ -176,11 +176,11 @@ function handleBulkUpdate(
   const { buyerIds, updates } = data;
   
   if (!buyerIds || !Array.isArray(buyerIds) || buyerIds.length === 0) {
-    return res.status(400).json({ error: 'Invalid buyer IDs' });
+    return res.status(400).json({ success: false, message: 'Invalid buyer IDs' });
   }
 
   if (!updates || Object.keys(updates).length === 0) {
-    return res.status(400).json({ error: 'No updates provided' });
+    return res.status(400).json({ success: false, message: 'No updates provided' });
   }
 
   let updatedCount = 0;
@@ -221,7 +221,7 @@ function handleBulkDelete(
   const { buyerIds } = data;
   
   if (!buyerIds || !Array.isArray(buyerIds) || buyerIds.length === 0) {
-    return res.status(400).json({ error: 'Invalid buyer IDs' });
+    return res.status(400).json({ success: false, message: 'Invalid buyer IDs' });
   }
 
   let deletedCount = 0;
@@ -259,11 +259,11 @@ function handleBulkStatus(
   const { buyerIds, isActive } = data;
   
   if (!buyerIds || !Array.isArray(buyerIds) || buyerIds.length === 0) {
-    return res.status(400).json({ error: 'Invalid buyer IDs' });
+    return res.status(400).json({ success: false, message: 'Invalid buyer IDs' });
   }
 
   if (typeof isActive !== 'boolean') {
-    return res.status(400).json({ error: 'Invalid status value' });
+    return res.status(400).json({ success: false, message: 'Invalid status value' });
   }
 
   let updatedCount = 0;

@@ -122,7 +122,7 @@ const WorkflowBuilderPage: React.FC = () => {
     setIsTesting(true);
     try {
       const testResult = await testWorkflow(workflowData);
-      if (testResult.success) {
+      if (testResult && 'success' in testResult && testResult.success) {
         toast({
           title: 'Workflow test successful',
           description: 'Workflow executed successfully',
@@ -132,7 +132,7 @@ const WorkflowBuilderPage: React.FC = () => {
       } else {
         toast({
           title: 'Workflow test failed',
-          description: testResult.error || 'Workflow execution failed',
+          description: (testResult && 'error' in testResult ? testResult.error : null) || 'Workflow execution failed',
           status: 'error',
           duration: 5000,
         });
@@ -152,7 +152,7 @@ const WorkflowBuilderPage: React.FC = () => {
   const handleValidateWorkflow = async (workflowData: any) => {
     try {
       const validation = await validateWorkflow(workflowData);
-      if (validation.isValid) {
+      if (validation && 'isValid' in validation && validation.isValid) {
         toast({
           title: 'Workflow validation successful',
           description: 'Workflow configuration is valid',
@@ -160,9 +160,14 @@ const WorkflowBuilderPage: React.FC = () => {
           duration: 3000,
         });
       } else {
+        // Handle case where validation might be a Workflow object or validation result
+        const errorMessage = validation && 'errors' in validation 
+          ? validation.errors.join(', ')
+          : 'Workflow validation failed';
+        
         toast({
           title: 'Workflow validation failed',
-          description: validation.errors.join(', '),
+          description: errorMessage,
           status: 'error',
           duration: 5000,
         });
@@ -298,7 +303,7 @@ const WorkflowBuilderPage: React.FC = () => {
               )}
 
               {/* Settings Modal */}
-              <Modal isOpen={isOpen} onClose={onClose} size="lg">
+              <Modal isOpen={isOpen} onClose={onClose} size="lg" title="Workflow Settings">
                 <ModalOverlay />
                 <ModalContent>
                   <ModalHeader>Workflow Settings</ModalHeader>

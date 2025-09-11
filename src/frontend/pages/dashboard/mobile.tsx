@@ -12,6 +12,7 @@ import {
   QuickActions
 } from '../../components/dashboard';
 import { useDashboard } from '../../hooks/useDashboard';
+import { FaPlus, FaCamera, FaMapMarkerAlt, FaEdit } from 'react-icons/fa';
 
 const MobileDashboardPage: React.FC = () => {
   const {
@@ -65,10 +66,42 @@ const MobileDashboardPage: React.FC = () => {
   };
 
   const quickActions = [
-    { name: 'Add Lead', action: 'add-lead', icon: 'plus' },
-    { name: 'Take Photo', action: 'take-photo', icon: 'camera' },
-    { name: 'Update Location', action: 'update-location', icon: 'location' },
-    { name: 'Log Activity', action: 'log-activity', icon: 'edit' },
+    { 
+      id: 'add-lead',
+      title: 'Add Lead', 
+      description: 'Add a new lead to the system',
+      action: () => console.log('Add Lead clicked'),
+      icon: FaPlus,
+      category: 'deal' as const,
+      priority: 'high' as const
+    },
+    { 
+      id: 'take-photo',
+      title: 'Take Photo', 
+      description: 'Capture a photo for documentation',
+      action: () => console.log('Take Photo clicked'),
+      icon: FaCamera,
+      category: 'system' as const,
+      priority: 'medium' as const
+    },
+    { 
+      id: 'update-location',
+      title: 'Update Location', 
+      description: 'Update current location information',
+      action: () => console.log('Update Location clicked'),
+      icon: FaMapMarkerAlt,
+      category: 'system' as const,
+      priority: 'low' as const
+    },
+    { 
+      id: 'log-activity',
+      title: 'Log Activity', 
+      description: 'Log a new activity or note',
+      action: () => console.log('Log Activity clicked'),
+      icon: FaEdit,
+      category: 'communication' as const,
+      priority: 'medium' as const
+    },
   ];
 
   const handleRefresh = useCallback(async () => {
@@ -130,7 +163,6 @@ const MobileDashboardPage: React.FC = () => {
           {/* Quick Actions */}
           <QuickActions 
             actions={quickActions}
-            variant="mobile"
           />
 
           {/* Mobile KPI Stats */}
@@ -181,7 +213,21 @@ const MobileDashboardPage: React.FC = () => {
               <Text fontSize="sm" color="gray.500">Latest updates</Text>
             </HStack>
             <ActivityFeed 
-              activities={dashboardData?.activities || []}
+              activities={(dashboardData?.recentActivity || []).map(activity => ({
+                id: activity.id,
+                type: activity.type as 'lead' | 'deal' | 'task' | 'communication' | 'system',
+                title: activity.message,
+                description: activity.message,
+                user: {
+                  name: activity.user || 'System',
+                  avatar: undefined as string | undefined,
+                  role: 'User'
+                },
+                timestamp: activity.timestamp.toISOString(),
+                status: 'completed' as const,
+                priority: 'medium' as const,
+                metadata: {}
+              }))}
               variant="mobile"
             />
           </Box>
@@ -194,7 +240,17 @@ const MobileDashboardPage: React.FC = () => {
               </Text>
             </HStack>
             <NotificationCenter 
-              notifications={dashboardData?.notifications || []}
+              notifications={(dashboardData?.alerts || []).map(alert => ({
+                id: alert.id,
+                type: alert.type,
+                title: alert.title,
+                message: alert.message,
+                timestamp: alert.timestamp.toISOString(),
+                read: alert.read,
+                priority: 'medium' as const,
+                category: 'system' as const,
+                metadata: {}
+              }))}
               variant="mobile"
             />
           </Box>

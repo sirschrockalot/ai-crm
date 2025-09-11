@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useApi } from '../useApi';
 import { useAuth } from '../../contexts/AuthContext';
-import { mockLeads, mockLeadAnalytics, mockLeadStatuses, mockPropertyTypes, mockCities, mockStates, mockLeadSources, mockCompanies, mockLeadScores, mockEstimatedValues, mockAssignedUsers, mockLeadStages, mockLeadActivities, mockLeadNotes, mockLeadTasks, mockLeadDocuments, mockLeadHistory } from '../../services/mockDataService';
+import { mockLeads, mockLeadAnalytics, mockLeadStatuses, mockPropertyTypes, mockCities, mockLeadStages, mockLeadActivities, mockLeadNotes, mockLeadTasks, mockLeadDocuments, mockLeadHistory } from '../../services/mockDataService';
 
 export interface Lead {
   id: string;
@@ -340,7 +340,7 @@ export function useLeads() {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    return mockLeadActivities.filter(activity => activity.leadId === leadId);
+    return mockLeadActivities; // Return all activity types since they don't have leadId
   }, [isAuthenticated]);
 
   const getLeadNotes = useCallback(async (leadId: string) => {
@@ -399,12 +399,6 @@ export function useLeads() {
       statuses: mockLeadStatuses,
       propertyTypes: mockPropertyTypes,
       cities: mockCities,
-      states: mockStates,
-      sources: mockLeadSources,
-      companies: mockCompanies,
-      scores: mockLeadScores,
-      values: mockEstimatedValues,
-      assignedUsers: mockAssignedUsers,
       stages: mockLeadStages,
     };
   }, [isAuthenticated]);

@@ -119,7 +119,6 @@ const NavigationPanel: React.FC<NavigationPanelProps> = ({
           placement="left" 
           onClose={onClose} 
           size="full"
-          onKeyDown={handleKeyDown}
         >
           <DrawerOverlay />
           <DrawerContent>

@@ -176,16 +176,16 @@ export class SettingsConfigService {
   /**
    * Get environment-specific configuration
    */
-  public getEnvironmentConfig() {
+  public getEnvironmentConfig(): Partial<SettingsConfig> & { debugMode?: boolean } {
     switch (this.environment) {
       case 'development':
-        return this.getConfigValue('development', {});
+        return this.getConfigValue('development', { debugMode: true });
       case 'staging':
-        return this.getConfigValue('staging', {});
+        return this.getConfigValue('staging', { debugMode: false });
       case 'production':
-        return this.getConfigValue('production', {});
+        return this.getConfigValue('production', { debugMode: false });
       default:
-        return {};
+        return { debugMode: false };
     }
   }
 

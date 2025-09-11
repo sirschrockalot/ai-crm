@@ -6,7 +6,7 @@ export interface KeyboardListNavigationOptions<T> extends ListNavigationOptions<
   preventDefault?: boolean;
 }
 
-export function useKeyboardListNavigation<T>(options: KeyboardListNavigationOptions<T> = {}) {
+export function useKeyboardListNavigation<T>(options: Partial<KeyboardListNavigationOptions<T>> = {}) {
   const {
     onKeyDown,
     preventDefault = true,

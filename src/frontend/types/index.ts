@@ -76,14 +76,32 @@ export interface Buyer {
   buyerType: BuyerType;
   investmentRange: InvestmentRange;
   preferredPropertyTypes: PropertyType[];
+  // Optional fields used by mock data and UI
+  preferredLocations?: string[];
+  maxPurchasePrice?: number;
+  minPurchasePrice?: number;
+  cashAvailable?: number;
+  financingType?: 'cash' | 'hard_money' | 'conventional';
+  closingTimeframe?: string;
+  source?: string;
+  assignedTo?: string;
+  lastContactDate?: Date;
   notes?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type BuyerType = 'individual' | 'company' | 'investor';
-export type InvestmentRange = '0-50k' | '50k-100k' | '100k-250k' | '250k-500k' | '500k+';
+export type BuyerType = 'individual' | 'company' | 'investor' | 'wholesaler' | 'flipper' | 'end_buyer';
+export type InvestmentRange =
+  | '0-50k'
+  | '50k-100k'
+  | '100k-250k'
+  | '250k-500k'
+  | '500k-1m'
+  | '1m-2m'
+  | '2m+'
+  | '500k+';
 
 // Communication types
 export interface Communication {
@@ -103,7 +121,7 @@ export interface Communication {
 
 export type CommunicationType = 'email' | 'sms' | 'phone' | 'meeting' | 'note';
 export type CommunicationDirection = 'inbound' | 'outbound';
-export type CommunicationStatus = 'sent' | 'delivered' | 'read' | 'failed';
+export type CommunicationStatus = 'sent' | 'delivered' | 'read' | 'failed' | 'completed';
 
 // Workflow types
 export interface Workflow {

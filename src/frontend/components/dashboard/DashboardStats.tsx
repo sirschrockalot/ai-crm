@@ -7,23 +7,20 @@ import {
   Text,
   Grid,
   Stat,
-  StatLabel,
   StatNumber,
   StatHelpText,
   StatArrow,
   useToast,
   useColorModeValue,
-  Button,
   IconButton,
-  Tooltip,
   Badge,
   useBreakpointValue,
+  Tooltip,
 } from '@chakra-ui/react';
-import { RepeatIcon, TriangleUpIcon, TriangleDownIcon } from '@chakra-ui/icons';
-import { Card, ErrorBoundary } from '../ui';
+import { RepeatIcon } from '@chakra-ui/icons';
 
 interface DashboardStatsProps {
-  stats: Record<string, any>;
+  stats: Record<string, number>;
   variant?: 'executive' | 'acquisitions' | 'disposition' | 'team-member' | 'mobile';
   loading?: boolean;
   onRefresh?: () => void;
@@ -95,7 +92,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
     }).format(date);
   };
 
-  const getStatConfig = (key: string, value: any) => {
+  const getStatConfig = (key: string, value: number) => {
     const configs = {
       executive: {
         totalRevenue: { label: 'Total Revenue', format: formatCurrency, icon: '💰' },
@@ -192,8 +189,8 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
 
         {/* Stats Grid */}
         <Grid templateColumns={`repeat(${gridColumns}, 1fr)`} gap={6}>
-          {Object.entries(stats).map(([key, value]) => {
-            const config = getStatConfig(key, value);
+          {Object.entries(stats).map(([key, _value]) => {
+            const config = getStatConfig(key, _value);
             const growthKey = `${key}Growth`;
             const growth = stats[growthKey];
             
@@ -217,7 +214,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
                     </Text>
                   </HStack>
                   <StatNumber fontSize="2xl" fontWeight="bold" color={textColor}>
-                    {config.format(value)}
+                    {config.format(_value)}
                   </StatNumber>
                   {growth !== undefined && (
                     <StatHelpText mb={0}>

@@ -152,7 +152,7 @@ const TransactionStatusBoard: React.FC = () => {
     setDragOverColumn(null);
     const txId = e.dataTransfer.getData('text/plain');
     if (!txId) return;
-    await handleStatusUpdate(txId, columnId);
+    await handleStatusUpdate(txId, columnId as TransactionProperty['status']);
   };
 
   const TransactionCard: React.FC<{ transaction: TransactionProperty }> = ({ transaction }) => (
@@ -315,7 +315,7 @@ const TransactionStatusBoard: React.FC = () => {
                   onChange={(e) => setFilters(prev => ({ ...prev, address: e.target.value }))}
                 >
                   <option value="">All Addresses</option>
-                  {[...new Set(transactions.map(t => t.address))].map(addr => (
+                  {Array.from(new Set(transactions.map(t => t.address))).map(addr => (
                     <option key={addr} value={addr}>{addr}</option>
                   ))}
                 </Select>
@@ -326,7 +326,7 @@ const TransactionStatusBoard: React.FC = () => {
                   onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
                 >
                   <option value="">All Cities</option>
-                  {[...new Set(transactions.map(t => `${t.city}, ${t.state}`))].map(location => (
+                  {Array.from(new Set(transactions.map(t => `${t.city}, ${t.state}`))).map(location => (
                     <option key={location} value={location}>{location}</option>
                   ))}
                 </Select>
@@ -337,7 +337,7 @@ const TransactionStatusBoard: React.FC = () => {
                   onChange={(e) => setFilters(prev => ({ ...prev, seller: e.target.value }))}
                 >
                   <option value="">All Sellers</option>
-                  {[...new Set(transactions.map(t => t.sellerName).filter(Boolean))].map(seller => (
+                  {Array.from(new Set(transactions.map(t => t.sellerName).filter(Boolean))).map(seller => (
                     <option key={seller} value={seller}>{seller}</option>
                   ))}
                 </Select>
@@ -348,7 +348,7 @@ const TransactionStatusBoard: React.FC = () => {
                   onChange={(e) => setFilters(prev => ({ ...prev, coordinator: e.target.value }))}
                 >
                   <option value="">All Coordinators</option>
-                  {[...new Set(transactions.map(t => t.coordinatorName).filter(Boolean))].map(coord => (
+                  {Array.from(new Set(transactions.map(t => t.coordinatorName).filter(Boolean))).map(coord => (
                     <option key={coord} value={coord}>{coord}</option>
                   ))}
                 </Select>

@@ -35,6 +35,7 @@
     "date-fns": "^2.30.0",
     "formidable": "^2.1.5",
     "framer-motion": "^10.16.0",
+    "lucide-react": "^0.543.0",
     "next": "14.0.0",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",

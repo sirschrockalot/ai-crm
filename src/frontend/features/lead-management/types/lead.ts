@@ -73,6 +73,7 @@ export interface LeadFormData {
   source?: string;
   company?: string;
   score?: number;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 export interface CommunicationMessage {

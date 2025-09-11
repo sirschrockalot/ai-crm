@@ -62,6 +62,7 @@ const leadFormSchema = z.object({
   source: z.string().default('website'),
   company: z.string().default(''),
   score: z.number().min(0).max(100).optional(),
+  priority: z.enum(['low', 'medium', 'high']).default('medium'),
 });
 
 type LeadFormData = z.infer<typeof leadFormSchema>;
@@ -240,7 +241,8 @@ export const LeadFormPage: React.FC<LeadFormPageProps> = ({ lead, mode = 'create
         await onSubmitProp(data);
       } else {
         // For direct submission, use the form data directly
-        await createLead(data);
+        // The data is validated by zodResolver, so we can safely cast it
+        await createLead(data as any);
         
         toast({
           title: 'Lead Created',

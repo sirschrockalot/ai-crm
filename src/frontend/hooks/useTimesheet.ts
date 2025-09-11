@@ -17,7 +17,7 @@ interface UseTimesheetReturn {
   
   // Actions
   loadTimesheet: () => Promise<void>;
-  saveTimesheet: (hours: number[], notes?: string) => Promise<void>;
+  saveTimesheet: (hours: number[], notes?: string, dayNotes?: string[]) => Promise<void>;
   submitTimesheet: () => Promise<void>;
   updateHours: (dayIndex: number, hours: number) => void;
   getHoursForDay: (dayIndex: number) => number;

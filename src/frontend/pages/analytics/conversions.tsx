@@ -6,7 +6,7 @@ import { ConversionCharts, AnalyticsErrorBoundary, AnalyticsLoading } from '../.
 import { useAnalytics } from '../../features/analytics/hooks/useAnalytics';
 
 const ConversionAnalyticsPage: React.FC = () => {
-  const { loading, error, fetchConversionData } = useAnalytics();
+  const { loading, error, fetchAnalyticsData } = useAnalytics();
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
 
   const handleTimeRangeChange = (range: string) => {
@@ -22,8 +22,8 @@ const ConversionAnalyticsPage: React.FC = () => {
 
   useEffect(() => {
     // Fetch conversion data on mount
-    fetchConversionData({ timeRange });
-  }, [fetchConversionData, timeRange]);
+    fetchAnalyticsData({ timeRange });
+  }, [fetchAnalyticsData, timeRange]);
 
   if (loading && !error) {
     return (
@@ -50,7 +50,6 @@ const ConversionAnalyticsPage: React.FC = () => {
             <Navigation />
             <ConversionCharts
               timeRange={timeRange}
-              onTimeRangeChange={handleTimeRangeChange}
               onSegmentClick={handleSegmentClick}
             />
           </Box>

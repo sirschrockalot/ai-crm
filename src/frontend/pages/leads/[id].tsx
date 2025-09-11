@@ -515,7 +515,7 @@ const LeadDetailPage: React.FC = () => {
             <Box bg="white" borderRadius="12px" p={6} boxShadow="sm" border="1px solid" borderColor="gray.200">
               <Flex justify="space-between" align="center" mb={6} pb={4} borderBottom="2px solid" borderColor="gray.100">
                 <HStack spacing={3}>
-                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                     <FiFile size="16" />
                   </Box>
                   <Heading size="md">Documents</Heading>
@@ -552,8 +552,8 @@ const LeadDetailPage: React.FC = () => {
                       color="white" 
                       borderRadius="8px" 
                       display="flex" 
-                      align="center" 
-                      justify="center"
+                      alignItems="center" 
+                      justifyContent="center"
                       mb={3}
                     >
                       <doc.icon size="20" />
@@ -569,7 +569,7 @@ const LeadDetailPage: React.FC = () => {
             <Box bg="white" borderRadius="12px" p={6} boxShadow="sm" border="1px solid" borderColor="gray.200">
               <Flex justify="space-between" align="center" mb={6} pb={4} borderBottom="2px solid" borderColor="gray.100">
                 <HStack spacing={3}>
-                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                     <FiMessageCircle size="16" />
                   </Box>
                   <Heading size="md">Communication History</Heading>
@@ -607,7 +607,7 @@ const LeadDetailPage: React.FC = () => {
             <Box bg="white" borderRadius="12px" p={6} boxShadow="sm" border="1px solid" borderColor="gray.200">
               <Flex justify="space-between" align="center" mb={6} pb={4} borderBottom="2px solid" borderColor="gray.100">
                 <HStack spacing={3}>
-                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                     <FiClock size="16" />
                   </Box>
                   <Heading size="md">Activity Timeline</Heading>
@@ -630,8 +630,8 @@ const LeadDetailPage: React.FC = () => {
                       color="white" 
                       borderRadius="50%" 
                       display="flex" 
-                      align="center" 
-                      justify="center"
+                      alignItems="center" 
+                      justifyContent="center"
                       flexShrink={0}
                     >
                       <activity.icon size="16" />
@@ -653,7 +653,7 @@ const LeadDetailPage: React.FC = () => {
             <Box bg="white" borderRadius="12px" p={6} boxShadow="sm" border="1px solid" borderColor="gray.200">
               <Flex justify="space-between" align="center" mb={6} pb={4} borderBottom="2px solid" borderColor="gray.100">
                 <HStack spacing={3}>
-                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                     <FiUsers size="16" />
                   </Box>
                   <Heading size="md">Buyer Information</Heading>
@@ -714,7 +714,7 @@ const LeadDetailPage: React.FC = () => {
               color="white"
             >
               <HStack spacing={3} mb={4}>
-                <Box w={8} h={8} bg="rgba(255, 255, 255, 0.2)" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                <Box w={8} h={8} bg="rgba(255, 255, 255, 0.2)" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                   <FiZap size="16" />
                 </Box>
                 <Heading size="md">AI Suggestions</Heading>
@@ -744,7 +744,7 @@ const LeadDetailPage: React.FC = () => {
             <Box bg="white" borderRadius="12px" p={6} boxShadow="sm" border="1px solid" borderColor="gray.200">
               <Flex justify="space-between" align="center" mb={6} pb={4} borderBottom="2px solid" borderColor="gray.100">
                 <HStack spacing={3}>
-                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                     <FiSettings size="16" />
                   </Box>
                   <Heading size="md">Automation Status</Heading>
@@ -778,7 +778,7 @@ const LeadDetailPage: React.FC = () => {
             <Box bg="white" borderRadius="12px" p={6} boxShadow="sm" border="1px solid" borderColor="gray.200">
               <Flex justify="space-between" align="center" mb={6} pb={4} borderBottom="2px solid" borderColor="gray.100">
                 <HStack spacing={3}>
-                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" align="center" justify="center">
+                  <Box w={8} h={8} bg="purple.500" color="white" borderRadius="8px" display="flex" alignItems="center" justifyContent="center">
                     <FiBookmark size="16" />
                   </Box>
                   <Heading size="md">Notes</Heading>

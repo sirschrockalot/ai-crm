@@ -113,7 +113,6 @@ const BuyersLayout: React.FC<BuyersLayoutProps> = ({
         {showNavigation && (
           <NavigationPanel
             isCollapsed={isCollapsed}
-            onToggle={handleNavigationToggle}
           />
         )}
         <Box flex={1} p={{ base: 4, md: 6 }}>

@@ -27,7 +27,7 @@ import {
   NumberDecrementStepper,
 } from '@chakra-ui/react';
 import { useForm, Controller } from 'react-hook-form';
-import { Lead } from '../types/lead';
+import { Lead, LeadStatus, PropertyType } from '../types/lead';
 
 interface LeadFormProps {
   isOpen: boolean;
@@ -47,8 +47,8 @@ interface LeadFormData {
   estimatedValue: number;
   propertyAddress?: string;
   status: string;
-  priority: number;
-  assignedAgent?: string;
+  priority: 'low' | 'medium' | 'high';
+  assignedTo?: string;
   notes?: string;
 }
 
@@ -61,8 +61,8 @@ const defaultValues: LeadFormData = {
   estimatedValue: 0,
   propertyAddress: '',
   status: 'new',
-  priority: 5,
-  assignedAgent: '',
+  priority: 'medium',
+  assignedTo: '',
   notes: '',
 };
 
@@ -163,6 +163,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       const leadData: Partial<Lead> = {
         ...data,
         propertyType: data.propertyType as PropertyType,
+        status: data.status as LeadStatus,
         createdAt: lead?.createdAt || new Date(),
         updatedAt: new Date(),
       };
@@ -403,7 +404,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
 
                 <GridItem>
                   <Controller
-                    name="assignedAgent"
+                    name="assignedTo"
                     control={control}
                     render={({ field }) => (
                       <FormControl>

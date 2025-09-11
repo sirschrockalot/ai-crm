@@ -186,8 +186,9 @@ export const useKeyboardNavigation = (options: KeyboardNavigationOptions = {}) =
 
   // Focus trap for modal/drawer navigation
   const createFocusTrap = useCallback((containerRef: React.RefObject<HTMLElement>) => {
-    const handleTabKey = (event: KeyboardEvent) => {
-      if (event.key === 'Tab' && containerRef.current) {
+    const handleTabKey = (event: Event) => {
+      const keyboardEvent = event as unknown as KeyboardEvent;
+      if (keyboardEvent.key === 'Tab' && containerRef.current) {
         const focusableElements = containerRef.current.querySelectorAll(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
@@ -197,22 +198,22 @@ export const useKeyboardNavigation = (options: KeyboardNavigationOptions = {}) =
         const firstElement = focusableElements[0] as HTMLElement;
         const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
-        if (event.shiftKey) {
+        if (keyboardEvent.shiftKey) {
           if (document.activeElement === firstElement) {
-            event.preventDefault();
+            keyboardEvent.preventDefault();
             lastElement.focus();
           }
         } else {
           if (document.activeElement === lastElement) {
-            event.preventDefault();
+            keyboardEvent.preventDefault();
             firstElement.focus();
           }
         }
       }
     };
 
-    document.addEventListener('keydown', handleTabKey as EventListener);
-    return () => document.removeEventListener('keydown', handleTabKey as EventListener);
+    document.addEventListener('keydown', handleTabKey);
+    return () => document.removeEventListener('keydown', handleTabKey);
   }, []);
 
   return {

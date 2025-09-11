@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { VStack, HStack, Box, Text, useColorModeValue, useToast } from '@chakra-ui/react';
+import { FaPlus, FaEdit, FaBullseye } from 'react-icons/fa';
 import { DashboardLayout } from '../../components/dashboard';
 import { ErrorBoundary, Loading } from '../../components/ui';
 import { 
@@ -75,9 +76,39 @@ const TeamMemberDashboardPage: React.FC = () => {
   };
 
   const quickActions = [
-    { name: 'Add Task', action: 'add-task', icon: 'plus' },
-    { name: 'Log Activity', action: 'log-activity', icon: 'edit' },
-    { name: 'View Goals', action: 'view-goals', icon: 'target' },
+    {
+      id: 'add-task',
+      title: 'Add Task',
+      description: 'Create a new task',
+      action: () => {
+        // TODO: Implement add task functionality
+      },
+      icon: FaPlus,
+      category: 'system' as const,
+      priority: 'medium' as const
+    },
+    { 
+      id: 'log-activity',
+      title: 'Log Activity', 
+      description: 'Record your daily activities',
+      action: () => {
+        // TODO: Implement log activity functionality
+      },
+      icon: FaEdit,
+      category: 'communication' as const,
+      priority: 'medium' as const
+    },
+    {
+      id: 'view-goals',
+      title: 'View Goals',
+      description: 'Check your performance goals',
+      action: () => {
+        // TODO: Implement view goals functionality
+      },
+      icon: FaBullseye,
+      category: 'report' as const,
+      priority: 'medium' as const
+    },
   ];
 
   const handleRefresh = useCallback(async () => {
@@ -139,7 +170,6 @@ const TeamMemberDashboardPage: React.FC = () => {
           {/* Quick Actions */}
           <QuickActions 
             actions={quickActions}
-            variant="team-member"
           />
 
           {/* Team Member KPI Stats */}
@@ -219,7 +249,21 @@ const TeamMemberDashboardPage: React.FC = () => {
                 </HStack>
               </HStack>
               <ActivityFeed 
-                activities={dashboardData?.activities || []}
+                activities={(dashboardData?.recentActivity || []).map(activity => ({
+                  id: activity.id,
+                  type: activity.type as 'lead' | 'deal' | 'task' | 'communication' | 'system',
+                  title: activity.message,
+                  description: activity.message,
+                  user: {
+                    name: activity.user || 'System',
+                    avatar: undefined as string | undefined,
+                    role: 'User'
+                  },
+                  timestamp: activity.timestamp.toISOString(),
+                  status: 'completed' as const,
+                  priority: 'medium' as const,
+                  metadata: {}
+                }))}
                 variant="team-member"
               />
             </Box>
@@ -276,7 +320,17 @@ const TeamMemberDashboardPage: React.FC = () => {
                 </Text>
               </HStack>
               <NotificationCenter 
-                notifications={dashboardData?.notifications || []}
+                notifications={(dashboardData?.alerts || []).map(alert => ({
+                  id: alert.id,
+                  type: alert.type,
+                  title: alert.title,
+                  message: alert.message,
+                  timestamp: alert.timestamp.toISOString(),
+                  read: alert.read,
+                  priority: 'medium' as const,
+                  category: 'system' as const,
+                  metadata: {}
+                }))}
                 variant="team-member"
               />
             </Box>

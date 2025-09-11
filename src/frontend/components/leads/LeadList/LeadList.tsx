@@ -234,7 +234,7 @@ export const LeadList: React.FC<LeadListProps> = ({
       const result = await importLeads(file);
       toast({
         title: 'Import successful',
-        description: `Imported ${result.imported} leads. ${result.errors.length} errors occurred.`,
+        description: `Imported ${result.importedCount} leads successfully.`,
         status: 'success',
       });
     } catch (error) {

@@ -30,6 +30,7 @@ import {
   FiFileText,
   FiChevronDown,
   FiChevronRight,
+  FiPlus,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';

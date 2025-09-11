@@ -1,4 +1,4 @@
-import { Lead } from '../types';
+import { Lead, LeadStatus } from '../types';
 import { mockLeads } from './mockDataService';
 
 export interface LeadQueueStats {
@@ -44,12 +44,12 @@ class LeadQueueService {
       );
       
       const callbackLeads = this.leads.filter(lead => 
-        lead.status === 'callback' && 
+        lead.status === 'contacted' && 
         (!lead.assignedTo || lead.assignedTo === this.currentUser)
       );
       
       const followUpLeads = this.leads.filter(lead => 
-        lead.status === 'contacted' && 
+        lead.status === 'qualified' && 
         (!lead.assignedTo || lead.assignedTo === this.currentUser)
       );
 
@@ -86,8 +86,8 @@ class LeadQueueService {
    */
   getQueueStats(): LeadQueueStats {
     const newLeads = this.leads.filter(lead => lead.status === 'new');
-    const callbackLeads = this.leads.filter(lead => lead.status === 'callback');
-    const followUpLeads = this.leads.filter(lead => lead.status === 'contacted');
+    const callbackLeads = this.leads.filter(lead => lead.status === 'contacted');
+    const followUpLeads = this.leads.filter(lead => lead.status === 'qualified');
 
     return {
       totalLeads: this.leads.length,
@@ -103,7 +103,7 @@ class LeadQueueService {
   /**
    * Update lead status after a call
    */
-  async updateLeadStatus(leadId: string, status: string, notes?: string): Promise<void> {
+  async updateLeadStatus(leadId: string, status: LeadStatus, notes?: string): Promise<void> {
     const leadIndex = this.leads.findIndex(lead => lead.id === leadId);
     if (leadIndex !== -1) {
       this.leads[leadIndex].status = status;
@@ -128,7 +128,7 @@ class LeadQueueService {
   /**
    * Get leads by status
    */
-  getLeadsByStatus(status: string): Lead[] {
+  getLeadsByStatus(status: LeadStatus): Lead[] {
     return this.leads.filter(lead => lead.status === status);
   }
 

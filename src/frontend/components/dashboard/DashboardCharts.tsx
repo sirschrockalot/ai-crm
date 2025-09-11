@@ -8,7 +8,6 @@ import {
   Badge,
   useColorModeValue,
   Progress,
-  Tooltip,
   IconButton,
   Menu,
   MenuButton,
@@ -34,7 +33,7 @@ interface DashboardChartsProps {
   conversionTrendData: ChartData[];
   revenueData: ChartData[];
   loading?: boolean;
-  onChartInteraction?: (chartType: string, data: any) => void;
+  onChartInteraction?: (chartType: string, data: ChartData) => void;
   onExportChart?: (chartType: string, format: 'png' | 'svg' | 'pdf') => void;
 }
 
@@ -64,9 +63,11 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
     }
   };
 
-  const handleChartClick = (chartType: string, data: any) => {
+  const handleChartClick = (chartType: string, data: ChartData | ChartData[]) => {
     if (onChartInteraction) {
-      onChartInteraction(chartType, data);
+      // If data is an array, pass the first item; otherwise pass the data as is
+      const chartData = Array.isArray(data) ? data[0] : data;
+      onChartInteraction(chartType, chartData);
     }
   };
 
@@ -126,7 +127,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({
             }
           >
             <VStack align="stretch" spacing={4}>
-              {leadPipelineData.map((item, index) => (
+              {leadPipelineData.map((item) => (
                 <VStack key={item.name} align="stretch" spacing={2}>
                   <HStack justify="space-between">
                     <HStack>

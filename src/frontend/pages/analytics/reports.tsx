@@ -6,7 +6,7 @@ import { CustomReports, AnalyticsErrorBoundary, AnalyticsLoading } from '../../f
 import { useAnalytics } from '../../features/analytics/hooks/useAnalytics';
 
 const CustomReportsPage: React.FC = () => {
-  const { loading, error, getCustomReport, exportAnalytics } = useAnalytics();
+  const { loading, error, createCustomReport, exportAnalytics } = useAnalytics();
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
 
   const handleTimeRangeChange = (range: string) => {

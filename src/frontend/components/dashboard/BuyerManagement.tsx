@@ -19,11 +19,9 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  Divider,
   Icon,
-  Tooltip,
 } from '@chakra-ui/react';
-import { FaFilter, FaSearch, FaPhone, FaEnvelope, FaCalendar, FaMapMarkerAlt, FaStar, FaUserPlus } from 'react-icons/fa';
+import { FaPhone, FaEnvelope, FaCalendar, FaUserPlus } from 'react-icons/fa';
 
 export interface Buyer {
   id: string;

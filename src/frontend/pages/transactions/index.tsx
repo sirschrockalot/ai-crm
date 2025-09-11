@@ -14,11 +14,15 @@ const TransactionsListPage: React.FC = () => {
 
   const statusColor = (status: TransactionProperty['status']) => {
     switch (status) {
-      case 'under_contract': return 'yellow';
-      case 'title': return 'blue';
-      case 'closing_scheduled': return 'purple';
+      case 'gathering_docs': return 'yellow';
+      case 'gathering_title': return 'blue';
+      case 'pending_closing': return 'purple';
       case 'closed': return 'green';
       case 'cancelled': return 'red';
+      case 'holding_for_funding': return 'orange';
+      case 'client_help_needed': return 'red';
+      case 'on_hold': return 'gray';
+      case 'ready_to_close': return 'green';
       default: return 'gray';
     }
   };

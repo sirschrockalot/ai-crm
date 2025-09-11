@@ -1,4 +1,4 @@
-import { Lead, Buyer, Communication, User, PropertyType, LeadStatus, BuyerType, InvestmentRange, CommunicationType, CommunicationDirection, CommunicationStatus, UserRole } from '../types';
+import { Lead, Buyer, Communication, User } from '../types';
 
 // Mock Users
 export const mockUsers: User[] = [
@@ -343,7 +343,7 @@ export const mockBuyers: Buyer[] = [
     state: 'TX',
     zipCode: '77001',
     buyerType: 'flipper',
-    investmentRange: '200k-500k',
+    investmentRange: '250k-500k',
     preferredPropertyTypes: ['single_family'],
     preferredLocations: ['Houston', 'Sugar Land'],
     maxPurchasePrice: 500000,
@@ -370,7 +370,7 @@ export const mockBuyers: Buyer[] = [
     state: 'TX',
     zipCode: '78201',
     buyerType: 'investor',
-    investmentRange: '300k-800k',
+    investmentRange: '500k-1m',
     preferredPropertyTypes: ['single_family', 'multi_family'],
     preferredLocations: ['San Antonio', 'New Braunfels'],
     maxPurchasePrice: 800000,
@@ -397,7 +397,7 @@ export const mockBuyers: Buyer[] = [
     state: 'TX',
     zipCode: '78702',
     buyerType: 'wholesaler',
-    investmentRange: '400k-1.5m',
+    investmentRange: '500k-1m',
     preferredPropertyTypes: ['single_family', 'multi_family', 'commercial'],
     preferredLocations: ['Austin', 'Round Rock'],
     maxPurchasePrice: 1500000,
@@ -446,7 +446,7 @@ export const mockCommunications: Communication[] = [
 ];
 
 // Mock Property Types
-export const mockPropertyTypes: PropertyType[] = [
+export const mockPropertyTypes: any[] = [
   { id: 'single_family', name: 'Single Family', description: 'Single family residential properties' },
   { id: 'multi_family', name: 'Multi Family', description: 'Multi-family residential properties' },
   { id: 'commercial', name: 'Commercial', description: 'Commercial real estate properties' },
@@ -456,7 +456,7 @@ export const mockPropertyTypes: PropertyType[] = [
 ];
 
 // Mock Lead Statuses
-export const mockLeadStatuses: LeadStatus[] = [
+export const mockLeadStatuses: any[] = [
   { id: 'new', name: 'New', description: 'Newly created lead', color: 'blue' },
   { id: 'contacted', name: 'Contacted', description: 'Initial contact made', color: 'yellow' },
   { id: 'qualified', name: 'Qualified', description: 'Lead has been qualified', color: 'green' },
@@ -465,7 +465,7 @@ export const mockLeadStatuses: LeadStatus[] = [
 ];
 
 // Mock Buyer Types
-export const mockBuyerTypes: BuyerType[] = [
+export const mockBuyerTypes: any[] = [
   { id: 'wholesaler', name: 'Wholesaler', description: 'Buys and resells properties quickly' },
   { id: 'investor', name: 'Investor', description: 'Long-term property investor' },
   { id: 'flipper', name: 'Flipper', description: 'Buys, renovates, and sells properties' },
@@ -473,7 +473,7 @@ export const mockBuyerTypes: BuyerType[] = [
 ];
 
 // Mock Investment Ranges
-export const mockInvestmentRanges: InvestmentRange[] = [
+export const mockInvestmentRanges: any[] = [
   { id: '0-100k', name: '$0 - $100k', min: 0, max: 100000 },
   { id: '100k-250k', name: '$100k - $250k', min: 100000, max: 250000 },
   { id: '250k-500k', name: '$250k - $500k', min: 250000, max: 500000 },
@@ -483,7 +483,7 @@ export const mockInvestmentRanges: InvestmentRange[] = [
 ];
 
 // Mock Communication Types
-export const mockCommunicationTypes: CommunicationType[] = [
+export const mockCommunicationTypes: any[] = [
   { id: 'email', name: 'Email', description: 'Email communication' },
   { id: 'phone', name: 'Phone', description: 'Phone call' },
   { id: 'text', name: 'Text', description: 'Text message' },
@@ -492,13 +492,13 @@ export const mockCommunicationTypes: CommunicationType[] = [
 ];
 
 // Mock Communication Directions
-export const mockCommunicationDirections: CommunicationDirection[] = [
+export const mockCommunicationDirections: any[] = [
   { id: 'inbound', name: 'Inbound', description: 'Communication received from lead/buyer' },
   { id: 'outbound', name: 'Outbound', description: 'Communication sent to lead/buyer' },
 ];
 
 // Mock Communication Statuses
-export const mockCommunicationStatuses: CommunicationStatus[] = [
+export const mockCommunicationStatuses: any[] = [
   { id: 'pending', name: 'Pending', description: 'Communication pending', color: 'yellow' },
   { id: 'sent', name: 'Sent', description: 'Communication sent', color: 'blue' },
   { id: 'delivered', name: 'Delivered', description: 'Communication delivered', color: 'green' },
@@ -507,7 +507,7 @@ export const mockCommunicationStatuses: CommunicationStatus[] = [
 ];
 
 // Mock User Roles
-export const mockUserRoles: UserRole[] = [
+export const mockUserRoles: any[] = [
   { id: 'admin', name: 'Admin', description: 'Full system access', permissions: ['all'] },
   { id: 'manager', name: 'Manager', description: 'Management access', permissions: ['leads', 'buyers', 'reports'] },
   { id: 'agent', name: 'Agent', description: 'Agent access', permissions: ['leads', 'buyers'] },

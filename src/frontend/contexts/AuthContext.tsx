@@ -98,9 +98,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const token = localStorage.getItem('auth_token');
-      const refreshToken = localStorage.getItem('refresh_token');
+      const refreshTokenValue = localStorage.getItem('refresh_token');
       
-      if (token && refreshToken) {
+      if (token && refreshTokenValue) {
         // Verify token with backend
         const response = await fetch('/api/auth/profile', {
           headers: {

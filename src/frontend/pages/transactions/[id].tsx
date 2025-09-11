@@ -1036,7 +1036,6 @@ const TransactionDetailPage: React.FC = () => {
                         ))
                       ) : (
                         <Box
-                          colSpan={6}
                           textAlign="center"
                           py={8}
                           border="2px dashed"

@@ -177,7 +177,7 @@ class ApiService {
   }
 
   public async request<T = any>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
-    return withErrorHandling(async () => {
+    const wrappedFunction = withErrorHandling(async () => {
       // Check cache for GET requests
       if (config.method?.toUpperCase() === 'GET' && config.useCache !== false) {
         const cacheKey = this.getCacheKey(config);
@@ -216,6 +216,8 @@ class ApiService {
       };
       throw apiError;
     });
+
+    return await wrappedFunction();
   }
 
   public async get<T = any>(url: string, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
@@ -244,7 +246,7 @@ class ApiService {
       return;
     }
 
-    for (const key of this.cache.keys()) {
+    for (const key of Array.from(this.cache.keys())) {
       if (key.includes(pattern)) {
         this.cache.delete(key);
       }

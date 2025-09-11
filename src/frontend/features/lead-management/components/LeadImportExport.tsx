@@ -224,11 +224,13 @@ export const LeadImportExport: React.FC<LeadImportExportProps> = ({
 
   const handleDownloadTemplate = async () => {
     try {
-      const blob = await downloadImportTemplate(exportFormat);
+      // Only CSV and XLSX are supported for templates
+      const templateFormat = exportFormat === 'json' ? 'csv' : exportFormat;
+      const blob = await downloadImportTemplate(templateFormat as 'csv' | 'xlsx');
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `lead-import-template.${exportFormat}`;
+      a.download = `lead-import-template.${templateFormat}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

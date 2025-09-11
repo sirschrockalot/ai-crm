@@ -21,6 +21,7 @@ import {
   AutomationLoading 
 } from '../../features/automation';
 import { useAutomation } from '../../features/automation/hooks/useAutomation';
+import { AutomationFilters } from '../../features/automation/types/automation';
 
 const WorkflowsPage: React.FC = () => {
   const {
@@ -39,7 +40,7 @@ const WorkflowsPage: React.FC = () => {
   } = useAutomation();
 
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<AutomationFilters>({
     status: 'all',
     category: 'all',
     search: '',
@@ -97,8 +98,12 @@ const WorkflowsPage: React.FC = () => {
   const handleWorkflowExport = async (workflow: any) => {
     try {
       const exportData = await exportWorkflow(workflow.id);
+      // Handle the response data - it might be a string or an object with data property
+      const jsonData = typeof exportData === 'string'
+        ? exportData
+        : (exportData as any)?.workflow || JSON.stringify(exportData, null, 2);
       // Create download link
-      const blob = new Blob([exportData], { type: 'application/json' });
+      const blob = new Blob([jsonData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;

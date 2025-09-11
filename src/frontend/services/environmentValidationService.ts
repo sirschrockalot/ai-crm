@@ -74,20 +74,20 @@ const FrontendEnvironmentValidationRules = {
   staging: {
     required: ['NEXT_PUBLIC_API_URL', 'NEXT_PUBLIC_GOOGLE_CLIENT_ID'],
     optional: ['NEXT_PUBLIC_TWILIO_ACCOUNT_SID', 'NEXT_PUBLIC_SENTRY_DSN'],
-    warnings: [],
+    warnings: [] as string[],
   },
   production: {
     required: [
       'NEXT_PUBLIC_API_URL', 'NEXT_PUBLIC_GOOGLE_CLIENT_ID', 
       'NEXT_PUBLIC_SENTRY_DSN', 'NEXT_PUBLIC_TWILIO_ACCOUNT_SID'
     ],
-    optional: [],
-    warnings: [],
+    optional: [] as string[],
+    warnings: [] as string[],
   },
   test: {
     required: ['NEXT_PUBLIC_API_URL'],
     optional: ['NEXT_PUBLIC_GOOGLE_CLIENT_ID'],
-    warnings: [],
+    warnings: [] as string[],
   },
 };
 

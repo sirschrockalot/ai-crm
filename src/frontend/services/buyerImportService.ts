@@ -1,4 +1,4 @@
-import { useApi } from '../hooks/useApi';
+import { apiService } from './apiService';
 
 export interface BuyerImportOptions {
   skipDuplicates?: boolean;
@@ -23,13 +23,10 @@ export interface BuyerExportOptions {
 }
 
 class BuyerImportService {
-  private api = useApi<BuyerImportResult>();
+  private api = apiService;
 
   constructor() {
-    this.api.interceptors.request.use((config) => {
-      // Add any request interceptors here
-      return config;
-    });
+    // Interceptors are handled by the ApiService class
   }
 
   /**
@@ -88,7 +85,7 @@ class BuyerImportService {
       }
 
       const response = await this.api.get(`/api/buyers/export?${params.toString()}`, {
-        responseType: 'blob',
+        responseType: 'blob' as any,
       });
 
       return response.data;
@@ -104,7 +101,7 @@ class BuyerImportService {
   async downloadTemplate(): Promise<Blob> {
     try {
       const response = await this.api.get('/api/buyers/template', {
-        responseType: 'blob',
+        responseType: 'blob' as any,
       });
 
       return response.data;

@@ -13,8 +13,8 @@ const buyerSchema = z.object({
   city: z.string().min(1, 'City is required'),
   state: z.string().min(2, 'State is required'),
   zipCode: z.string().regex(/^\d{5}(-\d{4})?$/, 'Invalid ZIP code'),
-  buyerType: z.enum(['individual', 'company', 'investor']),
-  investmentRange: z.enum(['0-50k', '50k-100k', '100k-250k', '250k-500k', '500k+']),
+  buyerType: z.enum(['individual', 'company', 'investor', 'wholesaler', 'flipper', 'end_buyer']),
+  investmentRange: z.enum(['0-50k', '50k-100k', '100k-250k', '250k-500k', '500k-1m', '1m-2m', '2m+', '500k+']),
   preferredPropertyTypes: z.array(z.string()).min(1, 'At least one property type must be selected'),
   notes: z.string().optional(),
   isActive: z.boolean().default(true),
@@ -120,6 +120,9 @@ const BuyerForm: React.FC<BuyerFormProps> = ({ onSubmit, initialData, isLoading 
             <option value="individual">Individual</option>
             <option value="company">Company</option>
             <option value="investor">Investor</option>
+            <option value="wholesaler">Wholesaler</option>
+            <option value="flipper">Flipper</option>
+            <option value="end_buyer">End Buyer</option>
           </Select>
           <FormErrorMessage>{errors.buyerType?.message}</FormErrorMessage>
         </FormControl>
@@ -131,6 +134,9 @@ const BuyerForm: React.FC<BuyerFormProps> = ({ onSubmit, initialData, isLoading 
             <option value="50k-100k">$50,000 - $100,000</option>
             <option value="100k-250k">$100,000 - $250,000</option>
             <option value="250k-500k">$250,000 - $500,000</option>
+            <option value="500k-1m">$500,000 - $1,000,000</option>
+            <option value="1m-2m">$1,000,000 - $2,000,000</option>
+            <option value="2m+">$2,000,000+</option>
             <option value="500k+">$500,000+</option>
           </Select>
           <FormErrorMessage>{errors.investmentRange?.message}</FormErrorMessage>

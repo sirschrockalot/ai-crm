@@ -96,9 +96,6 @@ const AnalyticsPage: React.FC = () => {
               <AnalyticsNavigation />
               <Box mt={6}>
                 <AnalyticsDashboard
-                  leads={leads || []}
-                  buyers={buyers || []}
-                  loading={loading}
                   timeRange={timeRange}
                   onTimeRangeChange={handleTimeRangeChange}
                 />

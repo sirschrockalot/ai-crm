@@ -6,7 +6,7 @@ import { TeamPerformance, AnalyticsErrorBoundary, AnalyticsLoading } from '../..
 import { useAnalytics } from '../../features/analytics/hooks/useAnalytics';
 
 const TeamPerformancePage: React.FC = () => {
-  const { loading, error, fetchTeamPerformance } = useAnalytics();
+  const { loading, error, fetchAnalyticsData } = useAnalytics();
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
 
   const handleTimeRangeChange = (range: string) => {
@@ -22,8 +22,8 @@ const TeamPerformancePage: React.FC = () => {
 
   useEffect(() => {
     // Fetch team performance data on mount
-    fetchTeamPerformance({ timeRange });
-  }, [fetchTeamPerformance, timeRange]);
+    fetchAnalyticsData({ timeRange });
+  }, [fetchAnalyticsData, timeRange]);
 
   if (loading && !error) {
     return (
@@ -50,7 +50,6 @@ const TeamPerformancePage: React.FC = () => {
             <Navigation />
             <TeamPerformance
               timeRange={timeRange}
-              onTimeRangeChange={handleTimeRangeChange}
               onMemberSelect={handleMemberSelect}
             />
           </Box>

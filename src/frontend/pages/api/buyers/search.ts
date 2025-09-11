@@ -176,13 +176,19 @@ export default async function handler(
       }
 
       // City filter
-      if (city && buyer.city.toLowerCase() !== city.toLowerCase()) {
-        return false;
+      if (city) {
+        const cityValue = Array.isArray(city) ? city[0] : city;
+        if (buyer.city.toLowerCase() !== cityValue.toLowerCase()) {
+          return false;
+        }
       }
 
       // State filter
-      if (state && buyer.state.toLowerCase() !== state.toLowerCase()) {
-        return false;
+      if (state) {
+        const stateValue = Array.isArray(state) ? state[0] : state;
+        if (buyer.state.toLowerCase() !== stateValue.toLowerCase()) {
+          return false;
+        }
       }
 
       // Active status filter

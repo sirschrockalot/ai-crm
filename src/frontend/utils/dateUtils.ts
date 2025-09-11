@@ -35,7 +35,9 @@ export const useRelativeTime = (timestamp: string | Date): string => {
   }, []);
 
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient) {
+      return undefined;
+    }
 
     const updateTime = () => {
       const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;

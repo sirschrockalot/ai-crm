@@ -22,6 +22,7 @@ import {
   AutomationLoading 
 } from '../../features/automation';
 import { useAutomation } from '../../features/automation/hooks/useAutomation';
+import { AutomationFilters } from '../../features/automation/types/automation';
 
 const AutomationStatsPage: React.FC = () => {
   const {
@@ -35,7 +36,7 @@ const AutomationStatsPage: React.FC = () => {
   } = useAutomation();
 
   const [timeRange, setTimeRange] = useState<'today' | 'week' | 'month' | 'year'>('week');
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<AutomationFilters>({
     category: 'all',
     status: 'all',
   });
@@ -65,8 +66,13 @@ const AutomationStatsPage: React.FC = () => {
         format: 'csv',
       });
       
+      // Handle the response data - it might be a string or an object with data property
+      const csvData = typeof exportData === 'string'
+        ? exportData
+        : (exportData as any)?.data || JSON.stringify(exportData, null, 2);
+      
       // Create download link
-      const blob = new Blob([exportData], { type: 'text/csv' });
+      const blob = new Blob([csvData], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
