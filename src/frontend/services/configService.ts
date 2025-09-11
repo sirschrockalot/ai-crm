@@ -181,22 +181,20 @@ class ConfigService {
 export const configService = new ConfigService();
 
 // Export individual getters for convenience
-export const {
-  getConfig,
-  getApiConfig,
-  getWebSocketConfig,
-  getMicroservicesConfig,
-  getServiceConfig,
-  getAuthServiceConfig,
-  getLeadsServiceConfig,
-  getTransactionsServiceConfig,
-  getTimesheetServiceConfig,
-  getLeadImportServiceConfig,
-  isDevelopment,
-  isProduction,
-  isStaging,
-  getEnvironment,
-  isAuthBypassEnabled,
-} = configService;
+export const getConfig = () => configService.getConfig();
+export const getApiConfig = () => configService.getApiConfig();
+export const getWebSocketConfig = () => configService.getWebSocketConfig();
+export const getMicroservicesConfig = () => configService.getMicroservicesConfig();
+export const getServiceConfig = (service: keyof MicroservicesConfig) => configService.getServiceConfig(service);
+export const getAuthServiceConfig = () => configService.getAuthServiceConfig();
+export const getLeadsServiceConfig = () => configService.getLeadsServiceConfig();
+export const getTransactionsServiceConfig = () => configService.getTransactionsServiceConfig();
+export const getTimesheetServiceConfig = () => configService.getTimesheetServiceConfig();
+export const getLeadImportServiceConfig = () => configService.getLeadImportServiceConfig();
+export const isDevelopment = () => configService.isDevelopment();
+export const isProduction = () => configService.isProduction();
+export const isStaging = () => configService.isStaging();
+export const getEnvironment = () => configService.getEnvironment();
+export const isAuthBypassEnabled = () => configService.isAuthBypassEnabled();
 
 export default configService;
