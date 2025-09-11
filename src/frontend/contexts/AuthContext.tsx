@@ -68,11 +68,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Initialize auth state
   useEffect(() => {
-    if (isInitialized) {
-      return; // Already initialized, don't run again
-    }
+    console.log('AuthProvider useEffect: Starting initialization', {
+      bypassAuth,
+      isInitialized,
+      hasUser: !!state.user,
+      isAuthenticated: state.isAuthenticated
+    });
 
     if (bypassAuth) {
+      console.log('AuthProvider useEffect: Using bypass mode');
       setState({
         user: {
           id: 'dev-user-1',
@@ -93,8 +97,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    initializeAuth();
-  }, [isInitialized]);
+    // Only initialize if we haven't already and we don't have a user
+    if (!isInitialized && !state.user) {
+      console.log('AuthProvider useEffect: Calling initializeAuth');
+      initializeAuth();
+    } else {
+      console.log('AuthProvider useEffect: Skipping initializeAuth', {
+        isInitialized,
+        hasUser: !!state.user
+      });
+    }
+  }, []);
 
   // Check for existing token on mount
   const initializeAuth = useCallback(async () => {
@@ -124,6 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
           isSessionExpiringSoon: false,
         });
+        setIsInitialized(true);
         return;
       }
       
@@ -394,6 +408,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.setItem('refresh_token', data.refreshToken);
       }
 
+      console.log('Login: Setting authenticated state', {
+        user: data.user,
+        isAuthenticated: true
+      });
+
       setState({
         user: data.user,
         isAuthenticated: true,
@@ -405,6 +424,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Mark as initialized after successful login
       setIsInitialized(true);
+      console.log('Login: Marked as initialized');
 
       // Start session monitoring
       startSessionMonitoring();
