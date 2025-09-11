@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Lead } from '../types/pipeline';
+import { getApiConfig } from './configService';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = getApiConfig().url;
 
 export interface ImportOptions {
   updateExisting?: boolean;

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/router';
+import { getAuthServiceConfig } from '../services/configService';
 
 export interface User {
   id: string;
@@ -168,8 +169,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Use the auth service's session timeout endpoint
       const controller = new AbortController();
-      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
-      const response = await fetch(`${authServiceUrl}/api/auth/session/timeout`, {
+      const authServiceConfig = getAuthServiceConfig();
+      const response = await fetch(`${authServiceConfig.url}/api/auth/session/timeout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -243,8 +244,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       // Use the auth service's session timeout endpoint to extend session
-      const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
-      const response = await fetch(`${authServiceUrl}/api/auth/session/timeout`, {
+      const authServiceConfig = getAuthServiceConfig();
+      const response = await fetch(`${authServiceConfig.url}/api/auth/session/timeout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

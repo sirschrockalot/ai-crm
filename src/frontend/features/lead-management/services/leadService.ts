@@ -1,7 +1,8 @@
 import { Lead, LeadMoveRequest, LeadMoveResponse, PipelineStage, LeadFormData } from '../types/lead';
 import { leadImportExportService, ImportOptions, ExportRequest } from './leadImportExportService';
+import { getApiConfig } from '../../../services/configService';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = getApiConfig().url;
 
 // Mock data for development/testing
 const mockLeads: Lead[] = [

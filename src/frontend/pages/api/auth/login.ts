@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getAuthServiceConfig } from '../../services/configService';
 
 interface LoginRequest {
   email: string;
@@ -34,8 +35,8 @@ export default async function handler(
     }
 
     // Call the auth service
-    const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
-    const response = await fetch(`${authServiceUrl}/api/auth/login`, {
+    const authServiceConfig = getAuthServiceConfig();
+    const response = await fetch(`${authServiceConfig.url}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
