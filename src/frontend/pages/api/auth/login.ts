@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getAuthServiceConfig } from '../../services/configService';
+import { getAuthServiceConfig } from '../../../services/configService';
 
 interface LoginRequest {
   email: string;
