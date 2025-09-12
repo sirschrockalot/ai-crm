@@ -60,7 +60,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sessionTimeout: null,
     isSessionExpiringSoon: false,
   });
-  const [isInitialized, setIsInitialized] = useState(false);
   const initializationRef = useRef(false);
 
   // Initialize auth state - run only once on mount
@@ -100,7 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         sessionTimeout: null,
         isSessionExpiringSoon: false,
       });
-      setIsInitialized(true);
+      initializationRef.current = true;
       return;
     }
 
@@ -114,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } else {
       console.log('AuthProvider useEffect: No existing tokens, setting loading to false');
       setState(prev => ({ ...prev, isLoading: false }));
-      setIsInitialized(true);
+      initializationRef.current = true;
     }
   }, []); // Empty dependency array - run only once on mount
 
@@ -141,7 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: null,
           isSessionExpiringSoon: false,
         });
-        setIsInitialized(true);
+        initializationRef.current = true;
         return;
       }
 
@@ -183,7 +182,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
       // Mark as initialized regardless of success/failure
-      setIsInitialized(true);
+      initializationRef.current = true;
     } catch (error) {
       // Ignore abort errors
       if (error instanceof Error && error.name === 'AbortError') {
@@ -196,7 +195,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setState(prev => ({ ...prev, isLoading: false }));
       
       // Mark as initialized even on error
-      setIsInitialized(true);
+      initializationRef.current = true;
     }
   }, []);
 
