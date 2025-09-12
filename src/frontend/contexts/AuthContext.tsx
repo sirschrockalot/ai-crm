@@ -145,44 +145,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setIsInitialized(true);
         return;
       }
-        // Verify token with auth service
-        const controller = new AbortController();
-        const authServiceConfig = getAuthServiceConfig();
-        const response = await fetch(`${authServiceConfig.url}/api/auth/users/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          signal: controller.signal,
-        });
 
-        if (response.ok) {
-          const userData = await response.json();
-          setState({
-            user: userData,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-            sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
-            isSessionExpiringSoon: false,
-          });
-          
-          // Start session monitoring
-          startSessionMonitoring();
-        } else {
-          // Token is invalid, clear state
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('refresh_token');
-          setState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-            error: null,
-            sessionTimeout: null,
-            isSessionExpiringSoon: false,
-          });
-        }
+      // Verify token with auth service
+      const controller = new AbortController();
+      const authServiceConfig = getAuthServiceConfig();
+      const response = await fetch(`${authServiceConfig.url}/api/auth/users/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        signal: controller.signal,
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setState({
+          user: userData,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+          sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
+          isSessionExpiringSoon: false,
+        });
+        
+        // Start session monitoring
+        startSessionMonitoring();
       } else {
-        console.log('InitializeAuth: No tokens found, setting unauthenticated state');
+        // Token is invalid, clear state
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
         setState({
           user: null,
           isAuthenticated: false,
