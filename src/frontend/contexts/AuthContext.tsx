@@ -105,14 +105,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    // Only initialize if we don't have a user
-    if (!state.user) {
-      console.log('AuthProvider useEffect: Calling initializeAuth');
+    // Check for existing tokens first
+    const token = localStorage.getItem('auth_token');
+    const refreshToken = localStorage.getItem('refresh_token');
+    
+    if (token && refreshToken) {
+      console.log('AuthProvider useEffect: Found existing tokens, calling initializeAuth');
       initializeAuth();
     } else {
-      console.log('AuthProvider useEffect: Skipping initializeAuth - user already exists', {
-        hasUser: !!state.user
-      });
+      console.log('AuthProvider useEffect: No existing tokens, setting loading to false');
+      setState(prev => ({ ...prev, isLoading: false }));
+      setIsInitialized(true);
     }
   }, []); // Empty dependency array - run only once on mount
 
@@ -124,12 +127,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      console.log('InitializeAuth: Checking for existing tokens');
+      console.log('InitializeAuth: Verifying existing tokens with auth service');
 
       const token = localStorage.getItem('auth_token');
       const refreshTokenValue = localStorage.getItem('refresh_token');
       
-      if (token && refreshTokenValue) {
+      if (!token || !refreshTokenValue) {
+        console.log('InitializeAuth: No tokens found, setting unauthenticated state');
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+          sessionTimeout: null,
+          isSessionExpiringSoon: false,
+        });
+        setIsInitialized(true);
+        return;
+      }
         // Verify token with auth service
         const controller = new AbortController();
         const authServiceConfig = getAuthServiceConfig();
@@ -167,7 +182,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           });
         }
       } else {
-        setState(prev => ({ ...prev, isLoading: false }));
+        console.log('InitializeAuth: No tokens found, setting unauthenticated state');
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+          sessionTimeout: null,
+          isSessionExpiringSoon: false,
+        });
       }
       
       // Mark as initialized regardless of success/failure
