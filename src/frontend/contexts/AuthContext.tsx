@@ -78,7 +78,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     console.log('AuthProvider useEffect: Starting initialization', {
       bypassAuth,
-      isInitialized,
       hasUser: !!state.user,
       isAuthenticated: state.isAuthenticated
     });
