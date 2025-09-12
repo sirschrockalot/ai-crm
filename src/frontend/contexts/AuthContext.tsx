@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import { getAuthServiceConfig } from '../services/configService';
 
@@ -61,13 +61,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isSessionExpiringSoon: false,
   });
   const [isInitialized, setIsInitialized] = useState(false);
+  const initializationRef = useRef(false);
 
-  // Development mode authentication bypass
-  const isDevelopmentMode = process.env.NODE_ENV === 'development';
-  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-
-  // Initialize auth state
+  // Initialize auth state - run only once on mount
   useEffect(() => {
+    // Prevent multiple initializations
+    if (initializationRef.current) {
+      console.log('AuthProvider useEffect: Already initialized, skipping');
+      return;
+    }
+    
+    initializationRef.current = true;
+    
+    // Read bypass auth value inside the effect to avoid dependency issues
+    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    
     console.log('AuthProvider useEffect: Starting initialization', {
       bypassAuth,
       isInitialized,
@@ -97,17 +105,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    // Only initialize if we haven't already and we don't have a user
-    if (!isInitialized && !state.user) {
+    // Only initialize if we don't have a user
+    if (!state.user) {
       console.log('AuthProvider useEffect: Calling initializeAuth');
       initializeAuth();
     } else {
-      console.log('AuthProvider useEffect: Skipping initializeAuth', {
-        isInitialized,
+      console.log('AuthProvider useEffect: Skipping initializeAuth - user already exists', {
         hasUser: !!state.user
       });
     }
-  }, []);
+  }, []); // Empty dependency array - run only once on mount
 
   // Check for existing token on mount
   const initializeAuth = useCallback(async () => {
@@ -117,31 +124,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // Check if we're in bypass mode first
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-      
-      console.log('InitializeAuth: Bypass auth check:', {
-        bypassAuth,
-        envVar: process.env.NEXT_PUBLIC_BYPASS_AUTH,
-        nodeEnv: process.env.NODE_ENV
-      });
-      
-      if (bypassAuth) {
-        console.log('InitializeAuth: Using bypass mode, setting authenticated state');
-        // In bypass mode, always set authenticated state without checking tokens
-        setState({
-          user: { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-          sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
-          isSessionExpiringSoon: false,
-        });
-        setIsInitialized(true);
-        return;
-      }
-      
-      console.log('InitializeAuth: Not in bypass mode, checking tokens');
+      console.log('InitializeAuth: Checking for existing tokens');
 
       const token = localStorage.getItem('auth_token');
       const refreshTokenValue = localStorage.getItem('refresh_token');
@@ -359,31 +342,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-      // Check if we're in bypass mode
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-      
-      console.log('Login: Bypass auth check:', {
-        bypassAuth,
-        envVar: process.env.NEXT_PUBLIC_BYPASS_AUTH,
-        nodeEnv: process.env.NODE_ENV
-      });
-      
-      if (bypassAuth) {
-        console.log('Login: Using bypass mode, skipping API call');
-        // In bypass mode, just set authenticated state without API call
-        setState({
-          user: { id: '1', email: credentials.email, firstName: 'Test', lastName: 'User', roles: ['user'], status: 'active' },
-          isAuthenticated: true,
-          isLoading: false,
-          error: null,
-          sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
-          isSessionExpiringSoon: false,
-        });
-        setIsInitialized(true);
-        return;
-      }
-      
-      console.log('Login: Not in bypass mode, making API call');
+      console.log('Login: Making API call');
 
       const controller = new AbortController();
       const response = await fetch('/api/auth/login', {
@@ -422,9 +381,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isSessionExpiringSoon: false,
       });
 
-      // Mark as initialized after successful login
-      setIsInitialized(true);
-      console.log('Login: Marked as initialized');
+      console.log('Login: Successfully authenticated');
 
       // Start session monitoring
       startSessionMonitoring();
