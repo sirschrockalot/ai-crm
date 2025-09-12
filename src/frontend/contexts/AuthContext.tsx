@@ -181,6 +181,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             isSessionExpiringSoon: false,
           });
         }
+      } else {
+        console.log('InitializeAuth: No tokens found, setting unauthenticated state');
+        setState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: null,
+          sessionTimeout: null,
+          isSessionExpiringSoon: false,
+        });
+      }
       
       // Mark as initialized regardless of success/failure
       setIsInitialized(true);
