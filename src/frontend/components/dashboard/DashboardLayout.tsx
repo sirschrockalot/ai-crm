@@ -33,6 +33,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       return () => clearTimeout(timer);
     }
+    // Return undefined when condition is not met
+    return undefined;
   }, [isAuthenticated, loading, router]);
 
   if (!isAuthenticated) {

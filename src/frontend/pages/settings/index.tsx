@@ -5,7 +5,6 @@ import ProfileSettings from '../../components/settings/ProfileSettings';
 import NotificationSettings from '../../components/settings/NotificationSettings';
 import SecuritySettings from '../../components/settings/SecuritySettings';
 import SystemSettings from '../../components/settings/SystemSettings';
-import UserManagement from '../../components/settings/UserManagement';
 import AuditAnalytics from '../../components/settings/AuditAnalytics';
 import MobileSettings from '../../components/settings/MobileSettings';
 import CustomFieldsManagement from '../../components/settings/CustomFieldsManagement';
@@ -17,7 +16,6 @@ import {
   FiBell, 
   FiShield, 
   FiSettings, 
-  FiUsers, 
   FiBarChart as FiBarChart3, 
   FiSmartphone,
   FiDatabase,
@@ -54,13 +52,6 @@ const settingsSections = [
     icon: FiSettings,
     description: 'Configure system-wide settings and preferences',
     component: SystemSettings,
-  },
-  {
-    id: 'users',
-    label: 'User Management',
-    icon: FiUsers,
-    description: 'Manage users, roles, and permissions',
-    component: UserManagement,
   },
   {
     id: 'audit',

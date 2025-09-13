@@ -32,6 +32,7 @@ export interface LoginCredentials {
 export interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  completeOAuthLogin: (user: User, token: string, refreshToken?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
@@ -142,17 +143,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         initializationRef.current = true;
         return;
-      }
-
-      // Verify token with auth service
-      const controller = new AbortController();
-      const authServiceConfig = getAuthServiceConfig();
-      const response = await fetch(`${authServiceConfig.url}/api/auth/users/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        signal: controller.signal,
-      });
+      } else {
+        // Verify token with auth service
+        const controller = new AbortController();
+        const authServiceConfig = getAuthServiceConfig();
+        const response = await fetch(`${authServiceConfig.url}/api/auth/users/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
 
       if (response.ok) {
         const userData = await response.json();
@@ -179,6 +179,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: null,
           isSessionExpiringSoon: false,
         });
+      }
       }
       
       // Mark as initialized regardless of success/failure
@@ -396,6 +397,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Start session monitoring
       startSessionMonitoring();
+
+      // Redirect to dashboard after successful authentication
+      console.log('Login: Redirecting to dashboard');
+      router.push('/dashboard');
     } catch (error) {
       // Ignore abort errors
       if (error instanceof Error && error.name === 'AbortError') {
@@ -408,7 +413,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }));
       throw error;
     }
-  }, [startSessionMonitoring]);
+  }, [startSessionMonitoring, router]);
 
   // Login with Google
   const loginWithGoogle = useCallback(async () => {
@@ -427,6 +432,49 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       throw error;
     }
   }, []);
+
+  // Complete OAuth login
+  const completeOAuthLogin = useCallback(async (user: User, token: string, refreshToken?: string) => {
+    try {
+      setState(prev => ({ ...prev, isLoading: true, error: null }));
+
+      // Store tokens
+      localStorage.setItem('auth_token', token);
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken);
+      }
+
+      console.log('OAuth Login: Setting authenticated state', {
+        user,
+        isAuthenticated: true
+      });
+
+      setState({
+        user,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+        sessionTimeout: null,
+        isSessionExpiringSoon: false,
+      });
+
+      console.log('OAuth Login: Successfully authenticated');
+
+      // Start session monitoring
+      startSessionMonitoring();
+
+      // Redirect to dashboard after successful authentication
+      console.log('OAuth Login: Redirecting to dashboard');
+      router.push('/dashboard');
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'OAuth login failed',
+      }));
+      throw error;
+    }
+  }, [startSessionMonitoring, router]);
 
   // Logout
   const logout = useCallback(async () => {
@@ -626,6 +674,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     ...state,
     login,
     loginWithGoogle,
+    completeOAuthLogin,
     logout,
     refreshToken,
     updateUser,

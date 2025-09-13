@@ -7,4 +7,5 @@ export { default as Navigation } from './Navigation';
 export { default as SearchBar } from './SearchBar';
 export { default as Layout } from './MainLayout';
 export { default as NavigationPanel } from './NavigationPanel';
-export { default as BreadcrumbNav } from './BreadcrumbNav'; 
+export { default as BreadcrumbNav } from './BreadcrumbNav';
+export { default as UnifiedNavigation } from './UnifiedNavigation'; 

@@ -13,12 +13,13 @@ import {
   AlertTitle,
   AlertDescription,
 } from '@chakra-ui/react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
+import { authService } from '../../services/authService';
 import Card from '../../components/ui/Card';
 
 const OAuthCallbackPage: NextPage = () => {
   const router = useRouter();
-  const { updateUser } = useAuth();
+  const { completeOAuthLogin } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -41,37 +42,13 @@ const OAuthCallbackPage: NextPage = () => {
           return;
         }
 
-        // Exchange code for token
-        const response = await fetch('/api/auth/google/callback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            code,
-            state,
-          }),
-        });
+        // Exchange code for token using authService
+        const authResponse = await authService.handleOAuthCallback(code as string, state as string);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to complete authentication');
-        }
-
-        const { user, token } = await response.json();
-
-        // Store token
-        localStorage.setItem('auth_token', token);
-
-        // Update auth context
-        updateUser(user);
+        // Complete OAuth login with proper authentication state management
+        await completeOAuthLogin(authResponse.user, authResponse.token, authResponse.refreshToken);
 
         setStatus('success');
-
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
 
       } catch (error) {
         setStatus('error');

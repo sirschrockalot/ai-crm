@@ -61,6 +61,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         isClosable: true,
       });
 
+      // AuthContext will handle the redirect to dashboard
       onSuccess?.();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';

@@ -14,6 +14,7 @@ export interface MicroservicesConfig {
   transactions: ServiceConfig;
   timesheet: ServiceConfig;
   leadImport: ServiceConfig;
+  userManagement: ServiceConfig;
 }
 
 export interface AppConfig {
@@ -60,6 +61,10 @@ class ConfigService {
         leadImport: {
           url: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_URL || 'http://localhost:3003',
           apiUrl: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_API_URL || 'http://localhost:3003/api/import',
+        },
+        userManagement: {
+          url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'http://localhost:3005',
+          apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'http://localhost:3005/api/v1',
         },
       },
     };
@@ -142,6 +147,13 @@ class ConfigService {
   }
 
   /**
+   * Get user management service configuration
+   */
+  getUserManagementServiceConfig(): ServiceConfig {
+    return this.config.microservices.userManagement;
+  }
+
+  /**
    * Check if running in development mode
    */
   isDevelopment(): boolean {
@@ -159,7 +171,7 @@ class ConfigService {
    * Check if running in staging mode
    */
   isStaging(): boolean {
-    return process.env.NODE_ENV === 'staging';
+    return process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_ENV === 'staging';
   }
 
   /**
@@ -282,6 +294,18 @@ export const getLeadImportServiceConfig = () => {
     return {
       url: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_URL || 'http://localhost:3005',
       apiUrl: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_API_URL || 'http://localhost:3005/api'
+    };
+  }
+};
+
+export const getUserManagementServiceConfig = () => {
+  try {
+    return configService.getUserManagementServiceConfig();
+  } catch (error) {
+    console.error('ConfigService not available, using fallback user management service config');
+    return {
+      url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'http://localhost:3005',
+      apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'http://localhost:3005/api/v1'
     };
   }
 };

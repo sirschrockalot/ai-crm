@@ -28,7 +28,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useNavigation } from '../../../contexts/NavigationContext';
 import { useKeyboardNavigation } from '../../../hooks/useKeyboardNavigation';
 import { useAccessibility, NAVIGATION_ARIA_LABELS, NAVIGATION_ARIA_ROLES } from '../../../hooks/useAccessibility';
-import NavigationMenu from '../NavigationMenu';
+import UnifiedNavigation from '../UnifiedNavigation';
 import QuickActions from '../QuickActions';
 import BreadcrumbNav from '../BreadcrumbNav';
 
@@ -141,7 +141,7 @@ const NavigationPanel: React.FC<NavigationPanelProps> = ({
             <DrawerBody p={0} bg={bg}>
               <Collapse in={!mobileCollapsed}>
                 <VStack align="stretch" spacing={0} h="full">
-                  <NavigationMenu user={user} isMobile={true} />
+                  <UnifiedNavigation isMobile={true} />
                   <Divider />
                   <QuickActions user={user} isMobile={true} />
                 </VStack>
@@ -193,7 +193,7 @@ const NavigationPanel: React.FC<NavigationPanelProps> = ({
       {/* Navigation content */}
       <VStack align="stretch" spacing={0} h="calc(100vh - 80px)" overflow="hidden">
         <Box flex={1} overflowY="auto">
-          <NavigationMenu user={user} isCollapsed={navCollapsed} />
+          <UnifiedNavigation isCollapsed={navCollapsed} />
         </Box>
         
         <Divider />

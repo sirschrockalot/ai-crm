@@ -78,12 +78,7 @@ const LoginPage: NextPage = () => {
         isClosable: true,
       });
       
-      // Use window.location.href instead of router.push to avoid abort errors
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          window.location.href = '/dashboard';
-        }
-      }, 100);
+      // AuthContext will handle the redirect to dashboard
     } catch (error) {
       // Only show error if component is still mounted
       if (isMountedRef.current) {
