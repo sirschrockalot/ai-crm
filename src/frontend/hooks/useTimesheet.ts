@@ -17,7 +17,7 @@ interface UseTimesheetReturn {
   
   // Actions
   loadTimesheet: () => Promise<void>;
-  saveTimesheet: (hours: number[], notes?: string, dayNotes?: string[]) => Promise<void>;
+  saveTimesheet: (hours: number[], notes?: string) => Promise<void>;
   submitTimesheet: () => Promise<void>;
   updateHours: (dayIndex: number, hours: number) => void;
   getHoursForDay: (dayIndex: number) => number;
@@ -66,14 +66,14 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
   }, [userId, toast]);
 
   // Save timesheet
-  const saveTimesheet = useCallback(async (hours: number[], notes?: string, dayNotes?: string[]) => {
+  const saveTimesheet = useCallback(async (hours: number[], notes?: string) => {
     if (!userId) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const data = await timesheetService.saveCurrentWeekTimesheet(userId, hours, notes, dayNotes);
+      const data = await timesheetService.saveCurrentWeekTimesheet(userId, hours, notes);
       setTimesheet(data);
       toast({
         title: 'Success',

@@ -161,7 +161,7 @@ class TimesheetService {
   }
 
   // Helper method to create or update current week's timesheet
-  async saveCurrentWeekTimesheet(userId: string, hours: number[], notes?: string, dayNotes?: string[]): Promise<TimeEntry> {
+  async saveCurrentWeekTimesheet(userId: string, hours: number[], notes?: string): Promise<TimeEntry> {
     try {
       const today = new Date();
       const weekStart = this.getWeekStart(today);
@@ -175,7 +175,6 @@ class TimesheetService {
         const response = await this.updateTimeEntry(existing._id, {
           hours,
           notes,
-          dayNotes,
           status: 'draft'
         });
         return response.data;
@@ -187,7 +186,6 @@ class TimesheetService {
           weekEnd: weekEnd.toISOString(),
           hours,
           notes,
-          dayNotes,
           status: 'draft'
         });
         return response.data;
