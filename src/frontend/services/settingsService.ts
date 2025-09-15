@@ -167,7 +167,7 @@ class SettingsService {
     return response.data;
   }
 
-  // User Management (Admin only) - Using User Management Service
+  // User Management (Admin only) - Using Frontend API Routes
   async getUsers(params: {
     search?: string;
     role?: string;
@@ -181,8 +181,7 @@ class SettingsService {
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
     includeInactive?: boolean;
-  } = {}): Promise<{ users: any[]; total: number; page: number; limit: number }> {
-    const userManagementConfig = getUserManagementServiceConfig();
+  } = {}): Promise<any[]> {
     const queryParams = new URLSearchParams();
     
     Object.entries(params).forEach(([key, value]) => {
@@ -195,28 +194,43 @@ class SettingsService {
       }
     });
 
-    const response = await apiService.get(`${userManagementConfig.apiUrl}/users?${queryParams}`);
-    return response.data;
+    const response = await apiService.get(`/users?${queryParams}`);
+    // Service returns { users, total, page, limit } – UI expects array for now
+    if (response?.data?.users) {
+      return response.data.users as any[];
+    }
+    return (response.data ?? []) as any[];
   }
 
   async createUser(userData: {
     email: string;
     firstName: string;
     lastName: string;
-    password: string;
-    roles?: string[];
-    organizationId?: string;
-    departmentId?: string;
+    role?: string;
     title?: string;
     department?: string;
     phone?: string;
     avatar?: string;
-    isActive?: boolean;
-    preferences?: Record<string, any>;
-    metadata?: Record<string, any>;
+    organizationId?: string;
+    departmentId?: string;
   }): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.post(`${userManagementConfig.apiUrl}/users`, userData);
+    // Map UI fields to API contract
+    const payload: any = {
+      email: userData.email,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      password: 'TempPass123!', // temporary; admin can force reset later
+      roles: userData.role ? [userData.role] : ['Agent'],
+      title: userData.title,
+      department: userData.department,
+      phone: userData.phone,
+      avatar: userData.avatar,
+      organizationId: userData.organizationId,
+      departmentId: userData.departmentId,
+      isActive: true,
+    };
+
+    const response = await apiService.post('/users', payload);
     return response.data;
   }
 
@@ -224,6 +238,7 @@ class SettingsService {
     email: string;
     firstName: string;
     lastName: string;
+    role?: string;
     title?: string;
     department?: string;
     phone?: string;
@@ -234,46 +249,46 @@ class SettingsService {
     preferences?: Record<string, any>;
     metadata?: Record<string, any>;
   }>): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.patch(`${userManagementConfig.apiUrl}/users/${userId}`, userData);
+    // Map potential role field to roles array if provided
+    const payload: any = { ...userData };
+    if (userData.role) {
+      payload.roles = [userData.role];
+      delete payload.role;
+    }
+
+    const response = await apiService.patch(`/users/${userId}`, payload);
     return response.data;
   }
 
   async deleteUser(userId: string): Promise<void> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    await apiService.delete(`${userManagementConfig.apiUrl}/users/${userId}`);
+    await apiService.delete(`/users/${userId}`);
   }
 
   async updateUserRoles(userId: string, roles: string[]): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.patch(`${userManagementConfig.apiUrl}/users/${userId}/roles`, { roles });
+    const response = await apiService.patch(`/users/${userId}/roles`, { roles });
     return response.data;
   }
 
   async activateUser(userId: string): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.patch(`${userManagementConfig.apiUrl}/users/${userId}/activate`);
+    const response = await apiService.patch(`/users/${userId}/activate`);
     return response.data;
   }
 
   async deactivateUser(userId: string): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.patch(`${userManagementConfig.apiUrl}/users/${userId}/deactivate`);
+    const response = await apiService.patch(`/users/${userId}/deactivate`);
     return response.data;
   }
 
   async getUserStats(): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.get(`${userManagementConfig.apiUrl}/users/stats`);
+    const response = await apiService.get('/users/stats');
     return response.data;
   }
 
-  // Role Management (Admin only) - Using User Management Service
+  // Role Management (Admin only) - Using Frontend API Routes
   async getRoles(organizationId?: string): Promise<any[]> {
-    const userManagementConfig = getUserManagementServiceConfig();
     const url = organizationId 
-      ? `${userManagementConfig.apiUrl}/roles?organizationId=${organizationId}`
-      : `${userManagementConfig.apiUrl}/roles`;
+      ? `/roles?organizationId=${organizationId}`
+      : '/roles';
     const response = await apiService.get(url);
     return response.data;
   }
@@ -286,8 +301,7 @@ class SettingsService {
     isActive?: boolean;
     metadata?: Record<string, any>;
   }): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.post(`${userManagementConfig.apiUrl}/roles`, roleData);
+    const response = await apiService.post('/roles', roleData);
     return response.data;
   }
 
@@ -298,25 +312,21 @@ class SettingsService {
     isActive: boolean;
     metadata: Record<string, any>;
   }>): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.patch(`${userManagementConfig.apiUrl}/roles/${roleId}`, roleData);
+    const response = await apiService.patch(`/roles/${roleId}`, roleData);
     return response.data;
   }
 
   async deleteRole(roleId: string): Promise<void> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    await apiService.delete(`${userManagementConfig.apiUrl}/roles/${roleId}`);
+    await apiService.delete(`/roles/${roleId}`);
   }
 
   async updateRolePermissions(roleId: string, permissions: string[]): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.patch(`${userManagementConfig.apiUrl}/roles/${roleId}/permissions`, { permissions });
+    const response = await apiService.patch(`/roles/${roleId}/permissions`, { permissions });
     return response.data;
   }
 
   async getRoleStats(): Promise<any> {
-    const userManagementConfig = getUserManagementServiceConfig();
-    const response = await apiService.get(`${userManagementConfig.apiUrl}/roles/stats`);
+    const response = await apiService.get('/roles/stats');
     return response.data;
   }
 

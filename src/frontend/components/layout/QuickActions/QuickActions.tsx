@@ -12,14 +12,11 @@ import {
 } from '@chakra-ui/react';
 import {
   FiPlus,
-  FiSearch,
   FiUpload,
   FiDownload,
   FiMessageCircle,
-  FiClock,
   FiTarget,
   FiUsers,
-  FiSettings,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -82,15 +79,6 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       variant: 'outline',
     },
     {
-      id: 'search',
-      label: 'Search',
-      icon: FiSearch,
-      action: () => router.push('/search'),
-      permissions: ['leads:read', 'buyers:read'],
-      colorScheme: 'gray',
-      variant: 'ghost',
-    },
-    {
       id: 'send-message',
       label: 'Send Message',
       icon: FiMessageCircle,
@@ -100,29 +88,11 @@ const QuickActions: React.FC<QuickActionsProps> = ({
       variant: 'outline',
     },
     {
-      id: 'time-entry',
-      label: 'Time Entry',
-      icon: FiClock,
-      action: () => router.push('/time-tracking/entry'),
-      permissions: ['time-tracking:create'],
-      colorScheme: 'orange',
-      variant: 'outline',
-    },
-    {
       id: 'export-data',
       label: 'Export',
       icon: FiDownload,
       action: () => router.push('/export'),
       permissions: ['leads:export', 'reports:export'],
-      colorScheme: 'gray',
-      variant: 'ghost',
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: FiSettings,
-      action: () => router.push('/settings'),
-      permissions: ['system:settings'],
       colorScheme: 'gray',
       variant: 'ghost',
     },

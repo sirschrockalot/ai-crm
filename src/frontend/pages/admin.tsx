@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Box,
   VStack,
@@ -63,6 +64,7 @@ import {
   CheckboxGroup,
   Stack,
 } from '@chakra-ui/react';
+import UserManagement from '../components/settings/UserManagement';
 import {
   FiUsers,
   FiSettings,
@@ -97,6 +99,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
 import { mockUsers } from '../services/mockDataService';
+import DashboardLayout from '../components/dashboard/DashboardLayout';
 
 interface SystemStats {
   totalUsers: number;
@@ -313,7 +316,8 @@ const AdminPage: React.FC = () => {
   }
 
   return (
-    <Box bg={bgColor} minH="100vh" p={6}>
+    <DashboardLayout isAuthenticated={true} showNavigation={true}>
+      <Box bg={bgColor} minH="100vh" p={6}>
       <VStack spacing={6} align="stretch">
         {/* Header */}
         <Box>
@@ -439,151 +443,8 @@ const AdminPage: React.FC = () => {
               <TabPanels>
                 {/* User Management Tab */}
                 <TabPanel>
-                  <VStack spacing={6} align="stretch">
-                    {/* User Management Header */}
-                    <HStack justify="space-between">
-                      <HStack spacing={4}>
-                        <InputGroup maxW="300px">
-                          <InputLeftElement>
-                            <FiSearch />
-                          </InputLeftElement>
-                          <Input
-                            placeholder="Search users..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </InputGroup>
-                        <Select placeholder="Filter by role" maxW="200px">
-                          <option value="admin">Admin</option>
-                          <option value="manager">Manager</option>
-                          <option value="agent">Agent</option>
-                          <option value="user">User</option>
-                        </Select>
-                      </HStack>
-                      <HStack spacing={2}>
-                        <Button
-                          leftIcon={<FiUserPlus />}
-                          colorScheme="blue"
-                          onClick={onUserModalOpen}
-                        >
-                          Add User
-                        </Button>
-                        <Button
-                          leftIcon={<FiUpload />}
-                          variant="outline"
-                          onClick={() => handleSystemAction('Import Users')}
-                        >
-                          Import
-                        </Button>
-                      </HStack>
-                    </HStack>
-
-                    {/* Bulk Actions */}
-                    {selectedUsers.length > 0 && (
-                      <HStack spacing={2} p={4} bg="blue.50" borderRadius="md">
-                        <Text fontSize="sm" fontWeight="medium">
-                          {selectedUsers.length} users selected:
-                        </Text>
-                        <Button size="sm" onClick={() => handleBulkUserAction('Activate')}>
-                          Activate
-                        </Button>
-                        <Button size="sm" onClick={() => handleBulkUserAction('Deactivate')}>
-                          Deactivate
-                        </Button>
-                        <Button size="sm" onClick={() => handleBulkUserAction('Reset Password')}>
-                          Reset Password
-                        </Button>
-                        <Button size="sm" colorScheme="red" variant="outline" onClick={() => handleBulkUserAction('Delete')}>
-                          Delete
-                        </Button>
-                      </HStack>
-                    )}
-
-                    {/* Users Table */}
-                    <Box overflowX="auto">
-                      <Table variant="simple">
-                        <Thead>
-                          <Tr>
-                            <Th>
-                              <Checkbox
-                                isChecked={selectedUsers.length === mockUsers.length}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setSelectedUsers(mockUsers.map(u => u.id));
-                                  } else {
-                                    setSelectedUsers([]);
-                                  }
-                                }}
-                              />
-                            </Th>
-                            <Th>User</Th>
-                            <Th>Role</Th>
-                            <Th>Status</Th>
-                            <Th>Last Login</Th>
-                            <Th>Actions</Th>
-                          </Tr>
-                        </Thead>
-                        <Tbody>
-                          {mockUsers.map((user) => (
-                            <Tr key={user.id}>
-                              <Td>
-                                <Checkbox
-                                  isChecked={selectedUsers.includes(user.id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedUsers([...selectedUsers, user.id]);
-                                    } else {
-                                      setSelectedUsers(selectedUsers.filter(id => id !== user.id));
-                                    }
-                                  }}
-                                />
-                              </Td>
-                              <Td>
-                                <VStack align="start" spacing={1}>
-                                  <Text fontWeight="medium">{user.firstName} {user.lastName}</Text>
-                                  <Text fontSize="sm" color={subTextColor}>{user.email}</Text>
-                                </VStack>
-                              </Td>
-                              <Td>
-                                <Badge colorScheme="blue" variant="subtle">
-                                  {user.role}
-                                </Badge>
-                              </Td>
-                              <Td>
-                                <Badge colorScheme={user.isActive ? 'green' : 'red'} variant="subtle">
-                                  {user.isActive ? 'Active' : 'Inactive'}
-                                </Badge>
-                              </Td>
-                              <Td>
-                                <Text fontSize="sm" color={subTextColor}>
-                                  {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
-                                </Text>
-                              </Td>
-                              <Td>
-                                <Menu>
-                                  <MenuButton as={IconButton} icon={<FiMoreVertical />} variant="ghost" size="sm" />
-                                  <MenuList>
-                                    <MenuItem icon={<FiEye />} onClick={() => handleUserAction('View', user.id)}>
-                                      View Details
-                                    </MenuItem>
-                                    <MenuItem icon={<FiEdit />} onClick={() => handleUserAction('Edit', user.id)}>
-                                      Edit User
-                                    </MenuItem>
-                                    <MenuItem icon={<FiKey />} onClick={() => handleUserAction('Reset Password', user.id)}>
-                                      Reset Password
-                                    </MenuItem>
-                                    <MenuItem icon={<FiTrash2 />} onClick={() => handleUserAction('Delete', user.id)}>
-                                      Delete User
-                                    </MenuItem>
-                                  </MenuList>
-                                </Menu>
-                              </Td>
-                            </Tr>
-                          ))}
-                        </Tbody>
-                      </Table>
-                    </Box>
-                  </VStack>
+                  {/* Replace mock UI with the real UserManagement component that calls the service */}
+                  <UserManagement />
                 </TabPanel>
 
                 {/* System Monitoring Tab */}
@@ -835,7 +696,8 @@ const AdminPage: React.FC = () => {
         </ModalContent>
       </Modal>
     </Box>
+    </DashboardLayout>
   );
 };
 
-export default AdminPage;
+export default dynamic(() => Promise.resolve(AdminPage), { ssr: false });

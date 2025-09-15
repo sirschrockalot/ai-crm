@@ -9,8 +9,8 @@
     "src/auth-service"
   ],
   "scripts": {
-    "dev": "npm run dev:frontend",
-    "dev:frontend": "cd src/frontend && npm run dev",
+    "dev": "npm --workspaces=false run dev:frontend",
+    "dev:frontend": "cd src/frontend && npm --workspaces=false run dev",
     "build": "npm run build:frontend",
     "build:frontend": "cd src/frontend && npm run build",
     "heroku-postbuild": "npm run build:frontend",

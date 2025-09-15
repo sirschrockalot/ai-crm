@@ -105,6 +105,19 @@ const UserManagement: React.FC = () => {
   const [organizationalUnits, setOrganizationalUnits] = useState<OrganizationalUnit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Helper normalizers to ensure stable keys
+  const normalizeUser = (u: any): User => ({
+    id: (u && (u.id || u._id || u.email)) || String(Math.random()),
+    firstName: u?.firstName ?? '',
+    lastName: u?.lastName ?? '',
+    email: u?.email ?? '',
+    role: Array.isArray(u?.roles) && u.roles.length > 0 ? u.roles[0] : (u?.role ?? ''),
+    department: u?.department ?? '',
+    isActive: typeof u?.isActive === 'boolean' ? u.isActive : true,
+    lastLogin: u?.lastLogin ?? undefined,
+    avatar: u?.avatar ?? undefined,
+  });
   
   // User modal
   const { isOpen: isUserOpen, onOpen: onUserOpen, onClose: onUserClose } = useDisclosure();
@@ -208,8 +221,20 @@ const UserManagement: React.FC = () => {
         ]),
       ]);
       
-      setUsers(usersData);
-      setRoles(rolesData);
+      // Normalize users (ensure stable unique keys)
+      const normalizedUsers = Array.isArray(usersData) ? usersData.map(normalizeUser) : [];
+      setUsers(normalizedUsers as any);
+
+      // Normalize roles coming from the service (may use _id instead of id)
+      const normalizedRoles = (rolesData as any[]).map((r) => ({
+        id: (r && (r.id || r._id)) || String(Math.random()),
+        name: r?.name ?? '',
+        description: r?.description ?? '',
+        permissions: r?.permissions ?? [],
+        userCount: r?.userCount ?? 0,
+        isSystem: r?.isSystem ?? false,
+      }));
+      setRoles(normalizedRoles);
       setPermissions(permissionsData);
       setOrganizationalUnits(unitsData);
     } catch (error) {
@@ -227,6 +252,19 @@ const UserManagement: React.FC = () => {
 
   const handleUserSave = async () => {
     try {
+      // Minimal validation and debug logging to ensure the action fires
+      if (!userForm.firstName || !userForm.lastName || !userForm.email) {
+        toast({
+          title: 'Missing information',
+          description: 'First name, last name, and email are required',
+          status: 'warning',
+          duration: 4000,
+          isClosable: true,
+        });
+        return;
+      }
+      console.log('UserManagement: handleUserSave clicked', { isEditing, editingUserId, userForm });
+
       if (isEditing) {
         const updatedUser = await settingsService.updateUser(editingUserId, userForm);
         setUsers(prev => prev.map(u => u.id === editingUserId ? updatedUser : u));
@@ -252,6 +290,7 @@ const UserManagement: React.FC = () => {
       onUserClose();
       resetUserForm();
     } catch (error) {
+      console.error('UserManagement: handleUserSave error', error);
       toast({
         title: 'Save failed',
         description: 'Failed to save user',
