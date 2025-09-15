@@ -144,7 +144,7 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
 
   // Get hours for a specific day
   const getHoursForDay = useCallback((dayIndex: number): number => {
-    if (!timesheet || !timesheet.hours[dayIndex]) return 0;
+    if (!timesheet || !timesheet.hours || timesheet.hours[dayIndex] === undefined) return 0;
     return timesheet.hours[dayIndex];
   }, [timesheet]);
 

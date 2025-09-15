@@ -55,8 +55,8 @@ class ConfigService {
           apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service.example.com/api/v1',
         },
         timesheet: {
-          url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3001',
-          apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'http://localhost:3001/api/timesheet',
+          url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3007',
+          apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'http://localhost:3007/api/time-entries',
         },
         leadImport: {
           url: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_URL || 'http://localhost:3003',
@@ -280,8 +280,8 @@ export const getTimesheetServiceConfig = () => {
   } catch (error) {
     console.error('ConfigService not available, using fallback timesheet service config');
     return {
-      url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3004',
-      apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'http://localhost:3004/api'
+      url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3007',
+      apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'http://localhost:3007/api/time-entries'
     };
   }
 };

@@ -62,7 +62,7 @@ class TimesheetService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3001';
+    this.baseURL = process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3007';
     
     this.api = axios.create({
       baseURL: this.baseURL,

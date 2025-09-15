@@ -1,11 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
-// API Configuration
-// Use same-origin proxy in browser to avoid CORS; use direct URL on server
-const API_BASE_URL = typeof window === 'undefined'
-  ? (process.env.NEXT_PUBLIC_TRANSACTIONS_API_URL || 'http://localhost:3003/api/v1')
-  : '/transactions-api';
-const JWT_TOKEN = process.env.NEXT_PUBLIC_JWT_TOKEN;
+// API Configuration - Use Heroku transactions service directly
+const TRANSACTIONS_SERVICE_API_URL = process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api/v1';
+const TRANSACTIONS_JWT_TOKEN = process.env.NEXT_PUBLIC_TRANSACTIONS_JWT_TOKEN;
 
 export interface TransactionProperty {
   id: string;
@@ -188,16 +185,18 @@ const mockTransactions: TransactionProperty[] = [
   },
 ];
 
-// Helper function to make API calls
-const apiCall = async (endpoint: string, options: RequestInit = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
+// Helper function to make API calls directly to Heroku transactions service
+const apiCall = async (endpoint: string, options: any = {}) => {
+  const url = `${TRANSACTIONS_SERVICE_API_URL}/transactions${endpoint}`;
+  
   const response = await fetch(url, {
+    method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(JWT_TOKEN && { 'Authorization': `Bearer ${JWT_TOKEN}` }),
+      ...(TRANSACTIONS_JWT_TOKEN && { 'Authorization': `Bearer ${TRANSACTIONS_JWT_TOKEN}` }),
       ...options.headers,
     },
-    ...options,
+    body: options.body,
   });
 
   if (!response.ok) {
@@ -210,7 +209,7 @@ const apiCall = async (endpoint: string, options: RequestInit = {}) => {
 export const transactionsService = {
   async list(): Promise<TransactionProperty[]> {
     try {
-      return await apiCall('/transactions');
+      return await apiCall('');
     } catch (error) {
       console.warn('API call failed, using mock data:', error);
       // Fallback to mock data
@@ -220,7 +219,7 @@ export const transactionsService = {
 
   async get(id: string): Promise<TransactionProperty | null> {
     try {
-      return await apiCall(`/transactions/${id}`);
+      return await apiCall(`/${id}`);
     } catch (error) {
       console.warn('API call failed, using mock data:', error);
       // Fallback to mock data
@@ -230,7 +229,7 @@ export const transactionsService = {
 
   async create(data: Omit<TransactionProperty, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { status?: TransactionProperty['status'] }): Promise<TransactionProperty> {
     try {
-      return await apiCall('/transactions', {
+      return await apiCall('', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -252,7 +251,7 @@ export const transactionsService = {
 
   async update(id: string, data: Partial<TransactionProperty>): Promise<TransactionProperty | null> {
     try {
-      return await apiCall(`/transactions/${id}`, {
+      return await apiCall(`/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
@@ -268,7 +267,7 @@ export const transactionsService = {
 
   async updateStatus(id: string, status: TransactionProperty['status']): Promise<TransactionProperty | null> {
     try {
-      return await apiCall(`/transactions/${id}/status`, {
+      return await apiCall(`/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status }),
       });
@@ -284,7 +283,7 @@ export const transactionsService = {
 
   async addActivity(id: string, activity: { user: string; userEmail: string; message: string }): Promise<TransactionProperty | null> {
     try {
-      return await apiCall(`/transactions/${id}/activities`, {
+      return await apiCall(`/${id}/activities`, {
         method: 'POST',
         body: JSON.stringify(activity),
       });
@@ -312,10 +311,10 @@ export const transactionsService = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${API_BASE_URL}/transactions/${id}/documents`, {
+      const response = await fetch(`${TRANSACTIONS_SERVICE_API_URL}/transactions/${id}/documents`, {
         method: 'POST',
         headers: {
-          ...(JWT_TOKEN && { 'Authorization': `Bearer ${JWT_TOKEN}` }),
+          ...(TRANSACTIONS_JWT_TOKEN && { 'Authorization': `Bearer ${TRANSACTIONS_JWT_TOKEN}` }),
         },
         body: formData,
       });
