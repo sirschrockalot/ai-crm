@@ -174,7 +174,7 @@ class TimesheetService {
         // Update existing timesheet
         const updateData = {
           hours,
-          notes,
+          notes: notes || '',
           status: 'draft'
         };
         
@@ -189,7 +189,7 @@ class TimesheetService {
           weekStart: weekStart.toISOString(),
           weekEnd: weekEnd.toISOString(),
           hours,
-          notes,
+          notes: notes || '',
           status: 'draft'
         };
         
