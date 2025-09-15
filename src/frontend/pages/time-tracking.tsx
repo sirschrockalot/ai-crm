@@ -88,6 +88,13 @@ const TimeTrackingPage: React.FC = () => {
       // Get current hours from the local timesheet or create empty array
       const currentHours = localTimesheet?.hours || [0, 0, 0, 0, 0, 0, 0];
       
+      console.log('Saving timesheet with data:', {
+        userId,
+        hours: currentHours,
+        notes,
+        localTimesheet
+      });
+      
       // Save the timesheet (no daily notes needed)
       await saveTimesheet(currentHours, notes);
       
@@ -98,6 +105,7 @@ const TimeTrackingPage: React.FC = () => {
       // Reset success status after 3 seconds
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
+      console.error('Error saving timesheet:', error);
       setSaveStatus('error');
       // Reset error status after 5 seconds
       setTimeout(() => setSaveStatus('idle'), 5000);

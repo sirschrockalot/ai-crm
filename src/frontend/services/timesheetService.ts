@@ -172,22 +172,30 @@ class TimesheetService {
 
       if (existing) {
         // Update existing timesheet
-        const response = await this.updateTimeEntry(existing._id, {
+        const updateData = {
           hours,
           notes,
           status: 'draft'
-        });
+        };
+        
+        console.log('Updating existing timesheet with data:', updateData);
+        
+        const response = await this.updateTimeEntry(existing._id, updateData);
         return response.data;
       } else {
         // Create new timesheet
-        const response = await this.createTimeEntry({
+        const createData = {
           userId,
           weekStart: weekStart.toISOString(),
           weekEnd: weekEnd.toISOString(),
           hours,
           notes,
           status: 'draft'
-        });
+        };
+        
+        console.log('Creating new timesheet with data:', createData);
+        
+        const response = await this.createTimeEntry(createData);
         return response.data;
       }
     } catch (error) {
