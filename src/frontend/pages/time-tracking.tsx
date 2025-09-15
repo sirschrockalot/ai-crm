@@ -45,7 +45,7 @@ const TimeTrackingPage: React.FC = () => {
 
   // Sync local timesheet with timesheet from hook
   useEffect(() => {
-    if (timesheet && !localTimesheet) {
+    if (timesheet) {
       setLocalTimesheet(timesheet);
       setNotes(timesheet.notes || '');
       
@@ -56,7 +56,7 @@ const TimeTrackingPage: React.FC = () => {
       });
       setInputValues(initialInputValues);
     }
-  }, [timesheet, localTimesheet]);
+  }, [timesheet]);
 
   const handleNotesChange = (value: string) => {
     setNotes(value);
@@ -324,16 +324,10 @@ const TimeTrackingPage: React.FC = () => {
                               min="0"
                               max="24"
                               step="0.25"
-                              value={inputValues[index] !== undefined ? inputValues[index] : (hours || '')}
+                              value={inputValues[index] !== undefined ? inputValues[index] : (hours > 0 ? hours.toString() : '')}
                               onChange={(e) => {
                                 const value = e.target.value;
                                 setInputValues(prev => ({ ...prev, [index]: value }));
-                                
-                                // Only update the timesheet if it's a valid number
-                                if (value === '' || !isNaN(parseFloat(value))) {
-                                  const numValue = value === '' ? 0 : parseFloat(value);
-                                  handleHoursChange(index, numValue);
-                                }
                               }}
                               onBlur={(e) => {
                                 const value = e.target.value;
