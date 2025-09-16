@@ -167,13 +167,21 @@ class TimesheetService {
       const weekStart = this.getWeekStart(today);
       const weekEnd = this.getWeekEnd(today);
 
+      // Normalize hours: ensure exactly 7 finite numbers between 0 and 24
+      const normalizedHours = Array.from({ length: 7 }, (_, idx) => {
+        const value = Array.isArray(hours) ? hours[idx] : undefined;
+        const num = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+        // Clamp to [0, 24]
+        return Math.max(0, Math.min(24, num));
+      });
+
       // Try to get existing timesheet for this week
       const existing = await this.getCurrentWeekTimesheet(userId);
 
       if (existing) {
         // Update existing timesheet
         const updateData = {
-          hours,
+          hours: normalizedHours,
           notes: notes || '',
           status: 'draft'
         };
@@ -188,7 +196,7 @@ class TimesheetService {
           userId,
           weekStart: weekStart.toISOString(),
           weekEnd: weekEnd.toISOString(),
-          hours,
+          hours: normalizedHours,
           notes: notes || '',
           status: 'draft'
         };
@@ -199,7 +207,14 @@ class TimesheetService {
         return response.data;
       }
     } catch (error) {
-      console.error('Error saving current week timesheet:', error);
+      // Surface server-side validation details if present
+      // @ts-ignore
+      const details = error?.response?.data?.details;
+      if (details) {
+        console.error('Error saving current week timesheet: validation details ->', details);
+      } else {
+        console.error('Error saving current week timesheet:', error);
+      }
       throw error;
     }
   }
