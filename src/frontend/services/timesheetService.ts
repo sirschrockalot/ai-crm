@@ -180,11 +180,13 @@ class TimesheetService {
 
       if (existing) {
         // Update existing timesheet
-        const updateData = {
+        const updateData: Record<string, any> = {
           hours: normalizedHours,
-          notes: notes || '',
           status: 'draft'
         };
+        if (notes && notes.trim().length > 0) {
+          updateData.notes = notes;
+        }
         
         console.log('Updating existing timesheet with data:', updateData);
         
@@ -192,14 +194,16 @@ class TimesheetService {
         return response.data;
       } else {
         // Create new timesheet
-        const createData = {
+        const createData: Record<string, any> = {
           userId,
           weekStart: weekStart.toISOString(),
           weekEnd: weekEnd.toISOString(),
           hours: normalizedHours,
-          notes: notes || '',
           status: 'draft'
         };
+        if (notes && notes.trim().length > 0) {
+          createData.notes = notes;
+        }
         
         console.log('Creating new timesheet with data:', createData);
         
