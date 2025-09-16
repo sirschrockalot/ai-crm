@@ -3,7 +3,7 @@ import {
   Box,
   VStack,
   HStack,
-  Link,
+  Link as ChakraLink,
   Text,
   Icon,
   Collapse,
@@ -13,6 +13,7 @@ import {
   Badge,
   Divider,
 } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import {
   FiBarChart,
   FiTrendingUp,
@@ -309,7 +310,8 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
 
     return (
       <Box key={item.id}>
-        <Link
+        <ChakraLink
+          as={NextLink}
           href={item.href}
           _hover={{ textDecoration: 'none' }}
           onClick={(e) => {
@@ -367,7 +369,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
               </>
             )}
           </HStack>
-        </Link>
+        </ChakraLink>
 
         {/* Render children */}
         {hasChildren && (
@@ -397,7 +399,8 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
               hasArrow
             >
               <Box>
-                <Link
+                <ChakraLink
+                  as={NextLink}
                   href={item.href}
                   _hover={{ textDecoration: 'none' }}
                   onClick={(e) => {
@@ -424,7 +427,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
                   >
                     <Icon as={item.icon} boxSize={5} />
                   </Box>
-                </Link>
+                </ChakraLink>
               </Box>
             </Tooltip>
           );

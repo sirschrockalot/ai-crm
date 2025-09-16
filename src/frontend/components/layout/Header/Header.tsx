@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Box, Flex, Heading, Spacer, IconButton, Avatar, Menu, MenuButton, MenuList, MenuItem, useColorMode, useColorModeValue, Badge, Text } from '@chakra-ui/react';
 import { BellIcon, SunIcon, MoonIcon } from '@chakra-ui/icons';
 import { useAuth } from '../../../contexts/AuthContext';
-import { getUserInitials, getDisplayName } from '../../../utils/userUtils';
+import { getDisplayName, getUserInitials } from '../../../utils/userUtils';
+import { useRouter } from 'next/router';
 
 const Header: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const bg = useColorModeValue('white', 'gray.900');
 
@@ -38,8 +40,22 @@ const Header: React.FC = () => {
           </MenuList>
         </Menu>
         <Menu>
-          <MenuButton as={Avatar} size="sm" ml={4} name={getDisplayName(user?.firstName, user?.lastName, user?.email)}>
-            {isAuthenticated && user ? getUserInitials(user.firstName, user.lastName) : 'U'}
+          <MenuButton
+            p={0}
+            ml={4}
+            borderRadius="full"
+            display="inline-flex"
+            _hover={{ opacity: 0.9 }}
+            _active={{ opacity: 0.95 }}
+            _focus={{ boxShadow: 'outline' }}
+          >
+            <Avatar
+              size="sm"
+              name={getDisplayName(user?.firstName, user?.lastName, user?.email)}
+              src={isAuthenticated && user?.picture ? user.picture : undefined}
+              bg={isAuthenticated ? 'green.400' : 'gray.300'}
+              color={isAuthenticated ? 'white' : 'gray.700'}
+            />
           </MenuButton>
           <MenuList>
             {isAuthenticated && user && (
@@ -52,9 +68,9 @@ const Header: React.FC = () => {
                 </Text>
               </Box>
             )}
-            <MenuItem>Profile</MenuItem>
-            <MenuItem>Settings</MenuItem>
-            <MenuItem>Logout</MenuItem>
+            <MenuItem onClick={() => router.push('/profile')}>Profile</MenuItem>
+            <MenuItem onClick={() => router.push('/settings')}>Settings</MenuItem>
+            <MenuItem onClick={logout}>Logout</MenuItem>
           </MenuList>
         </Menu>
       </Flex>

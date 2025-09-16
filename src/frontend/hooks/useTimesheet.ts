@@ -10,6 +10,7 @@ interface UseTimesheetOptions {
 interface UseTimesheetReturn {
   // Data
   timesheet: TimeEntry | null;
+  drafts: TimeEntry[];
   weekDates: { start: Date; end: Date; days: Date[] };
   totalHours: number;
   isLoading: boolean;
@@ -17,8 +18,10 @@ interface UseTimesheetReturn {
   
   // Actions
   loadTimesheet: () => Promise<void>;
+  loadDrafts: () => Promise<void>;
   saveTimesheet: (hours: number[], notes?: string) => Promise<void>;
   submitTimesheet: () => Promise<void>;
+  submitDraft: (id: string) => Promise<void>;
   updateHours: (dayIndex: number, hours: number) => void;
   getHoursForDay: (dayIndex: number) => number;
   
@@ -31,6 +34,7 @@ interface UseTimesheetReturn {
 
 export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): UseTimesheetReturn => {
   const [timesheet, setTimesheet] = useState<TimeEntry | null>(null);
+  const [drafts, setDrafts] = useState<TimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const toast = useToast();
@@ -65,6 +69,16 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
     }
   }, [userId, toast]);
 
+  const loadDrafts = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const entries = await timesheetService.getDraftsForUser(userId);
+      setDrafts(entries);
+    } catch (err) {
+      // silenced to avoid noisy UI
+    }
+  }, [userId]);
+
   // Save timesheet
   const saveTimesheet = useCallback(async (hours: number[], notes?: string) => {
     if (!userId) return;
@@ -96,6 +110,35 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
       setIsLoading(false);
     }
   }, [userId, toast]);
+
+  const submitDraft = useCallback(async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await timesheetService.submitEntry(id);
+      await loadDrafts();
+      await loadTimesheet();
+      toast({
+        title: 'Submitted',
+        description: 'Timesheet submitted for approval',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to submit timesheet';
+      setError(errorMessage);
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadDrafts, loadTimesheet, toast]);
 
   // Submit timesheet
   const submitTimesheet = useCallback(async () => {
@@ -171,12 +214,14 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
   useEffect(() => {
     if (autoLoad && userId) {
       loadTimesheet();
+      loadDrafts();
     }
-  }, [autoLoad, userId, loadTimesheet]);
+  }, [autoLoad, userId, loadTimesheet, loadDrafts]);
 
   return {
     // Data
     timesheet,
+    drafts,
     weekDates,
     totalHours,
     isLoading,
@@ -184,8 +229,10 @@ export const useTimesheet = ({ userId, autoLoad = true }: UseTimesheetOptions): 
     
     // Actions
     loadTimesheet,
+    loadDrafts,
     saveTimesheet,
     submitTimesheet,
+    submitDraft,
     updateHours,
     getHoursForDay,
     

@@ -24,18 +24,21 @@ const TimeTrackingPage: React.FC = () => {
   
   const {
     timesheet,
+    drafts,
     weekDates,
     totalHours,
     isLoading,
     error,
     saveTimesheet,
     submitTimesheet,
+    submitDraft,
     updateHours,
     getHoursForDay,
     weekDisplayText,
     statusColor,
     canSubmit,
     loadTimesheet,
+    loadDrafts,
   } = useTimesheet({ userId });
 
   const [notes, setNotes] = useState(timesheet?.notes || '');
@@ -202,6 +205,36 @@ const TimeTrackingPage: React.FC = () => {
           </HStack>
         </HStack>
 
+        {/* Draft Timesheets Section */}
+        {drafts && drafts.length > 0 && (
+          <Box mb={6}>
+            <Heading size="md" mb={3}>Draft Timesheets</Heading>
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+              {drafts.map((entry) => (
+                <Card key={entry._id} variant="outline" borderColor="yellow.300">
+                  <CardBody>
+                    <VStack align="stretch" spacing={2}>
+                      <HStack justify="space-between">
+                        <Badge colorScheme="yellow">Draft</Badge>
+                        <Text fontSize="sm" color="gray.600">
+                          Week of {new Date(entry.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </Text>
+                      </HStack>
+                      <HStack justify="space-between">
+                        <Text fontWeight="medium">Total Hours</Text>
+                        <Text>{timesheetService.calculateTotalHours(entry.hours)}h</Text>
+                      </HStack>
+                      <HStack justify="flex-end" spacing={3} mt={2}>
+                        <Button size="sm" variant="outline" onClick={() => submitDraft(entry._id)}>Submit</Button>
+                      </HStack>
+                    </VStack>
+                  </CardBody>
+                </Card>
+              ))}
+            </SimpleGrid>
+          </Box>
+        )}
+
         {/* Statistics Cards */}
         <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
           <Card>
@@ -261,8 +294,8 @@ const TimeTrackingPage: React.FC = () => {
           </Card>
         </SimpleGrid>
 
-        {/* Main Content Grid */}
-        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={6}>
+        {/* Main Content */}
+        <Grid templateColumns={{ base: '1fr' }} gap={6}>
           {/* Weekly Timesheet */}
           <Card>
             <CardBody>
@@ -423,52 +456,7 @@ const TimeTrackingPage: React.FC = () => {
             </CardBody>
           </Card>
 
-          {/* Sidebar */}
-          <VStack spacing={6} align="stretch">
-            {/* Recent Entries */}
-            <Card>
-              <CardBody>
-                <VStack align="stretch" spacing={4}>
-                  <Heading size="sm">Recent Entries</Heading>
-                  <VStack spacing={2} align="stretch">
-                    {[
-                      { project: 'Lead Management', hours: 2.5, date: 'Today' },
-                      { project: 'Client Calls', hours: 1.5, date: 'Yesterday' },
-                      { project: 'Documentation', hours: 3.0, date: 'Yesterday' },
-                    ].map((entry, index) => (
-                      <HStack key={index} justify="space-between" p={2} bg="gray.50" borderRadius="md">
-                        <VStack align="start" spacing={0}>
-                          <Text fontSize="sm" fontWeight="medium">{entry.project}</Text>
-                          <Text fontSize="xs" color="gray.600">{entry.date}</Text>
-                        </VStack>
-                        <Text fontSize="sm" fontWeight="bold" color="blue.600">
-                          {entry.hours}h
-                        </Text>
-                      </HStack>
-                    ))}
-                  </VStack>
-                </VStack>
-              </CardBody>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardBody>
-                <VStack align="stretch" spacing={3}>
-                  <Heading size="sm">Quick Actions</Heading>
-                  <Button leftIcon={<FaPlus />} size="sm" variant="outline">
-                    Start Timer
-                  </Button>
-                  <Button leftIcon={<FaClock />} size="sm" variant="outline">
-                    Add Manual Entry
-                  </Button>
-                  <Button leftIcon={<FaChartBar />} size="sm" variant="outline">
-                    View Reports
-                  </Button>
-                </VStack>
-              </CardBody>
-            </Card>
-          </VStack>
+          {/* Sidebar removed to allow Weekly Timesheet to span full width */}
         </Grid>
       </Box>
     </DashboardLayout>

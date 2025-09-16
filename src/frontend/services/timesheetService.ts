@@ -115,6 +115,12 @@ class TimesheetService {
     return response.data;
   }
 
+  // Get draft entries for a specific user
+  async getDraftsForUser(userId: string): Promise<TimeEntry[]> {
+    const response = await this.getTimeEntries({ userId, status: 'draft', limit: 50, page: 1 });
+    return response.data;
+  }
+
   // Get time entry by ID
   async getTimeEntryById(id: string): Promise<TimeEntryResponse> {
     const response = await this.api.get(`/api/time-entries/${id}`);
@@ -138,6 +144,12 @@ class TimesheetService {
   // Update existing time entry
   async updateTimeEntry(id: string, updates: TimeEntryUpdate): Promise<TimeEntryResponse> {
     const response = await this.api.put(`/api/time-entries/${id}`, updates);
+    return response.data;
+  }
+
+  // Submit a specific time entry by ID
+  async submitEntry(id: string): Promise<TimeEntry> {
+    const response = await this.updateTimeEntry(id, { status: 'submitted' });
     return response.data;
   }
 

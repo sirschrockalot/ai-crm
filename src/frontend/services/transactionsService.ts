@@ -4,6 +4,15 @@ import { v4 as uuidv4 } from 'uuid';
 const TRANSACTIONS_SERVICE_API_URL = process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api/v1';
 const TRANSACTIONS_JWT_TOKEN = process.env.NEXT_PUBLIC_TRANSACTIONS_JWT_TOKEN;
 
+const getLiveAuthToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem('auth_token');
+  } catch {
+    return null;
+  }
+};
+
 export interface TransactionProperty {
   id: string;
   status: 'gathering_docs' | 'gathering_title' | 'client_help_needed' | 'on_hold' | 'pending_closing' | 'ready_to_close' | 'closed' | 'cancelled';
@@ -189,11 +198,13 @@ const mockTransactions: TransactionProperty[] = [
 const apiCall = async (endpoint: string, options: any = {}) => {
   const url = `${TRANSACTIONS_SERVICE_API_URL}/transactions${endpoint}`;
   
+  const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
+
   const response = await fetch(url, {
     method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(TRANSACTIONS_JWT_TOKEN && { 'Authorization': `Bearer ${TRANSACTIONS_JWT_TOKEN}` }),
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
     body: options.body,

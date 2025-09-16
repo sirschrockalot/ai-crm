@@ -1,48 +1,34 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-
-interface RefreshResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-    tenantId: string;
-  };
-}
+import { getAuthServiceConfig } from '../../../services/configService';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<RefreshResponse | { error: string }>
+  res: NextApiResponse<{ token: string; user?: any } | { error: string }>
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'No token provided' });
+    const refreshToken = req.body?.refreshToken as string | undefined;
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'refreshToken is required' });
     }
 
-    // Mock token refresh - return new token
-    const newToken = 'mock-jwt-token-refreshed-' + Date.now();
-    
-    const mockUser = {
-      id: '1',
-      email: 'admin@dealcycle.com',
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin',
-      tenantId: 'tenant-1',
-    };
-    
-    return res.status(200).json({
-      token: newToken,
-      user: mockUser,
+    const authServiceConfig = getAuthServiceConfig();
+    const response = await fetch(`${authServiceConfig.apiUrl}/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return res.status(response.status).json({ error: errorData.message || 'Token refresh failed' });
+    }
+
+    const data = await response.json();
+    return res.status(200).json({ token: data.accessToken || data.token, user: data.user });
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error' });
   }

@@ -130,7 +130,7 @@ interface SystemLog {
 }
 
 const AdminPage: React.FC = () => {
-  const { user, isAuthenticated, hasPermission } = useAuth();
+  const { user, isAuthenticated, hasPermission, isLoading: authIsLoading } = useAuth();
   const router = useRouter();
   const toast = useToast();
   const { isOpen: isUserModalOpen, onOpen: onUserModalOpen, onClose: onUserModalClose } = useDisclosure();
@@ -209,6 +209,7 @@ const AdminPage: React.FC = () => {
 
   // Check authentication and permissions
   useEffect(() => {
+    if (authIsLoading) return; // Wait for auth to initialize before redirecting
     // Check if we're in bypass auth mode
     const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
     
@@ -235,7 +236,7 @@ const AdminPage: React.FC = () => {
       router.push('/dashboard');
       return;
     }
-  }, [isAuthenticated, hasPermission, router, toast]);
+  }, [authIsLoading, isAuthenticated, hasPermission, router, toast]);
 
   const handleUserAction = (action: string, userId: string) => {
     toast({
@@ -301,6 +302,16 @@ const AdminPage: React.FC = () => {
   // Check if we're in bypass auth mode
   const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
   
+  if (authIsLoading) {
+    return (
+      <DashboardLayout isAuthenticated={true} showNavigation={true}>
+        <Box p={8}>
+          <Text>Loading...</Text>
+        </Box>
+      </DashboardLayout>
+    );
+  }
+
   if (!bypassAuth && (!isAuthenticated || !hasPermission('system:admin'))) {
     return (
       <Box p={8} textAlign="center">

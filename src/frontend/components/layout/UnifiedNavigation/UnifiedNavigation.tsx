@@ -3,7 +3,7 @@ import {
   Box,
   VStack,
   HStack,
-  Link,
+  Link as ChakraLink,
   Text,
   Icon,
   useColorModeValue,
@@ -13,6 +13,7 @@ import {
   IconButton,
   Tooltip,
 } from '@chakra-ui/react';
+import NextLink from 'next/link';
 import { ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 import {
   FiBarChart,
@@ -204,7 +205,8 @@ const UnifiedNavigation: React.FC<UnifiedNavigationProps> = ({
 
     return (
       <Box key={item.id}>
-        <Link
+        <ChakraLink
+          as={NextLink}
           href={item.href}
           display="flex"
           alignItems="center"
@@ -252,7 +254,7 @@ const UnifiedNavigation: React.FC<UnifiedNavigationProps> = ({
               )}
             </>
           )}
-        </Link>
+        </ChakraLink>
 
         {/* Render children if expanded */}
         {hasChildren && !isCollapsed && (

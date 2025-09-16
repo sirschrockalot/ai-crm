@@ -116,7 +116,7 @@ class ApiService {
       const refreshToken = localStorage.getItem('refresh_token');
       if (!refreshToken) return null;
 
-      const response = await axios.post(`${this.config.baseURL}/auth/refresh`, {
+      const response = await axios.post(`${this.config.baseURL}/api/auth/refresh`, {
         refreshToken,
       });
 

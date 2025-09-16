@@ -104,15 +104,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return;
     }
 
-    // Check for existing tokens first
+    // Check for existing tokens first (token alone is sufficient to initialize)
     const token = localStorage.getItem('auth_token');
-    const refreshToken = localStorage.getItem('refresh_token');
-    
-    if (token && refreshToken) {
-      console.log('AuthProvider useEffect: Found existing tokens, calling initializeAuth');
+    if (token) {
+      console.log('AuthProvider useEffect: Found existing token, calling initializeAuth');
       initializeAuth();
     } else {
-      console.log('AuthProvider useEffect: No existing tokens, setting loading to false');
+      console.log('AuthProvider useEffect: No token, setting loading to false');
       setState(prev => ({ ...prev, isLoading: false }));
       initializationRef.current = true;
     }
@@ -129,10 +127,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('InitializeAuth: Verifying existing tokens with auth service');
 
       const token = localStorage.getItem('auth_token');
-      const refreshTokenValue = localStorage.getItem('refresh_token');
-      
-      if (!token || !refreshTokenValue) {
-        console.log('InitializeAuth: No tokens found, setting unauthenticated state');
+      if (!token) {
+        console.log('InitializeAuth: No token found, setting unauthenticated state');
         setState({
           user: null,
           isAuthenticated: false,
@@ -143,16 +139,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         initializationRef.current = true;
         return;
-      } else {
-        // Verify token with auth service
-        const controller = new AbortController();
-        const authServiceConfig = getAuthServiceConfig();
-        const response = await fetch(`${authServiceConfig.url}/api/auth/users/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          signal: controller.signal,
-        });
+      }
+
+      // Verify token via our Next.js API to keep logic consistent and avoid CORS
+      const controller = new AbortController();
+      const response = await fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` },
+        signal: controller.signal,
+      });
 
       if (response.ok) {
         const userData = await response.json();
@@ -164,13 +158,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: 24 * 60 * 60, // 24 hours in seconds
           isSessionExpiringSoon: false,
         });
-        
-        // Start session monitoring
         startSessionMonitoring();
       } else {
-        // Token is invalid, clear state
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('refresh_token');
+        // Do not aggressively clear tokens on transient errors; just mark unauthenticated
         setState({
           user: null,
           isAuthenticated: false,
@@ -179,7 +169,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           sessionTimeout: null,
           isSessionExpiringSoon: false,
         });
-      }
       }
       
       // Mark as initialized regardless of success/failure

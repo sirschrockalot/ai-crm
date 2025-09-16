@@ -58,6 +58,8 @@ export default async function handler(
       firstName: data.user.firstName,
       lastName: data.user.lastName,
       role: data.user.role,
+      roles: Array.isArray(data.user.roles) ? data.user.roles : (data.user.role ? [data.user.role] : []),
+      status: data.user.status,
       tenantId: data.user.tenantId,
     };
 
