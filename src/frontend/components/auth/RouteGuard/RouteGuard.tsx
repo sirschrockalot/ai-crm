@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../hooks/useAuth';
+import { isAuthBypassEnabled } from '../../../services/configService';
 import Loading from '../../ui/Loading';
 
 interface RouteGuardProps {
@@ -16,8 +17,14 @@ const AuthGuard: React.FC<RouteGuardProps> = ({
 }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const bypassAuth = isAuthBypassEnabled();
 
   useEffect(() => {
+    // Skip auth check if bypass is enabled
+    if (bypassAuth) {
+      return;
+    }
+
     if (!isLoading) {
       // If not authenticated, redirect to login
       if (!isAuthenticated) {
@@ -35,7 +42,12 @@ const AuthGuard: React.FC<RouteGuardProps> = ({
         }
       }
     }
-  }, [isAuthenticated, isLoading, user, requiredRoles, router, redirectTo]);
+  }, [isAuthenticated, isLoading, user, requiredRoles, router, redirectTo, bypassAuth]);
+
+  // Skip auth check if bypass is enabled
+  if (bypassAuth) {
+    return <>{children}</>;
+  }
 
   // Show loading while checking authentication
   if (isLoading) {

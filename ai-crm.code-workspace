@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../transactions-service"
+		},
+		{
+			"path": "../auth-service-repo"
+		},
+		{
+			"path": "../user-management-service"
+		},
+		{
+			"path": "../Timesheet-Service"
+		},
+		{
+			"path": "../Leads-Service"
+		}
+	],
+	"settings": {}
+}

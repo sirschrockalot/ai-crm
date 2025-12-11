@@ -104,6 +104,7 @@ const UserManagement: React.FC = () => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [organizationalUnits, setOrganizationalUnits] = useState<OrganizationalUnit[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isRolesLoading, setIsRolesLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Helper normalizers to ensure stable keys
@@ -128,6 +129,8 @@ const UserManagement: React.FC = () => {
     role: '',
     department: '',
     organizationalUnit: '',
+    password: '',
+    confirmPassword: '',
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string>('');
@@ -250,6 +253,47 @@ const UserManagement: React.FC = () => {
     }
   };
 
+  // Ensure roles are fetched when opening modals (handles initial load failure/race)
+  const ensureRolesLoaded = async () => {
+    if (roles && roles.length > 0) return;
+    try {
+      setIsRolesLoading(true);
+      const rolesData = await settingsService.getRoles();
+      const normalizedRoles = (rolesData as any[]).map((r) => ({
+        id: (r && (r.id || r._id)) || String(Math.random()),
+        name: r?.name ?? '',
+        description: r?.description ?? '',
+        permissions: r?.permissions ?? [],
+        userCount: r?.userCount ?? 0,
+        isSystem: r?.isSystem ?? false,
+      }));
+      setRoles(normalizedRoles);
+    } catch (error) {
+      toast({
+        title: 'Failed to load roles',
+        description: 'Could not fetch roles. Please try again.',
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsRolesLoading(false);
+    }
+  };
+
+  // Fetch roles when user/role modals open
+  useEffect(() => {
+    if (isUserOpen) {
+      void ensureRolesLoaded();
+    }
+  }, [isUserOpen]);
+
+  useEffect(() => {
+    if (isRoleOpen) {
+      void ensureRolesLoaded();
+    }
+  }, [isRoleOpen]);
+
   const handleUserSave = async () => {
     try {
       // Minimal validation and debug logging to ensure the action fires
@@ -262,6 +306,28 @@ const UserManagement: React.FC = () => {
           isClosable: true,
         });
         return;
+      }
+      if (!isEditing) {
+        if (!userForm.password || userForm.password.length < 8) {
+          toast({
+            title: 'Invalid password',
+            description: 'Password must be at least 8 characters',
+            status: 'warning',
+            duration: 4000,
+            isClosable: true,
+          });
+          return;
+        }
+        if (userForm.password !== userForm.confirmPassword) {
+          toast({
+            title: 'Passwords do not match',
+            description: 'Please confirm the password correctly',
+            status: 'warning',
+            duration: 4000,
+            isClosable: true,
+          });
+          return;
+        }
       }
       console.log('UserManagement: handleUserSave clicked', { isEditing, editingUserId, userForm });
 
@@ -276,7 +342,15 @@ const UserManagement: React.FC = () => {
           isClosable: true,
         });
       } else {
-        const newUser = await settingsService.createUser(userForm);
+        const newUser = await settingsService.createUser({
+          email: userForm.email,
+          firstName: userForm.firstName,
+          lastName: userForm.lastName,
+          role: userForm.role,
+          department: userForm.department,
+          organizationId: userForm.organizationalUnit || undefined,
+          password: userForm.password || undefined,
+        });
         setUsers(prev => [...prev, newUser]);
         toast({
           title: 'User created',
@@ -473,6 +547,8 @@ const UserManagement: React.FC = () => {
       role: '',
       department: '',
       organizationalUnit: '',
+      password: '',
+      confirmPassword: '',
     });
     setIsEditing(false);
     setEditingUserId('');
@@ -860,7 +936,8 @@ const UserManagement: React.FC = () => {
                   <Select
                     value={userForm.role}
                     onChange={(e) => setUserForm(prev => ({ ...prev, role: e.target.value }))}
-                    placeholder="Select role"
+                    placeholder={isRolesLoading ? 'Loading roles…' : 'Select role'}
+                    isDisabled={isRolesLoading}
                   >
                     {roles.map((role) => (
                       <option key={role.id} value={role.name}>{role.name}</option>
@@ -890,6 +967,33 @@ const UserManagement: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
+
+              {!isEditing && (
+                <>
+                  <SimpleGrid columns={2} spacing={4} w="full">
+                    <FormControl>
+                      <FormLabel>Initial Password</FormLabel>
+                      <Input
+                        value={userForm.password}
+                        onChange={(e) => setUserForm(prev => ({ ...prev, password: e.target.value }))}
+                        placeholder="Enter initial password"
+                        type="password"
+                        autoComplete="new-password"
+                      />
+                    </FormControl>
+                    <FormControl>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <Input
+                        value={userForm.confirmPassword}
+                        onChange={(e) => setUserForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        placeholder="Confirm password"
+                        type="password"
+                        autoComplete="new-password"
+                      />
+                    </FormControl>
+                  </SimpleGrid>
+                </>
+              )}
             </VStack>
           </ModalBody>
           <ModalFooter>

@@ -23,6 +23,9 @@ export interface AppConfig {
   apiRetryAttempts: number;
   wsUrl: string;
   microservices: MicroservicesConfig;
+  features?: {
+    enableGoogleOAuth: boolean;
+  };
 }
 
 class ConfigService {
@@ -47,8 +50,8 @@ class ConfigService {
           apiUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_API_URL || 'http://localhost:3001/api/auth',
         },
         leads: {
-          url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'http://localhost:3002',
-          apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'http://localhost:3002/api/leads',
+          url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'http://localhost:3008',
+          apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'http://localhost:3008/api/v1/leads',
         },
         transactions: {
           url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service.example.com',
@@ -66,6 +69,10 @@ class ConfigService {
           url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'http://localhost:3005',
           apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'http://localhost:3005/api/v1',
         },
+      },
+      // Feature Flags
+      features: {
+        enableGoogleOAuth: process.env.NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH === 'true',
       },
     };
   }
@@ -109,6 +116,13 @@ class ConfigService {
    */
   getServiceConfig(service: keyof MicroservicesConfig): ServiceConfig {
     return this.config.microservices[service];
+  }
+
+  /**
+   * Feature flags
+   */
+  isGoogleOAuthEnabled(): boolean {
+    return this.config.features?.enableGoogleOAuth === true;
   }
 
   /**
@@ -256,8 +270,8 @@ export const getLeadsServiceConfig = () => {
   } catch (error) {
     console.error('ConfigService not available, using fallback leads service config');
     return {
-      url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'http://localhost:3002',
-      apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'http://localhost:3002/api'
+      url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'http://localhost:3008',
+      apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'http://localhost:3008/api/v1/leads'
     };
   }
 };
@@ -347,6 +361,14 @@ export const isAuthBypassEnabled = () => {
     return configService.isAuthBypassEnabled();
   } catch (error) {
     return process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+  }
+};
+
+export const isGoogleOAuthEnabled = () => {
+  try {
+    return configService.isGoogleOAuthEnabled();
+  } catch (error) {
+    return process.env.NEXT_PUBLIC_ENABLE_GOOGLE_OAUTH === 'true';
   }
 };
 

@@ -223,9 +223,16 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
   const url = `${API_BASE_URL}${endpoint}`;
   
   try {
+    // Attach auth token if present
+    const rawToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    const authToken = rawToken
+      ? (rawToken.startsWith('Bearer ') ? rawToken : `Bearer ${rawToken}`)
+      : null;
+
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: authToken } : {}),
         ...options.headers,
       },
       ...options,

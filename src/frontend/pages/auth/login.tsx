@@ -17,6 +17,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Card from '../../components/ui/Card';
 import Loading from '../../components/ui/Loading';
+import { isGoogleOAuthEnabled, isAuthBypassEnabled } from '../../services/configService';
 
 const LoginPage: NextPage = () => {
   const router = useRouter();
@@ -126,15 +127,17 @@ const LoginPage: NextPage = () => {
             </Text>
           </VStack>
 
-          {/* Google OAuth Button */}
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={handleGoogleLogin}
-            leftIcon={<Box as="span" fontSize="lg">🔐</Box>}
-          >
-            Continue with Google
-          </Button>
+          {/* Google OAuth Button (feature-flagged) */}
+          {isGoogleOAuthEnabled() && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleGoogleLogin}
+              leftIcon={<Box as="span" fontSize="lg">🔐</Box>}
+            >
+              Continue with Google
+            </Button>
+          )}
 
           <Divider />
 
@@ -175,15 +178,22 @@ const LoginPage: NextPage = () => {
 
           <Divider />
 
-          {/* Test Mode Login */}
-          <Button
-            variant="ghost"
-            size="md"
-            onClick={handleTestModeLogin}
-            leftIcon={<Box as="span" fontSize="sm">🧪</Box>}
-          >
-            Test Mode Login
-          </Button>
+          {/* Test Mode Login - Only show in development */}
+          {isAuthBypassEnabled() && (
+            <>
+              <Button
+                variant="ghost"
+                size="md"
+                onClick={handleTestModeLogin}
+                leftIcon={<Box as="span" fontSize="sm">🧪</Box>}
+              >
+                Test Mode Login
+              </Button>
+              <Text fontSize="xs" color="gray.500" textAlign="center">
+                Test mode is only available in development environment
+              </Text>
+            </>
+          )}
 
           {/* Footer Links */}
           <Flex justify="space-between" fontSize="sm">

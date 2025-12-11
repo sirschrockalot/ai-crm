@@ -194,7 +194,7 @@ class SettingsService {
       }
     });
 
-    const response = await apiService.get(`/users?${queryParams}`);
+    const response = await apiService.get(`/api/users?${queryParams}`);
     // Service returns { users, total, page, limit } – UI expects array for now
     if (response?.data?.users) {
       return response.data.users as any[];
@@ -213,13 +213,14 @@ class SettingsService {
     avatar?: string;
     organizationId?: string;
     departmentId?: string;
+    password?: string;
   }): Promise<any> {
     // Map UI fields to API contract
     const payload: any = {
       email: userData.email,
       firstName: userData.firstName,
       lastName: userData.lastName,
-      password: 'TempPass123!', // temporary; admin can force reset later
+      password: userData.password || 'TempPass123!',
       roles: userData.role ? [userData.role] : ['Agent'],
       title: userData.title,
       department: userData.department,
@@ -230,7 +231,7 @@ class SettingsService {
       isActive: true,
     };
 
-    const response = await apiService.post('/users', payload);
+    const response = await apiService.post('/api/users', payload);
     return response.data;
   }
 
@@ -251,44 +252,50 @@ class SettingsService {
   }>): Promise<any> {
     // Map potential role field to roles array if provided
     const payload: any = { ...userData };
+
+    // Normalize organizational unit field name from UI to API contract
+    if ((payload as any).organizationalUnit && !payload.organizationId) {
+      payload.organizationId = (payload as any).organizationalUnit;
+    }
+    delete (payload as any).organizationalUnit; // Backend forbids unknown properties
     if (userData.role) {
       payload.roles = [userData.role];
       delete payload.role;
     }
 
-    const response = await apiService.patch(`/users/${userId}`, payload);
+    const response = await apiService.patch(`/api/users/${userId}`, payload);
     return response.data;
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await apiService.delete(`/users/${userId}`);
+    await apiService.delete(`/api/users/${userId}`);
   }
 
   async updateUserRoles(userId: string, roles: string[]): Promise<any> {
-    const response = await apiService.patch(`/users/${userId}/roles`, { roles });
+    const response = await apiService.patch(`/api/users/${userId}/roles`, { roles });
     return response.data;
   }
 
   async activateUser(userId: string): Promise<any> {
-    const response = await apiService.patch(`/users/${userId}/activate`);
+    const response = await apiService.patch(`/api/users/${userId}/activate`);
     return response.data;
   }
 
   async deactivateUser(userId: string): Promise<any> {
-    const response = await apiService.patch(`/users/${userId}/deactivate`);
+    const response = await apiService.patch(`/api/users/${userId}/deactivate`);
     return response.data;
   }
 
   async getUserStats(): Promise<any> {
-    const response = await apiService.get('/users/stats');
+    const response = await apiService.get('/api/users/stats');
     return response.data;
   }
 
   // Role Management (Admin only) - Using Frontend API Routes
   async getRoles(organizationId?: string): Promise<any[]> {
     const url = organizationId 
-      ? `/roles?organizationId=${organizationId}`
-      : '/roles';
+      ? `/api/roles?organizationId=${organizationId}`
+      : '/api/roles';
     const response = await apiService.get(url);
     return response.data;
   }
@@ -301,7 +308,7 @@ class SettingsService {
     isActive?: boolean;
     metadata?: Record<string, any>;
   }): Promise<any> {
-    const response = await apiService.post('/roles', roleData);
+    const response = await apiService.post('/api/roles', roleData);
     return response.data;
   }
 
@@ -312,21 +319,21 @@ class SettingsService {
     isActive: boolean;
     metadata: Record<string, any>;
   }>): Promise<any> {
-    const response = await apiService.patch(`/roles/${roleId}`, roleData);
+    const response = await apiService.patch(`/api/roles/${roleId}`, roleData);
     return response.data;
   }
 
   async deleteRole(roleId: string): Promise<void> {
-    await apiService.delete(`/roles/${roleId}`);
+    await apiService.delete(`/api/roles/${roleId}`);
   }
 
   async updateRolePermissions(roleId: string, permissions: string[]): Promise<any> {
-    const response = await apiService.patch(`/roles/${roleId}/permissions`, { permissions });
+    const response = await apiService.patch(`/api/roles/${roleId}/permissions`, { permissions });
     return response.data;
   }
 
   async getRoleStats(): Promise<any> {
-    const response = await apiService.get('/roles/stats');
+    const response = await apiService.get('/api/roles/stats');
     return response.data;
   }
 

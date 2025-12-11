@@ -156,12 +156,13 @@ const UnifiedNavigation: React.FC<UnifiedNavigationProps> = ({
     if (!user) return navigationItems;
     
     return navigationItems.filter(item => {
+      const userRoles = Array.isArray(user.roles) ? user.roles : [];
       const hasPermission = item.permissions.some(permission => {
-        if (user.role === 'admin' || user.role === 'SUPER_ADMIN') return true;
-        if (user.role === 'manager' || user.role === 'MANAGER') {
+        if (userRoles.includes('admin') || userRoles.includes('SUPER_ADMIN')) return true;
+        if (userRoles.includes('manager') || userRoles.includes('MANAGER')) {
           return !permission.includes('system:admin') && !permission.includes('system:settings');
         }
-        if (user.role === 'agent' || user.role === 'AGENT') {
+        if (userRoles.includes('agent') || userRoles.includes('AGENT')) {
           return !permission.includes('system:admin') && !permission.includes('system:settings') && !permission.includes('users:');
         }
         return true;
@@ -193,7 +194,11 @@ const UnifiedNavigation: React.FC<UnifiedNavigationProps> = ({
   useEffect(() => {
     const activeItem = filteredNavigationItems.find(item => isActive(item.href));
     if (activeItem && activeItem.children) {
-      setExpandedItems(prev => new Set([...prev, activeItem.id]));
+      setExpandedItems(prev => {
+        const next = new Set(prev);
+        next.add(activeItem.id);
+        return next;
+      });
     }
   }, [router.pathname, filteredNavigationItems]);
 

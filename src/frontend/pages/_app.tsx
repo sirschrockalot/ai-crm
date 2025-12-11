@@ -26,10 +26,26 @@ if (typeof window !== 'undefined') {
 // Global error handler
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (event) => {
+    // Filter out browser extension errors (harmless)
+    const errorMessage = event.error?.message || event.message || '';
+    if (errorMessage.includes('runtime.lastError') || 
+        errorMessage.includes('Extension context invalidated') ||
+        errorMessage.includes('message channel closed')) {
+      // Suppress browser extension errors - they don't affect app functionality
+      return;
+    }
     console.error('Global error caught:', event.error);
   });
 
   window.addEventListener('unhandledrejection', (event) => {
+    // Filter out browser extension errors
+    const errorMessage = event.reason?.message || String(event.reason) || '';
+    if (errorMessage.includes('runtime.lastError') || 
+        errorMessage.includes('Extension context invalidated') ||
+        errorMessage.includes('message channel closed')) {
+      // Suppress browser extension errors
+      return;
+    }
     console.error('Unhandled promise rejection:', event.reason);
   });
 }

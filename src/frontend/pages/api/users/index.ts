@@ -6,27 +6,41 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const userManagementConfig = getUserManagementServiceConfig();
-    
-    // Forward the request to the user management service
-    const response = await fetch(`${userManagementConfig.url}/api/v1/users${req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : ''}`, {
+    const userMgmt = getUserManagementServiceConfig();
+    const qs = req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
+    const targetUrl = `${userMgmt.url}/api/v1/users${qs}`;
+
+    const hasBody = req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0;
+    const response = await fetch(targetUrl, {
       method: req.method,
       headers: {
-        'Content-Type': 'application/json',
+        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
         ...(req.headers.authorization && { Authorization: req.headers.authorization }),
       },
-      ...(req.method !== 'GET' && { body: JSON.stringify(req.body) }),
+      ...(hasBody ? { body: JSON.stringify(req.body) } : {}),
     });
 
-    const data = await response.json();
-    
-    if (!response.ok) {
-      return res.status(response.status).json(data);
+    if (response.status === 204) {
+      return res.status(204).end();
     }
 
-    return res.status(response.status).json(data);
+    const raw = await response.text();
+    let maybeJson: any = {};
+    if (raw) {
+      try {
+        maybeJson = JSON.parse(raw);
+      } catch {
+        maybeJson = { message: raw };
+      }
+    }
+
+    if (!response.ok) {
+      return res.status(response.status).json(maybeJson);
+    }
+
+    return res.status(response.status).json(maybeJson);
   } catch (error) {
-    console.error('User management API error:', error);
+    console.error('Users API error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 }

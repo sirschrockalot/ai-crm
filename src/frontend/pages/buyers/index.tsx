@@ -271,6 +271,9 @@ const BuyersPageContent: React.FC = () => {
                 <Button variant="outline" colorScheme="blue" onClick={() => router.push('/buyers/matching')}>
                   Matching
                 </Button>
+                <Button variant="outline" colorScheme="blue" onClick={() => router.push('/buyers/map')}>
+                  Map Search
+                </Button>
                 <BuyerImport onImportComplete={fetchBuyers} />
                 <BuyerExport onExportComplete={fetchBuyers} />
                 <Button variant="primary" colorScheme="blue" onClick={onOpen}>

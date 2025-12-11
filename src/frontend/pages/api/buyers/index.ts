@@ -35,6 +35,11 @@ interface Buyer {
   buyerType: 'individual' | 'company' | 'investor';
   investmentRange: '0-50k' | '50k-100k' | '100k-250k' | '250k-500k' | '500k+';
   preferredPropertyTypes: string[];
+  buyBox?: {
+    zipCodes: string[];
+    states: string[];
+    cities: string[];
+  };
   notes?: string;
   isActive: boolean;
   createdAt: Date;

@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Box, VStack, FormControl, FormLabel, FormErrorMessage, Input, Textarea, Select, Button, useToast, Checkbox } from '@chakra-ui/react';
+import { Box, VStack, FormControl, FormLabel, FormErrorMessage, Input, Textarea, Select, Button, useToast, Checkbox, Divider } from '@chakra-ui/react';
+import { BuyBoxForm, BuyBoxData } from '../BuyBoxForm/BuyBoxForm';
+
+const buyBoxSchema = z.object({
+  zipCodes: z.array(z.string()).optional(),
+  states: z.array(z.string()).optional(),
+  cities: z.array(z.string()).optional(),
+}).optional();
 
 const buyerSchema = z.object({
   companyName: z.string().min(1, 'Company name is required'),
@@ -18,6 +25,7 @@ const buyerSchema = z.object({
   preferredPropertyTypes: z.array(z.string()).min(1, 'At least one property type must be selected'),
   notes: z.string().optional(),
   isActive: z.boolean().default(true),
+  buyBox: buyBoxSchema,
 });
 
 type BuyerFormData = z.infer<typeof buyerSchema>;
@@ -30,29 +38,53 @@ interface BuyerFormProps {
 
 const BuyerForm: React.FC<BuyerFormProps> = ({ onSubmit, initialData, isLoading = false }) => {
   const toast = useToast();
+  const [buyBoxData, setBuyBoxData] = useState<BuyBoxData | undefined>(
+    initialData?.buyBox || { zipCodes: [], states: [], cities: [] }
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<BuyerFormData>({
     resolver: zodResolver(buyerSchema),
     defaultValues: {
       isActive: true,
       preferredPropertyTypes: [],
+      buyBox: initialData?.buyBox,
       ...initialData,
     },
   });
 
+  const handleBuyBoxChange = (buyBox: BuyBoxData) => {
+    setBuyBoxData(buyBox);
+    // Only set buyBox if it has at least one value
+    if (buyBox.zipCodes.length > 0 || buyBox.states.length > 0 || buyBox.cities.length > 0) {
+      setValue('buyBox', buyBox);
+    } else {
+      setValue('buyBox', undefined);
+    }
+  };
+
   const onFormSubmit = async (data: BuyerFormData) => {
     try {
-      await onSubmit(data);
+      // Include buyBox data in submission
+      const submitData = {
+        ...data,
+        buyBox: buyBoxData && (buyBoxData.zipCodes.length > 0 || buyBoxData.states.length > 0 || buyBoxData.cities.length > 0)
+          ? buyBoxData
+          : undefined,
+      };
+      await onSubmit(submitData);
       toast({
         title: 'Buyer saved successfully',
         status: 'success',
         duration: 3000,
       });
       reset();
+      setBuyBoxData({ zipCodes: [], states: [], cities: [] });
     } catch (error) {
       toast({
         title: 'Error saving buyer',
@@ -166,6 +198,16 @@ const BuyerForm: React.FC<BuyerFormProps> = ({ onSubmit, initialData, isLoading 
           <Textarea {...register('notes')} />
           <FormErrorMessage>{errors.notes?.message}</FormErrorMessage>
         </FormControl>
+
+        <Divider />
+
+        {/* Buy Box Section */}
+        <Box>
+          <BuyBoxForm
+            value={buyBoxData}
+            onChange={handleBuyBoxChange}
+          />
+        </Box>
 
         <FormControl>
           <Checkbox {...register('isActive')}>Active Buyer</Checkbox>

@@ -88,7 +88,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <Box as="form" onSubmit={handleSubmit(onSubmit)}>
       <VStack spacing={6} align="stretch">
-        {/* Google OAuth Button */}
+        {/* Google OAuth Button (feature-flagged externally via prop) */}
         {showGoogleAuth && (
           <>
             <GoogleAuthButton />

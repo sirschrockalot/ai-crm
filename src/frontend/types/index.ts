@@ -76,6 +76,12 @@ export interface Buyer {
   buyerType: BuyerType;
   investmentRange: InvestmentRange;
   preferredPropertyTypes: PropertyType[];
+  // Buy Box - geographic areas where buyer purchases properties
+  buyBox?: {
+    zipCodes: string[];
+    states: string[];
+    cities: string[];
+  };
   // Optional fields used by mock data and UI
   preferredLocations?: string[];
   maxPurchasePrice?: number;

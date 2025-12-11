@@ -49,6 +49,13 @@ interface PDRBuyerCSV {
   terminated_user?: string;
   terminated_date?: string;
   sent_comm?: string;
+  // Buy Box fields
+  buy_box_zips?: string;
+  buy_box_states?: string;
+  buy_box_cities?: string;
+  buy_box_zip?: string;
+  buy_box_state?: string;
+  buy_box_city?: string;
 }
 
 interface Buyer {
@@ -64,6 +71,11 @@ interface Buyer {
   buyerType: 'individual' | 'company' | 'investor';
   investmentRange: '0-50k' | '50k-100k' | '100k-250k' | '250k-500k' | '500k+';
   preferredPropertyTypes: string[];
+  buyBox?: {
+    zipCodes: string[];
+    states: string[];
+    cities: string[];
+  };
   notes?: string;
   isActive: boolean;
   createdAt: string;
@@ -91,6 +103,18 @@ const mockBuyers: Buyer[] = [];
 
 function generateId(): string {
   return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+}
+
+// Helper function to parse comma or semicolon separated values into an array
+function parseArrayField(value: string | undefined): string[] {
+  if (!value || value.trim() === '') {
+    return [];
+  }
+  // Split by comma or semicolon, trim whitespace, and filter out empty strings
+  return value
+    .split(/[,;]/)
+    .map(item => item.trim())
+    .filter(item => item.length > 0);
 }
 
 function mapCSVToBuyer(csvData: PDRBuyerCSV): Partial<Buyer> {
@@ -169,6 +193,20 @@ function mapCSVToBuyer(csvData: PDRBuyerCSV): Partial<Buyer> {
   // Map status
   const status = csvData.status?.toLowerCase() || '';
   buyer.isActive = !status.includes('inactive') && !status.includes('archived') && status !== '0';
+
+  // Map buy box fields
+  const buyBoxZips = parseArrayField(csvData.buy_box_zips || csvData.buy_box_zip);
+  const buyBoxStates = parseArrayField(csvData.buy_box_states || csvData.buy_box_state);
+  const buyBoxCities = parseArrayField(csvData.buy_box_cities || csvData.buy_box_city);
+
+  // Only include buyBox if at least one field has values
+  if (buyBoxZips.length > 0 || buyBoxStates.length > 0 || buyBoxCities.length > 0) {
+    buyer.buyBox = {
+      zipCodes: buyBoxZips,
+      states: buyBoxStates.map(s => s.toUpperCase().substring(0, 2)), // Normalize states to 2-letter codes
+      cities: buyBoxCities,
+    };
+  }
 
   return buyer;
 }
@@ -293,6 +331,7 @@ export default async function handler(
             const updatedBuyer: Buyer = {
               ...mockBuyers[existingBuyerIndex],
               ...buyerData,
+              buyBox: buyerData.buyBox || mockBuyers[existingBuyerIndex].buyBox, // Preserve or update buyBox
               id: mockBuyers[existingBuyerIndex].id, // Preserve original ID
               updatedAt: new Date().toISOString(),
             };
@@ -317,6 +356,7 @@ export default async function handler(
             buyerType: buyerData.buyerType!,
             investmentRange: buyerData.investmentRange!,
             preferredPropertyTypes: buyerData.preferredPropertyTypes || ['single_family'],
+            buyBox: buyerData.buyBox,
             notes: buyerData.notes || '',
             isActive: buyerData.isActive !== undefined ? buyerData.isActive : options.defaultStatus,
             createdAt: new Date().toISOString(),

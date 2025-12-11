@@ -65,6 +65,7 @@ import {
   Stack,
 } from '@chakra-ui/react';
 import UserManagement from '../components/settings/UserManagement';
+import ServiceHealthStatus from '../components/admin/ServiceHealthStatus';
 import {
   FiUsers,
   FiSettings,
@@ -461,6 +462,9 @@ const AdminPage: React.FC = () => {
                 {/* System Monitoring Tab */}
                 <TabPanel>
                   <VStack spacing={6} align="stretch">
+                    {/* Service Health Status */}
+                    <ServiceHealthStatus autoRefresh={false} />
+
                     {/* System Health */}
                     <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
                       <GridItem>

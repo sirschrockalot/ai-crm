@@ -46,7 +46,14 @@ const OAuthCallbackPage: NextPage = () => {
         const authResponse = await authService.handleOAuthCallback(code as string, state as string);
 
         // Complete OAuth login with proper authentication state management
-        await completeOAuthLogin(authResponse.user, authResponse.token, authResponse.refreshToken);
+        const mappedUser = {
+          ...authResponse.user,
+          roles: Array.isArray((authResponse.user as any).roles)
+            ? (authResponse.user as any).roles
+            : ((authResponse.user as any).role ? [(authResponse.user as any).role] : []),
+          status: (authResponse.user as any).status ?? 'active',
+        } as any;
+        await completeOAuthLogin(mappedUser, authResponse.token, authResponse.refreshToken);
 
         setStatus('success');
 
@@ -59,7 +66,7 @@ const OAuthCallbackPage: NextPage = () => {
     if (router.isReady) {
       handleOAuthCallback();
     }
-  }, [router.isReady, router.query, updateUser, router]);
+  }, [router.isReady, router.query]);
 
   const renderContent = () => {
     switch (status) {
