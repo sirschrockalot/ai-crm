@@ -48,13 +48,29 @@ export function useApi<T = any>(options: UseApiOptions = {}): UseApiReturn<T> {
           finalUrl = `/${finalUrl}`;
         }
 
+        // Get auth token from localStorage
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        
+        // Build headers
+        const headers: Record<string, string> = {
+          ...options.headers,
+        };
+
+        // If we're not sending FormData, default to JSON content type
+        // For FormData, let the browser set the correct multipart boundary
+        if (typeof FormData === 'undefined' || !(config.data instanceof FormData)) {
+          headers['Content-Type'] = 'application/json';
+        }
+        
+        // Add auth token if available
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response: AxiosResponse<T> = await axios({
           baseURL,
           timeout: options.timeout || 10000,
-          headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-          },
+          headers,
           method: config.method || 'GET',
           url: finalUrl,
           data: config.data,

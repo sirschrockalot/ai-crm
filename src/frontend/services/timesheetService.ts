@@ -121,6 +121,24 @@ class TimesheetService {
     return response.data;
   }
 
+  // Get approved timesheets for a specific user
+  async getApprovedTimesheets(userId: string, params?: {
+    page?: number;
+    limit?: number;
+    weekStart?: string;
+    weekEnd?: string;
+  }): Promise<TimeEntryListResponse> {
+    const response = await this.getTimeEntries({ 
+      userId, 
+      status: 'approved', 
+      limit: params?.limit || 20, 
+      page: params?.page || 1,
+      weekStart: params?.weekStart,
+      weekEnd: params?.weekEnd
+    });
+    return response;
+  }
+
   // Get time entry by ID
   async getTimeEntryById(id: string): Promise<TimeEntryResponse> {
     const response = await this.api.get(`/api/time-entries/${id}`);
@@ -133,6 +151,27 @@ class TimesheetService {
       params: { userId, weekStart }
     });
     return response.data;
+  }
+
+  // Check if a timesheet exists for a specific week (any status)
+  async checkTimesheetExistsForWeek(userId: string, weekStart: string): Promise<TimeEntry | null> {
+    try {
+      const response = await this.getTimeEntries({ 
+        userId, 
+        weekStart,
+        limit: 10 
+      });
+      // Find exact match for the week
+      const weekStartDate = new Date(weekStart);
+      const matchingEntry = response.data?.find((entry: TimeEntry) => {
+        const entryWeekStart = new Date(entry.weekStart);
+        return entryWeekStart.getTime() === weekStartDate.getTime();
+      });
+      return matchingEntry || null;
+    } catch (error) {
+      console.error('Error checking timesheet existence:', error);
+      return null;
+    }
   }
 
   // Create new time entry
@@ -165,15 +204,21 @@ class TimesheetService {
       const today = new Date();
       const weekStart = this.getWeekStart(today);
       const response = await this.getTimeEntryForWeek(userId, weekStart.toISOString());
+      // API returns { success: true, data: timeEntry || null }
+      // If data is null, that's a valid state (no timesheet exists yet)
       return response.data || null;
-    } catch (error) {
+    } catch (error: any) {
+      // If it's a 404 or "not found" error, that's a valid state - no timesheet exists yet
+      if (error?.response?.status === 404 || error?.message?.includes('not found')) {
+        return null;
+      }
       console.error('Error getting current week timesheet:', error);
-      return null;
+      throw error; // Re-throw other errors
     }
   }
 
   // Helper method to create or update current week's timesheet
-  async saveCurrentWeekTimesheet(userId: string, hours: number[], notes?: string): Promise<TimeEntry> {
+  async saveCurrentWeekTimesheet(userId: string, hours: number[], notes?: string, existingTimesheetId?: string): Promise<TimeEntry> {
     try {
       const today = new Date();
       const weekStart = this.getWeekStart(today);
@@ -187,25 +232,44 @@ class TimesheetService {
         return Math.max(0, Math.min(24, num));
       });
 
-      // Try to get existing timesheet for this week
-      const existing = await this.getCurrentWeekTimesheet(userId);
+      // Check for existing timesheet for this week (any status)
+      let existing: TimeEntry | null = null;
+      
+      if (existingTimesheetId) {
+        // If we have an existing ID, try to get that specific timesheet
+        try {
+          const response = await this.getTimeEntryById(existingTimesheetId);
+          existing = response.data;
+        } catch (error) {
+          // Timesheet with that ID doesn't exist, check for any timesheet for this week
+          existing = await this.checkTimesheetExistsForWeek(userId, weekStart.toISOString());
+        }
+      } else {
+        // No existing ID provided, check if any timesheet exists for this week
+        existing = await this.checkTimesheetExistsForWeek(userId, weekStart.toISOString());
+      }
 
       if (existing) {
-        // Update existing timesheet
-        const updateData: Record<string, any> = {
-          hours: normalizedHours,
-          status: 'draft'
-        };
-        if (notes && notes.trim().length > 0) {
-          updateData.notes = notes;
+        // If we have an existing timesheet ID and it matches, update it
+        if (existingTimesheetId && existing._id === existingTimesheetId) {
+          const updateData: Record<string, any> = {
+            hours: normalizedHours,
+            status: 'draft'
+          };
+          if (notes && notes.trim().length > 0) {
+            updateData.notes = notes;
+          }
+          
+          console.log('Updating existing timesheet with data:', updateData);
+          
+          const response = await this.updateTimeEntry(existing._id, updateData);
+          return response.data;
+        } else {
+          // A different timesheet exists for this week - throw error
+          throw new Error(`A timesheet already exists for the week of ${this.formatDate(weekStart)}. Please update the existing timesheet instead of creating a new one.`);
         }
-        
-        console.log('Updating existing timesheet with data:', updateData);
-        
-        const response = await this.updateTimeEntry(existing._id, updateData);
-        return response.data;
       } else {
-        // Create new timesheet
+        // No existing timesheet, create new one
         const createData: Record<string, any> = {
           userId,
           weekStart: weekStart.toISOString(),

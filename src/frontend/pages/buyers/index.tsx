@@ -22,7 +22,8 @@ const BuyersPageContent: React.FC = () => {
 
   useEffect(() => {
     fetchBuyers();
-  }, [fetchBuyers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only fetch on mount to prevent infinite loop
 
   const handleCreateBuyer = async (data: any) => {
     try {
@@ -247,13 +248,13 @@ const BuyersPageContent: React.FC = () => {
   ];
 
   return (
-    <Box minH="100vh" bg="gray.50">
+    <Box h="100vh" bg="gray.50">
       <Header />
-      <HStack align="flex-start" spacing={0}>
+      <HStack align="flex-start" spacing={0} h="calc(100vh - 64px)">
         <Sidebar />
-        <Box flex={1} p={6}>
+        <Box flex={1} p={6} overflow="hidden">
           <Navigation />
-          <VStack align="stretch" spacing={6}>
+          <VStack align="stretch" spacing={4} h="calc(100vh - 64px - 56px)" overflow="hidden">
             <HStack justify="space-between">
               <VStack align="start" spacing={2}>
                 <Heading size="lg">Buyers Management</Heading>
@@ -344,7 +345,7 @@ const BuyersPageContent: React.FC = () => {
             </Card>
 
             {/* Stats */}
-            <HStack spacing={4}>
+            <HStack spacing={4} flexWrap="wrap" align="stretch">
               <Card>
                 <Text fontSize="sm" color="gray.600">Total Buyers</Text>
                 <Text fontSize="2xl" fontWeight="bold">{buyers?.length || 0}</Text>
@@ -376,19 +377,21 @@ const BuyersPageContent: React.FC = () => {
             </HStack>
 
             {/* Buyers Table */}
-            <Card header="Buyers">
+            <Card header="Buyers" flex={1} minH={0}>
               {loading ? (
                 <Text>Loading buyers...</Text>
               ) : error ? (
                 <Text color="red.500">Error loading buyers: {error}</Text>
               ) : (
-                <Table
-                  data={filteredBuyers}
-                  columns={columns}
-                  sortable
-                  pagination
-                  pageSize={10}
-                />
+                <Box h="100%" maxH="100%" overflowY="auto">
+                  <Table
+                    data={filteredBuyers}
+                    columns={columns}
+                    sortable
+                    pagination
+                    pageSize={10}
+                  />
+                </Box>
               )}
             </Card>
           </VStack>

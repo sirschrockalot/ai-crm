@@ -14,6 +14,7 @@ interface PDRBuyerCSV {
   csvid?: string;
   status?: string;
   bname?: string;
+  entity_name?: string;
   bstreet?: string;
   bcity?: string;
   bstate?: string;
@@ -21,6 +22,7 @@ interface PDRBuyerCSV {
   bssn?: string;
   bphone1?: string;
   bphone2?: string;
+  bphone3?: string;
   bemail?: string;
   bpaypalemail?: string;
   downershiptype?: string;
@@ -82,6 +84,11 @@ interface Buyer {
   updatedAt: string;
 }
 
+const BUYERS_SERVICE_API_URL =
+  process.env.BUYERS_SERVICE_API_URL ||
+  process.env.NEXT_PUBLIC_BUYERS_SERVICE_API_URL ||
+  'http://localhost:3006/api/buyers';
+
 interface ImportOptions {
   skipDuplicates?: boolean;
   updateExisting?: boolean;
@@ -98,7 +105,7 @@ interface ImportResponse {
   errors?: string[];
 }
 
-// Mock buyers data (in a real app, this would come from a database)
+// Mock buyers data fallback (used if Buyers Service/DB is not available)
 const mockBuyers: Buyer[] = [];
 
 function generateId(): string {
@@ -117,13 +124,33 @@ function parseArrayField(value: string | undefined): string[] {
     .filter(item => item.length > 0);
 }
 
+// Apply a user-provided field mapping from generic CSV headers to PDR buyer fields
+function applyFieldMapping(row: any, fieldMapping?: Record<string, string>): PDRBuyerCSV {
+  if (!fieldMapping || Object.keys(fieldMapping).length === 0) {
+    return row as PDRBuyerCSV;
+  }
+
+  const mappedRow: any = { ...row };
+
+  // For each CSV header that has a mapping, copy its value into the corresponding PDR field
+  for (const [csvHeader, pdrField] of Object.entries(fieldMapping)) {
+    if (csvHeader in row) {
+      mappedRow[pdrField] = row[csvHeader];
+    }
+  }
+
+  return mappedRow as PDRBuyerCSV;
+}
+
 function mapCSVToBuyer(csvData: PDRBuyerCSV): Partial<Buyer> {
   // Map PDR CSV fields to Buyer interface
   const buyer: Partial<Buyer> = {
-    companyName: csvData.bname || '',
-    contactName: csvData.bname || '', // Using bname as contact name if no separate field
+    // Prefer explicit entity/company name if provided, otherwise fall back to bname
+    companyName: csvData.entity_name || csvData.bname || '',
+    contactName: csvData.bname || csvData.entity_name || '', // Using bname or entity_name as contact name if no separate field
     email: csvData.bemail || '',
-    phone: csvData.bphone1 || csvData.bphone2 || '',
+    // Prefer primary, then secondary, then tertiary phone if present
+    phone: csvData.bphone1 || csvData.bphone2 || csvData.bphone3 || '',
     address: csvData.bstreet || csvData.buyer_street || '',
     city: csvData.bcity || csvData.buyer_city || '',
     state: csvData.bstate || csvData.buyer_state || '',
@@ -214,16 +241,23 @@ function mapCSVToBuyer(csvData: PDRBuyerCSV): Partial<Buyer> {
 function validateBuyer(buyer: Partial<Buyer>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (!buyer.email || !buyer.email.includes('@')) {
+  const hasEmail = !!buyer.email && buyer.email.trim().length > 0;
+  const hasValidEmail = hasEmail && buyer.email!.includes('@');
+  const hasPhone = !!buyer.phone && buyer.phone.trim().length > 0;
+
+  // Require at least one contact method: email or phone
+  if (!hasValidEmail && !hasPhone) {
+    errors.push('At least an email or phone number is required');
+  }
+
+  // If an email is provided, it must be valid
+  if (hasEmail && !hasValidEmail) {
     errors.push('Valid email is required');
   }
 
+  // Still require some kind of name for the buyer
   if (!buyer.companyName && !buyer.contactName) {
     errors.push('Company name or contact name is required');
-  }
-
-  if (!buyer.phone) {
-    errors.push('Phone number is required');
   }
 
   return {
@@ -253,12 +287,13 @@ export default async function handler(
       });
     });
 
-    const file = files.file;
-    if (!file || !Array.isArray(file) || file.length === 0) {
+    const fileField = (files as any).file;
+    if (!fileField) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const uploadedFile = file[0];
+    // Support both single-file and multi-file shapes from formidable
+    const uploadedFile = Array.isArray(fileField) ? fileField[0] : fileField;
     const filePath = uploadedFile.filepath;
     const fileExtension = uploadedFile.originalFilename?.split('.').pop()?.toLowerCase();
 
@@ -300,11 +335,23 @@ export default async function handler(
     let skippedCount = 0;
     const errors: string[] = [];
 
+    // Prepare headers for Buyers Service calls
+    const serviceHeaders: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(req.headers.authorization && { Authorization: req.headers.authorization as string }),
+    };
+
+    // Flag to switch to mock fallback if Buyers Service/DB is not available
+    let useService = true;
+
     for (let i = 0; i < csvData.length; i++) {
-      const csvRow = csvData[i];
+      const originalCsvRow = csvData[i];
       const rowNumber = i + 2; // +2 because CSV has header and arrays are 0-indexed
 
       try {
+        // First, normalize the raw CSV row using the optional field mapping
+        const csvRow = applyFieldMapping(originalCsvRow, options.fieldMapping);
+
         // Map CSV data to buyer format
         const buyerData = mapCSVToBuyer(csvRow);
 
@@ -315,56 +362,108 @@ export default async function handler(
           continue;
         }
 
-        // Check for duplicates by email
-        const existingBuyerIndex = mockBuyers.findIndex(b => 
-          b.email.toLowerCase() === buyerData.email?.toLowerCase()
-        );
+        // If Buyers Service is available, try to persist to the real DB
+        if (useService) {
+          try {
+            const payload: any = {
+              name: buyerData.contactName || buyerData.companyName,
+              company: buyerData.companyName,
+              email: buyerData.email || undefined,
+              phone: buyerData.phone || undefined,
+              property_types: buyerData.preferredPropertyTypes || ['single_family'],
+              notes: buyerData.notes || '',
+              is_active: buyerData.isActive !== undefined ? buyerData.isActive : options.defaultStatus,
+            };
 
-        if (existingBuyerIndex !== -1) {
-          if (options.skipDuplicates) {
-            skippedCount++;
-            continue;
+            const serviceResponse = await fetch(BUYERS_SERVICE_API_URL, {
+              method: 'POST',
+              headers: serviceHeaders,
+              body: JSON.stringify(payload),
+            });
+
+            if (serviceResponse.ok) {
+              importedCount++;
+              continue;
+            } else if (serviceResponse.status === 409 || serviceResponse.status === 400) {
+              // Treat conflict/validation errors as per-row import errors
+              const errBody = await serviceResponse.json().catch(() => ({}));
+              errors.push(
+                `Row ${rowNumber}: Buyers Service error (${serviceResponse.status}) - ${
+                  (errBody as any).message || (errBody as any).error || 'Unknown error'
+                }`,
+              );
+              continue;
+            } else {
+              console.warn(
+                `Row ${rowNumber}: Buyers Service returned status ${serviceResponse.status}, falling back to mock import`,
+              );
+              // Switch to mock fallback for subsequent rows
+              useService = false;
+            }
+          } catch (serviceError) {
+            console.warn(
+              `Row ${rowNumber}: Buyers Service unavailable, falling back to mock import`,
+              serviceError,
+            );
+            useService = false;
           }
-          
-          if (options.updateExisting) {
-            // Update existing buyer
-            const updatedBuyer: Buyer = {
-              ...mockBuyers[existingBuyerIndex],
-              ...buyerData,
-              buyBox: buyerData.buyBox || mockBuyers[existingBuyerIndex].buyBox, // Preserve or update buyBox
-              id: mockBuyers[existingBuyerIndex].id, // Preserve original ID
+        }
+
+        // Fallback path: in-memory mock buyers import
+        try {
+          // Check for duplicates by email
+          const existingBuyerIndex = mockBuyers.findIndex(
+            (b) => b.email.toLowerCase() === buyerData.email?.toLowerCase(),
+          );
+
+          if (existingBuyerIndex !== -1) {
+            if (options.skipDuplicates) {
+              skippedCount++;
+              continue;
+            }
+
+            if (options.updateExisting) {
+              // Update existing buyer
+              const updatedBuyer: Buyer = {
+                ...mockBuyers[existingBuyerIndex],
+                ...buyerData,
+                buyBox: buyerData.buyBox || mockBuyers[existingBuyerIndex].buyBox, // Preserve or update buyBox
+                id: mockBuyers[existingBuyerIndex].id, // Preserve original ID
+                updatedAt: new Date().toISOString(),
+              };
+
+              mockBuyers[existingBuyerIndex] = updatedBuyer;
+              updatedCount++;
+            } else {
+              skippedCount++;
+            }
+          } else {
+            // Create new buyer
+            const newBuyer: Buyer = {
+              id: generateId(),
+              companyName: buyerData.companyName!,
+              contactName: buyerData.contactName!,
+              email: buyerData.email!,
+              phone: buyerData.phone || '',
+              address: buyerData.address || '',
+              city: buyerData.city || '',
+              state: buyerData.state || '',
+              zipCode: buyerData.zipCode || '',
+              buyerType: buyerData.buyerType!,
+              investmentRange: buyerData.investmentRange!,
+              preferredPropertyTypes: buyerData.preferredPropertyTypes || ['single_family'],
+              buyBox: buyerData.buyBox,
+              notes: buyerData.notes || '',
+              isActive: buyerData.isActive !== undefined ? buyerData.isActive : options.defaultStatus,
+              createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };
-            
-            mockBuyers[existingBuyerIndex] = updatedBuyer;
-            updatedCount++;
-          } else {
-            skippedCount++;
-          }
-        } else {
-          // Create new buyer
-          const newBuyer: Buyer = {
-            id: generateId(),
-            companyName: buyerData.companyName!,
-            contactName: buyerData.contactName!,
-            email: buyerData.email!,
-            phone: buyerData.phone || '',
-            address: buyerData.address || '',
-            city: buyerData.city || '',
-            state: buyerData.state || '',
-            zipCode: buyerData.zipCode || '',
-            buyerType: buyerData.buyerType!,
-            investmentRange: buyerData.investmentRange!,
-            preferredPropertyTypes: buyerData.preferredPropertyTypes || ['single_family'],
-            buyBox: buyerData.buyBox,
-            notes: buyerData.notes || '',
-            isActive: buyerData.isActive !== undefined ? buyerData.isActive : options.defaultStatus,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
 
-          mockBuyers.push(newBuyer);
-          importedCount++;
+            mockBuyers.push(newBuyer);
+            importedCount++;
+          }
+        } catch (mockError) {
+          errors.push(`Row ${rowNumber}: Failed to process buyer in mock import - ${mockError}`);
         }
       } catch (error) {
         errors.push(`Row ${rowNumber}: Failed to process buyer - ${error}`);

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-// API Configuration - Use Heroku transactions service directly
-const TRANSACTIONS_SERVICE_API_URL = process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api/v1';
+// API Configuration - Use Next.js API routes as proxy
+const API_BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
 const TRANSACTIONS_JWT_TOKEN = process.env.NEXT_PUBLIC_TRANSACTIONS_JWT_TOKEN;
 
 const getLiveAuthToken = (): string | null => {
@@ -194,9 +194,10 @@ const mockTransactions: TransactionProperty[] = [
   },
 ];
 
-// Helper function to make API calls directly to Heroku transactions service
+// Helper function to make API calls through Next.js API routes
 const apiCall = async (endpoint: string, options: any = {}) => {
-  const url = `${TRANSACTIONS_SERVICE_API_URL}/transactions${endpoint}`;
+  // Use Next.js API route as proxy instead of calling service directly
+  const url = `${API_BASE_URL}/api/transactions${endpoint}`;
   
   const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
 
@@ -322,10 +323,12 @@ export const transactionsService = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${TRANSACTIONS_SERVICE_API_URL}/transactions/${id}/documents`, {
+      const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
+      
+      const response = await fetch(`${API_BASE_URL}/api/transactions/${id}/documents`, {
         method: 'POST',
         headers: {
-          ...(TRANSACTIONS_JWT_TOKEN && { 'Authorization': `Bearer ${TRANSACTIONS_JWT_TOKEN}` }),
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: formData,
       });

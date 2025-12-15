@@ -54,7 +54,8 @@ class BuyerImportService {
         formData.append('fieldMapping', JSON.stringify(options.fieldMapping));
       }
 
-      const response = await this.api.post('/api/buyers/import-csv', formData, {
+      // Use relative buyers API path (apiService baseURL typically already includes /api)
+      const response = await this.api.post('/buyers/import-csv', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -84,7 +85,7 @@ class BuyerImportService {
         params.append('filters', JSON.stringify(options.filters));
       }
 
-      const response = await this.api.get(`/api/buyers/export?${params.toString()}`, {
+      const response = await this.api.get(`/buyers/export?${params.toString()}`, {
         responseType: 'blob' as any,
       });
 
@@ -100,7 +101,7 @@ class BuyerImportService {
    */
   async downloadTemplate(): Promise<Blob> {
     try {
-      const response = await this.api.get('/api/buyers/template', {
+      const response = await this.api.get('/buyers/template', {
         responseType: 'blob' as any,
       });
 
@@ -126,7 +127,7 @@ class BuyerImportService {
       formData.append('file', file);
       formData.append('validateOnly', 'true');
 
-      const response = await this.api.post('/api/buyers/validate-csv', formData, {
+      const response = await this.api.post('/buyers/validate-csv', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -144,7 +145,7 @@ class BuyerImportService {
    */
   async getFieldMappingSuggestions(headers: string[]): Promise<Record<string, string>> {
     try {
-      const response = await this.api.post('/api/buyers/field-mapping', {
+      const response = await this.api.post('/buyers/field-mapping', {
         headers,
       });
 

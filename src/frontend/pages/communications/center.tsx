@@ -1,17 +1,30 @@
 import React from 'react';
-import { Box, Container, Heading, Text } from '@chakra-ui/react';
+import { NextPage } from 'next';
+import { Box, Heading, Text } from '@chakra-ui/react';
 import CommunicationCenter from '../../components/communications/CommunicationCenter';
+import { Layout } from '../../components/layout';
+import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
 
-const CommunicationsCenterPage: React.FC = () => {
+const CommunicationsCenterPageContent: React.FC = () => {
   return (
-    <Container maxW="container.xl" py={8}>
+    <>
       <Box mb={6}>
         <Heading size="lg" mb={2}>Communication Center</Heading>
         <Text color="gray.600">Unified communication interface for all channels</Text>
       </Box>
       
       <CommunicationCenter />
-    </Container>
+    </>
+  );
+};
+
+const CommunicationsCenterPage: NextPage = () => {
+  return (
+    <Layout>
+      <ErrorBoundary>
+        <CommunicationsCenterPageContent />
+      </ErrorBoundary>
+    </Layout>
   );
 };
 

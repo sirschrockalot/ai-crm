@@ -33,17 +33,8 @@ import {
   Code,
 } from '@chakra-ui/react';
 import { FaUpload, FaDownload, FaFileCsv, FaCheckCircle, FaExclamationTriangle, FaInfoCircle, FaEye, FaCog } from 'react-icons/fa';
-import { useApi } from '../../../hooks/useApi';
 import { FieldMapping } from '../FieldMapping';
-
-interface ImportResult {
-  success: boolean;
-  message: string;
-  importedCount: number;
-  updatedCount: number;
-  skippedCount: number;
-  errors?: string[];
-}
+import { buyerImportService, BuyerImportResult } from '../../../services/buyerImportService';
 
 interface ValidationResult {
   isValid: boolean;
@@ -61,7 +52,7 @@ interface BuyerImportProps {
 export const BuyerImport: React.FC<BuyerImportProps> = ({ onImportComplete, onClose }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [importResult, setImportResult] = useState<BuyerImportResult | null>(null);
   const [showErrorReport, setShowErrorReport] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [showValidationPreview, setShowValidationPreview] = useState(false);
@@ -76,7 +67,6 @@ export const BuyerImport: React.FC<BuyerImportProps> = ({ onImportComplete, onCl
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const api = useApi();
   const toast = useToast();
   const { isOpen, onOpen, onClose: onModalClose } = useDisclosure();
 
@@ -127,11 +117,9 @@ export const BuyerImport: React.FC<BuyerImportProps> = ({ onImportComplete, onCl
 
   const downloadTemplate = async () => {
     try {
-      const response = await api.get('/api/buyers/template', {
-        responseType: 'blob',
-      });
-      
-      const blob = new Blob([response.data], { type: 'text/csv' });
+      // Use dedicated import service for template download
+      const blobData = await buyerImportService.downloadTemplate();
+      const blob = new Blob([blobData], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -167,11 +155,8 @@ export const BuyerImport: React.FC<BuyerImportProps> = ({ onImportComplete, onCl
     setValidationResult(null);
 
     try {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-
-      const response = await api.post('/api/buyers/validate-csv', formData);
-      const result: ValidationResult = response.data;
+      // Use dedicated import service for validation
+      const result = await buyerImportService.validateCSV(selectedFile);
 
       setValidationResult(result);
 
@@ -213,20 +198,41 @@ export const BuyerImport: React.FC<BuyerImportProps> = ({ onImportComplete, onCl
     setImportResult(null);
 
     try {
+      // Build multipart form data for direct fetch to Next.js API route
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('skipDuplicates', importOptions.skipDuplicates.toString());
       formData.append('updateExisting', importOptions.updateExisting.toString());
       formData.append('defaultStatus', importOptions.defaultStatus.toString());
-      
-      // Add field mapping if available
+
       if (Object.keys(fieldMapping).length > 0) {
         formData.append('fieldMapping', JSON.stringify(fieldMapping));
       }
 
-      const response = await api.post('/api/buyers/import-csv', formData);
-      const result: ImportResult = response.data;
+      const res = await fetch('/api/buyers/import-csv', {
+        method: 'POST',
+        body: formData, // browser sets correct multipart headers
+      });
 
+      const resultJson = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        const message =
+          (resultJson as any).error ||
+          (resultJson as any).message ||
+          `Import failed with status ${res.status}`;
+        console.error('Buyer import failed:', { status: res.status, body: resultJson });
+        toast({
+          title: 'Import Failed',
+          description: message,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+
+      const result = resultJson as BuyerImportResult;
       setImportResult(result);
 
       if (result.success) {
@@ -247,11 +253,11 @@ export const BuyerImport: React.FC<BuyerImportProps> = ({ onImportComplete, onCl
           isClosable: true,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Import failed:', error);
       toast({
         title: 'Import Failed',
-        description: 'Failed to import buyers. Please try again.',
+        description: error?.message || 'Failed to import buyers. Please try again.',
         status: 'error',
         duration: 5000,
         isClosable: true,

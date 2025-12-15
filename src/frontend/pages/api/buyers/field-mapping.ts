@@ -11,7 +11,7 @@ interface FieldMappingResponse {
 
 // Define the standard PDR buyer fields
 const PDR_FIELDS = [
-  'buyerid', 'csvid', 'status', 'bname', 'bstreet', 'bcity', 'bstate', 'bzip',
+  'buyerid', 'csvid', 'status', 'entity_name', 'bname', 'bstreet', 'bcity', 'bstate', 'bzip',
   'bssn', 'bphone1', 'bphone2', 'bemail', 'bpaypalemail', 'downershiptype',
   'notes', 'phone_key', 'btype', 'btag1', 'btag2', 'btag3', 'lsource',
   'datecr', 'bnotes', 'useridcr', 'audited', 'buyer_street', 'buyer_city',
@@ -25,6 +25,7 @@ const FIELD_VARIATIONS: Record<string, string[]> = {
   'buyerid': ['buyer_id', 'buyer id', 'id', 'buyerid'],
   'csvid': ['csv_id', 'csv id', 'csvid'],
   'status': ['buyer_status', 'buyer status', 'active', 'inactive', 'status'],
+  'entity_name': ['entity', 'entity_name', 'entity name', 'company', 'company_name', 'company name', 'business name', 'business'],
   'bname': ['name', 'buyer_name', 'buyer name', 'company_name', 'company name', 'contact_name', 'contact name', 'bname'],
   'bstreet': ['street', 'address', 'street_address', 'street address', 'bstreet', 'buyer_street', 'buyer street'],
   'bcity': ['city', 'buyer_city', 'buyer city', 'bcity'],
@@ -33,6 +34,7 @@ const FIELD_VARIATIONS: Record<string, string[]> = {
   'bssn': ['ssn', 'social_security', 'social security', 'bssn'],
   'bphone1': ['phone', 'phone1', 'primary_phone', 'primary phone', 'phone_number', 'phone number', 'bphone1'],
   'bphone2': ['phone2', 'secondary_phone', 'secondary phone', 'alt_phone', 'alt phone', 'bphone2'],
+  'bphone3': ['phone3', 'third_phone', 'tertiary_phone', 'phone 3', 'bphone3'],
   'bemail': ['email', 'email_address', 'email address', 'buyer_email', 'buyer email', 'bemail'],
   'bpaypalemail': ['paypal_email', 'paypal email', 'paypal', 'bpaypalemail'],
   'downershiptype': ['ownership_type', 'ownership type', 'owner_type', 'owner type', 'downershiptype'],

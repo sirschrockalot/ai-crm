@@ -17,6 +17,9 @@
 		},
 		{
 			"path": "../Leads-Service"
+		},
+		{
+			"path": "../Buyers-Service"
 		}
 	],
 	"settings": {}

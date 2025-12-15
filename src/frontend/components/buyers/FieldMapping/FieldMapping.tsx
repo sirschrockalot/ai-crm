@@ -33,10 +33,12 @@ interface FieldMappingResponse {
 }
 
 const PDR_FIELDS = [
-  { value: 'bname', label: 'Buyer Name (bname)', description: 'Company or individual name' },
+  { value: 'entity_name', label: 'Entity/Company Name (entity_name)', description: 'Legal entity or company name' },
+  { value: 'bname', label: 'Buyer Name (bname)', description: 'Buyer name (person or company)' },
   { value: 'bemail', label: 'Email (bemail)', description: 'Primary email address' },
   { value: 'bphone1', label: 'Primary Phone (bphone1)', description: 'Main phone number' },
   { value: 'bphone2', label: 'Secondary Phone (bphone2)', description: 'Alternative phone number' },
+  { value: 'bphone3', label: 'Tertiary Phone (bphone3)', description: 'Third phone number' },
   { value: 'bstreet', label: 'Street Address (bstreet)', description: 'Street address' },
   { value: 'bcity', label: 'City (bcity)', description: 'City name' },
   { value: 'bstate', label: 'State (bstate)', description: 'State abbreviation' },
@@ -84,7 +86,8 @@ export const FieldMapping: React.FC<FieldMappingProps> = ({
         headers: csvHeaders,
       });
       
-      const result: FieldMappingResponse = response.data;
+      // useApi returns response.data directly, so treat response as the payload
+      const result: FieldMappingResponse = response as FieldMappingResponse;
       setMapping(result.mapping);
       setSuggestions(result.suggestions);
       setAutoMapped(true);
@@ -271,7 +274,7 @@ export const FieldMapping: React.FC<FieldMappingProps> = ({
             <AlertDescription>
               <VStack align="start" spacing={2}>
                 <Text fontSize="sm">
-                  • <strong>Required fields:</strong> bname (company name), bemail (email), bphone1 (phone)
+                  • <strong>Required fields:</strong> entity_name or bname (name), and at least one of bemail (email) or bphone1 (phone)
                 </Text>
                 <Text fontSize="sm">
                   • <strong>Optional fields:</strong> All other fields are optional and will use defaults if not mapped

@@ -10,7 +10,8 @@ const BuyerAnalyticsPage: React.FC = () => {
 
   useEffect(() => {
     fetchBuyers();
-  }, [fetchBuyers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only fetch on mount to prevent infinite loop
 
   // Calculate analytics data
   const calculateAnalytics = () => {

@@ -70,6 +70,16 @@ export const ErrorDisplay: React.FC = () => {
 
       // Override console.warn only once
       console.warn = (...args) => {
+        const firstArg = args[0];
+        const msg = typeof firstArg === 'string' ? firstArg : '';
+
+        // Filter out noisy React dev warnings we don't need in the UI
+        if (msg.startsWith('Warning: Function components cannot be given refs.')) {
+          // Still forward to original console for developer tools, but don't show in ErrorDisplay
+          originalConsoleWarn.apply(console, args);
+          return;
+        }
+
         const errorInfo: ErrorInfo = {
           message: args.map(arg => 
             typeof arg === 'string' ? arg : 

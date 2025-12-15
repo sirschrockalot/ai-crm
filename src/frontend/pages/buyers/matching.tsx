@@ -36,7 +36,8 @@ const BuyerLeadMatchingPage: React.FC = () => {
     // TODO: Fetch actual buyer-lead matches from API
     // For now, generate mock data
     generateMockMatches();
-  }, [fetchBuyers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only fetch on mount to prevent infinite loop
 
   const generateMockMatches = () => {
     if (!buyers.length) return;

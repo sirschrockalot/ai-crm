@@ -60,6 +60,14 @@ class ApiService {
     // Request interceptor
     this.instance.interceptors.request.use(
       (config) => {
+        // If sending FormData, let the browser/axios set the correct multipart headers
+        if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+          if (config.headers) {
+            // Axios flattens headers; handle both common and direct keys
+            delete (config.headers as any)['Content-Type'];
+          }
+        }
+
         // Add authentication token
         const token = this.getAuthToken();
         if (token) {

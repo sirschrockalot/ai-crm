@@ -1,11 +1,22 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// Simple rate limiting
+// Buyers Service configuration
+const BUYERS_SERVICE_API_URL =
+  process.env.BUYERS_SERVICE_API_URL ||
+  process.env.NEXT_PUBLIC_BUYERS_SERVICE_API_URL ||
+  'http://localhost:3006/api/buyers';
+
+// Simple rate limiting (disabled in development)
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
-const RATE_LIMIT = 100; // requests per minute
+const RATE_LIMIT = 1000; // requests per minute (increased for development)
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 
 function checkRateLimit(ip: string): boolean {
+  // Disable rate limiting in development
+  if (process.env.NODE_ENV === 'development') {
+    return true;
+  }
+  
   const now = Date.now();
   const record = requestCounts.get(ip);
   
@@ -50,15 +61,69 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Buyer[] | Buyer | { error: string }>
 ) {
-  // Rate limiting
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-  if (!checkRateLimit(clientIp as string)) {
-    return res.status(429).json({ error: 'Too many requests' });
+  // Rate limiting (only in production)
+  if (process.env.NODE_ENV !== 'development') {
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    if (!checkRateLimit(clientIp as string)) {
+      return res.status(429).json({ error: 'Too many requests' });
+    }
   }
 
   if (req.method === 'GET') {
     try {
-      // Mock buyers data
+      // Build query string for Buyers Service
+      const url = new URL(BUYERS_SERVICE_API_URL);
+      const { buyerType, investmentRange, city, state, isActive, search } = req.query;
+
+      if (buyerType && buyerType !== 'all') url.searchParams.set('buyerType', String(buyerType));
+      if (investmentRange && investmentRange !== 'all') url.searchParams.set('investmentRange', String(investmentRange));
+      if (city) url.searchParams.set('city', String(city));
+      if (state) url.searchParams.set('state', String(state));
+      if (isActive !== undefined && isActive !== 'all') url.searchParams.set('isActive', String(isActive));
+      if (search) url.searchParams.set('search', String(search));
+
+      try {
+        // Try to fetch buyers from Buyers Service first
+        const serviceResponse = await fetch(url.toString(), {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(req.headers.authorization && { Authorization: req.headers.authorization as string }),
+          },
+        });
+
+        if (serviceResponse.ok) {
+          const serviceBuyers = await serviceResponse.json();
+
+          // Map Buyers Service schema into frontend Buyer shape
+          const mapped: Buyer[] = (serviceBuyers || []).map((b: any): Buyer => ({
+            id: b.id || b._id || '',
+            companyName: b.company || b.name || '',
+            contactName: b.name || b.company || '',
+            email: b.email || '',
+            phone: b.phone || '',
+            address: b.address || '',
+            city: b.city || '',
+            state: b.state || '',
+            zipCode: b.zipCode || b.postalCode || '',
+            buyerType: (b.buyerType || 'investor') as Buyer['buyerType'],
+            investmentRange: (b.investmentRange || '100k-250k') as Buyer['investmentRange'],
+            preferredPropertyTypes: b.property_types || b.preferredPropertyTypes || ['single_family'],
+            buyBox: b.buyBox || undefined,
+            notes: b.notes || '',
+            isActive: b.is_active ?? b.isActive ?? true,
+            createdAt: b.created_at ? new Date(b.created_at) : new Date(),
+            updatedAt: b.updated_at ? new Date(b.updated_at) : new Date(),
+          }));
+
+          return res.status(200).json(mapped);
+        } else {
+          console.warn('Buyers Service returned non-OK status, falling back to mock buyers:', serviceResponse.status);
+        }
+      } catch (serviceError) {
+        console.warn('Buyers Service unavailable, falling back to mock buyers:', serviceError);
+      }
+
+      // Fallback: in-memory mock buyers if service/DB is not available
       const mockBuyers: Buyer[] = [
         {
           id: '1',
@@ -118,7 +183,6 @@ export default async function handler(
 
       // Apply filters if provided
       let filteredBuyers = mockBuyers;
-      const { buyerType, investmentRange, city, state, isActive, search } = req.query;
 
       if (buyerType && buyerType !== 'all') {
         filteredBuyers = filteredBuyers.filter(buyer => buyer.buyerType === buyerType);
