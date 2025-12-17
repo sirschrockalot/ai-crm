@@ -71,7 +71,8 @@ export function useLeads() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch leads';
       setError(errorMessage);
-      throw err;
+      // Do not rethrow here to avoid unhandled promise rejections in effects
+      return [];
     } finally {
       setLoading(false);
     }
@@ -89,7 +90,8 @@ export function useLeads() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch lead';
       setError(errorMessage);
-      throw err;
+      // Return null on error instead of throwing to avoid unhandled rejections
+      return null as any;
     }
   }, [singleLeadApi]);
 

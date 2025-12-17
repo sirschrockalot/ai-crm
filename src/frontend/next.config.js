@@ -29,6 +29,28 @@ const nextConfig = {
       };
     }
 
+    // Suppress autoprefixer warnings from AG Grid CSS
+    // The 'end' value is supported in modern browsers and AG Grid uses it correctly
+    const originalWarningsFilter = config.ignoreWarnings || [];
+    config.ignoreWarnings = [
+      ...originalWarningsFilter,
+      // Suppress autoprefixer warnings about 'end' value in AG Grid CSS
+      /autoprefixer: end value has mixed support/,
+      {
+        module: /ag-grid-community/,
+        message: /autoprefixer: end value has mixed support/,
+      },
+    ];
+
+    // Filter console warnings during build
+    if (!dev) {
+      const originalInfrastructureLogging = config.infrastructureLogging || {};
+      config.infrastructureLogging = {
+        ...originalInfrastructureLogging,
+        level: 'error', // Only show errors, suppress warnings
+      };
+    }
+
     return config;
   },
 

@@ -179,27 +179,6 @@ const AutomationPage: React.FC = () => {
     console.log('Filter changes:', _filters);
   };
 
-  if (!isAuthenticated) {
-    return (
-      <Box minH="100vh" bg={bgColor}>
-        <Header />
-        <HStack align="flex-start" spacing={0}>
-          <Sidebar />
-          <Box flex={1} p={6}>
-            <Navigation />
-            <Alert status="warning" borderRadius="md">
-              <AlertIcon />
-              <AlertTitle>Authentication Required</AlertTitle>
-              <AlertDescription>
-                Please log in to access automation features.
-              </AlertDescription>
-            </Alert>
-          </Box>
-        </HStack>
-      </Box>
-    );
-  }
-
   if (loading && !error) {
     return (
       <Box minH="100vh" bg={bgColor}>

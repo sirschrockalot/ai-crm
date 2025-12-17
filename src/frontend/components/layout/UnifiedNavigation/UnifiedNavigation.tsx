@@ -30,6 +30,7 @@ import {
   FiMessageCircle,
   FiFileText,
   FiUpload,
+  FiZap,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -114,6 +115,24 @@ const UnifiedNavigation: React.FC<UnifiedNavigationProps> = ({
       icon: FiActivity,
       description: 'Workflow automation',
       permissions: ['automation:read'],
+      children: [
+        {
+          id: 'automation-dashboard',
+          label: 'Automation Dashboard',
+          href: '/automation',
+          icon: FiActivity,
+          description: 'Automation overview',
+          permissions: ['automation:read'],
+        },
+        {
+          id: 'automation-nurture',
+          label: 'Nurture Campaigns',
+          href: '/automation/nurture',
+          icon: FiZap,
+          description: 'Nurture SMS campaigns',
+          permissions: ['automation:read'],
+        },
+      ],
     },
     {
       id: 'communications',

@@ -93,6 +93,7 @@ export const WorkflowList: React.FC<WorkflowListProps> = ({
   const textColor = useColorModeValue('gray.800', 'gray.100');
   const subTextColor = useColorModeValue('gray.600', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const rowHoverBg = useColorModeValue('gray.50', 'gray.700');
 
   // Filter and sort workflows
   const filteredAndSortedWorkflows = useMemo(() => {
@@ -370,7 +371,7 @@ export const WorkflowList: React.FC<WorkflowListProps> = ({
               </Thead>
               <Tbody>
                 {filteredAndSortedWorkflows.map((workflow) => (
-                  <Tr key={workflow.id} _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}>
+                  <Tr key={workflow.id} _hover={{ bg: rowHoverBg }}>
                     <Td>
                       <HStack spacing={3}>
                         <Box fontSize="xl">{getWorkflowIcon(workflow)}</Box>

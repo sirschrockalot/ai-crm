@@ -101,6 +101,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isSessionExpiringSoon: false,
       });
       initializationRef.current = true;
+      // Clear any existing tokens when bypass is enabled
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
+      }
       return;
     }
 
@@ -189,22 +194,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Start session monitoring
+  // Legacy session monitoring hook (kept as no-op; replaced by inactivity-based monitoring below)
   const startSessionMonitoring = useCallback(() => {
-    // Don't start session monitoring in bypass mode
-    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-    if (bypassAuth) {
-      return () => {}; // Return empty cleanup function
-    }
-
-    const checkInterval = setInterval(async () => {
-      if (state.user) {
-        await checkSessionTimeout();
-      }
-    }, 30 * 60 * 1000); // Check every 30 minutes to reduce aggressive logout
-
-    return () => clearInterval(checkInterval);
-  }, [state.user]);
+    return () => {};
+  }, []);
 
   // Check session timeout
   const checkSessionTimeout = useCallback(async () => {
@@ -226,10 +219,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return;
       }
 
-      // Use the auth service's session timeout endpoint
+      // Use the Next.js API proxy to avoid CORS issues
       const controller = new AbortController();
-      const authServiceConfig = getAuthServiceConfig();
-      const response = await fetch(`${authServiceConfig.url}/api/auth/session/timeout`, {
+      const response = await fetch('/api/auth/session-timeout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -303,9 +295,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('No token available');
       }
 
-      // Use the auth service's session timeout endpoint to extend session
-      const authServiceConfig = getAuthServiceConfig();
-      const response = await fetch(`${authServiceConfig.url}/api/auth/session/timeout`, {
+      // Use the Next.js API proxy to extend session (avoids CORS)
+      const response = await fetch('/api/auth/session-timeout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -512,6 +503,62 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       router.push('/auth/login');
     }
   }, [router]);
+
+  // Inactivity-based session monitoring (15-minute sliding window)
+  useEffect(() => {
+    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    if (bypassAuth) return;
+    if (!state.isAuthenticated) return;
+
+    const INACTIVITY_LIMIT_MS = 15 * 60 * 1000; // 15 minutes
+    const CHECK_INTERVAL_MS = 60 * 1000; // 1 minute
+    let lastActivity = Date.now();
+
+    const markActivity = () => {
+      lastActivity = Date.now();
+    };
+
+    const activityEvents: Array<keyof WindowEventMap> = [
+      'click',
+      'keydown',
+      'mousemove',
+      'scroll',
+      'touchstart',
+      'visibilitychange',
+    ];
+
+    activityEvents.forEach((event) => {
+      window.addEventListener(event, markActivity);
+    });
+
+    const interval = setInterval(async () => {
+      if (!state.isAuthenticated) return;
+
+      const now = Date.now();
+      const inactiveFor = now - lastActivity;
+
+      if (inactiveFor >= INACTIVITY_LIMIT_MS) {
+        // User has been inactive for too long - log out
+        await logout();
+        return;
+      }
+
+      // User has been active recently; extend the backend session
+      try {
+        await extendSession();
+      } catch (error) {
+        // On network/auth errors, don't immediately log out; allow other mechanisms to handle
+        console.warn('Failed to extend session during inactivity check:', error);
+      }
+    }, CHECK_INTERVAL_MS);
+
+    return () => {
+      clearInterval(interval);
+      activityEvents.forEach((event) => {
+        window.removeEventListener(event, markActivity);
+      });
+    };
+  }, [state.isAuthenticated, logout, extendSession]);
 
   // Refresh token
   const refreshToken = useCallback(async () => {

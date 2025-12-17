@@ -34,7 +34,20 @@ export interface PipelineStage {
 
 export type PropertyType = 'single_family' | 'multi_family' | 'commercial' | 'land';
 
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost';
+export type LeadStatus =
+  | 'new'
+  | 'contacted'
+  | 'qualified'
+  | 'converted'
+  | 'lost'
+  | 'still_on_cloud'
+  | 'wants_retail'
+  | 'working_with_competitor'
+  | 'no_longer_want_to_sell'
+  | 'not_interested'
+  | 'rejected_offer'
+  | 'interested_not_ready_now'
+  | 'listed_with_realtor';
 
 export interface LeadMoveRequest {
   leadId: string;

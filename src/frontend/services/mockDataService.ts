@@ -462,6 +462,15 @@ export const mockLeadStatuses: any[] = [
   { id: 'qualified', name: 'Qualified', description: 'Lead has been qualified', color: 'green' },
   { id: 'converted', name: 'Converted', description: 'Lead converted to sale', color: 'purple' },
   { id: 'lost', name: 'Lost', description: 'Lead lost or inactive', color: 'red' },
+  // Extended nurture / disposition statuses used for nurture SMS campaigns
+  { id: 'still_on_cloud', name: 'Still on Cloud', description: 'Owner is still thinking / not ready to sell', color: 'teal' },
+  { id: 'wants_retail', name: 'Wants Retail', description: 'Seller wants full retail price', color: 'orange' },
+  { id: 'working_with_competitor', name: 'Working with Competitor', description: 'Seller is working with another buyer/agent', color: 'pink' },
+  { id: 'no_longer_want_to_sell', name: 'No Longer Want To Sell', description: 'Seller no longer wants to sell', color: 'gray' },
+  { id: 'not_interested', name: 'Not Interested', description: 'Lead is not interested at this time', color: 'gray' },
+  { id: 'rejected_offer', name: 'Rejected Offer', description: 'Seller rejected our offer', color: 'red' },
+  { id: 'interested_not_ready_now', name: 'Interested Not Ready Now', description: 'Interested but not ready to move forward yet', color: 'yellow' },
+  { id: 'listed_with_realtor', name: 'Listed With Realtor', description: 'Property listed with a realtor', color: 'cyan' },
 ];
 
 // Mock Buyer Types

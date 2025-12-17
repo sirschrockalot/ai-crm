@@ -1,12 +1,16 @@
 import type { AppProps } from 'next/app';
+import { useRouter } from 'next/router';
 import { ChakraProvider } from '@chakra-ui/react';
 import { theme } from '../design-system/theme';
 import '../styles/globals.css';
+// AG Grid CSS imports - Next.js handles these at build time
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { DevModeIndicator } from '../components/ui/DevModeIndicator';
 import { ErrorDisplay } from '../components/ui/ErrorDisplay';
 import { NavigationProvider } from '../contexts/NavigationContext';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider, useAuth as useAuthContext } from '../contexts/AuthContext';
 import { useEffect, useState } from 'react';
 
 // Import utilities only on client side to prevent hydration issues
@@ -50,12 +54,59 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+const PUBLIC_ROUTES = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/google/callback',
+  '/_error',
+];
+
+function AuthGuard({ Component, pageProps }: AppProps) {
+  const router = useRouter();
+  const { isAuthenticated, isLoading } = useAuthContext();
+  
+  // Check if auth bypass is enabled
+  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+
+  const isPublicRoute = PUBLIC_ROUTES.some((route) =>
+    router.pathname.startsWith(route),
+  );
+
+  useEffect(() => {
+    // Skip auth check if bypass is enabled
+    if (bypassAuth) {
+      return;
+    }
+    
+    if (!isLoading && !isAuthenticated && !isPublicRoute) {
+      router.push('/auth/login');
+    }
+  }, [isLoading, isAuthenticated, isPublicRoute, router, bypassAuth]);
+
+  // Allow access if bypass is enabled, or if it's a public route, or if authenticated
+  if (bypassAuth || isPublicRoute || isAuthenticated) {
+    return <Component {...pageProps} />;
+  }
+
+  // While auth state is resolving or redirecting, render nothing
+  return null;
+}
+
+export default function App(appProps: AppProps) {
   const [isClient, setIsClient] = useState(false);
+  const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    
+    // Clear auth tokens if bypass is enabled to prevent conflicts
+    if (bypassAuth && typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+    }
+  }, [bypassAuth]);
 
   return (
     <ErrorBoundary>
@@ -63,7 +114,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <AuthProvider>
           <NavigationProvider>
             {isClient && <DevModeIndicator />}
-            <Component {...pageProps} />
+            <AuthGuard {...appProps} />
             {isClient && <ErrorDisplay />}
           </NavigationProvider>
         </AuthProvider>
