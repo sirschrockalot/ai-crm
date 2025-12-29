@@ -58,16 +58,16 @@ class ConfigService {
           apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com/api/v1',
         },
         timesheet: {
-          url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3007',
-          apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'http://localhost:3007/api/time-entries',
+          url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'https://timesheet-service-1c566082b633.herokuapp.com',
+          apiUrl: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_API_URL || 'https://timesheet-service-1c566082b633.herokuapp.com/api/time-entries',
         },
         leadImport: {
           url: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_URL || 'http://localhost:3003',
           apiUrl: process.env.NEXT_PUBLIC_LEAD_IMPORT_SERVICE_API_URL || 'http://localhost:3003/api/import',
         },
         userManagement: {
-          url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'http://localhost:3005',
-          apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'http://localhost:3005/api/v1',
+          url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'https://user-management-service-prod-d6fbfdbd7a27.herokuapp.com',
+          apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'https://user-management-service-prod-d6fbfdbd7a27.herokuapp.com/api/v1',
         },
       },
       // Feature Flags
