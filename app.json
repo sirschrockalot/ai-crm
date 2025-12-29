@@ -15,8 +15,8 @@
       "value": "production"
     },
     "NEXT_PUBLIC_BYPASS_AUTH": {
-      "description": "Enable authentication bypass for testing",
-      "value": "true"
+      "description": "Enable authentication bypass for testing (should be false in production)",
+      "value": "false"
     }
   },
   "formation": {
