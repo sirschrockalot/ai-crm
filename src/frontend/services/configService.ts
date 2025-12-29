@@ -54,8 +54,8 @@ class ConfigService {
           apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'http://localhost:3008/api/v1/leads',
         },
         transactions: {
-          url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service.example.com',
-          apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service.example.com/api/v1',
+          url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com',
+          apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com/api/v1',
         },
         timesheet: {
           url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'http://localhost:3007',
@@ -282,8 +282,8 @@ export const getTransactionsServiceConfig = () => {
   } catch (error) {
     console.error('ConfigService not available, using fallback transactions service config');
     return {
-      url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'http://localhost:3003',
-      apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api'
+      url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com',
+      apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com/api/v1'
     };
   }
 };
