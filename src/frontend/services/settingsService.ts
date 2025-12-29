@@ -65,11 +65,20 @@ export interface SystemSettings {
     phone?: string;
     email?: string;
     website?: string;
+    description?: string;
+    industry?: string;
+    founded?: string;
+    employees?: number;
+    revenue?: string;
   };
   branding: {
     primaryColor: string;
     secondaryColor: string;
     customCss?: string;
+    fontFamily?: string;
+    slogan?: string;
+    mission?: string;
+    vision?: string;
   };
   features: {
     [key: string]: boolean;
@@ -194,7 +203,7 @@ class SettingsService {
       }
     });
 
-    const response = await apiService.get(`/api/users?${queryParams}`);
+    const response = await apiService.get(`/users?${queryParams}`);
     // Service returns { users, total, page, limit } – UI expects array for now
     if (response?.data?.users) {
       return response.data.users as any[];
@@ -231,7 +240,7 @@ class SettingsService {
       isActive: true,
     };
 
-    const response = await apiService.post('/api/users', payload);
+    const response = await apiService.post('/users', payload);
     return response.data;
   }
 
@@ -263,39 +272,39 @@ class SettingsService {
       delete payload.role;
     }
 
-    const response = await apiService.patch(`/api/users/${userId}`, payload);
+    const response = await apiService.patch(`/users/${userId}`, payload);
     return response.data;
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await apiService.delete(`/api/users/${userId}`);
+    await apiService.delete(`/users/${userId}`);
   }
 
   async updateUserRoles(userId: string, roles: string[]): Promise<any> {
-    const response = await apiService.patch(`/api/users/${userId}/roles`, { roles });
+    const response = await apiService.patch(`/users/${userId}/roles`, { roles });
     return response.data;
   }
 
   async activateUser(userId: string): Promise<any> {
-    const response = await apiService.patch(`/api/users/${userId}/activate`);
+    const response = await apiService.patch(`/users/${userId}/activate`);
     return response.data;
   }
 
   async deactivateUser(userId: string): Promise<any> {
-    const response = await apiService.patch(`/api/users/${userId}/deactivate`);
+    const response = await apiService.patch(`/users/${userId}/deactivate`);
     return response.data;
   }
 
   async getUserStats(): Promise<any> {
-    const response = await apiService.get('/api/users/stats');
+    const response = await apiService.get('/users/stats');
     return response.data;
   }
 
   // Role Management (Admin only) - Using Frontend API Routes
   async getRoles(organizationId?: string): Promise<any[]> {
     const url = organizationId 
-      ? `/api/roles?organizationId=${organizationId}`
-      : '/api/roles';
+      ? `/roles?organizationId=${organizationId}`
+      : '/roles';
     const response = await apiService.get(url);
     return response.data;
   }
@@ -308,7 +317,7 @@ class SettingsService {
     isActive?: boolean;
     metadata?: Record<string, any>;
   }): Promise<any> {
-    const response = await apiService.post('/api/roles', roleData);
+    const response = await apiService.post('/roles', roleData);
     return response.data;
   }
 
@@ -319,21 +328,21 @@ class SettingsService {
     isActive: boolean;
     metadata: Record<string, any>;
   }>): Promise<any> {
-    const response = await apiService.patch(`/api/roles/${roleId}`, roleData);
+    const response = await apiService.patch(`/roles/${roleId}`, roleData);
     return response.data;
   }
 
   async deleteRole(roleId: string): Promise<void> {
-    await apiService.delete(`/api/roles/${roleId}`);
+    await apiService.delete(`/roles/${roleId}`);
   }
 
   async updateRolePermissions(roleId: string, permissions: string[]): Promise<any> {
-    const response = await apiService.patch(`/api/roles/${roleId}/permissions`, { permissions });
+    const response = await apiService.patch(`/roles/${roleId}/permissions`, { permissions });
     return response.data;
   }
 
   async getRoleStats(): Promise<any> {
-    const response = await apiService.get('/api/roles/stats');
+    const response = await apiService.get('/roles/stats');
     return response.data;
   }
 
