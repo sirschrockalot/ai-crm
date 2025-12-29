@@ -98,7 +98,7 @@ export interface SettingsResponse<T> {
 }
 
 class SettingsService {
-  private baseUrl = '/api/settings';
+  private baseUrl = '/settings';
 
   // User Profile Management
   async getUserProfile(): Promise<UserProfile> {
