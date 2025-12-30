@@ -81,7 +81,9 @@ dist
 
 # Gatsby files
 .cache/
-public
+# Public folder - allow logo.svg and other static assets
+public/*
+!public/logo.svg
 
 # Vuepress build output
 .vuepress/dist
