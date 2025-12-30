@@ -134,35 +134,34 @@ const OrganizationalSettings: React.FC = () => {
   const loadOrganizationalData = async () => {
     try {
       setIsLoading(true);
-      const [systemSettings, companyBranding] = await Promise.all([
-        settingsService.getSystemSettings(),
-        // Note: This would need to be implemented in the service
-        Promise.resolve({
-          company: {
-            name: 'Presidential Digs CRM',
-            logo: null,
-            address: null,
-            phone: null,
-            email: null,
-            website: null,
-            description: null,
-            industry: null,
-          },
-          branding: {
-            primaryColor: '#2563eb',
-            secondaryColor: '#1e40af',
-            customCss: null,
-          },
-        }),
-      ]);
+      const systemSettings = await settingsService.getSystemSettings();
       
-      setCompanyInfo(systemSettings.company);
+      // Map system settings company to CompanyInfo interface
+      const companyInfoData: CompanyInfo = {
+        name: systemSettings.company.name,
+        logo: systemSettings.company.logo,
+        address: systemSettings.company.address,
+        phone: systemSettings.company.phone,
+        email: systemSettings.company.email,
+        website: systemSettings.company.website,
+        description: systemSettings.company.description,
+        industry: systemSettings.company.industry,
+        founded: systemSettings.company.founded,
+        employees: systemSettings.company.employees,
+        revenue: systemSettings.company.revenue,
+      };
+      
+      setCompanyInfo(companyInfoData);
       setBranding({
         primaryColor: systemSettings.branding.primaryColor,
         secondaryColor: systemSettings.branding.secondaryColor,
-        customCss: systemSettings.branding.customCss
+        customCss: systemSettings.branding.customCss,
+        fontFamily: systemSettings.branding.fontFamily,
+        slogan: systemSettings.branding.slogan,
+        mission: systemSettings.branding.mission,
+        vision: systemSettings.branding.vision,
       });
-      setCompanyForm(systemSettings.company);
+      setCompanyForm(companyInfoData);
       setBrandingForm(systemSettings.branding);
       
       // Mock organizational units data
@@ -216,19 +215,47 @@ const OrganizationalSettings: React.FC = () => {
   const handleCompanySave = async () => {
     try {
       setIsSaving(true);
-      // This would call the actual API
-      const updatedCompany = await settingsService.updateSystemSettings({
-        company: {
-          name: companyForm.name || companyInfo.name,
-          logo: companyForm.logo,
-          address: companyForm.address,
-          phone: companyForm.phone,
-          email: companyForm.email,
-          website: companyForm.website,
-        },
+      
+      // Get current system settings to preserve other fields
+      const currentSettings = await settingsService.getSystemSettings();
+      
+      // Merge company form data with existing company data
+      const updatedCompanyData = {
+        name: companyForm.name || companyInfo?.name || currentSettings.company.name || '',
+        logo: companyForm.logo !== undefined ? companyForm.logo : currentSettings.company.logo,
+        address: companyForm.address !== undefined ? companyForm.address : currentSettings.company.address,
+        phone: companyForm.phone !== undefined ? companyForm.phone : currentSettings.company.phone,
+        email: companyForm.email !== undefined ? companyForm.email : currentSettings.company.email,
+        website: companyForm.website !== undefined ? companyForm.website : currentSettings.company.website,
+        description: companyForm.description !== undefined ? companyForm.description : currentSettings.company.description,
+        industry: companyForm.industry !== undefined ? companyForm.industry : currentSettings.company.industry,
+        founded: companyForm.founded !== undefined ? companyForm.founded : currentSettings.company.founded,
+        employees: companyForm.employees !== undefined ? companyForm.employees : currentSettings.company.employees,
+        revenue: companyForm.revenue !== undefined ? companyForm.revenue : currentSettings.company.revenue,
+      };
+      
+      // Update system settings with merged data, preserving branding and other fields
+      const updatedSettings = await settingsService.updateSystemSettings({
+        company: updatedCompanyData,
       });
-      setCompanyInfo(updatedCompany.company);
-      setCompanyForm(updatedCompany.company);
+      
+      // Update local state with the full company info
+      const fullCompanyInfo: CompanyInfo = {
+        name: updatedSettings.company.name,
+        logo: updatedSettings.company.logo,
+        address: updatedSettings.company.address,
+        phone: updatedSettings.company.phone,
+        email: updatedSettings.company.email,
+        website: updatedSettings.company.website,
+        description: updatedSettings.company.description,
+        industry: updatedSettings.company.industry,
+        founded: updatedSettings.company.founded,
+        employees: updatedSettings.company.employees,
+        revenue: updatedSettings.company.revenue,
+      };
+      
+      setCompanyInfo(fullCompanyInfo);
+      setCompanyForm(fullCompanyInfo);
       onCompanyClose();
       toast({
         title: 'Company information updated',
@@ -238,9 +265,10 @@ const OrganizationalSettings: React.FC = () => {
         isClosable: true,
       });
     } catch (error) {
+      console.error('Error saving company information:', error);
       toast({
         title: 'Update failed',
-        description: 'Failed to update company information',
+        description: error instanceof Error ? error.message : 'Failed to update company information',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -253,16 +281,38 @@ const OrganizationalSettings: React.FC = () => {
   const handleBrandingSave = async () => {
     try {
       setIsSaving(true);
-      // This would call the actual API
-      const updatedBranding = await settingsService.updateSystemSettings({
-        branding: {
-          primaryColor: brandingForm.primaryColor || branding.primaryColor,
-          secondaryColor: brandingForm.secondaryColor || branding.secondaryColor,
-          customCss: brandingForm.customCss,
-        },
+      
+      // Get current system settings to preserve other fields
+      const currentSettings = await settingsService.getSystemSettings();
+      
+      // Merge branding form data with existing branding data
+      const updatedBrandingData = {
+        primaryColor: brandingForm.primaryColor || branding?.primaryColor || currentSettings.branding.primaryColor,
+        secondaryColor: brandingForm.secondaryColor || branding?.secondaryColor || currentSettings.branding.secondaryColor,
+        customCss: brandingForm.customCss !== undefined ? brandingForm.customCss : currentSettings.branding.customCss,
+        fontFamily: brandingForm.fontFamily !== undefined ? brandingForm.fontFamily : currentSettings.branding.fontFamily,
+        slogan: brandingForm.slogan !== undefined ? brandingForm.slogan : currentSettings.branding.slogan,
+        mission: brandingForm.mission !== undefined ? brandingForm.mission : currentSettings.branding.mission,
+        vision: brandingForm.vision !== undefined ? brandingForm.vision : currentSettings.branding.vision,
+      };
+      
+      // Update system settings with merged data, preserving company and other fields
+      const updatedSettings = await settingsService.updateSystemSettings({
+        branding: updatedBrandingData,
       });
-      setBranding(updatedBranding.branding);
-      setBrandingForm(updatedBranding.branding);
+      
+      const fullBrandingData: BrandingSettings = {
+        primaryColor: updatedSettings.branding.primaryColor,
+        secondaryColor: updatedSettings.branding.secondaryColor,
+        customCss: updatedSettings.branding.customCss,
+        fontFamily: updatedSettings.branding.fontFamily,
+        slogan: updatedSettings.branding.slogan,
+        mission: updatedSettings.branding.mission,
+        vision: updatedSettings.branding.vision,
+      };
+      
+      setBranding(fullBrandingData);
+      setBrandingForm(fullBrandingData);
       onBrandingClose();
       toast({
         title: 'Branding updated',
@@ -272,9 +322,10 @@ const OrganizationalSettings: React.FC = () => {
         isClosable: true,
       });
     } catch (error) {
+      console.error('Error saving branding information:', error);
       toast({
         title: 'Update failed',
-        description: 'Failed to update branding settings',
+        description: error instanceof Error ? error.message : 'Failed to update branding settings',
         status: 'error',
         duration: 5000,
         isClosable: true,

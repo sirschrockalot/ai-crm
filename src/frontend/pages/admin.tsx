@@ -101,17 +101,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
 import { mockUsers } from '../services/mockDataService';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
+import { getSystemStats, SystemStats } from '../services/statsService';
 
-interface SystemStats {
-  totalUsers: number;
-  activeUsers: number;
-  totalLeads: number;
-  totalBuyers: number;
-  systemUptime: string;
-  storageUsed: string;
-  apiCalls: number;
-  errorRate: number;
-}
+// SystemStats interface moved to statsService.ts
 
 interface UserActivity {
   id: string;
@@ -141,15 +133,12 @@ const AdminPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [systemStats, setSystemStats] = useState<SystemStats>({
-    totalUsers: 24,
-    activeUsers: 18,
-    totalLeads: 156,
-    totalBuyers: 89,
-    systemUptime: '99.9%',
-    storageUsed: '2.4 GB',
-    apiCalls: 15420,
-    errorRate: 0.2,
+    totalUsers: 0,
+    activeUsers: 0,
+    systemUptime: 0,
+    errorRate: 0,
   });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   const [userActivity, setUserActivity] = useState<UserActivity[]>([
     {
@@ -208,6 +197,26 @@ const AdminPage: React.FC = () => {
   const subTextColor = useColorModeValue('gray.600', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
 
+  // Fetch system stats
+  const fetchSystemStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const stats = await getSystemStats();
+      setSystemStats(stats);
+    } catch (error) {
+      console.error('Error fetching system stats:', error);
+      toast({
+        title: 'Error Loading Stats',
+        description: 'Failed to load system statistics. Please try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
   // Check authentication and permissions
   useEffect(() => {
     if (authIsLoading) return; // Wait for auth to initialize before redirecting
@@ -236,6 +245,11 @@ const AdminPage: React.FC = () => {
       });
       router.push('/dashboard');
       return;
+    }
+
+    // Fetch stats when authenticated
+    if (bypassAuth || isAuthenticated) {
+      fetchSystemStats();
     }
   }, [authIsLoading, isAuthenticated, hasPermission, router, toast]);
 
@@ -346,7 +360,8 @@ const AdminPage: React.FC = () => {
               <Button
                 leftIcon={<FiRefreshCw />}
                 variant="outline"
-                onClick={() => window.location.reload()}
+                onClick={fetchSystemStats}
+                isLoading={isLoadingStats}
               >
                 Refresh
               </Button>
@@ -368,10 +383,15 @@ const AdminPage: React.FC = () => {
               <CardBody>
                 <Stat>
                   <StatLabel>Total Users</StatLabel>
-                  <StatNumber>{systemStats.totalUsers}</StatNumber>
+                  <StatNumber>{isLoadingStats ? '...' : systemStats.totalUsers}</StatNumber>
                   <StatHelpText>
-                    <StatArrow type="increase" />
-                    12% from last month
+                    {systemStats.totalUsersChange !== undefined && (
+                      <>
+                        <StatArrow type={systemStats.totalUsersChange >= 0 ? 'increase' : 'decrease'} />
+                        {Math.abs(systemStats.totalUsersChange).toFixed(1)}% from last month
+                      </>
+                    )}
+                    {systemStats.totalUsersChange === undefined && 'No previous data'}
                   </StatHelpText>
                 </Stat>
               </CardBody>
@@ -382,10 +402,15 @@ const AdminPage: React.FC = () => {
               <CardBody>
                 <Stat>
                   <StatLabel>Active Users</StatLabel>
-                  <StatNumber>{systemStats.activeUsers}</StatNumber>
+                  <StatNumber>{isLoadingStats ? '...' : systemStats.activeUsers}</StatNumber>
                   <StatHelpText>
-                    <StatArrow type="increase" />
-                    8% from last week
+                    {systemStats.activeUsersChange !== undefined && (
+                      <>
+                        <StatArrow type={systemStats.activeUsersChange >= 0 ? 'increase' : 'decrease'} />
+                        {Math.abs(systemStats.activeUsersChange).toFixed(1)}% from last week
+                      </>
+                    )}
+                    {systemStats.activeUsersChange === undefined && 'No previous data'}
                   </StatHelpText>
                 </Stat>
               </CardBody>
@@ -396,9 +421,9 @@ const AdminPage: React.FC = () => {
               <CardBody>
                 <Stat>
                   <StatLabel>System Uptime</StatLabel>
-                  <StatNumber>{systemStats.systemUptime}</StatNumber>
+                  <StatNumber>{isLoadingStats ? '...' : `${systemStats.systemUptime.toFixed(1)}%`}</StatNumber>
                   <StatHelpText>
-                    <StatArrow type="increase" />
+                    <StatArrow type={systemStats.systemUptime >= 99 ? 'increase' : 'decrease'} />
                     Last 30 days
                   </StatHelpText>
                 </Stat>
@@ -410,10 +435,15 @@ const AdminPage: React.FC = () => {
               <CardBody>
                 <Stat>
                   <StatLabel>Error Rate</StatLabel>
-                  <StatNumber>{systemStats.errorRate}%</StatNumber>
+                  <StatNumber>{isLoadingStats ? '...' : `${systemStats.errorRate.toFixed(2)}%`}</StatNumber>
                   <StatHelpText>
-                    <StatArrow type="decrease" />
-                    0.1% from last week
+                    {systemStats.errorRateChange !== undefined && (
+                      <>
+                        <StatArrow type={systemStats.errorRateChange <= 0 ? 'decrease' : 'increase'} />
+                        {Math.abs(systemStats.errorRateChange).toFixed(2)}% from last week
+                      </>
+                    )}
+                    {systemStats.errorRateChange === undefined && 'No previous data'}
                   </StatHelpText>
                 </Stat>
               </CardBody>

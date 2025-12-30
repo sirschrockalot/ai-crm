@@ -24,9 +24,17 @@ interface LeadFormProps {
   onSubmit: (data: LeadFormData) => void;
   initialData?: Partial<LeadFormData>;
   isLoading?: boolean;
+  hideSubmitButton?: boolean;
+  formRef?: React.RefObject<HTMLFormElement>;
 }
 
-const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, initialData, isLoading = false }) => {
+const LeadForm: React.FC<LeadFormProps> = ({ 
+  onSubmit, 
+  initialData, 
+  isLoading = false, 
+  hideSubmitButton = false,
+  formRef
+}) => {
   const toast = useToast();
   const {
     register,
@@ -41,12 +49,14 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, initialData, isLoading = 
   const onFormSubmit = async (data: LeadFormData) => {
     try {
       await onSubmit(data);
-      toast({
-        title: 'Lead saved successfully',
-        status: 'success',
-        duration: 3000,
-      });
-      reset();
+      if (!hideSubmitButton) {
+        toast({
+          title: 'Lead saved successfully',
+          status: 'success',
+          duration: 3000,
+        });
+        reset();
+      }
     } catch (error) {
       toast({
         title: 'Error saving lead',
@@ -54,11 +64,12 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, initialData, isLoading = 
         status: 'error',
         duration: 5000,
       });
+      throw error; // Re-throw so parent can handle it
     }
   };
 
   return (
-    <Box as="form" onSubmit={handleSubmit(onFormSubmit)}>
+    <Box as="form" ref={formRef} onSubmit={handleSubmit(onFormSubmit)}>
       <VStack spacing={4} align="stretch">
         <FormControl isInvalid={!!errors.firstName}>
           <FormLabel>First Name</FormLabel>
@@ -131,9 +142,15 @@ const LeadForm: React.FC<LeadFormProps> = ({ onSubmit, initialData, isLoading = 
           <FormErrorMessage>{errors.notes?.message}</FormErrorMessage>
         </FormControl>
 
-        <Button type="submit" colorScheme="primary" isLoading={isLoading}>
-          Save Lead
-        </Button>
+        {hideSubmitButton ? (
+          <Button type="submit" colorScheme="primary" isLoading={isLoading} display="none">
+            Save Lead
+          </Button>
+        ) : (
+          <Button type="submit" colorScheme="primary" isLoading={isLoading}>
+            Save Lead
+          </Button>
+        )}
       </VStack>
     </Box>
   );

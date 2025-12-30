@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { withErrorHandling, formatErrorForUser } from '../utils/error';
+import { trackApiError, trackApiSuccess } from './statsService';
 
 export interface ApiServiceConfig {
   baseURL?: string;
@@ -87,9 +88,15 @@ class ApiService {
     // Response interceptor
     this.instance.interceptors.response.use(
       (response) => {
+        // Track successful API calls for error rate calculation
+        trackApiSuccess();
         return response;
       },
       async (error: AxiosError) => {
+        // Track API errors for error rate calculation
+        if (error.response && error.response.status >= 400) {
+          trackApiError();
+        }
         const originalRequest = error.config as any;
 
         // Handle 401 errors with token refresh

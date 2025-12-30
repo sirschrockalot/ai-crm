@@ -76,6 +76,200 @@ export type LeadStatus =
   | 'interested_not_ready_now'
   | 'listed_with_realtor';
 
+// Lead Note types
+export interface LeadNote {
+  id: string;
+  leadId: string;
+  author: string;
+  authorId: string;
+  content: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Status Change History types
+export interface StatusChangeHistory {
+  id: string;
+  leadId: string;
+  oldStatus: LeadStatus;
+  newStatus: LeadStatus;
+  reason: string;
+  changedBy: string;
+  changedById: string;
+  createdAt: Date;
+}
+
+// Transaction Details types
+export interface TransactionDetails {
+  leadId: string;
+  acquisitionPrice?: number;
+  listingPrice?: number;
+  commission?: number;
+  repairCosts?: number;
+  closingCosts?: number;
+  contractDate?: Date;
+  inspectionDate?: Date;
+  closingDate?: Date;
+  arv?: number; // After Repair Value
+  estimatedRepairs?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Property Details types
+export interface ComparableProperty {
+  id: string;
+  link?: string;
+  price?: number;
+  notes?: string;
+}
+
+export interface PropertyDetails {
+  leadId: string;
+  // Basic Property Info
+  yearHouseBuilt?: number;
+  yearHousePurchased?: number;
+  permitted?: string;
+  lotSize?: string;
+  customerSqFt?: number;
+  zillowSqFt?: number;
+  propstreamSqFt?: number;
+  propertyType?: string;
+  blockOrWoodFrame?: string;
+  bedrooms?: string;
+  bedroomsPermitted?: string;
+  bath?: string;
+  bathPermitted?: string;
+  foundation?: string;
+  
+  // HVAC & Roof
+  yearOutsideACUnit?: number;
+  yearInsideHVAC?: number;
+  airConditioning?: string;
+  yearRoof?: number;
+  
+  // Features
+  garage?: string;
+  pool?: string;
+  poolFunctional?: string;
+  ageOfWindows?: number;
+  floodZone?: string;
+  
+  // Plumbing
+  ageOfHotWaterHeater?: number;
+  anyPlumbingIssues?: string;
+  typeOfPlumbing?: string;
+  
+  // Electrical
+  ageOfElectricalPanel?: number;
+  electrical?: string;
+  
+  // Utilities
+  heatSource?: string;
+  propaneLastServiced?: string;
+  propaneTankOwnedBy?: string;
+  water?: string;
+  wellLastServiced?: string;
+  wellPumpAge?: number;
+  waste?: string;
+  septicLastServiced?: string;
+  septicTankAge?: number;
+  electric?: string;
+  gas?: string;
+  
+  // Appliances
+  microwaveBuiltIn?: string;
+  stoveAge?: number;
+  stoveColor?: string;
+  stove?: string;
+  fridgeAge?: number;
+  fridgeColor?: string;
+  fridge?: string;
+  washerAge?: number;
+  washerColor?: string;
+  washer?: string;
+  dryerAge?: number;
+  dryerColor?: string;
+  dryer?: string;
+  
+  // Property Status
+  hoa?: string;
+  rentalRestrictions?: string;
+  liens?: string;
+  propertyOccupied?: string;
+  howLongVacant?: string;
+  whenWillItBeVacated?: string;
+  lengthOfLease?: string;
+  leaseEnds?: string;
+  amountOfRent?: number;
+  
+  // Property Notes
+  reasonForSelling?: string;
+  updatesCompleted?: string;
+  immediateRepairsNeeded?: string;
+  propertyNotes?: string;
+  
+  // Acquisition Financials
+  customerAskingPrice?: number;
+  acquisitionARVMin?: number;
+  acquisitionARVMax?: number;
+  acquisitionRehabEstimateMin?: number;
+  acquisitionRehabEstimateMax?: number;
+  acquisitionOfferMin?: number;
+  acquisitionOfferMax?: number;
+  acquisitionSellAtMin?: number;
+  acquisitionSellAtMax?: number;
+  
+  // Disposition Financials
+  dispositionARVMin?: number;
+  dispositionARVMax?: number;
+  dispositionRehabEstimateMin?: number;
+  dispositionRehabEstimateMax?: number;
+  dispositionOfferMin?: number;
+  dispositionOfferMax?: number;
+  dispositionSellAtMin?: number;
+  dispositionSellAtMax?: number;
+  investorProfitMin?: number;
+  investorProfitMax?: number;
+  
+  // Comparables
+  soldComparables?: ComparableProperty[];
+  pendingComparables?: ComparableProperty[];
+  cashComparables?: ComparableProperty[];
+  rentalsComparables?: ComparableProperty[];
+  
+  // Mortgage Data
+  hasMortgage?: string;
+  mortgageBalance?: number;
+  monthlyPaymentAmount?: number;
+  taxesAndInsurance?: string;
+  interestRate?: number;
+  yearsLeftOnMortgage?: number;
+  mortgageCurrent?: string;
+  
+  // TC Section (Transaction Coordination)
+  targetCloseDate?: Date;
+  inspectionPeriodDate?: Date;
+  emdReceivedDate?: Date;
+  nextStep?: string;
+  buyerName?: string;
+  buyerPhoneNumber?: string;
+  buyerEmailAddress?: string;
+  buyerEMDAmount?: number;
+  pdrEMD?: number;
+  picturesTakenBy?: string;
+  whoIsGrantingAccess?: string;
+  lockboxCode?: string;
+  titleCompanyAssigned?: string;
+  listedOnMLS?: string;
+  photosLink?: string;
+  dateOfSignedContract?: Date;
+  dateOfPhotosReceived?: Date;
+  
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 // Buyer types
 export interface Buyer {
   id: string;

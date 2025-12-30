@@ -110,6 +110,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     // Check for existing tokens first (token alone is sufficient to initialize)
+    // Only access localStorage in browser environment
+    if (typeof window === 'undefined') {
+      console.log('AuthProvider useEffect: SSR detected, setting loading to false');
+      setState(prev => ({ ...prev, isLoading: false }));
+      initializationRef.current = true;
+      return;
+    }
+
     const token = localStorage.getItem('auth_token');
     if (token) {
       console.log('AuthProvider useEffect: Found existing token, calling initializeAuth');
@@ -506,6 +514,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Inactivity-based session monitoring (15-minute sliding window)
   useEffect(() => {
+    // Skip during SSR
+    if (typeof window === 'undefined') return;
+    
     const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
     if (bypassAuth) return;
     if (!state.isAuthenticated) return;
@@ -518,17 +529,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       lastActivity = Date.now();
     };
 
-    const activityEvents: Array<keyof WindowEventMap> = [
+    const activityEvents: Array<keyof WindowEventMap | 'visibilitychange'> = [
       'click',
       'keydown',
       'mousemove',
       'scroll',
       'touchstart',
-      'visibilitychange',
+      'visibilitychange' as any, // visibilitychange is valid but not in WindowEventMap type
     ];
 
     activityEvents.forEach((event) => {
-      window.addEventListener(event, markActivity);
+      window.addEventListener(event as any, markActivity);
     });
 
     const interval = setInterval(async () => {
@@ -555,7 +566,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       clearInterval(interval);
       activityEvents.forEach((event) => {
-        window.removeEventListener(event, markActivity);
+        window.removeEventListener(event as any, markActivity);
       });
     };
   }, [state.isAuthenticated, logout, extendSession]);

@@ -1,8 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { Box, HStack, VStack, Heading, Text, Button, Table, Thead, Tbody, Tr, Th, Td, Badge, Card } from '@chakra-ui/react';
+import dynamic from 'next/dynamic';
+import { Box, HStack, VStack, Heading, Text, Button, Badge, Card } from '@chakra-ui/react';
 import { Sidebar, Header, Navigation } from '../../components/layout';
 import { transactionsService, TransactionProperty } from '../../services/transactionsService';
+import { ColDef, ICellRendererParams, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
+
+// Dynamically import AgGridReact to disable SSR
+const AgGridReact = dynamic(() => import('ag-grid-react').then((mod) => mod.AgGridReact), { ssr: false });
+
+// Register AG Grid modules (only on client side)
+if (typeof window !== 'undefined') {
+  ModuleRegistry.registerModules([AllCommunityModule]);
+}
 
 const TransactionsListPage: React.FC = () => {
   const router = useRouter();
@@ -23,6 +35,93 @@ const TransactionsListPage: React.FC = () => {
       case 'on_hold': return 'gray';
       case 'ready_to_close': return 'green';
       default: return 'gray';
+    }
+  };
+
+  // Status cell renderer
+  const StatusCellRenderer = (params: ICellRendererParams<TransactionProperty>) => {
+    if (!params.value) return null;
+    const color = statusColor(params.value);
+    const displayText = params.value.replace(/_/g, ' ');
+    return (
+      <Badge colorScheme={color} textTransform="none">
+        {displayText}
+      </Badge>
+    );
+  };
+
+  // Date cell renderer
+  const DateCellRenderer = (params: ICellRendererParams<TransactionProperty>) => {
+    if (!params.value) return null;
+    return <Text>{new Date(params.value).toLocaleDateString()}</Text>;
+  };
+
+  // Column definitions
+  const columnDefs = useMemo<ColDef<TransactionProperty>[]>(() => [
+    {
+      field: 'status',
+      headerName: 'Status',
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      cellRenderer: StatusCellRenderer,
+      width: 180,
+    },
+    {
+      field: 'address',
+      headerName: 'Address',
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      flex: 1,
+      minWidth: 150,
+    },
+    {
+      field: 'city',
+      headerName: 'City',
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      width: 150,
+    },
+    {
+      field: 'state',
+      headerName: 'State',
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      width: 100,
+    },
+    {
+      field: 'sellerName',
+      headerName: 'Seller',
+      sortable: true,
+      filter: 'agTextColumnFilter',
+      width: 200,
+      valueGetter: (params) => params.data?.sellerName || '-',
+    },
+    {
+      field: 'contractDate',
+      headerName: 'Contract Date',
+      sortable: true,
+      filter: 'agDateColumnFilter',
+      cellRenderer: DateCellRenderer,
+      width: 150,
+      valueGetter: (params) => params.data?.contractDate ? new Date(params.data.contractDate) : null,
+      comparator: (valueA, valueB) => {
+        if (!valueA && !valueB) return 0;
+        if (!valueA) return 1;
+        if (!valueB) return -1;
+        return new Date(valueA).getTime() - new Date(valueB).getTime();
+      },
+    },
+  ], []);
+
+  const defaultColDef = useMemo<ColDef>(() => ({
+    resizable: true,
+    sortable: true,
+    filter: true,
+  }), []);
+
+  const handleRowClick = (event: any) => {
+    if (event.data?.id) {
+      router.push(`/transactions/${event.data.id}`);
     }
   };
 
@@ -49,37 +148,32 @@ const TransactionsListPage: React.FC = () => {
 
             <Card>
               <Box p={4}>
-                <Table size="sm">
-                  <Thead>
-                    <Tr>
-                      <Th>Status</Th>
-                      <Th>Address</Th>
-                      <Th>City</Th>
-                      <Th>State</Th>
-                      <Th>Seller</Th>
-                      <Th>Contract Date</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {items.map(item => (
-                      <Tr key={item.id} onClick={() => router.push(`/transactions/${item.id}`)} style={{ cursor: 'pointer' }}>
-                        <Td><Badge colorScheme={statusColor(item.status)} textTransform="none">{item.status.replace('_',' ')}</Badge></Td>
-                        <Td>{item.address}</Td>
-                        <Td>{item.city}</Td>
-                        <Td>{item.state}</Td>
-                        <Td>{item.sellerName || '-'}</Td>
-                        <Td>{new Date(item.contractDate).toLocaleDateString()}</Td>
-                      </Tr>
-                    ))}
-                    {items.length === 0 && (
-                      <Tr>
-                        <Td colSpan={6}>
-                          <Text color="gray.600">No transactions yet. Click &quot;Add New&quot; to create one.</Text>
-                        </Td>
-                      </Tr>
-                    )}
-                  </Tbody>
-                </Table>
+                <Box
+                  className="ag-theme-alpine"
+                  style={{
+                    height: '600px',
+                    width: '100%',
+                  }}
+                >
+                  <AgGridReact<TransactionProperty>
+                    rowData={items}
+                    columnDefs={columnDefs}
+                    defaultColDef={defaultColDef}
+                    theme="legacy"
+                    animateRows={true}
+                    rowSelection={{ mode: 'singleRow', enableClickSelection: false }}
+                    onRowClicked={handleRowClick}
+                    getRowStyle={(params) => ({
+                      cursor: 'pointer',
+                    })}
+                    pagination={true}
+                    paginationPageSize={20}
+                    domLayout="normal"
+                    noRowsOverlayComponentParams={{
+                      message: 'No transactions yet. Click "Add New" to create one.',
+                    }}
+                  />
+                </Box>
               </Box>
             </Card>
           </VStack>
