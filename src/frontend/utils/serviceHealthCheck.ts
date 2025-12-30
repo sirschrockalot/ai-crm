@@ -84,15 +84,9 @@ export async function checkAllServicesHealth(): Promise<HealthCheckResult> {
   const config = configService.getConfig();
   const services: ServiceHealthStatus[] = [];
   
-  // Check Auth Service - try multiple paths
-  let authHealthUrl = `${config.microservices.auth.url}/api/health`;
-  let authHealth = await checkServiceHealth('Auth Service', authHealthUrl);
-  if (authHealth.status === 'unhealthy') {
-    // Try alternative path
-    authHealthUrl = `${config.microservices.auth.url}/health`;
-    authHealth = await checkServiceHealth('Auth Service', authHealthUrl);
-  }
-  services.push(authHealth);
+  // Check Auth Service - uses /api/auth/health (has global prefix)
+  const authHealthUrl = `${config.microservices.auth.url}/api/auth/health`;
+  services.push(await checkServiceHealth('Auth Service', authHealthUrl));
   
   // Check Leads Service - uses /health (skip if not configured or localhost)
   if (config.microservices.leads.url && !config.microservices.leads.url.includes('localhost')) {
@@ -139,7 +133,7 @@ export async function checkServiceHealthByName(
   
   switch (serviceName.toLowerCase()) {
     case 'auth':
-      healthUrl = `${config.microservices.auth.url}/health`;
+      healthUrl = `${config.microservices.auth.url}/api/auth/health`;
       break;
     case 'leads':
       healthUrl = `${config.microservices.leads.url}/health`;
