@@ -365,6 +365,29 @@ class SettingsService {
     return response.data;
   }
 
+  async getSystemStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    verified: number;
+    unverified: number;
+    byRole: Record<string, number>;
+    byDepartment: Record<string, number>;
+  }> {
+    const response = await apiService.get('/users/stats');
+    const data = response.data;
+    // Map the response to match expected format
+    return {
+      total: data.total || 0,
+      active: data.active || 0,
+      inactive: data.inactive || 0,
+      verified: data.verified || 0,
+      unverified: data.unverified || 0,
+      byRole: data.byRole || {},
+      byDepartment: data.byDepartment || {},
+    };
+  }
+
   // Audit and Analytics
   async getSettingsHistory(): Promise<any[]> {
     const response = await apiService.get(`${this.baseUrl}/history`);
