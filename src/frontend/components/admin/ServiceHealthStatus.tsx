@@ -48,9 +48,14 @@ export const ServiceHealthStatus: React.FC<ServiceHealthStatusProps> = ({
       setServices(result.services);
       setOverall(result.overall);
       setLastChecked(result.timestamp);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to check service health:', error);
+      // Don't show error toast for health checks - just log it
       setOverall('unhealthy');
+      // Set empty services array if we have an error
+      if (services.length === 0) {
+        setServices([]);
+      }
     } finally {
       setIsRefreshing(false);
     }

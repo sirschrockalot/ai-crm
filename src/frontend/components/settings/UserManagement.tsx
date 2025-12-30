@@ -240,10 +240,12 @@ const UserManagement: React.FC = () => {
       setRoles(normalizedRoles);
       setPermissions(permissionsData);
       setOrganizationalUnits(unitsData);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error loading user management data:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to load user management data';
       toast({
         title: 'Error loading data',
-        description: 'Failed to load user management data',
+        description: errorMessage,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -268,10 +270,12 @@ const UserManagement: React.FC = () => {
         isSystem: r?.isSystem ?? false,
       }));
       setRoles(normalizedRoles);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error loading roles:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Could not fetch roles. Please try again.';
       toast({
         title: 'Failed to load roles',
-        description: 'Could not fetch roles. Please try again.',
+        description: errorMessage,
         status: 'error',
         duration: 4000,
         isClosable: true,
