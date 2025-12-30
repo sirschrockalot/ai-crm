@@ -116,7 +116,7 @@ const UserManagement: React.FC = () => {
     role: Array.isArray(u?.roles) && u.roles.length > 0 ? u.roles[0] : (u?.role ?? ''),
     department: u?.department ?? '',
     isActive: typeof u?.isActive === 'boolean' ? u.isActive : true,
-    lastLogin: u?.lastLogin ?? undefined,
+    lastLogin: u?.lastLoginAt || u?.lastLogin || undefined, // Support both field names
     avatar: u?.avatar ?? undefined,
   });
   
