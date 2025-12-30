@@ -200,19 +200,33 @@ const apiCall = async (endpoint: string, options: any = {}) => {
   const url = `${API_BASE_URL}/api/transactions${endpoint}`;
   
   const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
+  
+  if (!token) {
+    throw new Error('Authentication token not found. Please log in again.');
+  }
 
   const response = await fetch(url, {
     method: options.method || 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
+      'Authorization': `Bearer ${token}`,
       ...options.headers,
     },
     body: options.body,
   });
 
+  if (response.status === 401) {
+    // Token might be expired, try to refresh or redirect to login
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      window.location.href = '/auth/login';
+    }
+    throw new Error('Authentication failed. Please log in again.');
+  }
+
   if (!response.ok) {
-    throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+    throw new Error(`API call failed: ${response.status} ${errorData.message || response.statusText}`);
   }
 
   return response.json();
