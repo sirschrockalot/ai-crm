@@ -86,6 +86,8 @@ public/*
 !public/logo.svg
 src/frontend/public/*
 !src/frontend/public/logo.svg
+!src/frontend/public/favicon.ico
+!src/frontend/public/favicon.svg
 
 # Vuepress build output
 .vuepress/dist
