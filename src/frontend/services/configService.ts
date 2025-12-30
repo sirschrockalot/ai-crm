@@ -50,8 +50,8 @@ class ConfigService {
           apiUrl: process.env.NEXT_PUBLIC_AUTH_SERVICE_API_URL || 'http://localhost:3001/api/auth',
         },
         leads: {
-          url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'https://leads-service-8b1c2d3e4f5a.herokuapp.com',
-          apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'https://leads-service-8b1c2d3e4f5a.herokuapp.com/api/v1/leads',
+          url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'https://leads-service-prod-5d0550273e4c.herokuapp.com',
+          apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'https://leads-service-prod-5d0550273e4c.herokuapp.com/api/v1/leads',
         },
         transactions: {
           url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com',
@@ -270,8 +270,8 @@ export const getLeadsServiceConfig = () => {
   } catch (error) {
     console.error('ConfigService not available, using fallback leads service config');
     return {
-      url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'https://leads-service-8b1c2d3e4f5a.herokuapp.com',
-      apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'https://leads-service-8b1c2d3e4f5a.herokuapp.com/api/v1/leads'
+      url: process.env.NEXT_PUBLIC_LEADS_SERVICE_URL || 'https://leads-service-prod-5d0550273e4c.herokuapp.com',
+      apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'https://leads-service-prod-5d0550273e4c.herokuapp.com/api/v1/leads'
     };
   }
 };
