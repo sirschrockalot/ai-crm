@@ -199,27 +199,43 @@ const apiCall = async (endpoint: string, options: any = {}) => {
   // Use Next.js API route as proxy instead of calling service directly
   const url = `${API_BASE_URL}/api/transactions${endpoint}`;
   
+  // Check if auth bypass is enabled
+  const bypassAuth = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+  
   const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
   
-  if (!token) {
-    throw new Error('Authentication token not found. Please log in again.');
+  // Only require token if bypass auth is not enabled
+  if (!bypassAuth && !token) {
+    // Don't throw error immediately - let the API route handle it
+    // This allows the user to see the page even if token is missing
+    console.warn('Authentication token not found. API call may fail.');
+  }
+
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  // Only add Authorization header if we have a token
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   const response = await fetch(url, {
     method: options.method || 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-      ...options.headers,
-    },
+    headers,
     body: options.body,
   });
 
   if (response.status === 401) {
     // Token might be expired, try to refresh or redirect to login
-    if (typeof window !== 'undefined') {
+    if (!bypassAuth && typeof window !== 'undefined') {
       localStorage.removeItem('auth_token');
-      window.location.href = '/auth/login';
+      localStorage.removeItem('refresh_token');
+      // Only redirect if not in bypass mode
+      if (process.env.NEXT_PUBLIC_BYPASS_AUTH !== 'true') {
+        window.location.href = '/auth/login';
+      }
     }
     throw new Error('Authentication failed. Please log in again.');
   }
@@ -236,7 +252,16 @@ export const transactionsService = {
   async list(): Promise<TransactionProperty[]> {
     try {
       return await apiCall('');
-    } catch (error) {
+    } catch (error: any) {
+      // Check if it's an authentication error and bypass is enabled
+      const bypassAuth = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      
+      if (bypassAuth && error.message?.includes('Authentication')) {
+        // In bypass mode, still try to return empty array or mock data
+        console.warn('Auth bypass enabled, using mock data:', error.message);
+        return [...mockTransactions].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      }
+      
       console.warn('API call failed, using mock data:', error);
       // Fallback to mock data
       return [...mockTransactions].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
