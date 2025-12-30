@@ -322,6 +322,18 @@ const UserManagement: React.FC = () => {
           });
           return;
         }
+        // Check password complexity
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+        if (!passwordRegex.test(userForm.password)) {
+          toast({
+            title: 'Invalid password',
+            description: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character (@$!%*?&)',
+            status: 'warning',
+            duration: 5000,
+            isClosable: true,
+          });
+          return;
+        }
         if (userForm.password !== userForm.confirmPassword) {
           toast({
             title: 'Passwords do not match',
@@ -367,13 +379,19 @@ const UserManagement: React.FC = () => {
       
       onUserClose();
       resetUserForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('UserManagement: handleUserSave error', error);
+      const errorMessage = error?.message || error?.response?.data?.message || 'Failed to save user';
+      const validationErrors = error?.response?.data?.errors || error?.response?.data?.error;
+      const detailedMessage = validationErrors 
+        ? (Array.isArray(validationErrors) ? validationErrors.join(', ') : String(validationErrors))
+        : errorMessage;
+      
       toast({
         title: 'Save failed',
-        description: 'Failed to save user',
+        description: detailedMessage,
         status: 'error',
-        duration: 5000,
+        duration: 6000,
         isClosable: true,
       });
     }

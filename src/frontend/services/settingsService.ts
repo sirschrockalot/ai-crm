@@ -216,6 +216,7 @@ class SettingsService {
     firstName: string;
     lastName: string;
     role?: string;
+    roles?: string[];
     title?: string;
     department?: string;
     phone?: string;
@@ -224,21 +225,39 @@ class SettingsService {
     departmentId?: string;
     password?: string;
   }): Promise<any> {
+    // Validate password meets requirements
+    if (!userData.password) {
+      throw new Error('Password is required');
+    }
+    
+    // Password must contain: uppercase, lowercase, number, and special character
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+    if (!passwordRegex.test(userData.password)) {
+      throw new Error('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+    }
+    
     // Map UI fields to API contract
     const payload: any = {
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      password: userData.password || 'TempPass123!',
-      roles: userData.role ? [userData.role] : ['Agent'],
-      title: userData.title,
-      department: userData.department,
-      phone: userData.phone,
+      email: userData.email.trim().toLowerCase(),
+      firstName: userData.firstName.trim(),
+      lastName: userData.lastName.trim(),
+      password: userData.password,
+      roles: userData.roles || (userData.role ? [userData.role] : ['Agent']),
+      title: userData.title?.trim(),
+      department: userData.department?.trim(),
+      phone: userData.phone?.trim(),
       avatar: userData.avatar,
       organizationId: userData.organizationId,
       departmentId: userData.departmentId,
       isActive: true,
     };
+
+    // Remove undefined/null values to avoid validation issues
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === undefined || payload[key] === null || payload[key] === '') {
+        delete payload[key];
+      }
+    });
 
     const response = await apiService.post('/users', payload);
     return response.data;

@@ -35,12 +35,22 @@ export default async function handler(
     }
 
     if (!response.ok) {
+      // Log the error for debugging
+      console.error('Users API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: maybeJson,
+        url: targetUrl,
+      });
       return res.status(response.status).json(maybeJson);
     }
 
     return res.status(response.status).json(maybeJson);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Users API error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: error?.message || 'Failed to process request'
+    });
   }
 }
