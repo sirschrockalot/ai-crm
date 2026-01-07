@@ -32,6 +32,7 @@ import {
   FiChevronDown,
   FiChevronRight,
   FiPlus,
+  FiBriefcase,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -218,6 +219,48 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({
       icon: FiClock,
       description: 'Time tracking and reporting',
       permissions: ['time-tracking:read'],
+    },
+    {
+      id: 'ats',
+      label: 'ATS',
+      href: '/ats',
+      icon: FiBriefcase,
+      description: 'Application Tracking System',
+      permissions: ['ats:read'],
+      children: [
+        {
+          id: 'ats-candidates',
+          label: 'Candidates',
+          href: '/ats/candidates',
+          icon: FiUsers,
+          description: 'Manage candidates',
+          permissions: ['ats:candidates:read'],
+        },
+        {
+          id: 'ats-interviews',
+          label: 'Interviews',
+          href: '/ats/interviews',
+          icon: FiMessageCircle,
+          description: 'Manage interviews',
+          permissions: ['ats:interviews:read'],
+        },
+        {
+          id: 'ats-scripts',
+          label: 'Scripts',
+          href: '/ats/scripts',
+          icon: FiFileText,
+          description: 'Interview scripts',
+          permissions: ['ats:scripts:read'],
+        },
+        {
+          id: 'ats-job-postings',
+          label: 'Job Postings',
+          href: '/ats/job-postings',
+          icon: FiTarget,
+          description: 'Manage job postings',
+          permissions: ['ats:job-postings:read'],
+        },
+      ],
     },
     {
       id: 'settings',

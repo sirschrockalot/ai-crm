@@ -49,11 +49,12 @@ const TransactionStatusBoard: React.FC = () => {
   const statusColumns: StatusColumn[] = [
     { id: 'gathering_docs', label: 'Gathering Docs', color: 'red', count: 0 },
     { id: 'gathering_title', label: 'Gathering Title', color: 'blue', count: 0 },
+    { id: 'title_issues', label: 'Title Issues', color: 'orange', count: 0 },
     { id: 'client_help_needed', label: 'Client Help', color: 'gray', count: 0 },
     { id: 'on_hold', label: 'On Hold', color: 'orange', count: 0 },
     { id: 'pending_closing', label: 'Pending Closing', color: 'yellow', count: 0 },
     { id: 'ready_to_close', label: 'Ready to Close', color: 'purple', count: 0 },
-    { id: 'closed', label: 'Closed', color: 'green', count: 0 },
+    // Closed status removed - closed transactions are hidden from the board
   ];
 
   useEffect(() => {
@@ -71,6 +72,9 @@ const TransactionStatusBoard: React.FC = () => {
 
   const filterTransactions = () => {
     let filtered = transactions;
+
+    // Exclude closed transactions from the board
+    filtered = filtered.filter(tx => tx.status !== 'closed');
 
     // Search filter
     if (searchTerm) {

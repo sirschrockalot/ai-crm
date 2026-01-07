@@ -31,6 +31,7 @@ import {
   FiFileText,
   FiUpload,
   FiZap,
+  FiBriefcase,
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -149,6 +150,14 @@ const UnifiedNavigation: React.FC<UnifiedNavigationProps> = ({
       icon: FiClock,
       description: 'Time tracking and reporting',
       permissions: ['time-tracking:read'],
+    },
+    {
+      id: 'ats',
+      label: 'ATS',
+      href: '/ats',
+      icon: FiBriefcase,
+      description: 'Application Tracking System',
+      permissions: ['ats:read'],
     },
     {
       id: 'settings',

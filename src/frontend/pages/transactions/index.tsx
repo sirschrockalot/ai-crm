@@ -168,6 +168,7 @@ const TransactionsListPage: React.FC = () => {
     switch (status) {
       case 'gathering_docs': return 'yellow';
       case 'gathering_title': return 'blue';
+      case 'title_issues': return 'orange';
       case 'pending_closing': return 'purple';
       case 'closed': return 'green';
       case 'cancelled': return 'red';
@@ -281,6 +282,15 @@ const TransactionsListPage: React.FC = () => {
               <HStack spacing={3}>
                 <Button variant="outline" onClick={() => router.push('/transactions/board')}>
                   Status Board
+                </Button>
+                <Button variant="outline" onClick={() => router.push('/transactions/calendar')}>
+                  Calendar
+                </Button>
+                <Button variant="outline" onClick={() => router.push('/transactions/planning')}>
+                  Daily Planning
+                </Button>
+                <Button variant="outline" onClick={() => router.push('/transactions/title-companies')}>
+                  Title Companies
                 </Button>
                 <Button colorScheme="blue" onClick={() => router.push('/transactions/new')}>Add New</Button>
               </HStack>

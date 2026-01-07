@@ -15,7 +15,7 @@ const getLiveAuthToken = (): string | null => {
 
 export interface TransactionProperty {
   id: string;
-  status: 'gathering_docs' | 'gathering_title' | 'client_help_needed' | 'on_hold' | 'pending_closing' | 'ready_to_close' | 'closed' | 'cancelled';
+  status: 'gathering_docs' | 'gathering_title' | 'title_issues' | 'client_help_needed' | 'on_hold' | 'pending_closing' | 'ready_to_close' | 'closed' | 'cancelled';
   propertyType?: string;
   transactionType?: string;
   loanType?: string;

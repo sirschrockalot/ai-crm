@@ -63,9 +63,11 @@ import {
   FiPaperclip,
   FiImage,
   FiSend,
+  FiBell,
 } from 'react-icons/fi';
 import { Sidebar, Header, Navigation } from '../../components/layout';
 import { transactionsService, TransactionProperty } from '../../services/transactionsService';
+import { appointmentsService, Appointment } from '../../services/appointmentsService';
 
 const TransactionDetailPage: React.FC = () => {
   const router = useRouter();
@@ -80,6 +82,20 @@ const TransactionDetailPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [uploading, setUploading] = useState(false);
   const [hideClosedDocs, setHideClosedDocs] = useState(true);
+  
+  // Appointment modal state
+  const { isOpen: isAppointmentModalOpen, onOpen: onAppointmentModalOpen, onClose: onAppointmentModalClose } = useDisclosure();
+  const [appointmentForm, setAppointmentForm] = useState({
+    title: '',
+    type: 'call_back_seller' as Appointment['type'],
+    startDate: '',
+    startTime: '',
+    duration: 30,
+    contactPerson: '',
+    contactMethod: 'phone' as Appointment['contactMethod'],
+    priority: 'medium' as Appointment['priority'],
+    notes: '',
+  });
   
   // Seller info modal state
   const { isOpen: isSellerModalOpen, onOpen: onSellerModalOpen, onClose: onSellerModalClose } = useDisclosure();
@@ -300,6 +316,87 @@ const TransactionDetailPage: React.FC = () => {
     }
   };
 
+  const handleOpenAppointmentModal = () => {
+    if (transaction) {
+      // Pre-populate with transaction context
+      const defaultContact = transaction.sellerName || transaction.buyerName || '';
+      setAppointmentForm({
+        title: `Follow-up: ${transaction.address}`,
+        type: 'call_back_seller',
+        startDate: new Date().toISOString().split('T')[0],
+        startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toTimeString().slice(0, 5), // Tomorrow at same time
+        duration: 30,
+        contactPerson: defaultContact,
+        contactMethod: 'phone',
+        priority: 'medium',
+        notes: `Transaction: ${transaction.id}`,
+      });
+    }
+    onAppointmentModalOpen();
+  };
+
+  const handleSaveAppointment = async () => {
+    if (!transaction || !appointmentForm.title || !appointmentForm.startDate || !appointmentForm.startTime) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in all required fields',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
+
+    try {
+      // Combine date and time
+      const startDateTime = new Date(`${appointmentForm.startDate}T${appointmentForm.startTime}`);
+      const endDateTime = new Date(startDateTime.getTime() + appointmentForm.duration * 60 * 1000);
+
+      const appointment = await appointmentsService.create({
+        transactionId: transaction.id,
+        title: appointmentForm.title,
+        type: appointmentForm.type,
+        startDate: startDateTime.toISOString(),
+        endDate: endDateTime.toISOString(),
+        duration: appointmentForm.duration,
+        contactPerson: appointmentForm.contactPerson,
+        contactMethod: appointmentForm.contactMethod,
+        priority: appointmentForm.priority,
+        notes: appointmentForm.notes,
+        reminderSettings: {
+          enabled: true,
+          timings: [15, 60], // 15 minutes and 1 hour before
+        },
+      });
+
+      toast({
+        title: 'Appointment created',
+        description: 'Follow-up appointment has been scheduled',
+        status: 'success',
+        duration: 3000,
+      });
+
+      onAppointmentModalClose();
+      setAppointmentForm({
+        title: '',
+        type: 'call_back_seller',
+        startDate: '',
+        startTime: '',
+        duration: 30,
+        contactPerson: '',
+        contactMethod: 'phone',
+        priority: 'medium',
+        notes: '',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error creating appointment',
+        description: error.message || 'Failed to create appointment',
+        status: 'error',
+        duration: 5000,
+      });
+    }
+  };
+
   const handleOpenSellerModal = () => {
     if (transaction) {
       setSellerForm({
@@ -432,6 +529,7 @@ const TransactionDetailPage: React.FC = () => {
     switch (status) {
       case 'gathering_docs': return 'red';
       case 'gathering_title': return 'blue';
+      case 'title_issues': return 'orange';
       case 'client_help_needed': return 'gray';
       case 'on_hold': return 'blue';
       case 'pending_closing': return 'yellow';
@@ -446,6 +544,7 @@ const TransactionDetailPage: React.FC = () => {
     switch (status) {
       case 'gathering_docs': return 'Gathering Documents';
       case 'gathering_title': return 'Gathering Title';
+      case 'title_issues': return 'Title Issues';
       case 'client_help_needed': return 'Client Help Needed';
       case 'on_hold': return 'On Hold';
       case 'pending_closing': return 'Pending Closing';
@@ -541,6 +640,14 @@ const TransactionDetailPage: React.FC = () => {
                 </VStack>
               </HStack>
               <HStack spacing={3}>
+                <Button
+                  leftIcon={<Icon as={FiBell} />}
+                  colorScheme="green"
+                  variant="outline"
+                  onClick={handleOpenAppointmentModal}
+                >
+                  Schedule Follow-up
+                </Button>
                 {!isEditing ? (
                   <Button
                     leftIcon={<Icon as={FiEdit} />}
@@ -759,6 +866,7 @@ const TransactionDetailPage: React.FC = () => {
                             >
                               <option value="gathering_docs">Gathering Documents</option>
                               <option value="gathering_title">Gathering Title</option>
+                              <option value="title_issues">Title Issues</option>
                               <option value="client_help_needed">Client Help Needed</option>
                               <option value="on_hold">On Hold</option>
                               <option value="pending_closing">Pending Closing</option>
@@ -1462,6 +1570,131 @@ const TransactionDetailPage: React.FC = () => {
             </Button>
             <Button colorScheme="red" onClick={handleSaveLenderInfo}>
               Save Changes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Schedule Follow-up Appointment Modal */}
+      <Modal isOpen={isAppointmentModalOpen} onClose={onAppointmentModalClose} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Schedule Follow-up Appointment</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4} align="stretch">
+              <FormControl isRequired>
+                <FormLabel>Title</FormLabel>
+                <Input
+                  value={appointmentForm.title}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, title: e.target.value })}
+                  placeholder="Appointment title"
+                />
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Type</FormLabel>
+                <Select
+                  value={appointmentForm.type}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, type: e.target.value as Appointment['type'] })}
+                >
+                  <option value="call_back_buyer">Call Back - Buyer</option>
+                  <option value="call_back_seller">Call Back - Seller</option>
+                  <option value="call_back_title_company">Call Back - Title Company</option>
+                  <option value="call_back_lender">Call Back - Lender</option>
+                  <option value="document_follow_up">Document Follow-up</option>
+                  <option value="closing_date_reminder">Closing Date Reminder</option>
+                  <option value="inspection_deadline">Inspection Deadline</option>
+                  <option value="emd_deadline">EMD Deadline</option>
+                  <option value="meeting">Meeting</option>
+                  <option value="custom">Custom</option>
+                </Select>
+              </FormControl>
+
+              <SimpleGrid columns={2} spacing={4}>
+                <FormControl isRequired>
+                  <FormLabel>Date</FormLabel>
+                  <Input
+                    type="date"
+                    value={appointmentForm.startDate}
+                    onChange={(e) => setAppointmentForm({ ...appointmentForm, startDate: e.target.value })}
+                  />
+                </FormControl>
+
+                <FormControl isRequired>
+                  <FormLabel>Time</FormLabel>
+                  <Input
+                    type="time"
+                    value={appointmentForm.startTime}
+                    onChange={(e) => setAppointmentForm({ ...appointmentForm, startTime: e.target.value })}
+                  />
+                </FormControl>
+              </SimpleGrid>
+
+              <SimpleGrid columns={2} spacing={4}>
+                <FormControl>
+                  <FormLabel>Duration (minutes)</FormLabel>
+                  <Input
+                    type="number"
+                    value={appointmentForm.duration}
+                    onChange={(e) => setAppointmentForm({ ...appointmentForm, duration: parseInt(e.target.value) || 30 })}
+                    min={5}
+                    step={5}
+                  />
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel>Priority</FormLabel>
+                  <Select
+                    value={appointmentForm.priority}
+                    onChange={(e) => setAppointmentForm({ ...appointmentForm, priority: e.target.value as Appointment['priority'] })}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                  </Select>
+                </FormControl>
+              </SimpleGrid>
+
+              <FormControl>
+                <FormLabel>Contact Person</FormLabel>
+                <Input
+                  value={appointmentForm.contactPerson}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, contactPerson: e.target.value })}
+                  placeholder="Name of person to contact"
+                />
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Contact Method</FormLabel>
+                <Select
+                  value={appointmentForm.contactMethod}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, contactMethod: e.target.value as Appointment['contactMethod'] })}
+                >
+                  <option value="phone">Phone</option>
+                  <option value="email">Email</option>
+                  <option value="in_person">In Person</option>
+                </Select>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Notes</FormLabel>
+                <Textarea
+                  value={appointmentForm.notes}
+                  onChange={(e) => setAppointmentForm({ ...appointmentForm, notes: e.target.value })}
+                  placeholder="Additional notes or context"
+                  rows={3}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onAppointmentModalClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="blue" onClick={handleSaveAppointment}>
+              Schedule Appointment
             </Button>
           </ModalFooter>
         </ModalContent>

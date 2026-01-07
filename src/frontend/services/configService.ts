@@ -15,6 +15,7 @@ export interface MicroservicesConfig {
   timesheet: ServiceConfig;
   leadImport: ServiceConfig;
   userManagement: ServiceConfig;
+  ats: ServiceConfig;
 }
 
 export interface AppConfig {
@@ -54,8 +55,8 @@ class ConfigService {
           apiUrl: process.env.NEXT_PUBLIC_LEADS_SERVICE_API_URL || 'https://leads-service-prod-5d0550273e4c.herokuapp.com/api/v1/leads',
         },
         transactions: {
-          url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com',
-          apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com/api/v1',
+          url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'http://localhost:3003',
+          apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api/v1',
         },
         timesheet: {
           url: process.env.NEXT_PUBLIC_TIMESHEET_SERVICE_URL || 'https://timesheet-service-1c566082b633.herokuapp.com',
@@ -68,6 +69,10 @@ class ConfigService {
         userManagement: {
           url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'https://user-management-service-prod-d6fbfdbd7a27.herokuapp.com',
           apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'https://user-management-service-prod-d6fbfdbd7a27.herokuapp.com/api/v1',
+        },
+        ats: {
+          url: process.env.NEXT_PUBLIC_ATS_SERVICE_URL || 'http://localhost:3008',
+          apiUrl: process.env.NEXT_PUBLIC_ATS_SERVICE_API_URL || 'http://localhost:3008/api/v1',
         },
       },
       // Feature Flags
@@ -282,8 +287,8 @@ export const getTransactionsServiceConfig = () => {
   } catch (error) {
     console.error('ConfigService not available, using fallback transactions service config');
     return {
-      url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com',
-      apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'https://transactions-service-beb6e341ca4b.herokuapp.com/api/v1'
+      url: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_URL || 'http://localhost:3003',
+      apiUrl: process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api/v1'
     };
   }
 };
@@ -320,6 +325,18 @@ export const getUserManagementServiceConfig = () => {
     return {
       url: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_URL || 'http://localhost:3005',
       apiUrl: process.env.NEXT_PUBLIC_USER_MANAGEMENT_SERVICE_API_URL || 'http://localhost:3005/api/v1'
+    };
+  }
+};
+
+export const getAtsServiceConfig = () => {
+  try {
+    return configService.getServiceConfig('ats');
+  } catch (error) {
+    console.error('ConfigService not available, using fallback ATS service config');
+    return {
+      url: process.env.NEXT_PUBLIC_ATS_SERVICE_URL || 'http://localhost:3008',
+      apiUrl: process.env.NEXT_PUBLIC_ATS_SERVICE_API_URL || 'http://localhost:3008/api/v1'
     };
   }
 };
