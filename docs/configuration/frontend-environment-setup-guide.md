@@ -81,11 +81,9 @@ NEXT_PUBLIC_AUTH_REDIRECT_URI=http://localhost:3000/callback
 ```bash
 # Google OAuth
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
-NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 # Twilio Configuration
 NEXT_PUBLIC_TWILIO_ACCOUNT_SID=your-twilio-account-sid
-NEXT_PUBLIC_TWILIO_AUTH_TOKEN=your-twilio-auth-token
 NEXT_PUBLIC_TWILIO_PHONE_NUMBER=+1234567890
 ```
 
