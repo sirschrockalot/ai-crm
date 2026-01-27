@@ -210,14 +210,14 @@ const apiCall = async (endpoint: string, options: any = {}) => {
     console.warn('Authentication token not found. API call may fail.');
   }
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers || {}),
   };
 
   // Only add Authorization header if we have a token
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(url, {
