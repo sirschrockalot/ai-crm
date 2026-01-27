@@ -68,6 +68,7 @@ System architecture and design:
 - [Stories](./stories/) - User stories and acceptance criteria
 
 ### Reports
+- [Security Plan](./SECURITY_PLAN.md) - System security plan and operational baseline
 - [Security Audit Report](./SECURITY_AUDIT_REPORT.md) - Security vulnerability audit
 - [Test Results](./TEST_RESULTS.md) - Application test results
 

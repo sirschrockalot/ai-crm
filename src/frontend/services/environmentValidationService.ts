@@ -24,11 +24,9 @@ const FrontendEnvironmentSchema = z.object({
   
   // Google OAuth Configuration
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: z.string().optional(),
-  NEXT_PUBLIC_GOOGLE_CLIENT_SECRET: z.string().optional(),
   
   // External Services
   NEXT_PUBLIC_TWILIO_ACCOUNT_SID: z.string().optional(),
-  NEXT_PUBLIC_TWILIO_AUTH_TOKEN: z.string().optional(),
   NEXT_PUBLIC_TWILIO_PHONE_NUMBER: z.string().optional(),
   
   // Monitoring and Analytics

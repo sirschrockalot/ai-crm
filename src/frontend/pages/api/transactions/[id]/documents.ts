@@ -9,7 +9,23 @@ export const config = {
   },
 };
 
-const TRANSACTIONS_SERVICE_API_URL = process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL || 'http://localhost:3003/api/v1';
+const TRANSACTIONS_SERVICE_API_URL =
+  process.env.TRANSACTIONS_SERVICE_API_URL ||
+  process.env.NEXT_PUBLIC_TRANSACTIONS_SERVICE_API_URL ||
+  'http://localhost:3003/api/v1';
+
+const TRANSACTIONS_SERVICE_JWT_TOKEN =
+  process.env.TRANSACTIONS_SERVICE_JWT_TOKEN || process.env.NEXT_PUBLIC_TRANSACTIONS_JWT_TOKEN;
+
+const BYPASS_AUTH = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+
+function getAuthorizationHeader(req: NextApiRequest): string | undefined {
+  const authHeader = req.headers.authorization;
+  if (authHeader) return authHeader;
+  if (BYPASS_AUTH) return undefined;
+  if (TRANSACTIONS_SERVICE_JWT_TOKEN) return `Bearer ${TRANSACTIONS_SERVICE_JWT_TOKEN}`;
+  return undefined;
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -17,6 +33,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     if (req.method === 'POST') {
+      const authorization = getAuthorizationHeader(req);
+      if (!authorization && !BYPASS_AUTH) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
       // Parse the incoming form data
       const form = new IncomingForm({
         keepExtensions: true,
@@ -49,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
-          ...(req.headers.authorization && { 'Authorization': req.headers.authorization }),
+          ...(authorization && { Authorization: authorization }),
           ...formData.getHeaders(),
         },
         body: formData as any,

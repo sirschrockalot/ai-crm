@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 // API Configuration - Use Next.js API routes as proxy
 const API_BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
-const TRANSACTIONS_JWT_TOKEN = process.env.NEXT_PUBLIC_TRANSACTIONS_JWT_TOKEN;
 
 const getLiveAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null;
@@ -202,7 +201,7 @@ const apiCall = async (endpoint: string, options: any = {}) => {
   // Check if auth bypass is enabled
   const bypassAuth = typeof window !== 'undefined' && process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
   
-  const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
+  const token = getLiveAuthToken();
   
   // Only require token if bypass auth is not enabled
   if (!bypassAuth && !token) {
@@ -211,14 +210,14 @@ const apiCall = async (endpoint: string, options: any = {}) => {
     console.warn('Authentication token not found. API call may fail.');
   }
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers || {}),
   };
 
   // Only add Authorization header if we have a token
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(url, {
@@ -362,7 +361,7 @@ export const transactionsService = {
       const formData = new FormData();
       formData.append('file', file);
       
-      const token = getLiveAuthToken() || TRANSACTIONS_JWT_TOKEN;
+      const token = getLiveAuthToken();
       
       const response = await fetch(`${API_BASE_URL}/api/transactions/${id}/documents`, {
         method: 'POST',

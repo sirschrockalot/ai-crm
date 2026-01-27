@@ -353,6 +353,11 @@ GitHub Actions automatically:
 - Rate limiting
 - Data encryption (AES-256-GCM)
 
+### Security documentation
+- **Security Plan**: `docs/SECURITY_PLAN.md`
+- **Security Audit Report**: `docs/SECURITY_AUDIT_REPORT.md`
+- **Vulnerability reporting**: `.github/SECURITY.md`
+
 ## 🤝 Contributing
 
 1. Fork the repository

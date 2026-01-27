@@ -105,9 +105,7 @@ export class EnvironmentConfigService {
         NEXT_PUBLIC_API_RETRY_ATTEMPTS: parseInt(process.env.NEXT_PUBLIC_API_RETRY_ATTEMPTS || '3'),
         NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000',
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        NEXT_PUBLIC_GOOGLE_CLIENT_SECRET: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
         NEXT_PUBLIC_TWILIO_ACCOUNT_SID: process.env.NEXT_PUBLIC_TWILIO_ACCOUNT_SID,
-        NEXT_PUBLIC_TWILIO_AUTH_TOKEN: process.env.NEXT_PUBLIC_TWILIO_AUTH_TOKEN,
         NEXT_PUBLIC_TWILIO_PHONE_NUMBER: process.env.NEXT_PUBLIC_TWILIO_PHONE_NUMBER,
         NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
         NEXT_PUBLIC_ANALYTICS_ID: process.env.NEXT_PUBLIC_ANALYTICS_ID,
@@ -262,11 +260,9 @@ export class EnvironmentConfigService {
     return {
       google: {
         clientId: config.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-        clientSecret: config.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET,
       },
       twilio: {
         accountSid: config.NEXT_PUBLIC_TWILIO_ACCOUNT_SID,
-        authToken: config.NEXT_PUBLIC_TWILIO_AUTH_TOKEN,
         phoneNumber: config.NEXT_PUBLIC_TWILIO_PHONE_NUMBER,
       },
     };
