@@ -12,10 +12,22 @@ env:
   TERRAFORM_VERSION: '1.5.0'
 
 jobs:
+  # Check for config and documentation sprawl
+  check-sprawl:
+    name: Check for Config and Documentation Sprawl
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for tracked .env files and markdown sprawl
+        run: ./scripts/check-doc-config-sprawl.sh
+
   # Lint and Type Check
   lint-and-type-check:
     name: Lint and Type Check
     runs-on: ubuntu-latest
+    needs: [check-sprawl]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

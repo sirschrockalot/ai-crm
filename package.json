@@ -9,8 +9,9 @@
     "src/auth-service"
   ],
   "scripts": {
-    "dev": "npm --workspaces=false run dev:frontend",
-    "dev:frontend": "cd src/frontend && npm --workspaces=false run dev",
+    "dev": "doppler run -- npm --workspaces=false run dev:frontend",
+    "dev:frontend": "cd src/frontend && doppler run -- npm --workspaces=false run dev",
+    "env:pull": "doppler secrets download --no-file --format env > .env",
     "build": "npm run build:frontend",
     "build:frontend": "cd src/frontend && npm run build",
     "heroku-postbuild": "npm run build:frontend",

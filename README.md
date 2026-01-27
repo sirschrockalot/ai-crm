@@ -49,21 +49,30 @@ A modern, AI-powered CRM platform for real estate wholesalers, built with Next.j
    npm run install:all
    ```
 
-3. **Set up environment variables**
+3. **Set up environment variables with Doppler**
    ```bash
-   cp env.example .env
-   # Edit .env with your configuration
+   # Install Doppler CLI (if not already installed)
+   # macOS: brew install doppler
+   # Linux: curl -L --request GET "https://cli.doppler.com/download/binary/unix" --output doppler && chmod +x doppler && sudo mv doppler /usr/local/bin/
+   # Windows: scoop install doppler
+   
+   # Authenticate with Doppler
+   doppler login
+   
+   # Set up your project (first time only)
+   doppler setup
    ```
 
 4. **Start development environment**
    ```bash
-   # Quick start - everything in one command
-   ./scripts/dev.sh
+   # Quick start - everything in one command (uses Doppler)
+   npm run dev
    
    # Or start individual services
-   npm run dev:backend
    npm run dev:frontend
-   npm run dev:mobile
+   
+   # For tools that require .env files (optional, not recommended)
+   npm run env:pull  # Downloads secrets to .env (gitignored)
    ```
 
 ## 🏗️ Project Structure
@@ -91,10 +100,53 @@ dealcycle-crm/
 └── monitoring/           # Monitoring configs
 ```
 
+## 🔐 Local Dev with Doppler
+
+This project uses [Doppler](https://www.doppler.com/) for secure secret management. All environment variables are managed through Doppler, eliminating the need for local `.env` files.
+
+### Setup
+1. **Install Doppler CLI**
+   ```bash
+   # macOS
+   brew install doppler
+   
+   # Linux
+   curl -L --request GET "https://cli.doppler.com/download/binary/unix" --output doppler
+   chmod +x doppler && sudo mv doppler /usr/local/bin/
+   
+   # Windows
+   scoop install doppler
+   ```
+
+2. **Authenticate**
+   ```bash
+   doppler login
+   ```
+
+3. **Configure Project**
+   ```bash
+   doppler setup  # Select your project and config (e.g., dev)
+   ```
+
+### Usage
+- **Run with Doppler**: `npm run dev` (automatically uses `doppler run --`)
+- **Pull .env for tools** (only if needed): `npm run env:pull`
+- **View secrets**: `doppler secrets`
+- **Update secrets**: Use Doppler dashboard or `doppler secrets set KEY=value`
+
+### Why Doppler?
+- ✅ No `.env` files in git (security)
+- ✅ Centralized secret management
+- ✅ Easy environment switching
+- ✅ Team collaboration without sharing secrets
+- ✅ Audit logs and access control
+
 ## 🛠️ Development Commands
 
 ### Root Commands
 ```bash
+npm run dev              # Start development with Doppler
+npm run env:pull         # Download secrets to .env (for tools that require it)
 ./scripts/dev.sh         # Start complete development environment
 ./scripts/dev.sh --stop  # Stop all development services
 ./scripts/test-dev.sh    # Test if development environment is working
@@ -188,7 +240,7 @@ Once running, you can access:
 - **Redis**: redis://localhost:6379
 - **Search**: http://localhost:7700
 
-For detailed development setup instructions, see [README-DEV.md](README-DEV.md).
+For detailed development setup instructions, see [docs/SETUP.md](./docs/SETUP.md) and [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md).
 
 ## 🐳 Docker Development
 
@@ -319,12 +371,16 @@ GitHub Actions automatically:
 
 ## 📚 Documentation
 
-- [Architecture Overview](docs/architecture/Architecture_Overview_Wholesaling_CRM.md)
-- [API Specifications](docs/api/api-specifications.md)
-- [Database Schema](docs/database/database-schema.md)
-- [Frontend Specification](docs/front-end-specification.md)
-- [Test Strategy](docs/qa/test-strategy.md)
-- [Epics & Stories](docs/epics/)
+All documentation is organized in the [`/docs`](./docs/README.md) directory. Key guides:
+
+- **[Setup Guide](./docs/SETUP.md)** - Local development setup and configuration
+- **[Development Guide](./docs/DEVELOPMENT.md)** - Development workflow and best practices
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment instructions
+- **[Troubleshooting](./docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[API Documentation](./docs/API.md)** - API specifications and endpoints
+- **[Architecture Guide](./docs/ARCHITECTURE.md)** - System architecture and design
+
+For the complete documentation index, see [docs/README.md](./docs/README.md).
 
 ## 📄 License
 

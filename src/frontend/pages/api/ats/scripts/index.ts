@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getAtsServiceConfig } from '@/services/configService';
+import { isAuthBypassEnabled } from '@/utils/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -7,7 +8,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const targetUrl = `${atsService.apiUrl}/scripts`;
 
     const authHeader = req.headers.authorization;
-    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    // Production-safe: bypass is disabled in production
+    const bypassAuth = isAuthBypassEnabled();
     
     if (!bypassAuth && (!authHeader || !authHeader.startsWith('Bearer '))) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -33,6 +35,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const url = queryString ? `${targetUrl}?${queryString}` : targetUrl;
 
       const response = await fetch(url, { headers });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || 'Failed to fetch scripts', status: response.status };
+        }
+        return res.status(response.status).json(errorData);
+      }
+
       const data = await response.json();
       return res.status(response.status).json(data);
     } else if (req.method === 'POST') {
@@ -42,6 +56,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         body: JSON.stringify(req.body),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: errorText || 'Failed to create script', status: response.status };
+        }
+        return res.status(response.status).json(errorData);
+      }
+
       const data = await response.json();
       return res.status(response.status).json(data);
     } else {
@@ -50,7 +75,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } catch (error: any) {
     console.error('API route /api/ats/scripts error:', error);
-    return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
+    
+    // Check if it's a connection error
+    if (error.code === 'ECONNREFUSED' || error.message?.includes('fetch failed')) {
+      return res.status(503).json({ 
+        error: 'Service Unavailable', 
+        details: 'ATS service is not available. Please ensure the service is running.',
+        message: error.message 
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: 'Internal Server Error', 
+      details: error.message,
+      type: error.name || 'UnknownError'
+    });
   }
 }
 

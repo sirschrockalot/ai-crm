@@ -2,29 +2,32 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { getLeadsServiceConfig } from '@/services/configService';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { id } = req.query;
-
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 
   try {
     const leadsService = getLeadsServiceConfig();
-    const targetUrl = `${leadsService.apiUrl}/${id}/notes`;
+    const baseUrl = leadsService.apiUrl.replace('/leads', '');
+    const targetUrl = `${baseUrl}/reports/pipeline`;
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const response = await fetch(targetUrl, {
-      method: 'POST',
+    const queryParams = new URLSearchParams();
+    if (req.query.from) queryParams.append('from', req.query.from as string);
+    if (req.query.to) queryParams.append('to', req.query.to as string);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${targetUrl}?${queryString}` : targetUrl;
+
+    const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify(req.body),
     });
 
     if (!response.ok) {
@@ -33,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         errorData = JSON.parse(errorText);
       } catch {
-        errorData = { error: errorText || 'Failed to add note', status: response.status };
+        errorData = { error: errorText || 'Failed to fetch pipeline report', status: response.status };
       }
       return res.status(response.status).json(errorData);
     }
@@ -41,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error: any) {
-    console.error('API route /api/leads/[id]/notes error:', error);
+    console.error('API route /api/reports/pipeline error:', error);
     
     if (error.code === 'ECONNREFUSED' || error.message?.includes('fetch failed')) {
       return res.status(503).json({ 

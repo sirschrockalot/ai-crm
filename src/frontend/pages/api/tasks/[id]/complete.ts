@@ -4,14 +4,15 @@ import { getLeadsServiceConfig } from '@/services/configService';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
 
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
+  if (req.method !== 'PATCH') {
+    res.setHeader('Allow', ['PATCH']);
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 
   try {
     const leadsService = getLeadsServiceConfig();
-    const targetUrl = `${leadsService.apiUrl}/${id}/notes`;
+    const baseUrl = leadsService.apiUrl.replace('/leads', '');
+    const targetUrl = `${baseUrl}/tasks/${id}/complete`;
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -19,12 +20,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const response = await fetch(targetUrl, {
-      method: 'POST',
+      method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': authHeader,
       },
-      body: JSON.stringify(req.body),
     });
 
     if (!response.ok) {
@@ -33,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         errorData = JSON.parse(errorText);
       } catch {
-        errorData = { error: errorText || 'Failed to add note', status: response.status };
+        errorData = { error: errorText || 'Failed to complete task', status: response.status };
       }
       return res.status(response.status).json(errorData);
     }
@@ -41,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error: any) {
-    console.error('API route /api/leads/[id]/notes error:', error);
+    console.error('API route /api/tasks/[id]/complete error:', error);
     
     if (error.code === 'ECONNREFUSED' || error.message?.includes('fetch failed')) {
       return res.status(503).json({ 

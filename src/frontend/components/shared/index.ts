@@ -5,3 +5,6 @@
 export * from '../../hooks';
 export * from '../../services';
 export * from '../../utils';
+
+// Export shared calendar component
+export * from './Calendar';

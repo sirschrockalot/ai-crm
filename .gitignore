@@ -62,10 +62,18 @@ jspm_packages/
 
 # dotenv environment variable files
 .env
+.env.*
+*.env
+**/.env
+**/.env.*
+!.env.example
+.env.local
+.env.development
+.env.test
+.env.production
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -166,9 +174,7 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
-.env.test
+# dotenv environment variables file (covered above)
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -236,4 +242,19 @@ config/local.yml
 *.kubeconfig
 
 # Local development
-.local/ 
+.local/
+
+# Secret artifacts
+secrets.*
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+secrets/
+.secrets/
+*.secret
+doppler-token
+.doppler/
+**/doppler.yaml 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { 
   Box, 
@@ -72,9 +72,13 @@ import {
   FiCheckCircle,
   FiAlertCircle,
   FiPlay,
-  FiPause
+  FiPause,
+  FiRefreshCw
 } from 'react-icons/fi';
 import { LeadsLayout } from '../../components/leads';
+import { LeadTimeline, LeadEvent } from '../../components/leads/LeadTimeline';
+import { TaskList, Task } from '../../components/leads/TaskList';
+import { CreateTaskModal } from '../../components/leads/CreateTaskModal';
 import { Card as UICard, Button as UIButton, Badge as UIBadge, Modal as UIModal } from '../../components/ui';
 import { LeadForm } from '../../components/forms';
 import { useLeads } from '../../hooks/services/useLeads';
@@ -118,6 +122,11 @@ const LeadDetailPage: React.FC = () => {
   const [propertyDetails, setPropertyDetails] = useState<PropertyDetails | null>(null);
   const [isLoadingPropertyDetails, setIsLoadingPropertyDetails] = useState(false);
   const [isPropertyDetailsEditModalOpen, setIsPropertyDetailsEditModalOpen] = useState(false);
+  const [timelineEvents, setTimelineEvents] = useState<LeadEvent[]>([]);
+  const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const { isOpen: isCreateTaskOpen, onOpen: onCreateTaskOpen, onClose: onCreateTaskClose } = useDisclosure();
   const leadFormRef = React.useRef<HTMLFormElement>(null);
   const toast = useToast();
 
@@ -289,6 +298,119 @@ const LeadDetailPage: React.FC = () => {
     }
   }, [id, router.isReady]);
 
+  const fetchTimelineEvents = useCallback(async () => {
+    if (!id || typeof id !== 'string') return;
+
+    setIsLoadingTimeline(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      
+      const headers: Record<string, string> = {};
+      
+      if (token && !bypassAuth) {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else if (!bypassAuth) {
+        return;
+      }
+      
+      const response = await fetch(`/api/leads/${id}/events`, {
+        headers,
+      });
+
+      if (response.ok) {
+        const events = await response.json();
+        setTimelineEvents(events);
+      }
+    } catch (error) {
+      console.error('Error fetching timeline events:', error);
+    } finally {
+      setIsLoadingTimeline(false);
+    }
+  }, [id]);
+
+  // Fetch timeline events when lead ID is available
+  useEffect(() => {
+    if (router.isReady && id) {
+      fetchTimelineEvents();
+      fetchTasks();
+    }
+  }, [id, router.isReady, fetchTimelineEvents]);
+
+  const fetchTasks = useCallback(async () => {
+    if (!id || typeof id !== 'string') return;
+
+    setIsLoadingTasks(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      
+      const headers: Record<string, string> = {};
+      
+      if (token && !bypassAuth) {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else if (!bypassAuth) {
+        return;
+      }
+      
+      const response = await fetch(`/api/tasks?leadId=${id}`, {
+        headers,
+      });
+
+      if (response.ok) {
+        const tasksData = await response.json();
+        setTasks(tasksData);
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setIsLoadingTasks(false);
+    }
+  }, [id]);
+
+  const handleCompleteTask = async (taskId: string) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      
+      const headers: Record<string, string> = {};
+      
+      if (token && !bypassAuth) {
+        headers['Authorization'] = `Bearer ${token}`;
+      } else if (!bypassAuth) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`/api/tasks/${taskId}/complete`, {
+        method: 'PATCH',
+        headers,
+      });
+
+      if (response.ok) {
+        await fetchTasks();
+        await fetchTimelineEvents();
+        toast({
+          title: 'Task completed',
+          description: 'Task has been marked as done',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to complete task');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error completing task',
+        description: error.message || 'Failed to complete task',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
   // Fetch property details when lead ID is available
   useEffect(() => {
     const fetchPropertyDetails = async () => {
@@ -409,24 +531,17 @@ const LeadDetailPage: React.FC = () => {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          content: newNote.trim(),
-          author: authorName,
-          authorId: user.id,
+          note: newNote.trim(),
         }),
       });
 
       if (response.ok) {
-        const newNoteData = await response.json();
-        // Convert date strings to Date objects
-        const noteWithDates = {
-          ...newNoteData,
-          createdAt: new Date(newNoteData.createdAt),
-          updatedAt: new Date(newNoteData.updatedAt),
-        };
-        
-        // Add new note to the beginning of the list (newest first)
-        setNotes(prevNotes => [noteWithDates, ...prevNotes]);
+        const updatedLead = await response.json();
+        setLead(updatedLead);
         setNewNote('');
+        
+        // Refresh timeline to show new NOTE_ADDED event
+        await fetchTimelineEvents();
         
         toast({
           title: 'Note added',
@@ -558,34 +673,22 @@ const LeadDetailPage: React.FC = () => {
       }
       
       const response = await fetch(`/api/leads/${id}/status`, {
-        method: 'POST',
+        method: 'PATCH',
         headers,
         body: JSON.stringify({
-          oldStatus: lead.status,
-          newStatus: newStatus,
-          reason: statusChangeReason.trim(),
-          changedBy: authorName,
-          changedById: user.id,
+          status: newStatus,
         }),
       });
 
       if (response.ok) {
-        const statusChangeData = await response.json();
-        // Convert date strings to Date objects
-        const statusChangeWithDates = {
-          ...statusChangeData,
-          createdAt: new Date(statusChangeData.createdAt),
-        };
-        
-        // Add to history (newest first)
-        setStatusHistory(prev => [statusChangeWithDates, ...prev]);
-        
-        // Update the lead status
-        const updatedLead = { ...lead, status: newStatus as LeadStatus };
+        const updatedLead = await response.json();
         setLead(updatedLead);
         
         // Also update in the leads list
         await updateLead(lead.id, { status: newStatus });
+        
+        // Refresh timeline to show new event
+        await fetchTimelineEvents();
         
         // Reset form
         setNewStatus('');
@@ -1285,6 +1388,12 @@ const LeadDetailPage: React.FC = () => {
             <TabList>
               <Tab>
                 <HStack spacing={2}>
+                  <FiFileText size="16" />
+                  <Text>Tasks</Text>
+                </HStack>
+              </Tab>
+              <Tab>
+                <HStack spacing={2}>
                   <FiUsers size="16" />
                   <Text>Buyer Information</Text>
                 </HStack>
@@ -1322,6 +1431,35 @@ const LeadDetailPage: React.FC = () => {
             </TabList>
 
             <TabPanels>
+              {/* Tasks Tab */}
+              <TabPanel p={6}>
+                <Flex justify="space-between" align="center" mb={6}>
+                  <Heading size="md">Tasks</Heading>
+                  <Button
+                    leftIcon={<FiPlus />}
+                    colorScheme="blue"
+                    size="sm"
+                    onClick={onCreateTaskOpen}
+                  >
+                    Create Task
+                  </Button>
+                </Flex>
+
+                {isLoadingTasks ? (
+                  <Flex justify="center" p={8}>
+                    <Spinner size="lg" />
+                  </Flex>
+                ) : (
+                  <Box bg="white" borderRadius="md" border="1px" borderColor="gray.200" p={4}>
+                    <TaskList
+                      tasks={tasks}
+                      onComplete={handleCompleteTask}
+                      showLead={false}
+                    />
+                  </Box>
+                )}
+              </TabPanel>
+
               {/* Buyer Information Tab */}
               <TabPanel p={6}>
                 <Flex justify="space-between" align="center" mb={6}>
@@ -1580,38 +1718,26 @@ const LeadDetailPage: React.FC = () => {
               <TabPanel p={6}>
                 <Flex justify="space-between" align="center" mb={6}>
                   <Heading size="md">Activity Timeline</Heading>
+                  <Button
+                    leftIcon={<FiRefreshCw />}
+                    size="sm"
+                    variant="outline"
+                    onClick={fetchTimelineEvents}
+                    isLoading={isLoadingTimeline}
+                  >
+                    Refresh
+                  </Button>
                 </Flex>
 
-                <VStack spacing={4} align="stretch">
-                  {[
-                    { action: 'Marketing Campaign Launched', description: 'Facebook and Instagram ads started for property listing', time: '2 hours ago', icon: FiPhone },
-                    { action: 'Owner Contacted', description: 'Called owner to discuss showing schedule', time: '1 day ago', icon: FiPhone },
-                    { action: 'Contract Signed', description: 'Purchase contract executed with owner', time: '7 days ago', icon: FiFileText },
-                    { action: 'Property Inspection', description: 'Home inspection completed, minor issues found', time: '7 days ago', icon: FiFile },
-                    { action: 'Lead Created', description: 'Lead added to system from direct mail campaign', time: '14 days ago', icon: FiPlus }
-                  ].map((activity, index) => (
-                    <HStack key={index} spacing={4} p={4} borderBottom="1px solid" borderColor="gray.100">
-                      <Box 
-                        w={8} 
-                        h={8} 
-                        bg="purple.500" 
-                        color="white" 
-                        borderRadius="50%" 
-                        display="flex" 
-                        alignItems="center" 
-                        justifyContent="center"
-                        flexShrink={0}
-                      >
-                        <activity.icon size="16" />
-                      </Box>
-                      <Box flex={1}>
-                        <Text fontWeight="600" color="gray.800" mb={1}>{activity.action}</Text>
-                        <Text color="gray.600" fontSize="sm" mb={1}>{activity.description}</Text>
-                        <Text color="gray.500" fontSize="xs">{activity.time}</Text>
-                      </Box>
-                    </HStack>
-                  ))}
-                </VStack>
+                {isLoadingTimeline ? (
+                  <Flex justify="center" p={8}>
+                    <Spinner size="lg" />
+                  </Flex>
+                ) : (
+                  <Box bg="white" borderRadius="md" border="1px" borderColor="gray.200" p={4}>
+                    <LeadTimeline events={timelineEvents} />
+                  </Box>
+                )}
               </TabPanel>
 
               {/* Notes Tab */}
@@ -1900,6 +2026,17 @@ const LeadDetailPage: React.FC = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      {id && typeof id === 'string' && (
+        <CreateTaskModal
+          isOpen={isCreateTaskOpen}
+          onClose={onCreateTaskClose}
+          leadId={id}
+          onSuccess={() => {
+            fetchTasks();
+            fetchTimelineEvents();
+          }}
+        />
+      )}
     </LeadsLayout>
   );
 };
@@ -3639,7 +3776,7 @@ const PropertyDetailsEditForm: React.FC<PropertyDetailsEditFormProps> = ({
         </Button>
       </ModalFooter>
     </form>
-  );
-};
+    );
+  };
 
-export default LeadDetailPage; 
+export default LeadDetailPage;

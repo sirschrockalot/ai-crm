@@ -61,6 +61,7 @@ import { Lead, LeadStatus, PropertyType } from '../../types';
 import { useRouter } from 'next/router';
 import { Layout } from '../../components/layout';
 import { ErrorBoundary } from '../../components/ui/ErrorBoundary';
+import { CsvImportModal } from '../../components/leads/CsvImportModal';
 
 const LeadsPageContent: React.FC = () => {
   const toast = useToast();
@@ -98,6 +99,7 @@ const LeadsPageContent: React.FC = () => {
     search: '',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const { isOpen: isImportOpen, onOpen: onImportOpen, onClose: onImportClose } = useDisclosure();
   const [stats, setStats] = useState<{
     totalLeads: number;
     newLeads: number;
@@ -115,6 +117,7 @@ const LeadsPageContent: React.FC = () => {
   } | null>(null);
 
   const { isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose } = useDisclosure();
+  const { isOpen: isImportOpen, onOpen: onImportOpen, onClose: onImportClose } = useDisclosure();
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
 
   const loadInitialData = useCallback(async () => {
@@ -493,10 +496,10 @@ const LeadsPageContent: React.FC = () => {
           </Button>
           <Button
             leftIcon={<FiUpload />}
+            onClick={onImportOpen}
             variant="outline"
-            onClick={() => document.getElementById('file-upload')?.click()}
           >
-            Import
+            Import CSV
           </Button>
           <Button
             leftIcon={<FiDownload />}
@@ -947,6 +950,14 @@ const LeadsPageContent: React.FC = () => {
           </Card>
         </Box>
       )}
+      <CsvImportModal
+        isOpen={isImportOpen}
+        onClose={onImportClose}
+        onSuccess={() => {
+          fetchLeads();
+          onImportClose();
+        }}
+      />
     </VStack>
   );
 };

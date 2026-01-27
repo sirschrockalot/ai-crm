@@ -138,13 +138,22 @@ const InterviewsListPage: React.FC = () => {
           <VStack align="stretch" spacing={6}>
             <HStack justify="space-between">
               <Heading size="lg">Interviews</Heading>
-              <Button
-                colorScheme="blue"
-                leftIcon={<FiPlus />}
-                onClick={() => router.push('/ats/interviews/new')}
-              >
-                Schedule Interview
-              </Button>
+              <HStack spacing={2}>
+                <Button
+                  leftIcon={<FiCalendar />}
+                  variant="outline"
+                  onClick={() => router.push('/ats/interviews/calendar')}
+                >
+                  Calendar View
+                </Button>
+                <Button
+                  colorScheme="blue"
+                  leftIcon={<FiPlus />}
+                  onClick={() => router.push('/ats/interviews/new')}
+                >
+                  Schedule Interview
+                </Button>
+              </HStack>
             </HStack>
 
             {/* Stats */}

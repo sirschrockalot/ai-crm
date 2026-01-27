@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import { getAuthServiceConfig } from '../services/configService';
+import { isAuthBypassEnabled } from '../utils/auth';
 
 export interface User {
   id: string;
@@ -74,7 +75,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializationRef.current = true;
     
     // Read bypass auth value inside the effect to avoid dependency issues
-    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    // Production-safe: bypass is disabled in production
+    const bypassAuth = isAuthBypassEnabled();
     
     console.log('AuthProvider useEffect: Starting initialization', {
       bypassAuth,
@@ -210,8 +212,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check session timeout
   const checkSessionTimeout = useCallback(async () => {
     try {
-      // Don't check session timeout in bypass mode
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      // Don't check session timeout in bypass mode (production-safe)
+      const bypassAuth = isAuthBypassEnabled();
       if (bypassAuth) {
         return;
       }
@@ -517,7 +519,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Skip during SSR
     if (typeof window === 'undefined') return;
     
-    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    // Production-safe: bypass is disabled in production
+    const bypassAuth = isAuthBypassEnabled();
     if (bypassAuth) return;
     if (!state.isAuthenticated) return;
 
@@ -664,17 +667,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const hasPermission = useCallback((permission: string): boolean => {
     if (!state.user || !state.user.roles) return false;
     
+    // Normalize roles to uppercase
+    const normalizedRoles = state.user.roles.map(r => r.toUpperCase());
+    
+    // ADMIN has all permissions
+    if (normalizedRoles.includes('ADMIN')) {
+      return true;
+    }
+    
     // This would integrate with the backend permission system
     // For now, implement basic role-based checks
     const rolePermissions: Record<string, string[]> = {
-      admin: ['*'], // Admin has all permissions
-      manager: ['user:read', 'user:update', 'lead:manage', 'buyer:manage'],
-      agent: ['lead:read', 'lead:update', 'buyer:read', 'buyer:update'],
-      user: ['lead:read', 'buyer:read'],
-      viewer: ['lead:read', 'buyer:read'],
+      ADMIN: ['*'], // Admin has all permissions
+      ACQ_REP: ['lead:create', 'lead:update', 'lead:assign', 'lead:read', 'buyer:read'],
+      DISPO: ['lead:create', 'lead:update', 'lead:assign', 'lead:read', 'buyer:read'],
+      TX: ['lead:read', 'buyer:read', 'transaction:manage'],
+      AGENT: ['lead:read', 'lead:update', 'buyer:read', 'buyer:update'],
+      USER: ['lead:read', 'buyer:read'],
+      VIEWER: ['lead:read', 'buyer:read'],
     };
 
-    return state.user.roles.some(role => {
+    return normalizedRoles.some(role => {
       const permissions = rolePermissions[role] || [];
       return permissions.includes('*') || permissions.includes(permission);
     });
@@ -691,17 +704,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const getUserPermissions = useCallback((): string[] => {
     if (!state.user || !state.user.roles) return [];
     
+    // Normalize roles to uppercase
+    const normalizedRoles = state.user.roles.map(r => r.toUpperCase());
+    
     // This would integrate with the backend permission system
     const allPermissions: string[] = [];
     const rolePermissions: Record<string, string[]> = {
-      admin: ['*'],
-      manager: ['user:read', 'user:update', 'lead:manage', 'buyer:manage'],
-      agent: ['lead:read', 'lead:update', 'buyer:read', 'buyer:update'],
-      user: ['lead:read', 'buyer:read'],
-      viewer: ['lead:read', 'buyer:read'],
+      ADMIN: ['*'],
+      ACQ_REP: ['lead:create', 'lead:update', 'lead:assign', 'lead:read', 'buyer:read'],
+      DISPO: ['lead:create', 'lead:update', 'lead:assign', 'lead:read', 'buyer:read'],
+      TX: ['lead:read', 'buyer:read', 'transaction:manage'],
+      AGENT: ['lead:read', 'lead:update', 'buyer:read', 'buyer:update'],
+      USER: ['lead:read', 'buyer:read'],
+      VIEWER: ['lead:read', 'buyer:read'],
     };
 
-    state.user.roles.forEach(role => {
+    normalizedRoles.forEach(role => {
       const permissions = rolePermissions[role] || [];
       if (permissions.includes('*')) {
         allPermissions.push('*');

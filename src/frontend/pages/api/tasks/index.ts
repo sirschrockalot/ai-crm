@@ -1,52 +1,66 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getTransactionsServiceConfig } from '../../../services/configService';
+import { getLeadsServiceConfig } from '@/services/configService';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
+    return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+  }
+
   try {
-    const transactionsService = getTransactionsServiceConfig();
-    const queryString = req.url?.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
-    const targetUrl = `${transactionsService.apiUrl}/tasks${queryString}`;
+    const leadsService = getLeadsServiceConfig();
+    // Tasks endpoint is at /api/v1/tasks (not /api/v1/leads/tasks)
+    const baseUrl = leadsService.apiUrl.replace('/leads', '');
+    const targetUrl = `${baseUrl}/tasks`;
 
-    const hasBody = req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0;
-    const response = await fetch(targetUrl, {
-      method: req.method,
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const queryParams = new URLSearchParams();
+    if (req.query.leadId) queryParams.append('leadId', req.query.leadId as string);
+    if (req.query.status) queryParams.append('status', req.query.status as string);
+    if (req.query.filter) queryParams.append('filter', req.query.filter as string);
+    if (req.query.assignedToUserId) queryParams.append('assignedToUserId', req.query.assignedToUserId as string);
+
+    const queryString = queryParams.toString();
+    const url = queryString ? `${targetUrl}?${queryString}` : targetUrl;
+
+    const response = await fetch(url, {
       headers: {
-        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-        ...(req.headers.authorization && { Authorization: req.headers.authorization }),
+        'Authorization': authHeader,
       },
-      ...(hasBody ? { body: JSON.stringify(req.body) } : {}),
     });
 
-    if (response.status === 204) {
-      return res.status(204).end();
-    }
-
-    const raw = await response.text();
-    let maybeJson: any = {};
-    if (raw) {
-      try {
-        maybeJson = JSON.parse(raw);
-      } catch {
-        maybeJson = { message: raw };
-      }
-    }
-
     if (!response.ok) {
-      console.error(`Proxy to Transactions Service (tasks) failed for ${req.method} ${targetUrl}:`, response.status, maybeJson);
-      return res.status(response.status).json(maybeJson);
+      const errorText = await response.text();
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch {
+        errorData = { error: errorText || 'Failed to fetch tasks', status: response.status };
+      }
+      return res.status(response.status).json(errorData);
     }
 
-    return res.status(response.status).json(maybeJson);
+    const data = await response.json();
+    return res.status(200).json(data);
   } catch (error: any) {
-    console.error('Tasks API error:', error);
-    return res.status(500).json({
-      error: 'Internal server error',
-      details: error.message || 'An unknown error occurred',
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+    console.error('API route /api/tasks error:', error);
+    
+    if (error.code === 'ECONNREFUSED' || error.message?.includes('fetch failed')) {
+      return res.status(503).json({ 
+        error: 'Service Unavailable', 
+        details: 'Leads service is not available.',
+        message: error.message 
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: 'Internal Server Error', 
+      details: error.message,
+      type: error.name || 'UnknownError'
     });
   }
 }
-
