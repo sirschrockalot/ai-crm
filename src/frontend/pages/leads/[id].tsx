@@ -81,7 +81,8 @@ import { TaskList, Task } from '../../components/leads/TaskList';
 import { CreateTaskModal } from '../../components/leads/CreateTaskModal';
 import { Card as UICard, Button as UIButton, Badge as UIBadge, Modal as UIModal } from '../../components/ui';
 import { LeadForm } from '../../components/forms';
-import { useLeads } from '../../hooks/services/useLeads';
+import { useLeads } from '../../features/lead-management/hooks/useLeads';
+import { leadService } from '../../features/lead-management/services/leadService';
 import { Lead, LeadStatus, PropertyType, LeadNote, TransactionDetails, StatusChangeHistory, PropertyDetails, ComparableProperty } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import dynamic from 'next/dynamic';
@@ -98,11 +99,22 @@ if (typeof window !== 'undefined') {
 // Dynamically import AG Grid to disable SSR
 const AgGridReact = dynamic(() => import('ag-grid-react').then((mod) => mod.AgGridReact), { ssr: false });
 
-const LeadDetailPage: React.FC = () => {
+// Valid lead ID from route: only set when router is ready and id is a non-empty string (not "undefined")
+function useLeadIdFromRoute() {
   const router = useRouter();
-  const { id, tab, action } = router.query;
+  const { id } = router.query;
+  const leadId =
+    router.isReady && id && String(id).trim() !== '' && String(id) !== 'undefined'
+      ? String(id)
+      : undefined;
+  return { leadId, router, id };
+}
+
+const LeadDetailPage: React.FC = () => {
+  const { leadId, router, id } = useLeadIdFromRoute();
+  const { tab, action } = router.query;
   const { leads, loading, error, fetchLeads, updateLead } = useLeads();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [lead, setLead] = useState<Lead | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -136,19 +148,45 @@ const LeadDetailPage: React.FC = () => {
     { id: '2', name: 'Jennifer Lee', status: 'Scheduled', phone: '(555) 456-7890', email: 'jennifer.l@email.com', budget: '$380k - $420k', timeline: '45-90 days', preference: 'Family home, good schools', matchScore: '88%' }
   ];
 
-  // Route guard - redirect if no ID
+  // Route guard - redirect if no valid lead ID
   useEffect(() => {
-    if (router.isReady && !id) {
+    if (router.isReady && !leadId) {
       router.push('/leads');
     }
-  }, [router.isReady, id, router]);
+  }, [router.isReady, leadId, router]);
 
+  // Normalize lead from API (address may be object { street, city, state, zipCode }) for display
+  const normalizeLeadForDisplay = useCallback((raw: Lead & { address?: { street?: string; city?: string; state?: string; zipCode?: string } }): Lead => {
+    if (!raw || typeof raw.address !== 'object' || raw.address === null) return raw as Lead;
+    const addr = raw.address;
+    const street = addr.street ?? '';
+    const city = (addr.city ?? (raw as any).city) ?? '';
+    const state = (addr.state ?? (raw as any).state) ?? '';
+    const zipCode = (addr.zipCode ?? (raw as any).zipCode) ?? '';
+    const addressStr = [street, city, state, zipCode].filter(Boolean).join(', ') || street;
+    return { ...raw, address: addressStr || (raw as Lead).address, city, state, zipCode } as Lead;
+  }, []);
+
+  // Always fetch lead by ID so status/disposition and all fields reflect DB; use list for instant display then overwrite
   useEffect(() => {
-    if (id && leads.length > 0) {
-      const foundLead = leads.find(l => l.id === id);
-      setLead(foundLead || null);
+    if (!leadId) return;
+    const found = leads.find((l) => l.id === leadId);
+    if (found) {
+      setLead(normalizeLeadForDisplay(found as Lead & { address?: { street?: string; city?: string; state?: string; zipCode?: string } }));
     }
-  }, [id, leads]);
+    let cancelled = false;
+    leadService
+      .getLead(leadId)
+      .then((fetched) => {
+        if (!cancelled) setLead(normalizeLeadForDisplay(fetched as Lead & { address?: { street?: string; city?: string; state?: string; zipCode?: string } }));
+      })
+      .catch(() => {
+        if (!cancelled && !found) setLead(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [leadId, leads, normalizeLeadForDisplay]);
 
   useEffect(() => {
     fetchLeads();
@@ -157,23 +195,17 @@ const LeadDetailPage: React.FC = () => {
   // Fetch notes when lead ID is available
   useEffect(() => {
     const fetchNotes = async () => {
-      if (!id || typeof id !== 'string') return;
+      if (!leadId) return;
       
       setIsLoadingNotes(true);
       try {
         const token = localStorage.getItem('auth_token');
-        const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-        
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
         
-        // Only add Authorization header if we have a token or bypass is not enabled
-        if (token && !bypassAuth) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`/api/leads/${id}/notes`, {
+        const response = await fetch(`/api/leads/${leadId}/notes`, {
           headers,
         });
 
@@ -196,48 +228,43 @@ const LeadDetailPage: React.FC = () => {
       }
     };
 
-    if (router.isReady && id) {
+    if (router.isReady && leadId) {
       fetchNotes();
     }
-  }, [id, router.isReady]);
+  }, [leadId, router.isReady]);
 
   // Fetch transaction details when lead ID is available
   useEffect(() => {
     const fetchTransactionDetails = async () => {
-      if (!id || typeof id !== 'string') return;
+      if (!leadId) return;
       
       setIsLoadingTransaction(true);
       try {
         const token = localStorage.getItem('auth_token');
-        const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-        
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
         
-        if (token && !bypassAuth) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`/api/leads/${id}/transaction`, {
+        const response = await fetch(`/api/leads/${leadId}/transaction`, {
           headers,
         });
 
         if (response.ok) {
           const transactionData = await response.json();
-          // Convert date strings to Date objects
-          const transactionWithDates = {
-            ...transactionData,
-            contractDate: transactionData.contractDate ? new Date(transactionData.contractDate) : undefined,
-            inspectionDate: transactionData.inspectionDate ? new Date(transactionData.inspectionDate) : undefined,
-            closingDate: transactionData.closingDate ? new Date(transactionData.closingDate) : undefined,
-            createdAt: transactionData.createdAt ? new Date(transactionData.createdAt) : undefined,
-            updatedAt: transactionData.updatedAt ? new Date(transactionData.updatedAt) : undefined,
-          };
-          setTransactionDetails(transactionWithDates);
-        } else if (response.status === 404) {
-          // No transaction details yet, that's okay
-          setTransactionDetails(null);
+          if (transactionData == null) {
+            setTransactionDetails(null);
+          } else {
+            const transactionWithDates = {
+              ...transactionData,
+              contractDate: transactionData.contractDate ? new Date(transactionData.contractDate) : undefined,
+              inspectionDate: transactionData.inspectionDate ? new Date(transactionData.inspectionDate) : undefined,
+              closingDate: transactionData.closingDate ? new Date(transactionData.closingDate) : undefined,
+              createdAt: transactionData.createdAt ? new Date(transactionData.createdAt) : undefined,
+              updatedAt: transactionData.updatedAt ? new Date(transactionData.updatedAt) : undefined,
+            };
+            setTransactionDetails(transactionWithDates);
+          }
         } else {
           console.error('Failed to fetch transaction details');
         }
@@ -248,30 +275,25 @@ const LeadDetailPage: React.FC = () => {
       }
     };
 
-    if (router.isReady && id) {
+    if (router.isReady && leadId) {
       fetchTransactionDetails();
     }
-  }, [id, router.isReady]);
+  }, [leadId, router.isReady]);
 
   // Fetch status change history when lead ID is available
   useEffect(() => {
     const fetchStatusHistory = async () => {
-      if (!id || typeof id !== 'string') return;
+      if (!leadId) return;
       
       setIsLoadingStatusHistory(true);
       try {
         const token = localStorage.getItem('auth_token');
-        const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-        
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
         
-        if (token && !bypassAuth) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`/api/leads/${id}/status`, {
+        const response = await fetch(`/api/leads/${leadId}/status`, {
           headers,
         });
 
@@ -293,13 +315,13 @@ const LeadDetailPage: React.FC = () => {
       }
     };
 
-    if (router.isReady && id) {
+    if (router.isReady && leadId) {
       fetchStatusHistory();
     }
-  }, [id, router.isReady]);
+  }, [leadId, router.isReady]);
 
   const fetchTimelineEvents = useCallback(async () => {
-    if (!id || typeof id !== 'string') return;
+    if (!leadId) return;
 
     setIsLoadingTimeline(true);
     try {
@@ -307,14 +329,10 @@ const LeadDetailPage: React.FC = () => {
       const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
       const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (!token && !bypassAuth) return;
       
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      } else if (!bypassAuth) {
-        return;
-      }
-      
-      const response = await fetch(`/api/leads/${id}/events`, {
+      const response = await fetch(`/api/leads/${leadId}/events`, {
         headers,
       });
 
@@ -327,18 +345,18 @@ const LeadDetailPage: React.FC = () => {
     } finally {
       setIsLoadingTimeline(false);
     }
-  }, [id]);
+  }, [leadId]);
 
   // Fetch timeline events when lead ID is available
   useEffect(() => {
-    if (router.isReady && id) {
+    if (router.isReady && leadId) {
       fetchTimelineEvents();
       fetchTasks();
     }
-  }, [id, router.isReady, fetchTimelineEvents]);
+  }, [leadId, router.isReady, fetchTimelineEvents]);
 
   const fetchTasks = useCallback(async () => {
-    if (!id || typeof id !== 'string') return;
+    if (!leadId) return;
 
     setIsLoadingTasks(true);
     try {
@@ -346,14 +364,10 @@ const LeadDetailPage: React.FC = () => {
       const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
       const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (!token && !bypassAuth) return;
       
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      } else if (!bypassAuth) {
-        return;
-      }
-      
-      const response = await fetch(`/api/tasks?leadId=${id}`, {
+      const response = await fetch(`/api/tasks?leadId=${leadId}`, {
         headers,
       });
 
@@ -366,7 +380,7 @@ const LeadDetailPage: React.FC = () => {
     } finally {
       setIsLoadingTasks(false);
     }
-  }, [id]);
+  }, [leadId]);
 
   const handleCompleteTask = async (taskId: string) => {
     try {
@@ -374,12 +388,8 @@ const LeadDetailPage: React.FC = () => {
       const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
       
       const headers: Record<string, string> = {};
-      
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      } else if (!bypassAuth) {
-        throw new Error('Authentication required');
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (!token && !bypassAuth) throw new Error('Authentication required');
 
       const response = await fetch(`/api/tasks/${taskId}/complete`, {
         method: 'PATCH',
@@ -411,43 +421,40 @@ const LeadDetailPage: React.FC = () => {
     }
   };
 
-  // Fetch property details when lead ID is available
+  // Fetch property details when lead ID is available (when bypass is on, wait for token so we don't trigger Auth Service)
   useEffect(() => {
     const fetchPropertyDetails = async () => {
-      if (!id || typeof id !== 'string') return;
-      
+      if (!leadId) return;
+      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (bypassAuth && !token) return;
+
       setIsLoadingPropertyDetails(true);
       try {
-        const token = localStorage.getItem('auth_token');
-        const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-        
         const headers: Record<string, string> = {
           'Content-Type': 'application/json',
         };
-        
-        if (token && !bypassAuth) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        
-        const response = await fetch(`/api/leads/${id}/property-details`, {
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(`/api/leads/${leadId}/property-details`, {
           headers,
         });
 
         if (response.ok) {
           const detailsData = await response.json();
-          // Convert date strings to Date objects
-          const detailsWithDates = {
-            ...detailsData,
-            targetCloseDate: detailsData.targetCloseDate ? new Date(detailsData.targetCloseDate) : undefined,
-            inspectionPeriodDate: detailsData.inspectionPeriodDate ? new Date(detailsData.inspectionPeriodDate) : undefined,
-            emdReceivedDate: detailsData.emdReceivedDate ? new Date(detailsData.emdReceivedDate) : undefined,
-            dateOfSignedContract: detailsData.dateOfSignedContract ? new Date(detailsData.dateOfSignedContract) : undefined,
-            dateOfPhotosReceived: detailsData.dateOfPhotosReceived ? new Date(detailsData.dateOfPhotosReceived) : undefined,
-          };
-          setPropertyDetails(detailsWithDates);
-        } else if (response.status === 404) {
-          // No property details yet, that's okay
-          setPropertyDetails(null);
+          if (detailsData == null) {
+            setPropertyDetails(null);
+          } else {
+            const detailsWithDates = {
+              ...detailsData,
+              targetCloseDate: detailsData.targetCloseDate ? new Date(detailsData.targetCloseDate) : undefined,
+              inspectionPeriodDate: detailsData.inspectionPeriodDate ? new Date(detailsData.inspectionPeriodDate) : undefined,
+              emdReceivedDate: detailsData.emdReceivedDate ? new Date(detailsData.emdReceivedDate) : undefined,
+              dateOfSignedContract: detailsData.dateOfSignedContract ? new Date(detailsData.dateOfSignedContract) : undefined,
+              dateOfPhotosReceived: detailsData.dateOfPhotosReceived ? new Date(detailsData.dateOfPhotosReceived) : undefined,
+            };
+            setPropertyDetails(detailsWithDates);
+          }
         } else {
           console.error('Failed to fetch property details');
         }
@@ -458,10 +465,10 @@ const LeadDetailPage: React.FC = () => {
       }
     };
 
-    if (router.isReady && id) {
+    if (router.isReady && leadId) {
       fetchPropertyDetails();
     }
-  }, [id, router.isReady]);
+  }, [leadId, router.isReady, isAuthenticated]);
 
   const handleUpdateLead = async (data: any) => {
     if (!lead) return;
@@ -495,7 +502,7 @@ const LeadDetailPage: React.FC = () => {
   };
 
   const handleAddNote = async () => {
-    if (!newNote.trim() || !id || typeof id !== 'string') {
+    if (!newNote.trim() || !leadId) {
       return;
     }
 
@@ -518,16 +525,10 @@ const LeadDetailPage: React.FC = () => {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (!token && !bypassAuth) throw new Error('Authentication required');
       
-      // Only add Authorization header if we have a token or bypass is not enabled
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      } else if (!bypassAuth) {
-        // If no token and bypass is not enabled, we should have already returned above
-        throw new Error('Authentication required');
-      }
-      
-      const response = await fetch(`/api/leads/${id}/notes`, {
+      const response = await fetch(`/api/leads/${leadId}/notes`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -578,22 +579,17 @@ const LeadDetailPage: React.FC = () => {
   };
 
   const handleSavePropertyDetails = async (data: Partial<PropertyDetails>) => {
-    if (!id || typeof id !== 'string') return;
+    if (!leadId) return;
     
     setIsLoadingPropertyDetails(true);
     try {
       const token = localStorage.getItem('auth_token');
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-      
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch(`/api/leads/${id}/property-details`, {
+      const response = await fetch(`/api/leads/${leadId}/property-details`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(data),
@@ -665,14 +661,10 @@ const LeadDetailPage: React.FC = () => {
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (!token && !bypassAuth) throw new Error('Authentication required');
       
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      } else if (!bypassAuth) {
-        throw new Error('Authentication required');
-      }
-      
-      const response = await fetch(`/api/leads/${id}/status`, {
+      const response = await fetch(`/api/leads/${leadId}/status`, {
         method: 'PATCH',
         headers,
         body: JSON.stringify({
@@ -717,13 +709,20 @@ const LeadDetailPage: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: LeadStatus) => {
-    switch (status) {
+  const getStatusColor = (status: LeadStatus | string) => {
+    const s = (status || '').toLowerCase();
+    switch (s) {
       case 'new': return 'blue';
       case 'contacted': return 'yellow';
       case 'qualified': return 'green';
       case 'converted': return 'purple';
       case 'lost': return 'red';
+      case 'under_contract': return 'yellow';
+      case 'appt_set': return 'teal';
+      case 'offer_sent': return 'blue';
+      case 'nurture': return 'orange';
+      case 'follow_up': return 'green';
+      case 'dead': return 'gray';
       case 'still_on_cloud': return 'orange';
       case 'wants_retail': return 'teal';
       case 'working_with_competitor': return 'red';
@@ -734,6 +733,11 @@ const LeadDetailPage: React.FC = () => {
       case 'listed_with_realtor': return 'purple';
       default: return 'gray';
     }
+  };
+
+  const formatStatusLabel = (status: string | undefined): string => {
+    if (!status) return '';
+    return status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
   };
 
   const getPropertyTypeColor = (type: PropertyType) => {
@@ -792,27 +796,22 @@ const LeadDetailPage: React.FC = () => {
 
   // Handle saving transaction details
   const handleSaveTransactionDetails = async (data: Partial<TransactionDetails>) => {
-    if (!id || typeof id !== 'string') return;
+    if (!leadId) return;
     
     setIsLoadingTransaction(true);
     try {
       const token = localStorage.getItem('auth_token');
-      const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
-      
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       
-      if (token && !bypassAuth) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-      const response = await fetch(`/api/leads/${id}/transaction`, {
+      const response = await fetch(`/api/leads/${leadId}/transaction`, {
         method: 'PUT',
         headers,
         body: JSON.stringify({
           ...data,
-          leadId: id,
+          leadId,
         }),
       });
 
@@ -851,6 +850,18 @@ const LeadDetailPage: React.FC = () => {
       setIsLoadingTransaction(false);
     }
   };
+
+  // Invalid or missing lead ID – redirect is triggered in useEffect; show minimal UI until then
+  if (router.isReady && !leadId) {
+    return (
+      <LeadsLayout>
+        <VStack spacing={4} align="center" justify="center" minH="200px">
+          <Spinner size="md" color="blue.500" />
+          <Text fontSize="sm" color="gray.600">Redirecting to leads...</Text>
+        </VStack>
+      </LeadsLayout>
+    );
+  }
 
   if (loading || !router.isReady) {
     return (
@@ -924,7 +935,7 @@ const LeadDetailPage: React.FC = () => {
                 {lead.firstName} {lead.lastName}
               </Heading>
               <Text color="gray.600" fontSize="lg">
-                {lead.address}, {lead.city}, {lead.state} {lead.zipCode}
+                {lead.address}
               </Text>
             </Box>
             <VStack align="end" spacing={2}>
@@ -940,7 +951,7 @@ const LeadDetailPage: React.FC = () => {
                   _hover={{ opacity: 0.8 }}
                   title="Click to change status"
                 >
-                  {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                  {lead.status ? (lead.status.charAt(0).toUpperCase() + lead.status.slice(1)) : ''}
                 </Badge>
                 <IconButton
                   aria-label="Change status"
@@ -999,7 +1010,7 @@ const LeadDetailPage: React.FC = () => {
           </HStack>
         </Box>
 
-        {/* Status Banner */}
+        {/* Status Banner - shows disposition/status from DB */}
         <Box 
           bg="linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)"
           border="1px solid"
@@ -1010,12 +1021,18 @@ const LeadDetailPage: React.FC = () => {
         >
           <Flex justify="space-between" align="center">
             <HStack spacing={4}>
-              <Badge bg="yellow.500" color="white" px={4} py={2} borderRadius="full" fontSize="sm">
-                Under Contract
+              <Badge colorScheme={getStatusColor(lead.status)} color="white" px={4} py={2} borderRadius="full" fontSize="sm">
+                {formatStatusLabel(lead.status)}
               </Badge>
               <Box>
-                <Text fontSize="lg" fontWeight="600" color="yellow.800">Active Disposition</Text>
-                <Text fontSize="sm" color="yellow.700">Contract signed 7 days ago • Marketing campaign active</Text>
+                <Text fontSize="lg" fontWeight="600" color="yellow.800">Disposition</Text>
+                <Text fontSize="sm" color="yellow.700">
+                  {statusHistory?.length
+                    ? `Changed to ${formatStatusLabel(statusHistory[0].newStatus)} ${statusHistory[0].createdAt ? formatTimeAgo(new Date(statusHistory[0].createdAt)) : ''}`
+                    : lead.updatedAt
+                      ? `Last updated ${formatTimeAgo(new Date(lead.updatedAt))}`
+                      : formatStatusLabel(lead.status)}
+                </Text>
               </Box>
             </HStack>
             <HStack spacing={3}>
@@ -1050,11 +1067,11 @@ const LeadDetailPage: React.FC = () => {
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6} mb={6}>
                 <VStack align="start" spacing={2} minW={0} flex={1}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">Property Address</Text>
-                  <Text fontWeight="600" wordBreak="break-word">{lead.address}, {lead.city}, {lead.state} {lead.zipCode}</Text>
+                  <Text fontWeight="600" wordBreak="break-word">{lead.address}</Text>
                 </VStack>
                 <VStack align="start" spacing={2} minW={0} flex={1}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">Lead Source</Text>
-                  <Text fontWeight="600" wordBreak="break-word">Direct Mail Campaign</Text>
+                  <Text fontWeight="600" wordBreak="break-word">{lead.source ?? (lead as { leadSource?: string }).leadSource ?? '—'}</Text>
                 </VStack>
                 <VStack align="start" spacing={2} minW={0} flex={1}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">Owner Name</Text>
@@ -1077,7 +1094,7 @@ const LeadDetailPage: React.FC = () => {
                 </VStack>
                 <VStack align="start" spacing={2} minW={0} flex={1}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">Property Type</Text>
-                  <Text fontWeight="600" wordBreak="break-word">{lead.propertyType.replace('_', ' ')}</Text>
+                  <Text fontWeight="600" wordBreak="break-word">{(lead.propertyType ?? '').replace(/_/g, ' ')}</Text>
                 </VStack>
                 <VStack align="start" spacing={2} minW={0} flex={1}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">Bedrooms/Bathrooms</Text>
@@ -1101,7 +1118,7 @@ const LeadDetailPage: React.FC = () => {
                 </VStack>
                 <VStack align="start" spacing={2} minW={0} flex={1}>
                   <Text fontSize="sm" color="gray.600" fontWeight="500">Created Date</Text>
-                  <Text fontWeight="600" wordBreak="break-word">{lead.createdAt.toLocaleDateString()}</Text>
+                  <Text fontWeight="600" wordBreak="break-word">{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : '—'}</Text>
                 </VStack>
               </SimpleGrid>
             </Box>
@@ -2026,11 +2043,11 @@ const LeadDetailPage: React.FC = () => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-      {id && typeof id === 'string' && (
+      {leadId && (
         <CreateTaskModal
           isOpen={isCreateTaskOpen}
           onClose={onCreateTaskClose}
-          leadId={id}
+          leadId={leadId}
           onSuccess={() => {
             fetchTasks();
             fetchTimelineEvents();

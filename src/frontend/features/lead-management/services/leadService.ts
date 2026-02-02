@@ -218,6 +218,18 @@ const mockLeads: Lead[] = [
   },
 ];
 
+// Ensure lead has `id` (Leads Service / MongoDB may return _id only)
+function normalizeLead<T extends Record<string, unknown>>(lead: T): T & { id: string } {
+  const id = (lead.id as string) ?? (lead._id != null ? String(lead._id) : undefined);
+  // Ensure status is set from DB: backend uses "status"; some sources may send "disposition"
+  const status = (lead.status as string) ?? (lead.disposition as string);
+  return { ...lead, id: id ?? '', ...(status !== undefined ? { status } : {}) } as T & { id: string };
+}
+
+function normalizeLeads(leads: Lead[]): Lead[] {
+  return leads.map((l) => normalizeLead(l));
+}
+
 // Helper function to make API calls
 async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -239,70 +251,99 @@ async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<
     });
 
     if (!response.ok) {
-      throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+      const text = await response.text();
+      let message = `API call failed: ${response.status} ${response.statusText}`;
+      try {
+        const data = text ? JSON.parse(text) : {};
+        if (typeof (data as { error?: string }).error === 'string') {
+          message = (data as { error: string }).error;
+        }
+      } catch {
+        // use default message
+      }
+      throw new Error(message);
     }
 
     return await response.json();
   } catch (error) {
-    // In development/test mode, return mock data based on endpoint
-    console.warn('API call failed, using mock data:', error);
-    
-    // Handle different endpoints
-    if (endpoint.includes('/leads/') && !endpoint.includes('/leads?')) {
-      // Individual lead lookup
-      const leadId = endpoint.split('/leads/')[1];
-      const lead = mockLeads.find(l => l.id === leadId);
-      if (lead) {
-        return lead as unknown as T;
-      } else {
-        throw new Error(`Lead with ID ${leadId} not found`);
-      }
-    } else if (endpoint === '/leads' || endpoint.startsWith('/leads?')) {
-      // All leads or filtered leads
-      return mockLeads as unknown as T;
-    } else if (endpoint === '/leads/pipeline') {
-      // Pipeline data
-      return {
-        stages: [
-          { id: '1', name: 'New', position: 1, color: 'blue' },
-          { id: '2', name: 'Contacted', position: 2, color: 'yellow' },
-          { id: '3', name: 'Qualified', position: 3, color: 'orange' },
-          { id: '4', name: 'Converted', position: 4, color: 'green' },
-          { id: '5', name: 'Lost', position: 5, color: 'red' },
-        ],
-        leads: mockLeads
-      } as unknown as T;
-    }
-    
-    // Default fallback
-    return mockLeads as unknown as T;
+    // Do not fall back to mock data: surface real API errors so the UI shows
+    // "Leads service unavailable" or empty state instead of fake leads.
+    throw error;
   }
 }
 
-export const leadService = {
-  // Get all leads with optional filtering
-  async getLeads(filters?: Record<string, any>): Promise<Lead[]> {
-    const params = new URLSearchParams();
-    
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          params.append(key, value.toString());
-        }
-      });
-    }
+// Query params accepted by Leads Service (LeadQueryDto). Sending others causes 400 (forbidNonWhitelisted).
+const ALLOWED_LEAD_QUERY_KEYS = new Set([
+  'search', 'status', 'source', 'priority', 'assignedTo', 'createdBy', 'tags',
+  'minScore', 'maxScore', 'minEstimatedValue', 'maxEstimatedValue',
+  'startDate', 'endDate', 'lastContactStartDate', 'lastContactEndDate',
+  'nextFollowUpStartDate', 'nextFollowUpEndDate', 'isActive',
+  'page', 'limit', 'sortBy', 'sortOrder',
+]);
 
-    return await apiCall<Lead[]>(`/leads${params.toString() ? `?${params.toString()}` : ''}`);
+export interface LeadsPagination {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
+export const leadService = {
+  // Get leads with pagination and optional filtering (returns leads + pagination from API)
+  async getLeadsWithPagination(filters?: Record<string, any>): Promise<{
+    leads: Lead[];
+    pagination: LeadsPagination;
+  }> {
+    const params = new URLSearchParams();
+    const merged = {
+      page: 1,
+      limit: 25,
+      ...filters,
+    };
+    Object.entries(merged).forEach(([key, value]) => {
+      if (!ALLOWED_LEAD_QUERY_KEYS.has(key)) return;
+      if (value === undefined || value === null || value === '') return;
+      params.append(key, String(value));
+    });
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const result = await apiCall<{
+      data?: Lead[];
+      pagination?: { page?: number; limit?: number; total?: number; pages?: number };
+    } | Lead[]>(`/leads${queryString}`);
+    if (Array.isArray(result)) {
+      return {
+        leads: normalizeLeads(result),
+        pagination: { page: 1, limit: result.length, total: result.length, pages: 1 },
+      };
+    }
+    const list = result?.data ?? [];
+    const pag = result?.pagination ?? {};
+    return {
+      leads: normalizeLeads(list),
+      pagination: {
+        page: pag.page ?? 1,
+        limit: pag.limit ?? 25,
+        total: pag.total ?? list.length,
+        pages: pag.pages ?? 1,
+      },
+    };
+  },
+
+  // Get all leads with optional filtering (single page, limit 100; for code that expects a plain list)
+  async getLeads(filters?: Record<string, any>): Promise<Lead[]> {
+    const { leads } = await this.getLeadsWithPagination({ ...filters, page: 1, limit: 100 });
+    return leads;
   },
 
   // Get a single lead by ID
   async getLead(id: string): Promise<Lead> {
-    return await apiCall<Lead>(`/leads/${id}`);
+    const lead = await apiCall<Lead>(`/leads/${id}`);
+    return normalizeLead(lead);
   },
 
   // Create a new lead
   async createLead(leadData: LeadFormData): Promise<Lead> {
-    return await apiCall<Lead>('/leads', {
+    const lead = await apiCall<Lead>('/leads', {
       method: 'POST',
       body: JSON.stringify({
         ...leadData,
@@ -310,14 +351,16 @@ export const leadService = {
         updatedAt: new Date(),
       }),
     });
+    return normalizeLead(lead);
   },
 
   // Update an existing lead
   async updateLead(id: string, leadData: Partial<Lead>): Promise<Lead> {
-    return await apiCall<Lead>(`/leads/${id}`, {
+    const lead = await apiCall<Lead>(`/leads/${id}`, {
       method: 'PUT',
       body: JSON.stringify(leadData),
     });
+    return normalizeLead(lead);
   },
 
   // Delete a lead
@@ -325,6 +368,22 @@ export const leadService = {
     return await apiCall<void>(`/leads/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  /**
+   * Get lead counts from DB (totalLeads, newLeadsThisMonth, callBack, offerMade, contractOut, transaction, negotiatingOffer).
+   * Used for dashboard stats; not based on UI-loaded list.
+   */
+  async getLeadCounts(): Promise<{
+    totalLeads: number;
+    newLeadsThisMonth: number;
+    callBack: number;
+    offerMade: number;
+    contractOut: number;
+    transaction: number;
+    negotiatingOffer: number;
+  }> {
+    return apiCall(`/leads/counts`);
   },
 
   // Get pipeline stages and leads

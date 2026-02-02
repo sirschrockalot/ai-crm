@@ -25,7 +25,7 @@ export const ErrorDisplay: React.FC = () => {
     }
     isInitialized.current = true;
 
-    // Capture global errors
+    // Capture global errors (defer setState to avoid "Cannot update component while rendering another")
     const handleError = (event: ErrorEvent) => {
       const errorInfo: ErrorInfo = {
         message: event.message,
@@ -33,10 +33,10 @@ export const ErrorDisplay: React.FC = () => {
         timestamp: new Date(),
         type: 'error',
       };
-      setErrors(prev => [...prev, errorInfo]);
+      setTimeout(() => setErrors(prev => [...prev, errorInfo]), 0);
     };
 
-    // Capture unhandled promise rejections
+    // Capture unhandled promise rejections (defer setState)
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
       const errorInfo: ErrorInfo = {
         message: event.reason?.message || 'Unhandled Promise Rejection',
@@ -44,7 +44,7 @@ export const ErrorDisplay: React.FC = () => {
         timestamp: new Date(),
         type: 'error',
       };
-      setErrors(prev => [...prev, errorInfo]);
+      setTimeout(() => setErrors(prev => [...prev, errorInfo]), 0);
     };
 
     // Store original console methods
@@ -64,8 +64,8 @@ export const ErrorDisplay: React.FC = () => {
           timestamp: new Date(),
           type: 'error',
         };
-        setErrors(prev => [...prev, errorInfo]);
         originalConsoleError.apply(console, args);
+        setTimeout(() => setErrors(prev => [...prev, errorInfo]), 0);
       };
 
       // Override console.warn only once
@@ -73,24 +73,32 @@ export const ErrorDisplay: React.FC = () => {
         const firstArg = args[0];
         const msg = typeof firstArg === 'string' ? firstArg : '';
 
-        // Filter out noisy React dev warnings we don't need in the UI
+        // Filter out noisy React dev warnings we don't need in the UI (still forward to console)
         if (msg.startsWith('Warning: Function components cannot be given refs.')) {
-          // Still forward to original console for developer tools, but don't show in ErrorDisplay
+          originalConsoleWarn.apply(console, args);
+          return;
+        }
+        if (msg.includes('unique "key" prop') || msg.includes('key" prop')) {
+          originalConsoleWarn.apply(console, args);
+          return;
+        }
+        if (msg.includes('Cannot update a component') && msg.includes('while rendering a different component')) {
           originalConsoleWarn.apply(console, args);
           return;
         }
 
         const errorInfo: ErrorInfo = {
-          message: args.map(arg => 
-            typeof arg === 'string' ? arg : 
-            arg instanceof Error ? arg.message : 
+          message: args.map(arg =>
+            typeof arg === 'string' ? arg :
+            arg instanceof Error ? arg.message :
             JSON.stringify(arg)
           ).join(' '),
           timestamp: new Date(),
           type: 'warning',
         };
-        setErrors(prev => [...prev, errorInfo]);
         originalConsoleWarn.apply(console, args);
+        // Defer setState to avoid "Cannot update a component while rendering a different component"
+        setTimeout(() => setErrors(prev => [...prev, errorInfo]), 0);
       };
     }
 

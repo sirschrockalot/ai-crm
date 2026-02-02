@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { leadService } from '../services/leadService';
+import { leadService, LeadsPagination } from '../services/leadService';
 import { Lead, LeadFormData } from '../types/lead';
 import { ImportOptions, ExportRequest, ValidationResult } from '../services/leadImportExportService';
 
@@ -50,6 +50,7 @@ export interface ExportProgress {
 
 export function useLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [pagination, setPagination] = useState<LeadsPagination | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [importProgress, setImportProgress] = useState<ImportProgress>({
@@ -72,10 +73,11 @@ export function useLeads() {
   const fetchLeads = useCallback(async (filters?: Record<string, any>) => {
     setLoading(true);
     setError(null);
-    
+    const merged = { page: 1, limit: 25, ...filters };
     try {
-      const result = await leadService.getLeads(filters);
-      setLeads(result);
+      const { leads: list, pagination: pag } = await leadService.getLeadsWithPagination(merged);
+      setLeads(list);
+      setPagination(pag);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch leads');
     } finally {
@@ -258,31 +260,31 @@ export function useLeads() {
     }
   }, []);
 
-  // Mock methods for compatibility
+  // Lead counts from DB via GET /api/leads/counts (not from UI-loaded list)
   const getLeadStats = useCallback(async (): Promise<{
     totalLeads: number;
-    newLeads: number;
-    qualifiedLeads: number;
-    convertedLeads: number;
-    conversionRate: number;
-    totalPipelineValue: number;
-    averageLeadValue: number;
+    newLeadsThisMonth: number;
+    callBack: number;
+    offerMade: number;
+    contractOut: number;
+    transaction: number;
+    negotiatingOffer: number;
   }> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return {
-      totalLeads: leads.length,
-      newLeads: leads.filter(lead => lead.status === 'new').length,
-      qualifiedLeads: leads.filter(lead => lead.status === 'qualified').length,
-      convertedLeads: leads.filter(lead => lead.status === 'converted').length,
-      conversionRate: leads.length > 0 ? 
-        (leads.filter(lead => lead.status === 'converted').length / leads.length) * 100 : 0,
-      totalPipelineValue: leads.reduce((sum, lead) => sum + lead.estimatedValue, 0),
-      averageLeadValue: leads.length > 0 ? 
-        leads.reduce((sum, lead) => sum + lead.estimatedValue, 0) / leads.length : 0,
-    };
-  }, [leads]);
+    try {
+      return await leadService.getLeadCounts();
+    } catch {
+      // Fallback to zeros if counts API fails (e.g. service down)
+      return {
+        totalLeads: 0,
+        newLeadsThisMonth: 0,
+        callBack: 0,
+        offerMade: 0,
+        contractOut: 0,
+        transaction: 0,
+        negotiatingOffer: 0,
+      };
+    }
+  }, []);
 
   const getFilterOptions = useCallback(async (): Promise<{
     statuses: Array<{ value: string; label: string; count: number }>;
@@ -355,6 +357,7 @@ export function useLeads() {
 
   return {
     leads,
+    pagination,
     loading,
     error,
     isAuthenticated,

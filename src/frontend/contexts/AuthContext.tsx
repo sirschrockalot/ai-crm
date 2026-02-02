@@ -85,29 +85,72 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     if (bypassAuth) {
-      console.log('AuthProvider useEffect: Using bypass mode');
-      setState({
-        user: {
-          id: 'dev-user-1',
-          email: 'dev@dealcycle.com',
-          firstName: 'Development',
-          lastName: 'User',
-          roles: ['admin'],
-          status: 'active',
-          tenantId: 'dev-tenant-1',
-        },
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-        sessionTimeout: null,
-        isSessionExpiringSoon: false,
-      });
-      initializationRef.current = true;
-      // Clear any existing tokens when bypass is enabled
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('refresh_token');
+      console.log('AuthProvider useEffect: Using bypass mode (auto-login as admin@dealcycle.com)');
+      const mockUser = {
+        id: 'admin-user-1',
+        email: 'admin@dealcycle.com',
+        firstName: 'Admin',
+        lastName: 'User',
+        roles: ['ADMIN', 'admin'] as string[],
+        status: 'active',
+        tenantId: 'dev-tenant-1',
+      };
+      if (typeof window === 'undefined') {
+        setState({
+          user: mockUser,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+          sessionTimeout: null,
+          isSessionExpiringSoon: false,
+        });
+        initializationRef.current = true;
+        return;
       }
+      // Fetch real JWT from /api/auth/bypass-token so API routes (e.g. leads) receive a valid Authorization header
+      fetch('/api/auth/bypass-token')
+        .then(async (res) => {
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.token) {
+            localStorage.setItem('auth_token', data.token);
+            localStorage.removeItem('refresh_token');
+            setState({
+              user: mockUser,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+              sessionTimeout: null,
+              isSessionExpiringSoon: false,
+            });
+          } else {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('refresh_token');
+            setState({
+              user: mockUser,
+              isAuthenticated: true,
+              isLoading: false,
+              error: data.error ?? 'Could not get bypass token. Set DEV_ADMIN_PASSWORD and ensure Auth Service is running.',
+              sessionTimeout: null,
+              isSessionExpiringSoon: false,
+            });
+          }
+        })
+        .catch((err) => {
+          console.warn('Bypass token fetch failed:', err);
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refresh_token');
+          setState({
+            user: mockUser,
+            isAuthenticated: true,
+            isLoading: false,
+            error: 'Could not get bypass token. Set DEV_ADMIN_PASSWORD and ensure Auth Service is running.',
+            sessionTimeout: null,
+            isSessionExpiringSoon: false,
+          });
+        })
+        .finally(() => {
+          initializationRef.current = true;
+        });
       return;
     }
 

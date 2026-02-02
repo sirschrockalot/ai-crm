@@ -1,0 +1,6 @@
+# Doppler project and config for local development.
+# Run once: doppler setup   (then use: doppler run -- npm run dev)
+# See docs/DOPPLER_SETUP.md for full setup and secret list.
+setup:
+  - project: ai-crm
+    config: dev

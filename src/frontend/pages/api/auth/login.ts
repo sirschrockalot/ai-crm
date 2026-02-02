@@ -45,8 +45,14 @@ export default async function handler(
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(response.status).json({ error: errorData.message || 'Login failed' });
+      let message = 'Login failed';
+      try {
+        const errorData = await response.json();
+        message = errorData.message || errorData.error || message;
+      } catch {
+        // Auth service may return non-JSON
+      }
+      return res.status(response.status).json({ error: message });
     }
 
     const data = await response.json();

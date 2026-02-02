@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "dev": "doppler run -- npm --workspaces=false run dev:frontend",
+    "start:dev": "doppler run -- npm --workspaces=false run dev:frontend",
     "dev:frontend": "cd src/frontend && doppler run -- npm --workspaces=false run dev",
     "env:pull": "doppler secrets download --no-file --format env > .env",
     "build": "npm run build:frontend",
@@ -46,11 +47,17 @@
     "clean:frontend": "cd src/frontend && npm run clean",
     "clean:auth-service": "cd src/auth-service && npm run clean",
     "dev:auth": "cd src/auth-service && npm run start:dev",
+    "dev:auth:doppler": "doppler run -- bash -c 'cd ../auth-service-repo && npm run start:dev'",
+    "dev:leads": "doppler run -- bash -c 'cd ../Leads-Service && npm run start:dev'",
     "build:auth": "cd src/auth-service && npm run build",
     "test:auth": "cd src/auth-service && npm test"
   },
+  "dependencies": {
+    "papaparse": "^5.4.1"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/papaparse": "^5.3.14",
     "autoprefixer": "^10.4.23",
     "husky": "^8.0.0",
     "lint-staged": "^15.0.0",

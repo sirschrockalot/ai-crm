@@ -12,7 +12,7 @@ export const isAuthBypassEnabled = (): boolean => {
   if (isProduction()) {
     return false;
   }
-  // Only allow in development if explicitly enabled
+  // In development: set NEXT_PUBLIC_BYPASS_AUTH=true to disable auth and auto-login as admin@dealcycle.com
   return process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
 };
 

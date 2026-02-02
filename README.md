@@ -104,6 +104,8 @@ dealcycle-crm/
 
 This project uses [Doppler](https://www.doppler.com/) for secure secret management. All environment variables are managed through Doppler, eliminating the need for local `.env` files.
 
+**Full setup (UI + microservices, no .env files):** see [docs/DOPPLER_SETUP.md](docs/DOPPLER_SETUP.md) for creating the Doppler project/config and the complete list of secrets for the CRM frontend and each microservice.
+
 ### Setup
 1. **Install Doppler CLI**
    ```bash
@@ -125,7 +127,7 @@ This project uses [Doppler](https://www.doppler.com/) for secure secret manageme
 
 3. **Configure Project**
    ```bash
-   doppler setup  # Select your project and config (e.g., dev)
+   doppler setup  # Uses doppler.yaml (project: dealcycle-crm, config: dev); or select interactively
    ```
 
 ### Usage

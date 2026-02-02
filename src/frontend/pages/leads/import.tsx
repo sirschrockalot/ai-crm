@@ -84,10 +84,19 @@ import {
   FiCopy,
   FiSave
 } from 'react-icons/fi';
+import type { ParseResult } from 'papaparse';
 import { Sidebar, Header, Navigation } from '../../components/layout';
 import LeadForm from '../../components/forms/LeadForm/LeadForm';
 import { Lead } from '../../features/lead-management/types/lead';
 import { useLeads } from '../../hooks/services/useLeads';
+import {
+  buildMappedRows,
+  applyPresetMapping,
+  detectPresetFromHeaders,
+  readFileWithEncoding,
+  parseCsvLenient,
+  COMMIT_BATCH_SIZE,
+} from '../../utils/csvLeadImport';
 
 // Constants for localStorage keys
 const STORAGE_KEYS = {
@@ -325,11 +334,11 @@ const ImportLeadsPage: React.FC = () => {
         return;
       }
 
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      // Validate file size (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
         toast({
           title: 'File Too Large',
-          description: 'Please select a file smaller than 10MB',
+          description: 'Please select a file smaller than 100MB',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -445,7 +454,7 @@ const ImportLeadsPage: React.FC = () => {
     }
   }, [toast]);
 
-  // Enhanced file validation with progress tracking
+  // Real CSV validation: parse file and set totalRows/validRows/fieldMapping from content
   const validateFile = useCallback(async (file?: File) => {
     const targetFile = file || selectedFile;
     if (!targetFile) return;
@@ -461,52 +470,42 @@ const ImportLeadsPage: React.FC = () => {
     });
 
     try {
-      // Simulate validation progress
-      for (let i = 0; i <= 100; i += 10) {
-        setImportProgress(prev => ({
-          ...prev,
-          percentage: i,
-          message: `Validating... ${i}%`,
-        }));
-        await new Promise(resolve => setTimeout(resolve, 50));
+      const encoding = targetFile.name.toLowerCase().includes('pdr_deals') ? 'iso-8859-1' : 'utf-8';
+      const csvString = await readFileWithEncoding(targetFile, encoding);
+
+      const results = parseCsvLenient(csvString);
+
+      if (results.errors?.length) {
+        setImportProgress({ status: 'idle', percentage: 0, message: 'Ready to import', currentStep: 'Ready', totalSteps: 4, currentStepNumber: 0 });
+        toast({ title: 'Validation Failed', description: results.errors[0].message, status: 'error', duration: 3000, isClosable: true });
+        return;
       }
 
-      // Mock validation results
-      const mockResults: ValidationResults = {
+      const data = results.data as any[];
+      const headers = data.length ? Object.keys(data[0]) : [];
+      const preset = detectPresetFromHeaders(headers);
+      const fieldMapping = Object.keys(applyPresetMapping(headers, preset)).length
+        ? applyPresetMapping(headers, preset)
+        : importOptions.fieldMapping || {};
+
+      const totalRows = data.length;
+      const validRows = totalRows;
+
+      const validationResultsData: ValidationResults = {
         isValid: true,
-        errors: [
-          { row: 23, field: 'email', message: 'Invalid email format', severity: 'error' },
-          { row: 67, field: 'phone', message: 'Missing required field', severity: 'error' },
-        ],
-        warnings: [
-          'Some phone numbers may be in different formats',
-          'Consider standardizing address formats',
-        ],
-        totalRows: 155,
-        validRows: 153,
-        fieldMapping: {
-          'First Name': 'firstName',
-          'Last Name': 'lastName',
-          'Email': 'email',
-          'Phone': 'phone',
-          'Address': 'address',
-        },
-        sampleData: [
-          { 'First Name': 'John', 'Last Name': 'Doe', 'Email': 'john@example.com' },
-          { 'First Name': 'Jane', 'Last Name': 'Smith', 'Email': 'jane@example.com' },
-        ],
+        errors: [],
+        warnings: preset ? [`Using ${preset === 'pdr-deals' ? 'PDR Deals' : 'Turnkey/PDR'} preset for column mapping`] : [],
+        totalRows,
+        validRows,
+        fieldMapping,
+        sampleData: data.slice(0, 5),
         requiredFields: ['firstName', 'lastName', 'email'],
         optionalFields: ['phone', 'address', 'company'],
       };
 
-      setValidationResults(mockResults);
-      
-      // Update field mapping if auto-mapping is enabled
-      if (importOptions.autoMapFields) {
-        setImportOptions(prev => ({
-          ...prev,
-          fieldMapping: mockResults.fieldMapping,
-        }));
+      setValidationResults(validationResultsData);
+      if (importOptions.autoMapFields && Object.keys(fieldMapping).length) {
+        setImportOptions(prev => ({ ...prev, fieldMapping }));
       }
 
       setImportProgress({
@@ -520,13 +519,12 @@ const ImportLeadsPage: React.FC = () => {
 
       toast({
         title: 'Validation Complete',
-        description: `${mockResults.validRows} valid rows found, ${mockResults.errors.length} errors detected`,
-        status: mockResults.isValid ? 'success' : 'warning',
+        description: `${validRows.toLocaleString()} rows found. Ready to import.`,
+        status: 'success',
         duration: 3000,
         isClosable: true,
       });
-
-    } catch (error) {
+    } catch (error: any) {
       setImportProgress({
         status: 'failed',
         percentage: 0,
@@ -535,18 +533,17 @@ const ImportLeadsPage: React.FC = () => {
         totalSteps: 4,
         currentStepNumber: 1,
       });
-
       toast({
         title: 'Validation Failed',
-        description: 'Failed to validate file',
+        description: error?.message || 'Failed to read or parse file',
         status: 'error',
         duration: 3000,
         isClosable: true,
       });
     }
-  }, [selectedFile, importOptions.autoMapFields, toast]);
+  }, [selectedFile, importOptions.autoMapFields, importOptions.fieldMapping, toast]);
 
-  // Enhanced import process with detailed progress tracking
+  // Real import: parse CSV, build mapped rows, batched commit to Leads API
   const startImport = useCallback(async () => {
     if (!selectedFile || !validationResults?.isValid) {
       toast({
@@ -560,11 +557,10 @@ const ImportLeadsPage: React.FC = () => {
     }
 
     const startTime = Date.now();
-    
     setImportProgress({
-      status: 'processing',
+      status: 'importing',
       percentage: 0,
-      message: 'Starting import process...',
+      message: 'Reading file...',
       currentStep: 'Processing',
       totalSteps: 4,
       currentStepNumber: 2,
@@ -572,41 +568,85 @@ const ImportLeadsPage: React.FC = () => {
     });
 
     try {
-      // Simulate import progress
-      const steps = [
-        { name: 'Uploading file', percentage: 25 },
-        { name: 'Processing data', percentage: 50 },
-        { name: 'Validating records', percentage: 75 },
-        { name: 'Importing to database', percentage: 100 },
-      ];
+      const encoding = selectedFile.name.toLowerCase().includes('pdr_deals') ? 'iso-8859-1' : 'utf-8';
+      const csvString = await readFileWithEncoding(selectedFile, encoding);
 
-      for (let i = 0; i < steps.length; i++) {
-        const step = steps[i];
-        setImportProgress(prev => ({
-          ...prev,
-          currentStep: step.name,
-          currentStepNumber: i + 2,
-          percentage: step.percentage,
-          message: step.name,
-        }));
-        
-        // Simulate processing time
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      const parseResult = parseCsvLenient(csvString);
+
+      if (parseResult.errors?.length) {
+        throw new Error(parseResult.errors[0].message || 'CSV parse failed');
       }
 
-      // Mock successful import
-      const importedCount = validationResults.validRows;
-      const failedCount = validationResults.errors.length;
-      
+      const data = parseResult.data as any[];
+      const defaultSource = importOptions.defaultSource === 'Import' ? 'other' : (importOptions.defaultSource || 'other').toLowerCase().replace(/\s+/g, '_');
+      const mappedRows = buildMappedRows(data, validationResults.fieldMapping, defaultSource);
+
+      const MAX_IMPORT_ROWS = 100000;
+      if (mappedRows.length > MAX_IMPORT_ROWS) {
+        toast({ title: 'Row limit', description: `CSV exceeds ${MAX_IMPORT_ROWS.toLocaleString()} rows. Please split your file.`, status: 'error', duration: 5000, isClosable: true });
+        setImportProgress({ status: 'idle', percentage: 0, message: 'Ready to import', currentStep: 'Ready', totalSteps: 4, currentStepNumber: 0 });
+        return;
+      }
+
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        toast({ title: 'Not signed in', description: 'Please sign in to import leads.', status: 'error', duration: 5000, isClosable: true });
+        setImportProgress({ status: 'idle', percentage: 0, message: 'Ready to import', currentStep: 'Ready', totalSteps: 4, currentStepNumber: 0 });
+        return;
+      }
+
+      const chunks: typeof mappedRows[] = [];
+      for (let i = 0; i < mappedRows.length; i += COMMIT_BATCH_SIZE) {
+        chunks.push(mappedRows.slice(i, i + COMMIT_BATCH_SIZE));
+      }
+
+      let createdCount = 0;
+      let duplicateCount = 0;
+      const errors: Array<{ rowNumber: string; message: string }> = [];
+
+      for (let b = 0; b < chunks.length; b++) {
+        setImportProgress(prev => ({
+          ...prev,
+          status: 'importing',
+          percentage: chunks.length ? Math.round(((b + 1) / chunks.length) * 100) : 100,
+          message: `Importing batch ${b + 1} of ${chunks.length}...`,
+          currentStep: `Batch ${b + 1}/${chunks.length}`,
+        }));
+
+        const response = await fetch('/api/imports/leads/commit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            rows: chunks[b],
+            defaultSource,
+            createNoteEvents: false,
+            preset: undefined,
+          }),
+        });
+
+        if (!response.ok) {
+          const errBody = await response.json();
+          throw new Error(errBody.message || errBody.error || 'Commit failed');
+        }
+
+        const batchResult = await response.json();
+        createdCount += batchResult.createdCount ?? 0;
+        duplicateCount += batchResult.duplicateCount ?? 0;
+        if (batchResult.errors?.length) errors.push(...batchResult.errors);
+      }
+
+      const totalErrorCount = errors.length;
+      const totalProcessed = createdCount + duplicateCount + totalErrorCount;
+
       const newHistoryItem: ImportHistory = {
         id: Date.now().toString(),
         fileName: selectedFile.name,
         timestamp: new Date(),
         status: 'completed',
-        imported: importedCount,
-        failed: failedCount,
+        imported: createdCount,
+        failed: totalErrorCount,
         total: validationResults.totalRows,
-        errors: validationResults.errors.map(e => `Row ${e.row}: ${e.message}`),
+        errors: errors.slice(0, 20).map(e => `Row ${e.rowNumber}: ${e.message}`),
         duration: Math.round((Date.now() - startTime) / 1000),
         fileSize: selectedFile.size,
         user: user?.email || 'unknown',
@@ -614,11 +654,10 @@ const ImportLeadsPage: React.FC = () => {
       };
 
       setImportHistory(prev => [newHistoryItem, ...prev]);
-      
       setImportProgress({
         status: 'completed',
         percentage: 100,
-        message: `Import completed successfully! ${importedCount} leads imported`,
+        message: `Import completed: ${createdCount} created, ${duplicateCount} duplicates, ${totalErrorCount} errors`,
         currentStep: 'Import Complete',
         totalSteps: 4,
         currentStepNumber: 4,
@@ -626,18 +665,14 @@ const ImportLeadsPage: React.FC = () => {
 
       toast({
         title: 'Import Successful',
-        description: `${importedCount} leads imported successfully`,
+        description: `Processed ${totalProcessed.toLocaleString()} rows → Created: ${createdCount}, Duplicates: ${duplicateCount}, Errors: ${totalErrorCount}`,
         status: 'success',
-        duration: 5000,
+        duration: 7000,
         isClosable: true,
       });
 
-      // Clear file after successful import
-      setTimeout(() => {
-        clearFile();
-      }, 2000);
-
-    } catch (error) {
+      setTimeout(() => clearFile(), 2000);
+    } catch (error: any) {
       setImportProgress({
         status: 'failed',
         percentage: 0,
@@ -646,10 +681,9 @@ const ImportLeadsPage: React.FC = () => {
         totalSteps: 4,
         currentStepNumber: 2,
       });
-
       toast({
         title: 'Import Failed',
-        description: 'Failed to import leads',
+        description: error?.message || 'Failed to import leads',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -940,7 +974,7 @@ const ImportLeadsPage: React.FC = () => {
                             Click to select file or drag and drop
                           </Text>
                           <Text fontSize="sm" color="gray.500">
-                            Supports CSV and Excel files (max 10MB)
+                            Supports CSV and Excel files (max 100MB)
                           </Text>
                         </VStack>
                       )}
@@ -1041,7 +1075,7 @@ const ImportLeadsPage: React.FC = () => {
                         leftIcon={<FiEye />}
                         variant="outline"
                         onClick={() => validateFile()}
-                        isDisabled={!selectedFile || importProgress.status === 'processing'}
+                        isDisabled={!selectedFile || importProgress.status === 'processing' || importProgress.status === 'importing' || importProgress.status === 'validating'}
                         flex={1}
                       >
                         Validate File
@@ -1050,7 +1084,7 @@ const ImportLeadsPage: React.FC = () => {
                         leftIcon={<FiUpload />}
                         colorScheme="blue"
                         onClick={startImport}
-                        isDisabled={!selectedFile || importProgress.status === 'processing'}
+                        isDisabled={!selectedFile || importProgress.status === 'processing' || importProgress.status === 'importing' || importProgress.status === 'validating'}
                         flex={1}
                       >
                         Start Import
@@ -1083,13 +1117,13 @@ const ImportLeadsPage: React.FC = () => {
                           colorScheme={
                             importProgress.status === 'completed' ? 'green' :
                             importProgress.status === 'failed' ? 'red' :
-                            importProgress.status === 'processing' ? 'blue' : 'gray'
+                            (importProgress.status === 'processing' || importProgress.status === 'importing' || importProgress.status === 'validating') ? 'blue' : 'gray'
                           }
                           size="lg"
                         />
                       </Box>
                       
-                      {importProgress.status === 'processing' && (
+                      {(importProgress.status === 'processing' || importProgress.status === 'importing' || importProgress.status === 'validating') && (
                         <HStack justify="center">
                           <Spinner size="sm" />
                           <Text fontSize="sm" color="gray.600">

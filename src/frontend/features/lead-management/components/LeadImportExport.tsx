@@ -106,11 +106,11 @@ export const LeadImportExport: React.FC<LeadImportExportProps> = ({
         return;
       }
 
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      // Validate file size (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
         toast({
           title: 'File Too Large',
-          description: 'Please select a file smaller than 10MB',
+          description: 'Please select a file smaller than 100MB',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -288,7 +288,7 @@ export const LeadImportExport: React.FC<LeadImportExportProps> = ({
                       Click to select file or drag and drop
                     </Text>
                     <Text fontSize="sm" color="gray.500">
-                      Supports CSV and Excel files (max 10MB)
+                      Supports CSV and Excel files (max 100MB)
                     </Text>
                   </Box>
                   

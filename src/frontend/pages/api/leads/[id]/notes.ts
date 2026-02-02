@@ -3,15 +3,54 @@ import { getLeadsServiceConfig } from '@/services/configService';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
+  const leadId = Array.isArray(id) ? id[0] : id;
+
+  if (req.method === 'GET') {
+    // Frontend fetches notes list; Leads Service has no GET notes endpoint, return empty array so page loads
+    const bypassAuth = process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true';
+    if (!bypassAuth) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+    }
+    if (!leadId) {
+      return res.status(400).json({ error: 'Lead ID is required' });
+    }
+    try {
+      const leadsService = getLeadsServiceConfig();
+      const targetUrl = `${leadsService.apiUrl}/${leadId}/notes`;
+      const authHeader = req.headers.authorization;
+      const response = await fetch(targetUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authHeader && authHeader.startsWith('Bearer ') ? { Authorization: authHeader } : {}),
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return res.status(200).json(Array.isArray(data) ? data : []);
+      }
+      // Leads Service may not implement GET /leads/:id/notes; return empty list so UI can load
+      return res.status(200).json([]);
+    } catch {
+      return res.status(200).json([]);
+    }
+  }
 
   if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
+    res.setHeader('Allow', ['GET', 'POST']);
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
+  }
+
+  if (!leadId) {
+    return res.status(400).json({ error: 'Lead ID is required' });
   }
 
   try {
     const leadsService = getLeadsServiceConfig();
-    const targetUrl = `${leadsService.apiUrl}/${id}/notes`;
+    const targetUrl = `${leadsService.apiUrl}/${leadId}/notes`;
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

@@ -1,39 +1,35 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PropertyDetails } from '../../../../types';
+import { getLeadsServiceConfig } from '@/services/configService';
+import { getBypassToken, isBypassAuthExpected } from '@/services/bypassToken';
 
-// In-memory store for property details (in production, this would be a database)
+// In-memory store for user-edited property details (overlay on lead data)
 const propertyDetailsStore: Map<string, PropertyDetails> = new Map();
 
-// Initialize with some mock data for existing leads
-const initializeMockPropertyDetails = () => {
-  if (propertyDetailsStore.size === 0) {
-    propertyDetailsStore.set('1', {
-      leadId: '1',
-      yearHouseBuilt: 1985,
-      bedrooms: '3',
-      bath: '2',
-      propertyType: 'Single Family',
-      reasonForSelling: 'She wants to offload the property as it has been in the family for over 50 years',
-      soldComparables: [
-        { id: 'comp-1', link: 'https://www.zillow.com/homedetails/0-Whitehe', price: 53000 },
-        { id: 'comp-2', link: 'https://www.zillow.com/homedetails/0-Cook-R', price: 80000 },
-        { id: 'comp-3', link: 'https://www.zillow.com/homedetails/885-North', price: 80000 },
-      ],
-      pendingComparables: [
-        { id: 'comp-4', link: 'https://www.zillow.com/homedetails/0-Hard-Rc', price: 55000 },
-        { id: 'comp-5', link: 'https://www.zillow.com/homedetails/70-Clear-s', price: 65000 },
-      ],
-      targetCloseDate: new Date('2026-01-16'),
-      inspectionPeriodDate: new Date('2025-12-10'),
-      nextStep: 'Dispo',
-      photosLink: 'https://drive.google.com/drive/folders/1pi3UX6_RAROAJbhSICFxvTzF6u69UBkz?usp=shar',
-      dateOfSignedContract: new Date('2025-11-05'),
-      dateOfPhotosReceived: new Date('2025-11-10'),
-    });
-  }
-};
-
-initializeMockPropertyDetails();
+/** Build PropertyDetails from a lead document (Leads Service / DB). */
+function leadToPropertyDetails(leadId: string, lead: Record<string, any>): Partial<PropertyDetails> {
+  const address = lead?.address && typeof lead.address === 'object' ? lead.address : {};
+  const custom = lead?.customFields && typeof lead.customFields === 'object' ? lead.customFields : {};
+  const parts: string[] = [];
+  if (address.street) parts.push(address.street);
+  if (address.city) parts.push(address.city);
+  if (address.state) parts.push(address.state);
+  if (address.zipCode) parts.push(address.zipCode);
+  const propertyAddress = parts.length ? parts.join(', ') : undefined;
+  return {
+    leadId,
+    reasonForSelling: lead?.notes ?? undefined,
+    customerAskingPrice: lead?.estimatedValue ?? lead?.actualValue ?? undefined,
+    propertyType: custom?.propertyType ?? lead?.propertyType ?? undefined,
+    propertyNotes: propertyAddress,
+    // Map common customFields into PropertyDetails for display
+    yearHouseBuilt: custom?.yearHouseBuilt ?? undefined,
+    bedrooms: custom?.bedrooms ?? undefined,
+    bath: custom?.bath ?? undefined,
+    ...(custom?.soldComparables && { soldComparables: custom.soldComparables }),
+    ...(custom?.pendingComparables && { pendingComparables: custom.pendingComparables }),
+  };
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -56,12 +52,40 @@ export default async function handler(
   }
 
   switch (req.method) {
-    case 'GET':
-      const details = propertyDetailsStore.get(leadId);
-      if (details) {
-        return res.status(200).json(details);
+    case 'GET': {
+      let authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const bypassToken = await getBypassToken();
+        if (bypassToken) authHeader = `Bearer ${bypassToken}`;
       }
-      return res.status(404).json({ error: 'Property details not found' });
+      if ((!authHeader || !authHeader.startsWith('Bearer ')) && isBypassAuthExpected()) {
+        return res.status(503).json({
+          error: 'Bypass token unavailable. Ensure Auth Service is running and DEV_ADMIN_PASSWORD (or ADMIN_PASSWORD) is set for admin@dealcycle.com.',
+          code: 'bypass_token_unavailable',
+        } as any);
+      }
+      const stored = propertyDetailsStore.get(leadId);
+      try {
+        const leadsService = getLeadsServiceConfig();
+        const baseUrl = leadsService.apiUrl.replace(/\/leads\/?$/, '');
+        const leadRes = await fetch(`${baseUrl}/leads/${leadId}`, {
+          headers: authHeader && authHeader.startsWith('Bearer ') ? { Authorization: authHeader } : {},
+        });
+        if (leadRes.ok) {
+          const lead = await leadRes.json();
+          const fromLead = leadToPropertyDetails(leadId, lead);
+          const merged: PropertyDetails = {
+            ...fromLead,
+            ...stored,
+            leadId,
+          } as PropertyDetails;
+          return res.status(200).json(merged);
+        }
+      } catch (_) {
+        // Leads Service unreachable or error; fall back to stored only
+      }
+      return res.status(200).json(stored ?? null);
+    }
 
     case 'PUT':
     case 'POST':

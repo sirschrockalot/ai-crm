@@ -61,7 +61,7 @@ describe('ImportLeadsPage', () => {
     );
 
     expect(screen.getByText('Click to select file or drag and drop')).toBeInTheDocument();
-    expect(screen.getByText('Supports CSV and Excel files (max 10MB)')).toBeInTheDocument();
+    expect(screen.getByText('Supports CSV and Excel files (max 100MB)')).toBeInTheDocument();
   });
 
   it('shows import options', () => {

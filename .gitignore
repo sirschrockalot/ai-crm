@@ -257,4 +257,6 @@ secrets/
 *.secret
 doppler-token
 .doppler/
-**/doppler.yaml 
+**/doppler.yaml
+# Allow repo-root doppler.yaml (project/config for local dev)
+!/doppler.yaml

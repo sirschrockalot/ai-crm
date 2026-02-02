@@ -51,13 +51,10 @@ export default async function handler(
   }
 
   switch (req.method) {
-    case 'GET':
-      // Get transaction details for a lead
+    case 'GET': {
       const transaction = transactionStore.get(leadId);
-      if (!transaction) {
-        return res.status(404).json({ error: 'Transaction details not found' });
-      }
-      return res.status(200).json(transaction);
+      return res.status(200).json(transaction ?? null);
+    }
 
     case 'PUT':
     case 'POST':

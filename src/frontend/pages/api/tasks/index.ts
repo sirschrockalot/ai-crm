@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getLeadsServiceConfig } from '@/services/configService';
+import { getBypassToken, isBypassAuthExpected } from '@/services/bypassToken';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -13,7 +14,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const baseUrl = leadsService.apiUrl.replace('/leads', '');
     const targetUrl = `${baseUrl}/tasks`;
 
-    const authHeader = req.headers.authorization;
+    let authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const bypassToken = await getBypassToken();
+      if (bypassToken) authHeader = `Bearer ${bypassToken}`;
+    }
+    if ((!authHeader || !authHeader.startsWith('Bearer ')) && isBypassAuthExpected()) {
+      return res.status(503).json({
+        error: 'Bypass token unavailable. Ensure Auth Service is running and DEV_ADMIN_PASSWORD (or ADMIN_PASSWORD) is set for admin@dealcycle.com.',
+        code: 'bypass_token_unavailable',
+      });
+    }
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Authentication required' });
     }
